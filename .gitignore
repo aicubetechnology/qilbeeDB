@@ -1,0 +1,136 @@
+# Build artifacts
+/target/
+**/target/
+Cargo.lock
+*.rlib
+*.rmeta
+*.o
+*.so
+*.dylib
+*.dll
+
+# Test directories (excluded per user requirement)
+/tests/
+**/tests/
+test/
+**/test/
+
+# MkDocs site output (excluded per user requirement)
+/site/
+site.zip
+
+# Documentation deployment script (excluded per user requirement)
+deploy-docs-to-s3.sh
+
+# Python virtual environments
+docs-venv/
+venv/
+env/
+ENV/
+.venv/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Rust virtual environment
+rustenv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+.classpath
+
+# Data directories
+/data/
+**/data/
+*.db
+*.rdb
+*.rocksdb/
+
+# Logs
+*.log
+logs/
+**/logs/
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+tmp/
+
+# RocksDB
+LOCK
+LOG
+LOG.old.*
+MANIFEST-*
+OPTIONS-*
+*.sst
+*.blob
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Package manager files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Credentials and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.toml
+config.local.toml
+
+# AWS
+.aws/
+*.credentials
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Rust documentation
+doc/
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Benchmarks
+criterion/
+*.profdata
+perf.data*
+
+# Examples that generate files
+examples/output/
+
+# Lock files from services
+*.lock
+!Cargo.lock

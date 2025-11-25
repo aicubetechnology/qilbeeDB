@@ -1,0 +1,134 @@
+site_name: QilbeeDB Documentation
+site_description: Enterprise Graph Database with Bi-Temporal Agent Memory
+site_author: QilbeeDB Team
+site_url: https://qilbeedb.com
+
+repo_name: aicubetechnology/qilbeeDB
+repo_url: https://github.com/aicubetechnology/qilbeeDB
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      lang: en
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - tables
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/aicubetechnology/qilbeeDB
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/qilbeedb/qilbeedb
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/qilbeedb
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  - Client Libraries:
+    - Overview: client-libraries/overview.md
+    - Python SDK: client-libraries/python.md
+    - Connection Management: client-libraries/connections.md
+  - Graph Operations:
+    - Nodes: graph-operations/nodes.md
+    - Relationships: graph-operations/relationships.md
+    - Properties: graph-operations/properties.md
+    - Indexes: graph-operations/indexes.md
+    - Transactions: graph-operations/transactions.md
+  - Cypher Query Language:
+    - Introduction: cypher/introduction.md
+    - MATCH: cypher/match.md
+    - WHERE: cypher/where.md
+    - RETURN: cypher/return.md
+    - CREATE: cypher/create.md
+    - DELETE: cypher/delete.md
+    - SET: cypher/set.md
+    - ORDER BY: cypher/orderby.md
+    - LIMIT: cypher/limit.md
+    - Functions: cypher/functions.md
+  - Agent Memory:
+    - Overview: agent-memory/overview.md
+    - Episodes: agent-memory/episodes.md
+    - Memory Types: agent-memory/memory-types.md
+    - Consolidation: agent-memory/consolidation.md
+    - Forgetting: agent-memory/forgetting.md
+    - Statistics: agent-memory/statistics.md
+  - Use Cases:
+    - AI Agents: use-cases/ai-agents.md
+    - Social Networks: use-cases/social-networks.md
+    - Knowledge Graphs: use-cases/knowledge-graphs.md
+    - Recommendations: use-cases/recommendations.md
+    - Multi-Agent Systems: use-cases/multi-agent.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Storage Engine: architecture/storage.md
+    - Query Engine: architecture/query-engine.md
+    - Memory Engine: architecture/memory-engine.md
+    - Bi-Temporal Model: architecture/bi-temporal.md
+  - API Reference:
+    - HTTP REST API: api/http-api.md
+    - Bolt Protocol: api/bolt-protocol.md
+    - Graph API: api/graph-api.md
+    - Memory API: api/memory-api.md
+  - Operations:
+    - Deployment: operations/deployment.md
+    - Docker: operations/docker.md
+    - Monitoring: operations/monitoring.md
+    - Backup & Recovery: operations/backup.md
+    - Performance Tuning: operations/performance.md
+  - Contributing:
+    - Development Setup: contributing/setup.md
+    - Code Style: contributing/style.md
+    - Testing: contributing/testing.md

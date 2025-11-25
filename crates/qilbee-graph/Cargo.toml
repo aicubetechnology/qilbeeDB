@@ -1,0 +1,22 @@
+[package]
+name = "qilbee-graph"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+description = "Graph engine for QilbeeDB"
+
+[dependencies]
+qilbee-core = { workspace = true }
+qilbee-storage = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

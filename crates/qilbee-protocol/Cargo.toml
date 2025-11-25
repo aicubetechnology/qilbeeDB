@@ -1,0 +1,20 @@
+[package]
+name = "qilbee-protocol"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+description = "Protocol implementations for QilbeeDB (Bolt, HTTP)"
+
+[dependencies]
+qilbee-core = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

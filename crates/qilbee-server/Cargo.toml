@@ -1,0 +1,37 @@
+[package]
+name = "qilbee-server"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+description = "Server implementation for QilbeeDB"
+
+[[bin]]
+name = "qilbeedb"
+path = "src/main.rs"
+
+[dependencies]
+qilbee-core = { workspace = true }
+qilbee-storage = { workspace = true }
+qilbee-graph = { workspace = true }
+qilbee-query = { workspace = true }
+qilbee-memory = { workspace = true }
+qilbee-protocol = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+hyper = { version = "1.0", features = ["full"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+base64 = "0.22"
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

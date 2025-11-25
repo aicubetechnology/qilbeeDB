@@ -1,0 +1,24 @@
+[package]
+name = "qilbee-storage"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+description = "Storage engine for QilbeeDB"
+
+[dependencies]
+qilbee-core = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = { workspace = true }
+thiserror = { workspace = true }
+rocksdb = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+proptest = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
