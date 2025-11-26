@@ -1,4 +1,3 @@
-# QilbeeDB
 
 <div align="center">
 
