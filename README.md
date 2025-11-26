@@ -223,24 +223,24 @@ QilbeeDB is built with a clean, layered architecture:
 
 ```
 ┌─────────────────────────────────────────┐
-│     Protocol Layer                       │
-│   Bolt | HTTP/REST | gRPC                │
+│           Protocol Layer                │
+│       Bolt | HTTP/REST | gRPC           │
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│     Query Engine                         │
-│   Parser → Planner → Optimizer → Executor│
+│             Query Engine                │
+│  Parser → Planner → Optimizer → Executor│
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│     Graph Engine                         │
-│   Nodes | Relationships | Transactions   │
+│             Graph Engine                │
+│   Nodes | Relationships | Transactions  │
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│     Memory Engine                        │
-│   Episodic | Semantic | Procedural       │
+│             Memory Engine               │
+│   Episodic | Semantic | Procedural      │
 └─────────────────────────────────────────┘
 ┌─────────────────────────────────────────┐
-│     Storage Engine                       │
-│   RocksDB | Indexes | WAL                │
+│           Storage Engine                │
+│        RocksDB | Indexes | WAL          │
 └─────────────────────────────────────────┘
 ```
 
