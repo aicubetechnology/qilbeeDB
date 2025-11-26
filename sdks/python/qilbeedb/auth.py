@@ -24,13 +24,15 @@ class TokenStorage:
     Tokens can be stored in memory or persisted to disk for session persistence.
     """
 
-    def __init__(self, persist: bool = True, storage_path: Optional[str] = None):
+    def __init__(self, persist: bool = True, storage_path: Optional[str] = None,
+                 app_id: Optional[str] = None):
         """
         Initialize token storage.
 
         Args:
             persist: Whether to persist tokens to disk
-            storage_path: Custom path for token storage (default: ~/.qilbeedb/tokens)
+            storage_path: Custom path for token storage (default: ~/.qilbeedb/tokens_<pid>)
+            app_id: Application identifier for token isolation (default: process PID)
         """
         self.persist = persist
         self.access_token: Optional[str] = None
@@ -42,7 +44,9 @@ class TokenStorage:
             if storage_path:
                 self.storage_path = Path(storage_path)
             else:
-                self.storage_path = Path.home() / ".qilbeedb" / "tokens"
+                # Use app_id or PID for token isolation between applications
+                app_suffix = app_id if app_id else f"pid_{os.getpid()}"
+                self.storage_path = Path.home() / ".qilbeedb" / f"tokens_{app_suffix}"
             self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
     def save_tokens(self, access_token: str, refresh_token: str,
@@ -70,9 +74,21 @@ class TokenStorage:
                 "refresh_expiry": refresh_expiry.isoformat() if refresh_expiry else None,
             }
 
-            # Write with restricted permissions (owner read/write only)
-            self.storage_path.write_text(json.dumps(token_data))
-            os.chmod(self.storage_path, 0o600)
+            # SECURITY: Use os.open with secure permissions to prevent race condition
+            # This creates the file atomically with 0o600 permissions (owner read/write only)
+            # preventing any window where the file could be world-readable
+            fd = os.open(
+                self.storage_path,
+                os.O_CREAT | os.O_WRONLY | os.O_TRUNC,
+                0o600
+            )
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    f.write(json.dumps(token_data))
+            except Exception:
+                # If writing fails, close the file descriptor
+                os.close(fd)
+                raise
 
     def load_tokens(self) -> Tuple[Optional[str], Optional[str]]:
         """
@@ -175,7 +191,8 @@ class JWTAuth:
     """
 
     def __init__(self, base_url: str, session, timeout: int = 30,
-                 verify_ssl: bool = True, persist_tokens: bool = True):
+                 verify_ssl: bool = True, persist_tokens: bool = True,
+                 app_id: Optional[str] = None, auto_load_tokens: bool = True):
         """
         Initialize JWT authentication.
 
@@ -185,16 +202,19 @@ class JWTAuth:
             timeout: Request timeout in seconds
             verify_ssl: Whether to verify SSL certificates
             persist_tokens: Whether to persist tokens to disk
+            app_id: Application identifier for token isolation (default: PID)
+            auto_load_tokens: Whether to automatically load persisted tokens on init
         """
         self.base_url = base_url
         self.session = session
         self.timeout = timeout
         self.verify_ssl = verify_ssl
-        self.token_storage = TokenStorage(persist=persist_tokens)
+        self.token_storage = TokenStorage(persist=persist_tokens, app_id=app_id)
         self.username: Optional[str] = None
 
-        # Try to load existing tokens
-        self.token_storage.load_tokens()
+        # Optionally load existing tokens
+        if auto_load_tokens:
+            self.token_storage.load_tokens()
 
     def login(self, username: str, password: str) -> Dict[str, Any]:
         """
