@@ -27,9 +27,10 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
+    - navigation.indexes
     - navigation.top
     - navigation.tracking
+    - navigation.instant
     - search.suggest
     - search.highlight
     - content.tabs.link
@@ -77,27 +78,33 @@ nav:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
     - Configuration: getting-started/configuration.md
-  - Client Libraries:
-    - Overview: client-libraries/overview.md
-    - Python SDK: client-libraries/python.md
-    - Connection Management: client-libraries/connections.md
-  - Graph Operations:
-    - Nodes: graph-operations/nodes.md
-    - Relationships: graph-operations/relationships.md
-    - Properties: graph-operations/properties.md
-    - Indexes: graph-operations/indexes.md
-    - Transactions: graph-operations/transactions.md
-  - Cypher Query Language:
-    - Introduction: cypher/introduction.md
-    - MATCH: cypher/match.md
-    - WHERE: cypher/where.md
-    - RETURN: cypher/return.md
-    - CREATE: cypher/create.md
-    - DELETE: cypher/delete.md
-    - SET: cypher/set.md
-    - ORDER BY: cypher/orderby.md
-    - LIMIT: cypher/limit.md
-    - Functions: cypher/functions.md
+  - Developers:
+    - Client Libraries:
+      - Overview: client-libraries/overview.md
+      - Python SDK: client-libraries/python.md
+      - Connection Management: client-libraries/connections.md
+    - Graph Operations:
+      - Nodes: graph-operations/nodes.md
+      - Relationships: graph-operations/relationships.md
+      - Properties: graph-operations/properties.md
+      - Indexes: graph-operations/indexes.md
+      - Transactions: graph-operations/transactions.md
+    - Cypher Query Language:
+      - Introduction: cypher/introduction.md
+      - MATCH: cypher/match.md
+      - WHERE: cypher/where.md
+      - RETURN: cypher/return.md
+      - CREATE: cypher/create.md
+      - DELETE: cypher/delete.md
+      - SET: cypher/set.md
+      - ORDER BY: cypher/orderby.md
+      - LIMIT: cypher/limit.md
+      - Functions: cypher/functions.md
+    - API Reference:
+      - HTTP REST API: api/http-api.md
+      - Bolt Protocol: api/bolt-protocol.md
+      - Graph API: api/graph-api.md
+      - Memory API: api/memory-api.md
   - Agent Memory:
     - Overview: agent-memory/overview.md
     - Episodes: agent-memory/episodes.md
@@ -105,30 +112,32 @@ nav:
     - Consolidation: agent-memory/consolidation.md
     - Forgetting: agent-memory/forgetting.md
     - Statistics: agent-memory/statistics.md
-  - Use Cases:
-    - AI Agents: use-cases/ai-agents.md
-    - Social Networks: use-cases/social-networks.md
-    - Knowledge Graphs: use-cases/knowledge-graphs.md
-    - Recommendations: use-cases/recommendations.md
-    - Multi-Agent Systems: use-cases/multi-agent.md
-  - Architecture:
-    - Overview: architecture/overview.md
-    - Storage Engine: architecture/storage.md
-    - Query Engine: architecture/query-engine.md
-    - Memory Engine: architecture/memory-engine.md
-    - Bi-Temporal Model: architecture/bi-temporal.md
-  - API Reference:
-    - HTTP REST API: api/http-api.md
-    - Bolt Protocol: api/bolt-protocol.md
-    - Graph API: api/graph-api.md
-    - Memory API: api/memory-api.md
+  - Security:
+    - Overview: security/overview.md
+    - Bootstrap & Initial Setup: security/bootstrap.md
+    - Authentication: security/authentication.md
+    - Authorization (RBAC): security/authorization.md
+    - Audit Logging: security/audit.md
   - Operations:
     - Deployment: operations/deployment.md
     - Docker: operations/docker.md
     - Monitoring: operations/monitoring.md
     - Backup & Recovery: operations/backup.md
     - Performance Tuning: operations/performance.md
-  - Contributing:
-    - Development Setup: contributing/setup.md
-    - Code Style: contributing/style.md
-    - Testing: contributing/testing.md
+  - Learn More:
+    - Use Cases:
+      - AI Agents: use-cases/ai-agents.md
+      - Social Networks: use-cases/social-networks.md
+      - Knowledge Graphs: use-cases/knowledge-graphs.md
+      - Recommendations: use-cases/recommendations.md
+      - Multi-Agent Systems: use-cases/multi-agent.md
+    - Architecture:
+      - Overview: architecture/overview.md
+      - Storage Engine: architecture/storage.md
+      - Query Engine: architecture/query-engine.md
+      - Memory Engine: architecture/memory-engine.md
+      - Bi-Temporal Model: architecture/bi-temporal.md
+    - Contributing:
+      - Development Setup: contributing/setup.md
+      - Code Style: contributing/style.md
+      - Testing: contributing/testing.md

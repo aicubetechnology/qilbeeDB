@@ -1,0 +1,53 @@
+CloudFront Distribution Information
+====================================
+Distribution ID: E21JCI29MUYUSO
+CloudFront Domain: d3f4edmb6vok7h.cloudfront.net
+Custom Domain: docs.qilbeedb.io
+Status: InProgress (Deploying)
+
+Certificate ARN: arn:aws:acm:us-east-1:225520704248:certificate/7c122e83-c870-4d6b-9ced-e6d86bcb8b79
+Certificate Status: ISSUED
+
+Origin: docs.qilbeedb.io.s3-website-us-east-1.amazonaws.com
+HTTP Version: HTTP/2 and HTTP/3
+IPv6: Enabled
+Compression: Enabled
+Viewer Protocol Policy: Redirect HTTP to HTTPS
+
+Created: Mon Nov 25 08:36:17 PST 2025
+
+========================================
+NEXT STEP: Update DNS in GoDaddy
+========================================
+
+Update the 'docs' CNAME record in GoDaddy:
+
+OLD VALUE:
+  docs.qilbeedb.io.s3-website-us-east-1.amazonaws.com
+
+NEW VALUE:
+  d3f4edmb6vok7h.cloudfront.net
+
+After updating DNS:
+- Wait 15-30 minutes for CloudFront deployment
+- Wait 5-30 minutes for DNS propagation
+- Test: https://docs.qilbeedb.io
+
+========================================
+Testing Commands
+========================================
+
+# Check CloudFront status
+AWS_PROFILE=aicube-bruno-noprod aws cloudfront get-distribution \
+  --id E21JCI29MUYUSO \
+  --query 'Distribution.Status' \
+  --output text
+
+# Test HTTPS
+curl -I https://docs.qilbeedb.io
+
+# Test HTTP redirect
+curl -I http://docs.qilbeedb.io
+
+# Check DNS resolution
+dig docs.qilbeedb.io

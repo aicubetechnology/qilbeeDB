@@ -18,6 +18,9 @@ qilbee-protocol = { path = "crates/qilbee-protocol" }
 
 [dev-dependencies]
 tempfile = "3.14"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 [workspace]
 resolver = "2"

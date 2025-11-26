@@ -21,25 +21,51 @@ use std::time::Instant;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
+use crate::security::{AuthService, UserService, TokenService, Credentials, AuthConfig};
+
 /// Shared application state
 #[derive(Clone)]
 pub struct AppState {
     pub database: Arc<Database>,
     pub start_time: Instant,
     pub agent_memories: Arc<Mutex<StdHashMap<String, Arc<AgentMemory>>>>,
+    pub auth_service: Arc<AuthService>,
 }
 
 /// Create HTTP server router
 pub fn create_router(database: Arc<Database>) -> Router {
+    // Initialize security services
+    let user_service = Arc::new(UserService::new());
+    let token_service = Arc::new(TokenService::new("qilbee_jwt_secret_change_in_production".to_string()));
+
+    // Create bootstrap admin user for testing
+    // TODO: Replace with proper bootstrap process
+    let _ = user_service.create_user(
+        "admin".to_string(),
+        "admin@qilbeedb.io".to_string(),
+        "Admin123!@#"
+    );
+
+    let auth_service = Arc::new(AuthService::new(
+        user_service.clone(),
+        token_service,
+        AuthConfig::default(),
+    ));
+
     let state = AppState {
         database,
         start_time: Instant::now(),
         agent_memories: Arc::new(Mutex::new(StdHashMap::new())),
+        auth_service,
     };
 
     Router::new()
         // Health check
         .route("/health", get(health_check))
+        // Authentication endpoints
+        .route("/api/v1/auth/login", post(auth_login))
+        .route("/api/v1/auth/logout", post(auth_logout))
+        .route("/api/v1/auth/refresh", post(auth_refresh))
         // Graph management
         .route("/graphs/:name", post(create_graph))
         .route("/graphs/:name", delete(delete_graph))
@@ -796,6 +822,97 @@ async fn clear_memory(
 ) -> impl IntoResponse {
     // TODO: Implement memory clearing
     (StatusCode::OK, Json(json!({"cleared": true})))
+}
+
+// ==================== Authentication Operations ====================
+
+#[derive(Debug, Deserialize)]
+struct LoginRequest {
+    username: String,
+    password: String,
+}
+
+#[derive(Debug, Serialize)]
+struct LoginResponse {
+    access_token: String,
+    token_type: String,
+    expires_in: u64,
+    refresh_token: Option<String>,
+    username: String,
+    user_id: String,
+}
+
+async fn auth_login(
+    State(state): State<AppState>,
+    Json(request): Json<LoginRequest>,
+) -> impl IntoResponse {
+    let credentials = Credentials {
+        username: request.username.clone(),
+        password: request.password,
+    };
+
+    match state.auth_service.login(credentials) {
+        Ok(token) => {
+            // Get user_id from token claims (we should validate token to get claims)
+            // For now, we'll just return the token info
+            let response = LoginResponse {
+                access_token: token.access_token.clone(),
+                token_type: token.token_type,
+                expires_in: token.expires_in,
+                refresh_token: token.refresh_token,
+                username: request.username,
+                user_id: "user_id_placeholder".to_string(), // TODO: Extract from token
+            };
+            (StatusCode::OK, Json(json!(response)))
+        }
+        Err(e) => (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": format!("Invalid username or password: {}", e)})),
+        ),
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct LogoutRequest {
+    user_id: String,
+}
+
+async fn auth_logout(
+    State(state): State<AppState>,
+    Json(request): Json<LogoutRequest>,
+) -> impl IntoResponse {
+    match state.auth_service.logout(&request.user_id) {
+        Ok(_) => (StatusCode::OK, Json(json!({"success": true}))),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": e.to_string()})),
+        ),
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct RefreshRequest {
+    refresh_token: String,
+}
+
+async fn auth_refresh(
+    State(state): State<AppState>,
+    Json(request): Json<RefreshRequest>,
+) -> impl IntoResponse {
+    match state.auth_service.refresh_token(&request.refresh_token) {
+        Ok(token) => {
+            let response = json!({
+                "access_token": token.access_token,
+                "token_type": token.token_type,
+                "expires_in": token.expires_in,
+            });
+            (StatusCode::OK, Json(response))
+        }
+        Err(e) => (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": format!("Token refresh failed: {}", e)})),
+        ),
+    }
 }
 
 // ==================== Helper Functions ====================

@@ -32,6 +32,16 @@ hyper = { version = "1.0", features = ["full"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
 base64 = "0.22"
 
+# Security dependencies
+jsonwebtoken = "9.3"
+argon2 = "0.5"
+rand = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+chrono = { workspace = true }
+rpassword = "7.3"
+atty = "0.2"
+
 [dev-dependencies]
 tempfile = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

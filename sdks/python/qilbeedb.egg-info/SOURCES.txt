@@ -1,6 +1,11 @@
+LICENSE
+MANIFEST.in
 README.md
+pyproject.toml
+requirements-dev.txt
 setup.py
 qilbeedb/__init__.py
+qilbeedb/auth.py
 qilbeedb/client.py
 qilbeedb/exceptions.py
 qilbeedb/graph.py
@@ -11,9 +16,3 @@ qilbeedb.egg-info/SOURCES.txt
 qilbeedb.egg-info/dependency_links.txt
 qilbeedb.egg-info/requires.txt
 qilbeedb.egg-info/top_level.txt
-tests/__init__.py
-tests/conftest.py
-tests/test_client.py
-tests/test_graph.py
-tests/test_memory.py
-tests/test_query.py

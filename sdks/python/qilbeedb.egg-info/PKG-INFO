@@ -2,13 +2,14 @@ Metadata-Version: 2.4
 Name: qilbeedb
 Version: 0.1.0
 Summary: Python SDK for QilbeeDB - Enterprise Graph Database with Agent Memory
-Home-page: https://github.com/your-org/qilbeedb
+Home-page: https://github.com/aicubetechnology/qilbeeDB
 Author: QilbeeDB Team
-Author-email: support@qilbeedb.com
-Project-URL: Bug Tracker, https://github.com/your-org/qilbeedb/issues
-Project-URL: Documentation, https://docs.qilbeedb.com
-Project-URL: Source Code, https://github.com/your-org/qilbeedb
-Keywords: graph database nosql agent memory ai temporal
+Author-email: QilbeeDB Team <contact@aicube.ca>
+Project-URL: Homepage, https://github.com/aicubetechnology/qilbeeDB
+Project-URL: Documentation, https://docs.qilbeedb.io
+Project-URL: Repository, https://github.com/aicubetechnology/qilbeeDB
+Project-URL: Bug Tracker, https://github.com/aicubetechnology/qilbeeDB/issues
+Keywords: graph,database,nosql,agent,memory,ai,temporal
 Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Database
@@ -22,6 +23,7 @@ Classifier: Programming Language :: Python :: 3.11
 Classifier: Programming Language :: Python :: 3.12
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: requests>=2.28.0
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0.0; extra == "dev"
@@ -30,17 +32,9 @@ Requires-Dist: black>=23.0.0; extra == "dev"
 Requires-Dist: flake8>=6.0.0; extra == "dev"
 Requires-Dist: mypy>=1.0.0; extra == "dev"
 Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
 Dynamic: home-page
-Dynamic: keywords
-Dynamic: project-url
-Dynamic: provides-extra
-Dynamic: requires-dist
+Dynamic: license-file
 Dynamic: requires-python
-Dynamic: summary
 
 # QilbeeDB Python SDK
 
@@ -324,4 +318,4 @@ Apache License 2.0
 
 - Documentation: https://docs.qilbeedb.com
 - Issues: https://github.com/your-org/qilbeedb/issues
-- Email: support@qilbeedb.com
+- Email: contact@aicube.ca

@@ -280,4 +280,4 @@ Apache License 2.0
 
 - Documentation: https://docs.qilbeedb.com
 - Issues: https://github.com/your-org/qilbeedb/issues
-- Email: support@qilbeedb.com
+- Email: contact@aicube.ca

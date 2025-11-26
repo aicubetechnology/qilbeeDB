@@ -2,6 +2,7 @@
 
 use crate::config::ServerConfig;
 use crate::http_server;
+use crate::security::{UserService, BootstrapService};
 use qilbee_core::{Error, Result};
 use qilbee_graph::Database;
 use std::sync::Arc;
@@ -27,6 +28,24 @@ impl Server {
     /// Create a new server instance
     pub fn new(config: ServerConfig) -> Result<Self> {
         let database = Database::open(&config.data_dir)?;
+
+        // Run bootstrap if authentication is enabled
+        if config.auth_enabled {
+            info!("Authentication is enabled, checking bootstrap status...");
+            let user_service = Arc::new(UserService::new());
+            let bootstrap = BootstrapService::new(
+                config.data_dir.clone(),
+                user_service.clone(),
+            );
+
+            // Run bootstrap if needed
+            if bootstrap.is_bootstrap_required()? {
+                info!("Initial bootstrap required");
+                bootstrap.run_auto()?;
+            } else {
+                info!("System already bootstrapped");
+            }
+        }
 
         Ok(Self {
             config,

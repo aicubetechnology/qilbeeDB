@@ -11,15 +11,15 @@ setup(
     name="qilbeedb",
     version="0.1.0",
     author="QilbeeDB Team",
-    author_email="support@qilbeedb.com",
+    author_email="contact@aicube.ca",
     description="Python SDK for QilbeeDB - Enterprise Graph Database with Agent Memory",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-org/qilbeedb",
+    url="https://github.com/aicubetechnology/qilbeeDB",
     project_urls={
-        "Bug Tracker": "https://github.com/your-org/qilbeedb/issues",
-        "Documentation": "https://docs.qilbeedb.com",
-        "Source Code": "https://github.com/your-org/qilbeedb",
+        "Bug Tracker": "https://github.com/aicubetechnology/qilbeeDB/issues",
+        "Documentation": "https://docs.qilbeedb.io",
+        "Source Code": "https://github.com/aicubetechnology/qilbeeDB",
     },
     packages=find_packages(),
     classifiers=[
@@ -38,6 +38,8 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "requests>=2.28.0",
+        "PyJWT>=2.8.0",
+        "cryptography>=41.0.0",
     ],
     extras_require={
         "dev": [
