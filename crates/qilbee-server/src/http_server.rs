@@ -30,6 +30,7 @@ pub struct AppState {
     pub start_time: Instant,
     pub agent_memories: Arc<Mutex<StdHashMap<String, Arc<AgentMemory>>>>,
     pub auth_service: Arc<AuthService>,
+    pub token_service: Arc<TokenService>,
 }
 
 /// Create HTTP server router
@@ -46,6 +47,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         "Admin123!@#"
     );
 
+    let token_service_clone = token_service.clone();
     let auth_service = Arc::new(AuthService::new(
         user_service.clone(),
         token_service,
@@ -57,6 +59,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         start_time: Instant::now(),
         agent_memories: Arc::new(Mutex::new(StdHashMap::new())),
         auth_service,
+        token_service: token_service_clone,
     };
 
     Router::new()
@@ -66,6 +69,9 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/api/v1/auth/login", post(auth_login))
         .route("/api/v1/auth/logout", post(auth_logout))
         .route("/api/v1/auth/refresh", post(auth_refresh))
+        // API Key management endpoints
+        .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
+        .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
         // Graph management
         .route("/graphs/:name", post(create_graph))
         .route("/graphs/:name", delete(delete_graph))
@@ -912,6 +918,174 @@ async fn auth_refresh(
             StatusCode::UNAUTHORIZED,
             Json(json!({"error": format!("Token refresh failed: {}", e)})),
         ),
+    }
+}
+
+// ==================== API Key Management ====================
+
+#[derive(Debug, Deserialize)]
+struct CreateApiKeyRequest {
+    name: String,
+    expires_in_days: Option<u32>,
+}
+
+#[derive(Debug, Serialize)]
+struct CreateApiKeyResponse {
+    key: String,
+    id: String,
+    prefix: String,
+    name: String,
+    created_at: String,
+    expires_at: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct ListApiKeysResponse {
+    keys: Vec<ApiKeyInfo>,
+}
+
+#[derive(Debug, Serialize)]
+struct ApiKeyInfo {
+    id: String,
+    prefix: String,
+    name: String,
+    created_at: String,
+    expires_at: Option<String>,
+    last_used: Option<String>,
+    is_active: bool,
+}
+
+async fn api_key_create(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Json(request): Json<CreateApiKeyRequest>,
+) -> impl IntoResponse {
+    // Extract user_id from JWT token in Authorization header
+    let user_id = match extract_user_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing JWT token"})),
+            )
+        }
+    };
+
+    // Generate API key
+    match state
+        .token_service
+        .generate_api_key(user_id, request.name.clone())
+    {
+        Ok((key, api_key)) => {
+            let response = CreateApiKeyResponse {
+                key,
+                id: api_key.id,
+                prefix: api_key.prefix,
+                name: api_key.name,
+                created_at: api_key.created_at.to_rfc3339(),
+                expires_at: api_key.expires_at.map(|dt| dt.to_rfc3339()),
+            };
+            (StatusCode::CREATED, Json(json!(response)))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to create API key: {}", e)})),
+        ),
+    }
+}
+
+async fn api_key_list(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    // Extract user_id from JWT token
+    let user_id = match extract_user_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing JWT token"})),
+            )
+        }
+    };
+
+    // List API keys for user
+    let keys = state.token_service.list_api_keys(&user_id);
+    let key_infos: Vec<ApiKeyInfo> = keys
+        .into_iter()
+        .map(|k| ApiKeyInfo {
+            id: k.id,
+            prefix: k.prefix,
+            name: k.name,
+            created_at: k.created_at.to_rfc3339(),
+            expires_at: k.expires_at.map(|dt| dt.to_rfc3339()),
+            last_used: k.last_used.map(|dt| dt.to_rfc3339()),
+            is_active: k.is_active,
+        })
+        .collect();
+
+    (
+        StatusCode::OK,
+        Json(json!(ListApiKeysResponse { keys: key_infos })),
+    )
+}
+
+async fn api_key_revoke(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(key_id): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    // Extract user_id from JWT token to verify ownership
+    let _user_id = match extract_user_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing JWT token"})),
+            )
+        }
+    };
+
+    // Revoke API key by ID (key_hash in storage)
+    match state.token_service.revoke_api_key(&key_id) {
+        Ok(_) => (
+            StatusCode::OK,
+            Json(json!({"success": true, "message": "API key revoked"})),
+        ),
+        Err(e) => (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": format!("Failed to revoke API key: {}", e)})),
+        ),
+    }
+}
+
+/// Helper function to extract user_id from JWT token in Authorization header
+fn extract_user_from_token(
+    headers: &axum::http::HeaderMap,
+    state: &AppState,
+) -> Result<crate::security::UserId, StatusCode> {
+    use crate::security::UserId;
+    use uuid::Uuid;
+
+    // Get Authorization header
+    let auth_header = headers
+        .get("Authorization")
+        .and_then(|v| v.to_str().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    // Extract token (format: "Bearer <token>")
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    // Validate token and extract claims
+    match state.token_service.validate_jwt(token) {
+        Ok(claims) => {
+            // Parse UUID from string
+            let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+            Ok(UserId(uuid))
+        }
+        Err(_) => Err(StatusCode::UNAUTHORIZED),
     }
 }
 
