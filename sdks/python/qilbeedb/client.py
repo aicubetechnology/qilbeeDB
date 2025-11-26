@@ -231,6 +231,28 @@ class QilbeeDB:
             return False
         return self._auth_handler.is_authenticated()
 
+    def set_api_key(self, api_key: str) -> None:
+        """
+        Switch to API key authentication.
+
+        This method allows you to change authentication method to API key
+        after client initialization. Useful for switching from JWT to API key.
+
+        Args:
+            api_key: QilbeeDB API key (starts with 'qilbee_live_')
+
+        Example:
+            >>> db = QilbeeDB("http://localhost:7474")
+            >>> db.login("admin", "password")
+            >>> db.set_api_key("qilbee_live_abc123...")
+        """
+        # Clear any existing auth headers
+        if self._auth_handler:
+            self._auth_handler.logout()
+
+        # Set up API key authentication
+        self._auth_handler = APIKeyAuth(api_key, self.session)
+
     def refresh_token(self) -> str:
         """
         Manually refresh the JWT access token.

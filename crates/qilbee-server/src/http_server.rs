@@ -1147,7 +1147,7 @@ fn require_admin(claims: &super::security::token::Claims) -> Result<(), StatusCo
     }
 }
 
-/// Helper to extract and validate admin user from JWT token
+/// Helper to extract and validate admin user from either JWT token or API key
 fn extract_admin_from_token(
     headers: &axum::http::HeaderMap,
     state: &AppState,
@@ -1155,6 +1155,25 @@ fn extract_admin_from_token(
     use crate::security::UserId;
     use uuid::Uuid;
 
+    // Try X-API-Key header first
+    if let Some(api_key_header) = headers.get("X-API-Key").and_then(|v| v.to_str().ok()) {
+        // Validate API key and get associated user_id
+        let user_id = state.token_service.validate_api_key(api_key_header)
+            .map_err(|_| StatusCode::UNAUTHORIZED)?;
+
+        // Get user to check admin role
+        let user = state.user_service.get_user(&user_id)
+            .ok_or(StatusCode::UNAUTHORIZED)?;
+
+        // Check if user has Admin role
+        if !user.roles.contains(&super::security::rbac::Role::Admin) {
+            return Err(StatusCode::FORBIDDEN);
+        }
+
+        return Ok(user_id);
+    }
+
+    // Fall back to JWT Bearer token
     let auth_header = headers
         .get("Authorization")
         .and_then(|v| v.to_str().ok())
