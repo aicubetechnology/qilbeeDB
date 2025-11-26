@@ -10,6 +10,33 @@ pip install qilbeedb
 
 ## Quick Start
 
+### Authentication
+
+QilbeeDB supports two authentication methods:
+
+#### JWT Authentication (for humans/admins)
+```python
+from qilbeedb import QilbeeDB
+
+# Connect and login with username/password
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+```
+
+#### API Key Authentication (recommended for applications)
+```python
+# Option 1: Initialize with API key
+db = QilbeeDB({
+    "uri": "http://localhost:7474",
+    "api_key": "qilbee_live_your_api_key_here"
+})
+
+# Option 2: Switch to API key after JWT login
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+db.set_api_key("qilbee_live_your_api_key_here")
+```
+
 ### Basic Graph Operations
 
 ```python
@@ -17,6 +44,7 @@ from qilbeedb import QilbeeDB
 
 # Connect to database
 db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
 
 # Get or create a graph
 graph = db.graph("social")
@@ -145,6 +173,11 @@ Main database client.
 - `delete_graph(name: str) -> bool` - Delete graph
 - `health() -> Dict` - Get health status
 - `agent_memory(agent_id: str, **config) -> AgentMemory` - Create agent memory
+- `login(username: str, password: str) -> Dict` - Login with JWT authentication
+- `logout() -> None` - Logout and clear authentication
+- `is_authenticated() -> bool` - Check if authenticated
+- `set_api_key(api_key: str) -> None` - Switch to API key authentication
+- `refresh_token() -> str` - Manually refresh JWT access token
 
 ### Graph
 
@@ -213,12 +246,61 @@ Episodic memory.
 ### Connection Options
 
 ```python
-db = QilbeeDB(
-    uri="http://localhost:7474",
-    auth=("username", "password"),
-    timeout=30,
-    verify_ssl=True
+# Simple URI connection (use login() afterward)
+db = QilbeeDB("http://localhost:7474")
+
+# Configuration dict with API key (recommended for applications)
+db = QilbeeDB({
+    "uri": "http://localhost:7474",
+    "api_key": "qilbee_live_your_api_key_here",
+    "timeout": 30,
+    "verify_ssl": True
+})
+
+# Configuration dict with basic auth (deprecated, use login() instead)
+db = QilbeeDB({
+    "uri": "http://localhost:7474",
+    "auth": {"username": "admin", "password": "password"},
+    "timeout": 30,
+    "verify_ssl": True,
+    "persist_tokens": True
+})
+```
+
+### Managing API Keys
+
+Create and manage API keys for application authentication:
+
+```python
+import requests
+
+# Login as admin to manage API keys
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "Admin123!@#")
+
+# Create a new API key
+response = db.session.post(
+    "http://localhost:7474/api/v1/api-keys",
+    json={"name": "my-app-key"}
 )
+api_key_data = response.json()
+api_key = api_key_data["key"]
+key_id = api_key_data["id"]
+
+print(f"Created API key: {api_key}")
+
+# List all API keys
+response = db.session.get("http://localhost:7474/api/v1/api-keys")
+api_keys = response.json()["api_keys"]
+
+# Delete an API key
+db.session.delete(f"http://localhost:7474/api/v1/api-keys/{key_id}")
+
+# Now use the API key in your application
+app_db = QilbeeDB({
+    "uri": "http://localhost:7474",
+    "api_key": api_key
+})
 ```
 
 ### Memory Configuration

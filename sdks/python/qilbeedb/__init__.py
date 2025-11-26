@@ -10,8 +10,8 @@ Example:
     >>> alice = graph.create_node(["Person"], {"name": "Alice", "age": 30})
 """
 
-__version__ = "0.1.0"
-__author__ = "QilbeeDB Team"
+__version__ = "0.2.0"
+__author__ = "AICUBE TECHNOLOGY LLC"
 __license__ = "Apache-2.0"
 
 from .client import QilbeeDB

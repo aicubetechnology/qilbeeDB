@@ -16,8 +16,8 @@
 - [x] Update all HTTP request methods to use X-API-Key header when API key is set
 - [x] Add tests for API key authentication in Python SDK
 - [x] Server fix: extract_admin_from_token now supports both JWT and API key
-- [ ] Update Python SDK documentation with API key examples
-- [ ] Version bump to 0.2.0
+- [x] Update Python SDK documentation with API key examples
+- [x] Version bump to 0.2.0
 
 ### Phase 2: Rate Limiting ⏳
 - [ ] Implement token bucket rate limiter in Rust

@@ -9,8 +9,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="qilbeedb",
-    version="0.1.0",
-    author="QilbeeDB Team",
+    version="0.2.0",
+    author="AICUBE TECHNOLOGY LLC",
     author_email="contact@aicube.ca",
     description="Python SDK for QilbeeDB - Enterprise Graph Database with Agent Memory",
     long_description=long_description,
