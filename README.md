@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![QilbeeDB Logo](https://via.placeholder.com/200x200/4A90E2/FFFFFF?text=QilbeeDB)
+![QilbeeDB Logo](https://preview--agent-chronicle-db.lovable.app/assets/qilbee-logo-c3CsNydB.png)
 
 **Enterprise-Grade Graph Database with Bi-Temporal Agent Memory**
 
