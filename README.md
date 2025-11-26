@@ -7,14 +7,14 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-[![Documentation](https://img.shields.io/badge/docs-online-green.svg)](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com)
+[![Documentation](https://img.shields.io/badge/docs-online-green.svg)](https://docs.qilbeedb.io/)
 [![GitHub](https://img.shields.io/github/stars/aicubetechnology/qilbeeDB?style=social)](https://github.com/aicubetechnology/qilbeeDB)
 
-Created by **[AICUBE TECHNOLOGY LLC](https://aicube.technology)**
+Created by **[AICUBE TECHNOLOGY LLC](https://www.aicube.ca/)**
 
 [Features](#-features) •
 [Quick Start](#-quick-start) •
-[Documentation](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com) •
+[Documentation](https://docs.qilbeedb.io/) •
 [Examples](#-examples) •
 [Contributing](#-contributing)
 
@@ -269,16 +269,16 @@ QilbeeDB excels in scenarios requiring both graph relationships and intelligent 
 ## 📖 Documentation
 
 Comprehensive documentation is available at:
-**[http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com)**
+**[https://docs.qilbeedb.io/](https://docs.qilbeedb.io/)**
 
 ### Key Sections:
-- [Installation Guide](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/getting-started/installation/)
-- [Quick Start](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/getting-started/quickstart/)
-- [Python SDK](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/client-libraries/python/)
-- [Cypher Query Language](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/cypher/introduction/)
-- [Agent Memory](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/agent-memory/overview/)
-- [Architecture](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/architecture/overview/)
-- [API Reference](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/api/http-api/)
+- [Installation Guide](https://docs.qilbeedb.io/getting-started/installation/)
+- [Quick Start](https://docs.qilbeedb.io/getting-started/quickstart/)
+- [Python SDK](https://docs.qilbeedb.io/client-libraries/python/)
+- [Cypher Query Language](https://docs.qilbeedb.io/cypher/introduction/)
+- [Agent Memory](https://docs.qilbeedb.io/agent-memory/overview/)
+- [Architecture](https://docs.qilbeedb.io/architecture/overview/)
+- [API Reference](https://docs.qilbeedb.io/api/http-api/)
 
 ## 🛠️ Development
 
@@ -325,7 +325,7 @@ qilbeeDB/
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Please read our [Contributing Guide](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/contributing/setup/) for details on:
+We welcome contributions from the community! Please read our [https://docs.qilbeedb.io/getting-started/installation/) for details on:
 
 - Development setup
 - Code style guidelines
@@ -344,7 +344,7 @@ We welcome contributions from the community! Please read our [Contributing Guide
 
 ## 🔒 Security
 
-Security is a top priority for QilbeeDB. If you discover a security vulnerability, please email security@aicube.technology instead of using the issue tracker.
+Security is a top priority for QilbeeDB. If you discover a security vulnerability, please email contact@aicube.ca instead of using the issue tracker.
 
 ## 📊 Benchmarks
 
@@ -356,7 +356,7 @@ QilbeeDB is designed for high performance:
 - **Complex Pattern Matching**: Optimized with cost-based planning
 - **Memory Consolidation**: Real-time processing with minimal overhead
 
-See our [benchmark documentation](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com/operations/performance/) for detailed performance metrics.
+See our [benchmark documentation](https://docs.qilbeedb.io/operations/performance/#use-parameters) for detailed performance metrics.
 
 ## 🗺️ Roadmap
 
@@ -403,10 +403,10 @@ QilbeeDB is built on top of excellent open-source projects:
 
 ## 💬 Community & Support
 
-- **Documentation**: [http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com)
+- **Documentation**: [https://docs.qilbeedb.io/](https://docs.qilbeedb.io/)
 - **GitHub Issues**: [Report bugs or request features](https://github.com/aicubetechnology/qilbeeDB/issues)
 - **Discussions**: Join our GitHub Discussions for Q&A and community support
-- **Email**: support@aicube.technology
+- **Email**: contact@aicube.ca
 
 ## 🌟 Why QilbeeDB?
 
@@ -423,10 +423,10 @@ Production-ready with ACID transactions, monitoring, and enterprise-grade query 
 
 <div align="center">
 
-**Built with ❤️ by [AICUBE TECHNOLOGY LLC](https://aicube.technology)**
+**Built with ❤️ by [AICUBE TECHNOLOGY LLC](https://www.aicube.ca/)**
 
-[Website](https://qilbeedb.com) •
-[Documentation](http://qilbeedb-docs.s3-website-us-east-1.amazonaws.com) •
+[Website](https://qilbeedb.io/) •
+[Documentation](https://docs.qilbeedb.io/) •
 [GitHub](https://github.com/aicubetechnology/qilbeeDB) •
 [Docker Hub](https://hub.docker.com/r/qilbeedb/qilbeedb)
 
