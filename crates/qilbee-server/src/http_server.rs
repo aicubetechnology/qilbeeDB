@@ -31,6 +31,7 @@ pub struct AppState {
     pub agent_memories: Arc<Mutex<StdHashMap<String, Arc<AgentMemory>>>>,
     pub auth_service: Arc<AuthService>,
     pub token_service: Arc<TokenService>,
+    pub user_service: Arc<UserService>,
 }
 
 /// Create HTTP server router
@@ -41,11 +42,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
 
     // Create bootstrap admin user for testing
     // TODO: Replace with proper bootstrap process
-    let _ = user_service.create_user(
-        "admin".to_string(),
-        "admin@qilbeedb.io".to_string(),
-        "Admin123!@#"
-    );
+    let _ = user_service.create_default_admin("Admin123!@#");
 
     let token_service_clone = token_service.clone();
     let auth_service = Arc::new(AuthService::new(
@@ -60,6 +57,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         agent_memories: Arc::new(Mutex::new(StdHashMap::new())),
         auth_service,
         token_service: token_service_clone,
+        user_service: user_service.clone(),
     };
 
     Router::new()
@@ -72,6 +70,10 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // API Key management endpoints
         .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
         .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
+        // User management endpoints
+        .route("/api/v1/users", post(user_create).get(user_list))
+        .route("/api/v1/users/:user_id", get(user_get).put(user_update).delete(user_delete))
+        .route("/api/v1/users/:user_id/roles", put(user_update_roles))
         // Graph management
         .route("/graphs/:name", post(create_graph))
         .route("/graphs/:name", delete(delete_graph))
@@ -1086,6 +1088,458 @@ fn extract_user_from_token(
             Ok(UserId(uuid))
         }
         Err(_) => Err(StatusCode::UNAUTHORIZED),
+    }
+}
+
+// ==================== User Management Endpoints ====================
+
+/// Request/response DTOs for user management
+#[derive(Debug, Deserialize)]
+struct CreateUserRequest {
+    username: String,
+    email: String,
+    password: String,
+    roles: Option<Vec<super::security::rbac::Role>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdateUserRequest {
+    email: Option<String>,
+    password: Option<String>,
+    is_active: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdateRolesRequest {
+    roles: Vec<super::security::rbac::Role>,
+}
+
+#[derive(Debug, Serialize)]
+struct UserResponse {
+    id: String,
+    username: String,
+    email: String,
+    roles: Vec<super::security::rbac::Role>,
+    is_active: bool,
+    created_at: String,
+    updated_at: String,
+    last_login: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct ListUsersResponse {
+    users: Vec<UserResponse>,
+}
+
+/// Helper to check if user has Admin role
+fn require_admin(claims: &super::security::token::Claims) -> Result<(), StatusCode> {
+    use super::security::rbac::Role;
+
+    if claims.roles.contains(&Role::Admin) {
+        Ok(())
+    } else {
+        Err(StatusCode::FORBIDDEN)
+    }
+}
+
+/// Helper to extract and validate admin user from JWT token
+fn extract_admin_from_token(
+    headers: &axum::http::HeaderMap,
+    state: &AppState,
+) -> Result<crate::security::UserId, StatusCode> {
+    use crate::security::UserId;
+    use uuid::Uuid;
+
+    let auth_header = headers
+        .get("Authorization")
+        .and_then(|v| v.to_str().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    match state.token_service.validate_jwt(token) {
+        Ok(claims) => {
+            // Check admin role
+            require_admin(&claims)?;
+
+            let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+            Ok(UserId(uuid))
+        }
+        Err(_) => Err(StatusCode::UNAUTHORIZED),
+    }
+}
+
+/// Create a new user (Admin only)
+async fn user_create(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Json(request): Json<CreateUserRequest>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Create user with provided roles or default to Read
+    let roles = request.roles.unwrap_or_else(|| vec![super::security::rbac::Role::Read]);
+
+    match state.user_service.create_user(
+        request.username.clone(),
+        request.email.clone(),
+        &request.password,
+    ) {
+        Ok(mut user) => {
+            // Update roles if provided
+            user.roles = roles;
+
+            let response = UserResponse {
+                id: user.id.0.to_string(),
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+                is_active: user.is_active,
+                created_at: user.created_at.to_rfc3339(),
+                updated_at: user.updated_at.to_rfc3339(),
+                last_login: user.last_login.map(|dt| dt.to_rfc3339()),
+            };
+
+            (StatusCode::CREATED, Json(json!(response)))
+        }
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": format!("Failed to create user: {}", e)})),
+        ),
+    }
+}
+
+/// List all users (Admin only)
+async fn user_list(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    let users = state.user_service.list_users();
+    let user_responses: Vec<UserResponse> = users
+        .into_iter()
+        .map(|u| UserResponse {
+            id: u.id.0.to_string(),
+            username: u.username,
+            email: u.email,
+            roles: u.roles,
+            is_active: u.is_active,
+            created_at: u.created_at.to_rfc3339(),
+            updated_at: u.updated_at.to_rfc3339(),
+            last_login: u.last_login.map(|dt| dt.to_rfc3339()),
+        })
+        .collect();
+
+    (
+        StatusCode::OK,
+        Json(json!(ListUsersResponse { users: user_responses })),
+    )
+}
+
+/// Get user details (own user or Admin)
+async fn user_get(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(user_id_str): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+    use crate::security::UserId;
+
+    // Extract requesting user
+    let requester_id = match extract_user_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing JWT token"})),
+            )
+        }
+    };
+
+    // Parse target user ID
+    let target_uuid = match Uuid::parse_str(&user_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+        }
+    };
+    let target_id = UserId(target_uuid);
+
+    // Check if requester is admin or requesting own user
+    let auth_header = headers.get("Authorization").and_then(|v| v.to_str().ok()).unwrap();
+    let token = auth_header.strip_prefix("Bearer ").unwrap();
+    let is_admin = if let Ok(claims) = state.token_service.validate_jwt(token) {
+        require_admin(&claims).is_ok()
+    } else {
+        false
+    };
+
+    if requester_id != target_id && !is_admin {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({"error": "Access denied: can only view own user or admin required"})),
+        );
+    }
+
+    match state.user_service.get_user(&target_id) {
+        Some(user) => {
+            let response = UserResponse {
+                id: user.id.0.to_string(),
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+                is_active: user.is_active,
+                created_at: user.created_at.to_rfc3339(),
+                updated_at: user.updated_at.to_rfc3339(),
+                last_login: user.last_login.map(|dt| dt.to_rfc3339()),
+            };
+            (StatusCode::OK, Json(json!(response)))
+        }
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "User not found"})),
+        ),
+    }
+}
+
+/// Update user (own user or Admin)
+async fn user_update(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(user_id_str): axum::extract::Path<String>,
+    Json(request): Json<UpdateUserRequest>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+    use crate::security::UserId;
+
+    // Extract requesting user
+    let requester_id = match extract_user_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing JWT token"})),
+            )
+        }
+    };
+
+    // Parse target user ID
+    let target_uuid = match Uuid::parse_str(&user_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+        }
+    };
+    let target_id = UserId(target_uuid);
+
+    // Check if requester is admin or updating own user
+    let auth_header = headers.get("Authorization").and_then(|v| v.to_str().ok()).unwrap();
+    let token = auth_header.strip_prefix("Bearer ").unwrap();
+    let is_admin = if let Ok(claims) = state.token_service.validate_jwt(token) {
+        require_admin(&claims).is_ok()
+    } else {
+        false
+    };
+
+    if requester_id != target_id && !is_admin {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({"error": "Access denied: can only update own user or admin required"})),
+        );
+    }
+
+    // Get existing user
+    let mut user = match state.user_service.get_user(&target_id) {
+        Some(u) => u,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "User not found"})),
+            )
+        }
+    };
+
+    // Apply updates
+    if let Some(email) = request.email {
+        user.email = email;
+    }
+    if let Some(password) = request.password {
+        // Re-hash password using user method
+        if let Err(e) = user.update_password(&password) {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to hash password: {}", e)})),
+            )
+        }
+    }
+    if let Some(is_active) = request.is_active {
+        // Only admin can change is_active status
+        if !is_admin {
+            return (
+                StatusCode::FORBIDDEN,
+                Json(json!({"error": "Only admin can change user active status"})),
+            );
+        }
+        user.is_active = is_active;
+    }
+
+    match state.user_service.update_user(user.clone()) {
+        Ok(_) => {
+            let response = UserResponse {
+                id: user.id.0.to_string(),
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+                is_active: user.is_active,
+                created_at: user.created_at.to_rfc3339(),
+                updated_at: user.updated_at.to_rfc3339(),
+                last_login: user.last_login.map(|dt| dt.to_rfc3339()),
+            };
+            (StatusCode::OK, Json(json!(response)))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to update user: {}", e)})),
+        ),
+    }
+}
+
+/// Delete user (Admin only)
+async fn user_delete(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(user_id_str): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+    use crate::security::UserId;
+
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Parse target user ID
+    let target_uuid = match Uuid::parse_str(&user_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+        }
+    };
+    let target_id = UserId(target_uuid);
+
+    match state.user_service.delete_user(&target_id) {
+        Ok(_) => (
+            StatusCode::OK,
+            Json(json!({"success": true, "message": "User deleted"})),
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to delete user: {}", e)})),
+        ),
+    }
+}
+
+/// Update user roles (Admin only)
+async fn user_update_roles(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(user_id_str): axum::extract::Path<String>,
+    Json(request): Json<UpdateRolesRequest>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+    use crate::security::UserId;
+
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Parse target user ID
+    let target_uuid = match Uuid::parse_str(&user_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            )
+        }
+    };
+    let target_id = UserId(target_uuid);
+
+    // Get existing user
+    let mut user = match state.user_service.get_user(&target_id) {
+        Some(u) => u,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "User not found"})),
+            )
+        }
+    };
+
+    // Update roles
+    user.roles = request.roles;
+
+    match state.user_service.update_user(user.clone()) {
+        Ok(_) => {
+            let response = UserResponse {
+                id: user.id.0.to_string(),
+                username: user.username,
+                email: user.email,
+                roles: user.roles,
+                is_active: user.is_active,
+                created_at: user.created_at.to_rfc3339(),
+                updated_at: user.updated_at.to_rfc3339(),
+                last_login: user.last_login.map(|dt| dt.to_rfc3339()),
+            };
+            (StatusCode::OK, Json(json!(response)))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to update user roles: {}", e)})),
+        ),
     }
 }
 
