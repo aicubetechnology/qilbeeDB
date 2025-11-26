@@ -963,7 +963,7 @@ async fn api_key_create(
     Json(request): Json<CreateApiKeyRequest>,
 ) -> impl IntoResponse {
     // Extract user_id from JWT token in Authorization header
-    let user_id = match extract_user_from_token(&headers, &state) {
+    let user_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1001,7 +1001,7 @@ async fn api_key_list(
     headers: axum::http::HeaderMap,
 ) -> impl IntoResponse {
     // Extract user_id from JWT token
-    let user_id = match extract_user_from_token(&headers, &state) {
+    let user_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1038,7 +1038,7 @@ async fn api_key_revoke(
     axum::extract::Path(key_id): axum::extract::Path<String>,
 ) -> impl IntoResponse {
     // Extract user_id from JWT token to verify ownership
-    let _user_id = match extract_user_from_token(&headers, &state) {
+    let _user_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1061,34 +1061,39 @@ async fn api_key_revoke(
     }
 }
 
-/// Helper function to extract user_id from JWT token in Authorization header
-fn extract_user_from_token(
+/// Helper function to extract user_id from either JWT token or API key
+/// Supports both Bearer token (Authorization: Bearer <token>) and API key (X-API-Key: <key>)
+fn extract_user_from_auth(
     headers: &axum::http::HeaderMap,
     state: &AppState,
 ) -> Result<crate::security::UserId, StatusCode> {
     use crate::security::UserId;
     use uuid::Uuid;
 
-    // Get Authorization header
-    let auth_header = headers
-        .get("Authorization")
-        .and_then(|v| v.to_str().ok())
-        .ok_or(StatusCode::UNAUTHORIZED)?;
-
-    // Extract token (format: "Bearer <token>")
-    let token = auth_header
-        .strip_prefix("Bearer ")
-        .ok_or(StatusCode::UNAUTHORIZED)?;
-
-    // Validate token and extract claims
-    match state.token_service.validate_jwt(token) {
-        Ok(claims) => {
-            // Parse UUID from string
-            let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
-            Ok(UserId(uuid))
+    // Try X-API-Key header first
+    if let Some(api_key_header) = headers.get("X-API-Key").and_then(|v| v.to_str().ok()) {
+        // Validate API key and get associated user_id
+        match state.token_service.validate_api_key(api_key_header) {
+            Ok(user_id) => return Ok(user_id),
+            Err(_) => return Err(StatusCode::UNAUTHORIZED),
         }
-        Err(_) => Err(StatusCode::UNAUTHORIZED),
     }
+
+    // Fall back to JWT Bearer token
+    if let Some(auth_header) = headers.get("Authorization").and_then(|v| v.to_str().ok()) {
+        if let Some(token) = auth_header.strip_prefix("Bearer ") {
+            match state.token_service.validate_jwt(token) {
+                Ok(claims) => {
+                    let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
+                    return Ok(UserId(uuid));
+                }
+                Err(_) => return Err(StatusCode::UNAUTHORIZED),
+            }
+        }
+    }
+
+    // No valid authentication found
+    Err(StatusCode::UNAUTHORIZED)
 }
 
 // ==================== User Management Endpoints ====================
@@ -1267,7 +1272,7 @@ async fn user_get(
     use crate::security::UserId;
 
     // Extract requesting user
-    let requester_id = match extract_user_from_token(&headers, &state) {
+    let requester_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1337,7 +1342,7 @@ async fn user_update(
     use crate::security::UserId;
 
     // Extract requesting user
-    let requester_id = match extract_user_from_token(&headers, &state) {
+    let requester_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
