@@ -95,6 +95,16 @@ pub enum Error {
     #[error("Configuration error: {0}")]
     Configuration(String),
 
+    // ========== Authentication/Authorization Errors ==========
+    #[error("Authentication failed: {0}")]
+    AuthenticationFailed(String),
+
+    #[error("Token revoked: {0}")]
+    TokenRevoked(String),
+
+    #[error("Unauthorized: {0}")]
+    Unauthorized(String),
+
     // ========== Internal Errors ==========
     #[error("Internal error: {0}")]
     Internal(String),

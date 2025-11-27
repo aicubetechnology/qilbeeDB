@@ -407,8 +407,69 @@ security_events = db.get_security_events(limit=50)
 | User Management | `user_created`, `user_updated`, `user_deleted`, `password_changed` |
 | Role Management | `role_assigned`, `role_removed` |
 | API Keys | `api_key_created`, `api_key_revoked`, `api_key_used`, `api_key_validation_failed` |
+| Token Revocation | `token_revoked`, `all_tokens_revoked` |
 | Authorization | `permission_denied`, `access_granted` |
 | Rate Limiting | `rate_limit_exceeded` |
+
+## Token Revocation
+
+Revoke JWT tokens to immediately invalidate them before expiration:
+
+```python
+from qilbeedb import QilbeeDB
+
+# Login and get a token
+db = QilbeeDB("http://localhost:7474")
+login_response = db.login("admin", "Admin123!@#")
+access_token = login_response.get("access_token")
+
+# Revoke the current token
+result = db.revoke_token(access_token)
+print(f"Token revoked with jti: {result['jti']}")
+```
+
+### Revoke All Tokens (Admin Only)
+
+Administrators can revoke all tokens for a specific user:
+
+```python
+# Login as admin
+admin_db = QilbeeDB("http://localhost:7474")
+admin_db.login("admin", "Admin123!@#")
+
+# Revoke all tokens for a user
+result = admin_db.revoke_all_tokens(
+    user_id="550e8400-e29b-41d4-a716-446655440000",
+    reason="security_incident"
+)
+print(f"All tokens revoked for user: {result['user_id']}")
+```
+
+### Use Cases
+
+```python
+# Emergency session termination
+def terminate_user_sessions(admin_db, user_id, reason="admin_action"):
+    """Terminate all active sessions for a user."""
+    result = admin_db.revoke_all_tokens(user_id, reason=reason)
+    print(f"Sessions terminated for user {user_id}")
+    return result
+
+# Logout from current device
+def logout_current_session(db):
+    """Revoke the current token on logout."""
+    if hasattr(db, '_access_token') and db._access_token:
+        db.revoke_token(db._access_token)
+        db._access_token = None
+    print("Logged out successfully")
+
+# Security incident response
+def handle_security_incident(admin_db, compromised_user_ids):
+    """Revoke all tokens for potentially compromised accounts."""
+    for user_id in compromised_user_ids:
+        admin_db.revoke_all_tokens(user_id, reason="security_incident")
+        print(f"Revoked all tokens for {user_id}")
+```
 
 ## Error Handling
 

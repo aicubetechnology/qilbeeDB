@@ -33,30 +33,42 @@
 - [x] Rate limit policy management API (CRUD for policies)
 - [x] Documentation added to MkDocs (security/rate-limiting.md)
 
-### Phase 3: Audit Logging ⏳
-- [ ] Create AuditLog struct and storage (append-only log file)
-- [ ] Log authentication events:
-  - [ ] User login/logout
-  - [ ] Failed login attempts
-  - [ ] API key creation/revocation
-- [ ] Log authorization events:
-  - [ ] User creation/modification/deletion
-  - [ ] Role changes
-  - [ ] Permission denials (403 responses)
-- [ ] Add GET /api/v1/audit-logs endpoint (admin only)
-- [ ] Add audit log rotation/retention policy
-- [ ] Test audit logging
+### Phase 3: Audit Logging (Completed) ✅
+- [x] Create AuditLog struct and storage (append-only log file)
+- [x] Log authentication events:
+  - [x] User login/logout
+  - [x] Failed login attempts
+  - [x] API key creation/revocation
+- [x] Log authorization events:
+  - [x] User creation/modification/deletion
+  - [x] Role changes
+  - [x] Permission denials (403 responses)
+- [x] Add GET /api/v1/audit-logs endpoint (admin only)
+- [x] Add audit log rotation/retention policy
+- [x] Test audit logging (Python tests in python-test/test_audit_logging.py, python-test/test_sdk_audit_logs.py)
+- [x] Python SDK audit log methods (get_audit_logs, get_failed_logins, get_user_audit_events, get_security_events)
+- [x] Documentation (docs/security/audit.md, sdks/python/README.md, docs/client-libraries/python.md)
 
-### Phase 4: Token Revocation ⏳
-- [ ] Implement token blacklist (in-memory + persistent storage)
-- [ ] Add POST /api/v1/auth/revoke endpoint
-- [ ] Update JWT validation to check blacklist
-- [ ] Add token expiration time to blacklist entries
-- [ ] Implement blacklist cleanup for expired tokens
-- [ ] Test token revocation
+### Phase 4: Token Revocation (Completed) ✅
+- [x] Implement token blacklist (in-memory + persistent storage)
+- [x] Add POST /api/v1/auth/revoke endpoint
+- [x] Add POST /api/v1/auth/revoke-all endpoint (admin bulk revocation)
+- [x] Update JWT validation to check blacklist
+- [x] Add token expiration time to blacklist entries
+- [x] Implement blacklist cleanup for expired tokens
+- [x] Test token revocation (7/7 Python tests pass)
+- [x] Python SDK methods (revoke_token, revoke_all_tokens)
+- [x] Documentation updated
 
 ### Phase 5: Additional Security Enhancements ⏳
-- [ ] Account lockout after N failed login attempts
+- [x] Account lockout after N failed login attempts
+  - [x] AccountLockoutService with configurable thresholds
+  - [x] Track failed attempts by username and IP address
+  - [x] Progressive lockout (duration increases with each lockout)
+  - [x] Time-based automatic unlock
+  - [x] Manual admin lock/unlock via HTTP API
+  - [x] Audit logging for lockout events
+  - [x] Python SDK methods (get_locked_accounts, get_lockout_status, lock_account, unlock_account)
 - [ ] Password complexity validation
 - [ ] API key expiration and rotation
 - [ ] HTTPS enforcement configuration
@@ -67,11 +79,12 @@
 - [x] Security best practices guide (docs/security/overview.md)
 - [x] API key usage guide (docs/security/authentication.md, sdks/python/API_KEYS.md)
 - [x] Rate limiting documentation (docs/security/rate-limiting.md)
+- [x] Token revocation documentation (docs/security/authentication.md)
 - [ ] Audit log analysis guide
 - [ ] Production deployment security checklist
 
 ## Current Priority
-**Phase 3: Audit Logging** - Implement comprehensive audit logging for security events.
+**Phase 5: Additional Security Enhancements** - Account lockout, password validation, API key rotation, security headers.
 
 ## Notes
 - All phases follow enterprise-grade security standards

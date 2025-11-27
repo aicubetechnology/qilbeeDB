@@ -419,7 +419,7 @@ pub async fn global_rate_limit(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::security::{UserService, TokenService, AuthConfig, Role, AuditConfig};
+    use crate::security::{UserService, TokenService, AuthConfig, Role, AuditConfig, TokenBlacklist, BlacklistConfig};
     use axum::{
         body::Body,
         http::{Request, header},
@@ -428,9 +428,11 @@ mod tests {
     fn create_test_middleware() -> AuthMiddleware {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let token_blacklist = Arc::new(TokenBlacklist::new(BlacklistConfig::default()));
         let auth_service = Arc::new(AuthService::new(
             user_service.clone(),
             token_service.clone(),
+            token_blacklist,
             AuthConfig::default(),
         ));
         let rbac_service = Arc::new(RbacService::new());

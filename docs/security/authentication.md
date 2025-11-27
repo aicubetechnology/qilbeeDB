@@ -97,6 +97,92 @@ curl -X POST http://localhost:7474/api/v1/auth/logout \
   -H "Authorization: Bearer your-token"
 ```
 
+## Token Revocation
+
+QilbeeDB supports token revocation to immediately invalidate tokens before they expire. This is essential for security scenarios like:
+
+- User logout from all devices
+- Compromised credential response
+- Session termination after permission changes
+- Emergency access revocation
+
+### Revoke a Single Token
+
+Revoke a specific JWT token to immediately invalidate it:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/auth/revoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "eyJhbGc...."
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Token revoked successfully",
+  "jti": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+The `jti` (JWT ID) is returned for audit trail purposes.
+
+### Revoke All Tokens for a User (Admin Only)
+
+Administrators can revoke all tokens for a specific user, forcing them to re-authenticate:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/auth/revoke-all \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "reason": "security_incident"
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "All tokens revoked for user",
+  "user_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+!!! warning "Revoke All Tokens"
+    This operation immediately invalidates ALL active sessions for the user.
+    The user will need to log in again to obtain new tokens.
+
+### Token Blacklist
+
+Revoked tokens are stored in a persistent blacklist that is checked on every authenticated request. The blacklist:
+
+- Persists across server restarts
+- Automatically cleans up expired tokens
+- Uses JWT ID (`jti`) for efficient lookup
+- Supports both individual token and user-wide revocation
+
+### Audit Trail
+
+All token revocation events are logged in the audit system:
+
+| Event Type | Description |
+|------------|-------------|
+| `token_revoked` | Single token was revoked |
+| `all_tokens_revoked` | All tokens for a user were revoked |
+
+Query revocation events:
+
+```bash
+curl -X GET "http://localhost:7474/api/v1/audit?event_type=token_revoked&limit=50" \
+  -H "Authorization: Bearer admin-token"
+```
+
 ## Rate Limiting
 
 All API endpoints are protected by rate limiting to prevent abuse and brute-force attacks.
@@ -112,6 +198,189 @@ For detailed rate limiting configuration and management, see the [Rate Limiting]
     X-RateLimit-Remaining: 95
     X-RateLimit-Reset: 45
     ```
+
+## Account Lockout
+
+QilbeeDB automatically locks accounts after multiple failed login attempts to protect against brute-force attacks.
+
+### How Lockout Works
+
+| Setting | Default Value |
+|---------|---------------|
+| Max failed attempts | 5 |
+| Initial lockout duration | 15 minutes |
+| Lockout multiplier | 2x per subsequent lockout |
+| Maximum lockout duration | 24 hours |
+
+**Progressive Lockout:** Each subsequent lockout doubles in duration, up to 24 hours maximum.
+
+- 1st lockout: 15 minutes
+- 2nd lockout: 30 minutes
+- 3rd lockout: 1 hour
+- 4th lockout: 2 hours
+- ... up to 24 hours
+
+### Failed Login Response
+
+When a login attempt fails, the response includes lockout tracking information:
+
+```json
+{
+  "error": "Invalid username or password",
+  "failed_attempts": 3,
+  "remaining_attempts": 2
+}
+```
+
+### Locked Account Response (HTTP 429)
+
+When an account is locked, login attempts return HTTP 429 Too Many Requests:
+
+```json
+{
+  "error": "Account locked due to too many failed login attempts",
+  "locked": true,
+  "lockout_expires": "2025-01-01T12:15:00Z",
+  "lockout_remaining_seconds": 850
+}
+```
+
+### Admin Lockout Management
+
+Administrators can view and manage locked accounts through the lockout management API.
+
+#### Get All Locked Accounts
+
+```bash
+curl -X GET http://localhost:7474/api/v1/lockouts \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "count": 2,
+  "locked_users": [
+    ["user1", {
+      "locked": true,
+      "failed_attempts": 5,
+      "lockout_count": 1,
+      "lockout_expires": "2025-01-01T12:15:00Z",
+      "lockout_remaining_seconds": 850,
+      "remaining_attempts": 0
+    }],
+    ["user2", {
+      "locked": true,
+      "failed_attempts": 5,
+      "lockout_count": 2,
+      "lockout_expires": "2025-01-01T12:30:00Z",
+      "lockout_remaining_seconds": 1750,
+      "remaining_attempts": 0
+    }]
+  ]
+}
+```
+
+#### Get Lockout Status for a User
+
+```bash
+curl -X GET http://localhost:7474/api/v1/lockouts/{username} \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "username": "user1",
+  "status": {
+    "locked": true,
+    "failed_attempts": 5,
+    "lockout_count": 1,
+    "lockout_expires": "2025-01-01T12:15:00Z",
+    "lockout_remaining_seconds": 850,
+    "remaining_attempts": 0
+  }
+}
+```
+
+#### Manually Lock an Account
+
+Administrators can manually lock an account with a reason:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/lockouts/{username}/lock \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Suspicious activity detected"}'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Account 'user1' has been locked"
+}
+```
+
+#### Unlock an Account
+
+```bash
+curl -X DELETE http://localhost:7474/api/v1/lockouts/{username} \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Account 'user1' has been unlocked"
+}
+```
+
+### Python SDK
+
+```python
+from qilbeedb import QilbeeDB
+
+# Connect as admin
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+
+# Get all locked accounts
+locked = db.get_locked_accounts()
+print(f"Locked accounts: {locked['count']}")
+
+# Get lockout status for a specific user
+status = db.get_lockout_status("user1")
+print(f"User locked: {status['status']['locked']}")
+
+# Manually lock an account
+db.lock_account("user1", reason="Security review")
+
+# Unlock an account
+db.unlock_account("user1")
+```
+
+### Audit Events
+
+Account lockout events are logged in the audit system:
+
+| Event Type | Description |
+|------------|-------------|
+| `account_lockout_triggered` | Account locked after failed attempts |
+| `account_locked` | Admin manually locked an account |
+| `account_unlocked` | Account was unlocked (manual or time-based) |
+
+Query lockout events:
+
+```bash
+curl -X GET "http://localhost:7474/api/v1/audit?event_type=account_lockout_triggered&limit=50" \
+  -H "Authorization: Bearer admin-token"
+```
 
 ## Password Requirements
 

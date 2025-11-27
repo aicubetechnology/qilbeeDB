@@ -182,6 +182,10 @@ Main database client.
 - `get_failed_logins(limit: int) -> List` - Get failed login events
 - `get_user_audit_events(username: str, limit: int) -> List` - Get events for a user
 - `get_security_events(limit: int) -> List` - Get security-related events
+- `get_locked_accounts() -> Dict` - Get all locked accounts (admin only)
+- `get_lockout_status(username: str) -> Dict` - Get lockout status for a user (admin only)
+- `lock_account(username: str, reason: str) -> Dict` - Manually lock an account (admin only)
+- `unlock_account(username: str) -> Dict` - Unlock an account (admin only)
 
 ### Graph
 
@@ -370,6 +374,48 @@ security_events = db.get_security_events(limit=50)
 | API Keys | `api_key_created`, `api_key_revoked`, `api_key_used`, `api_key_validation_failed` |
 | Authorization | `permission_denied`, `access_granted` |
 | Rate Limiting | `rate_limit_exceeded` |
+| Account Lockout | `account_lockout_triggered`, `account_locked`, `account_unlocked` |
+
+## Account Lockout Management (Admin Only)
+
+Monitor and manage locked accounts due to failed login attempts:
+
+```python
+from qilbeedb import QilbeeDB
+
+# Login as admin
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "Admin123!@#")
+
+# Get all locked accounts
+locked = db.get_locked_accounts()
+print(f"Total locked accounts: {locked['count']}")
+for user, status in locked['locked_users']:
+    print(f"  {user}: {status['lockout_remaining_seconds']}s remaining")
+
+# Get lockout status for a specific user
+status = db.get_lockout_status("suspicious_user")
+print(f"User: {status['username']}")
+print(f"  Locked: {status['status']['locked']}")
+print(f"  Failed attempts: {status['status']['failed_attempts']}")
+print(f"  Remaining attempts: {status['status']['remaining_attempts']}")
+print(f"  Lockout count: {status['status']['lockout_count']}")
+
+# Manually lock an account (e.g., suspicious activity)
+result = db.lock_account("suspicious_user", reason="Suspicious activity detected")
+print(f"Lock result: {result['success']}")
+
+# Unlock an account
+result = db.unlock_account("suspicious_user")
+print(f"Unlock result: {result['success']}")
+```
+
+### Lockout Behavior
+
+- **Default max attempts:** 5 failed logins
+- **Initial lockout duration:** 15 minutes
+- **Progressive lockout:** Duration doubles with each subsequent lockout (up to 24 hours)
+- **Automatic unlock:** Accounts unlock automatically after lockout period expires
 
 ## Error Handling
 

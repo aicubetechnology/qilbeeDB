@@ -24,7 +24,8 @@ use tower_http::trace::TraceLayer;
 use crate::security::{
     AuthService, UserService, TokenService, Credentials, AuthConfig,
     RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
-    AuditEventType, AuditResult,
+    AuditEventType, AuditResult, TokenBlacklist, BlacklistConfig, RevocationReason,
+    AccountLockoutService, LockoutConfig,
 };
 
 /// Shared application state
@@ -38,6 +39,7 @@ pub struct AppState {
     pub user_service: Arc<UserService>,
     pub rate_limit_service: Arc<RateLimitService>,
     pub audit_service: Arc<AuditService>,
+    pub lockout_service: Arc<AccountLockoutService>,
     pub auth_middleware: AuthMiddleware,
 }
 
@@ -59,16 +61,23 @@ pub fn create_router(database: Arc<Database>) -> Router {
     // TODO: Replace with proper bootstrap process
     let _ = user_service.create_default_admin("Admin123!@#");
 
+    // Create token blacklist (in-memory for now, can add persistence later)
+    let token_blacklist = Arc::new(TokenBlacklist::new(BlacklistConfig::default()));
+
     let token_service_clone = token_service.clone();
     let auth_service = Arc::new(AuthService::new(
         user_service.clone(),
         token_service,
+        token_blacklist,
         AuthConfig::default(),
     ));
 
     // Create RBAC and Audit services for AuthMiddleware
     let rbac_service = Arc::new(RbacService::new());
     let audit_service = Arc::new(AuditService::new(AuditConfig::default()));
+
+    // Create account lockout service
+    let lockout_service = Arc::new(AccountLockoutService::new(LockoutConfig::default()));
 
     // Create AuthMiddleware for rate limiting
     let auth_middleware = AuthMiddleware {
@@ -87,6 +96,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         user_service: user_service.clone(),
         rate_limit_service,
         audit_service,
+        lockout_service,
         auth_middleware: auth_middleware.clone(),
     };
 
@@ -98,6 +108,8 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/api/v1/auth/login", post(auth_login))
         .route("/api/v1/auth/logout", post(auth_logout))
         .route("/api/v1/auth/refresh", post(auth_refresh))
+        .route("/api/v1/auth/revoke", post(auth_revoke))
+        .route("/api/v1/auth/revoke-all", post(auth_revoke_all))
         // API key management
         .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
         .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
@@ -110,6 +122,10 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/api/v1/rate-limits/:policy_id", get(rate_limit_get).put(rate_limit_update).delete(rate_limit_delete))
         // Audit log query (Admin only)
         .route("/api/v1/audit-logs", get(audit_logs_query))
+        // Account lockout management (Admin only)
+        .route("/api/v1/lockouts", get(lockout_list))
+        .route("/api/v1/lockouts/:username", get(lockout_status).delete(lockout_unlock))
+        .route("/api/v1/lockouts/:username/lock", post(lockout_lock))
         // Graph operations
         .route("/graphs/:name", post(create_graph).delete(delete_graph))
         .route("/graphs/:name/nodes", post(create_node).get(find_nodes))
@@ -881,8 +897,51 @@ struct LoginResponse {
 
 async fn auth_login(
     State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
     Json(request): Json<LoginRequest>,
 ) -> impl IntoResponse {
+    // Extract client IP from X-Forwarded-For header or X-Real-IP
+    let client_ip = headers
+        .get("X-Forwarded-For")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.split(',').next().unwrap_or(s).trim().to_string())
+        .or_else(|| {
+            headers
+                .get("X-Real-IP")
+                .and_then(|v| v.to_str().ok())
+                .map(|s| s.to_string())
+        });
+
+    // Check if account is locked before attempting login
+    if let Err(lockout_status) = state.lockout_service.check_login_allowed(
+        &request.username,
+        client_ip.as_deref(),
+    ) {
+        // Log account lockout event
+        state.audit_service.log_auth_event(
+            AuditEventType::AccountLockoutTriggered,
+            &request.username,
+            AuditResult::Failure,
+            client_ip.clone(),
+            Some(format!(
+                "Account locked. Remaining: {:?}s, Reason: {:?}",
+                lockout_status.lockout_remaining_seconds,
+                lockout_status.lockout_reason
+            )),
+        );
+
+        return (
+            StatusCode::TOO_MANY_REQUESTS,
+            Json(json!({
+                "error": "Account locked due to too many failed login attempts",
+                "locked": true,
+                "lockout_expires": lockout_status.lockout_expires,
+                "lockout_remaining_seconds": lockout_status.lockout_remaining_seconds,
+                "lockout_reason": lockout_status.lockout_reason,
+            })),
+        );
+    }
+
     let credentials = Credentials {
         username: request.username.clone(),
         password: request.password,
@@ -890,12 +949,18 @@ async fn auth_login(
 
     match state.auth_service.login(credentials) {
         Ok(token) => {
+            // Record successful login (resets failed attempt counter)
+            state.lockout_service.record_successful_login(
+                &request.username,
+                client_ip.as_deref(),
+            );
+
             // Log successful login
             state.audit_service.log_auth_event(
                 AuditEventType::Login,
                 &request.username,
                 AuditResult::Success,
-                None,
+                client_ip,
                 None,
             );
 
@@ -912,19 +977,64 @@ async fn auth_login(
             (StatusCode::OK, Json(json!(response)))
         }
         Err(e) => {
-            // Log failed login
+            // Record failed login attempt
+            let lockout_status = state.lockout_service.record_failed_attempt(
+                &request.username,
+                client_ip.as_deref(),
+            );
+
+            // Log failed login with lockout status
+            let details = if lockout_status.locked {
+                Some(format!(
+                    "Account locked after {} failed attempts",
+                    lockout_status.failed_attempts
+                ))
+            } else {
+                Some(format!(
+                    "Failed attempt {}/{}, {} remaining",
+                    lockout_status.failed_attempts,
+                    lockout_status.failed_attempts + lockout_status.remaining_attempts,
+                    lockout_status.remaining_attempts
+                ))
+            };
+
             state.audit_service.log_auth_event(
                 AuditEventType::LoginFailed,
                 &request.username,
                 AuditResult::Failure,
-                None,
-                None,
+                client_ip,
+                details,
             );
 
-            (
-                StatusCode::UNAUTHORIZED,
-                Json(json!({"error": format!("Invalid username or password: {}", e)})),
-            )
+            // If account got locked due to this attempt, log the lockout event
+            if lockout_status.locked {
+                state.audit_service.log_auth_event(
+                    AuditEventType::AccountLocked,
+                    &request.username,
+                    AuditResult::Success,
+                    None,
+                    Some(format!(
+                        "Account locked after {} failed attempts. Lockout expires: {:?}",
+                        lockout_status.failed_attempts,
+                        lockout_status.lockout_expires
+                    )),
+                );
+            }
+
+            // Return error with lockout information
+            let mut response = json!({
+                "error": format!("Invalid username or password: {}", e),
+                "failed_attempts": lockout_status.failed_attempts,
+                "remaining_attempts": lockout_status.remaining_attempts,
+            });
+
+            if lockout_status.locked {
+                response["locked"] = json!(true);
+                response["lockout_expires"] = json!(lockout_status.lockout_expires);
+                response["lockout_remaining_seconds"] = json!(lockout_status.lockout_remaining_seconds);
+            }
+
+            (StatusCode::UNAUTHORIZED, Json(response))
         }
     }
 }
@@ -968,6 +1078,183 @@ async fn auth_refresh(
         Err(e) => (
             StatusCode::UNAUTHORIZED,
             Json(json!({"error": format!("Token refresh failed: {}", e)})),
+        ),
+    }
+}
+
+// ==================== Token Revocation ====================
+
+/// Request to revoke a specific token
+#[derive(Debug, Deserialize)]
+struct RevokeTokenRequest {
+    /// The token to revoke (JWT access token)
+    token: String,
+}
+
+/// Revoke a specific token (logout)
+///
+/// POST /api/v1/auth/revoke
+///
+/// This endpoint allows a user to revoke their own token (logout).
+/// The token to be revoked is provided in the request body.
+/// No authentication header is required - the token being revoked serves as proof of ownership.
+async fn auth_revoke(
+    State(state): State<AppState>,
+    Json(request): Json<RevokeTokenRequest>,
+) -> impl IntoResponse {
+    // Get the token to revoke
+    let token_to_revoke = &request.token;
+
+    // Validate the token and extract claims
+    let claims = match state.auth_service.validate_token_claims(token_to_revoke) {
+        Ok(claims) => claims,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": format!("Invalid token: {}", e)})),
+            );
+        }
+    };
+
+    // Get the expiration time from the token
+    let expires_at = chrono::DateTime::from_timestamp(claims.exp as i64, 0)
+        .unwrap_or_else(|| chrono::Utc::now() + chrono::Duration::hours(1));
+
+    // Revoke the token
+    match state.auth_service.revoke_token(
+        claims.jti.clone(),
+        claims.sub.clone(),
+        claims.username.clone(),
+        expires_at,
+        RevocationReason::Logout,
+    ) {
+        Ok(_) => {
+            // Log the revocation as TokenRevoked (with logout context)
+            state.audit_service.log_event(
+                AuditEventType::TokenRevoked,
+                Some(claims.sub.clone()),
+                Some(claims.username.clone()),
+                "revoke_token".to_string(),
+                format!("jti:{}", claims.jti),
+                AuditResult::Success,
+                None, // IP address can be extracted from request if needed
+                None, // User agent
+                serde_json::json!({
+                    "reason": "logout",
+                    "jti": claims.jti
+                }),
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "Token revoked successfully",
+                    "jti": claims.jti
+                })),
+            )
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to revoke token: {}", e)})),
+        ),
+    }
+}
+
+/// Request to revoke all tokens for a user
+#[derive(Debug, Deserialize)]
+struct RevokeAllTokensRequest {
+    /// User ID whose tokens should be revoked
+    user_id: String,
+    /// Optional reason for revocation
+    reason: Option<String>,
+}
+
+/// Revoke all tokens for a user (Admin only)
+///
+/// POST /api/v1/auth/revoke-all
+/// Requires Admin role
+async fn auth_revoke_all(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Json(request): Json<RevokeAllTokensRequest>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Admin privileges required to revoke all tokens for a user"})),
+            );
+        }
+    };
+
+    // Get the user to validate they exist
+    let user_id = match uuid::Uuid::parse_str(&request.user_id) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            );
+        }
+    };
+
+    let user = match state.user_service.get_user(&crate::security::UserId(user_id)) {
+        Some(user) => user,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "User not found"})),
+            );
+        }
+    };
+
+    // Determine the revocation reason
+    let reason = match request.reason.as_deref() {
+        Some("security_incident") => RevocationReason::SecurityIncident,
+        Some("password_changed") => RevocationReason::PasswordChanged,
+        _ => RevocationReason::AdminRevoke,
+    };
+
+    // Revoke all tokens for the user
+    match state.auth_service.revoke_all_user_tokens(
+        &request.user_id,
+        &user.username,
+        reason.clone(),
+    ) {
+        Ok(count) => {
+            // Log the revocation using AllTokensRevoked event type
+            state.audit_service.log_event(
+                AuditEventType::AllTokensRevoked,
+                Some(request.user_id.clone()),
+                Some(user.username.clone()),
+                "revoke_all_tokens".to_string(),
+                format!("user:{}", request.user_id),
+                AuditResult::Success,
+                None,
+                None,
+                json!({
+                    "reason": reason.to_string(),
+                    "previously_revoked_count": count,
+                    "revoked_by_admin_id": format!("{:?}", admin_id)
+                }),
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "All tokens revoked for user",
+                    "user_id": request.user_id,
+                    "previously_revoked_count": count
+                })),
+            )
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to revoke tokens: {}", e)})),
         ),
     }
 }
@@ -1286,13 +1573,15 @@ fn extract_admin_from_token(
         .strip_prefix("Bearer ")
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
-    match state.token_service.validate_jwt(token) {
-        Ok(claims) => {
-            // Check admin role
-            require_admin(&claims)?;
+    // Use auth_service.validate_token which checks the blacklist
+    match state.auth_service.validate_token(token) {
+        Ok(user) => {
+            // Check if user has Admin role
+            if !user.roles.contains(&super::security::rbac::Role::Admin) {
+                return Err(StatusCode::FORBIDDEN);
+            }
 
-            let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
-            Ok(UserId(uuid))
+            Ok(user.id)
         }
         Err(_) => Err(StatusCode::UNAUTHORIZED),
     }
@@ -2246,6 +2535,157 @@ async fn audit_logs_query(
             "limit": limit
         })),
     )
+}
+
+// ==================== Account Lockout Handlers ====================
+
+/// List all locked accounts (Admin only)
+async fn lockout_list(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    let locked_users = state.lockout_service.get_locked_users();
+
+    (
+        StatusCode::OK,
+        Json(json!({
+            "locked_users": locked_users,
+            "count": locked_users.len()
+        })),
+    )
+}
+
+/// Get lockout status for a specific user (Admin only)
+async fn lockout_status(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Path(username): Path<String>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    let status = state.lockout_service.get_user_status(&username);
+
+    (
+        StatusCode::OK,
+        Json(json!({
+            "username": username,
+            "status": status
+        })),
+    )
+}
+
+#[derive(Debug, Deserialize)]
+struct LockUserRequest {
+    reason: Option<String>,
+}
+
+/// Manually lock a user account (Admin only)
+async fn lockout_lock(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Path(username): Path<String>,
+    Json(request): Json<LockUserRequest>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    state.lockout_service.lock_user(&username, request.reason.clone());
+
+    // Log the manual lock event
+    state.audit_service.log_auth_event(
+        AuditEventType::AccountLocked,
+        &username,
+        AuditResult::Success,
+        None,
+        Some(format!(
+            "Manually locked by admin {:?}. Reason: {:?}",
+            admin_id,
+            request.reason
+        )),
+    );
+
+    (
+        StatusCode::OK,
+        Json(json!({
+            "success": true,
+            "message": format!("Account '{}' has been locked", username)
+        })),
+    )
+}
+
+/// Manually unlock a user account (Admin only)
+async fn lockout_unlock(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Path(username): Path<String>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    let was_locked = state.lockout_service.unlock_user(&username);
+
+    if was_locked {
+        // Log the unlock event
+        state.audit_service.log_auth_event(
+            AuditEventType::AccountUnlocked,
+            &username,
+            AuditResult::Success,
+            None,
+            Some(format!("Unlocked by admin {:?}", admin_id)),
+        );
+
+        (
+            StatusCode::OK,
+            Json(json!({
+                "success": true,
+                "message": format!("Account '{}' has been unlocked", username)
+            })),
+        )
+    } else {
+        (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "success": false,
+                "error": format!("No lockout record found for user '{}'", username)
+            })),
+        )
+    }
 }
 
 // ==================== Helper Functions ====================

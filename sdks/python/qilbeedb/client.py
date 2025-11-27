@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 
 from .graph import Graph
 from .memory import AgentMemory, MemoryConfig
-from .exceptions import ConnectionError, AuthenticationError
+from .exceptions import ConnectionError, AuthenticationError, PermissionDeniedError
 from .auth import JWTAuth, APIKeyAuth, BasicAuth
 
 
@@ -858,6 +858,231 @@ class QilbeeDB:
         events = unauthorized.get("events", []) + forbidden.get("events", [])
         events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         return events[:limit]
+
+    # Token Revocation Methods
+
+    def revoke_token(self, token: str) -> Dict[str, Any]:
+        """
+        Revoke a specific JWT token.
+
+        This adds the token to the blacklist, making it immediately invalid
+        even if it hasn't expired yet. Useful for logout or when a token
+        is compromised.
+
+        Args:
+            token: The JWT access token to revoke
+
+        Returns:
+            Dictionary with 'success' and 'message' keys
+
+        Raises:
+            AuthenticationError: If not authenticated
+
+        Example:
+            >>> # Revoke the current token (logout)
+            >>> db.revoke_token(current_token)
+            {'success': True, 'message': 'Token revoked successfully', 'jti': '...'}
+        """
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/auth/revoke"),
+            json={"token": token},
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        response.raise_for_status()
+        return response.json()
+
+    def revoke_all_tokens(self, user_id: str, reason: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Revoke all tokens for a specific user (admin only).
+
+        This invalidates all existing tokens for the user, forcing them to
+        re-authenticate. Useful for security incidents, password changes,
+        or when a user is compromised.
+
+        Args:
+            user_id: The user ID whose tokens should be revoked
+            reason: Optional reason for revocation (for audit purposes)
+
+        Returns:
+            Dictionary with 'success', 'message', and 'user_id' keys
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> # Revoke all tokens for a compromised user
+            >>> db.revoke_all_tokens(user_id, reason="security_incident")
+            {'success': True, 'message': 'All tokens revoked for user', 'user_id': '...'}
+        """
+        payload = {"user_id": user_id}
+        if reason:
+            payload["reason"] = reason
+
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/auth/revoke-all"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+        if response.status_code == 403:
+            raise PermissionDeniedError("Admin role required to revoke all tokens for a user")
+
+        response.raise_for_status()
+        return response.json()
+
+    # Account Lockout Methods
+
+    def get_locked_accounts(self) -> Dict[str, Any]:
+        """
+        Get list of all locked user accounts (admin only).
+
+        Returns:
+            Dictionary with 'locked_users' list and 'count'
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> locked = db.get_locked_accounts()
+            >>> print(f"Found {locked['count']} locked accounts")
+        """
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/lockouts"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+        if response.status_code == 403:
+            raise PermissionDeniedError("Admin role required to view locked accounts")
+
+        response.raise_for_status()
+        return response.json()
+
+    def get_lockout_status(self, username: str) -> Dict[str, Any]:
+        """
+        Get lockout status for a specific user (admin only).
+
+        Args:
+            username: The username to check
+
+        Returns:
+            Dictionary with 'username' and 'status' containing:
+                - locked: Boolean indicating if account is locked
+                - failed_attempts: Number of failed login attempts
+                - remaining_attempts: Attempts remaining before lockout
+                - lockout_expires: ISO timestamp when lockout expires (if locked)
+                - lockout_remaining_seconds: Seconds until lockout expires
+                - lockout_count: Total times account has been locked
+                - lockout_reason: Reason for lockout (if manually locked)
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> status = db.get_lockout_status("user123")
+            >>> if status['status']['locked']:
+            ...     print(f"Account locked, expires in {status['status']['lockout_remaining_seconds']}s")
+        """
+        response = self.session.get(
+            urljoin(self.base_url, f"/api/v1/lockouts/{username}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+        if response.status_code == 403:
+            raise PermissionDeniedError("Admin role required to view lockout status")
+
+        response.raise_for_status()
+        return response.json()
+
+    def lock_account(self, username: str, reason: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Manually lock a user account (admin only).
+
+        Locks an account immediately, preventing login until unlocked.
+        Manual locks do not auto-expire and must be explicitly unlocked.
+
+        Args:
+            username: The username to lock
+            reason: Optional reason for locking (for audit purposes)
+
+        Returns:
+            Dictionary with 'success' and 'message' keys
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> db.lock_account("suspicious_user", reason="security_investigation")
+            {'success': True, 'message': "Account 'suspicious_user' has been locked"}
+        """
+        payload = {}
+        if reason:
+            payload["reason"] = reason
+
+        response = self.session.post(
+            urljoin(self.base_url, f"/api/v1/lockouts/{username}/lock"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+        if response.status_code == 403:
+            raise PermissionDeniedError("Admin role required to lock accounts")
+
+        response.raise_for_status()
+        return response.json()
+
+    def unlock_account(self, username: str) -> Dict[str, Any]:
+        """
+        Manually unlock a user account (admin only).
+
+        Unlocks a locked account, allowing the user to login again.
+        Also resets the failed attempt counter.
+
+        Args:
+            username: The username to unlock
+
+        Returns:
+            Dictionary with 'success' and 'message' keys
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> db.unlock_account("user123")
+            {'success': True, 'message': "Account 'user123' has been unlocked"}
+        """
+        response = self.session.delete(
+            urljoin(self.base_url, f"/api/v1/lockouts/{username}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+        if response.status_code == 403:
+            raise PermissionDeniedError("Admin role required to unlock accounts")
+
+        if response.status_code == 404:
+            return response.json()  # Return error message about no lockout record
+
+        response.raise_for_status()
+        return response.json()
 
     def close(self):
         """Close the database connection."""
