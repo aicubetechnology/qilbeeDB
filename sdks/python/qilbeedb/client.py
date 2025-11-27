@@ -859,6 +859,83 @@ class QilbeeDB:
         events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         return events[:limit]
 
+    # Token Revocation Methods
+
+    def revoke_token(self, token: str) -> Dict[str, Any]:
+        """
+        Revoke a specific JWT token.
+
+        This adds the token to the blacklist, making it immediately invalid
+        even if it hasn't expired yet. Useful for logout or when a token
+        is compromised.
+
+        Args:
+            token: The JWT access token to revoke
+
+        Returns:
+            Dictionary with 'success' and 'message' keys
+
+        Raises:
+            AuthenticationError: If not authenticated
+
+        Example:
+            >>> # Revoke the current token (logout)
+            >>> db.revoke_token(current_token)
+            {'success': True, 'message': 'Token revoked successfully', 'jti': '...'}
+        """
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/auth/revoke"),
+            json={"token": token},
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        response.raise_for_status()
+        return response.json()
+
+    def revoke_all_tokens(self, user_id: str, reason: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Revoke all tokens for a specific user (admin only).
+
+        This invalidates all existing tokens for the user, forcing them to
+        re-authenticate. Useful for security incidents, password changes,
+        or when a user is compromised.
+
+        Args:
+            user_id: The user ID whose tokens should be revoked
+            reason: Optional reason for revocation (for audit purposes)
+
+        Returns:
+            Dictionary with 'success', 'message', and 'user_id' keys
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> # Revoke all tokens for a compromised user
+            >>> db.revoke_all_tokens(user_id, reason="security_incident")
+            {'success': True, 'message': 'All tokens revoked for user', 'user_id': '...'}
+        """
+        payload = {"user_id": user_id}
+        if reason:
+            payload["reason"] = reason
+
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/auth/revoke-all"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
     def close(self):
         """Close the database connection."""
         if self.session:

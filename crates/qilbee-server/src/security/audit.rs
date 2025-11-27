@@ -47,6 +47,10 @@ pub enum AuditEventType {
     // Rate limiting events
     RateLimitExceeded,
 
+    // Token revocation events
+    TokenRevoked,
+    AllTokensRevoked,
+
     // System events
     SystemStartup,
     SystemShutdown,
@@ -74,6 +78,8 @@ impl std::fmt::Display for AuditEventType {
             AuditEventType::PermissionDenied => write!(f, "permission_denied"),
             AuditEventType::AccessGranted => write!(f, "access_granted"),
             AuditEventType::RateLimitExceeded => write!(f, "rate_limit_exceeded"),
+            AuditEventType::TokenRevoked => write!(f, "token_revoked"),
+            AuditEventType::AllTokensRevoked => write!(f, "all_tokens_revoked"),
             AuditEventType::SystemStartup => write!(f, "system_startup"),
             AuditEventType::SystemShutdown => write!(f, "system_shutdown"),
             AuditEventType::ConfigurationChanged => write!(f, "configuration_changed"),

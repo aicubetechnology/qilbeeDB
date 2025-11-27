@@ -2,6 +2,7 @@
 
 use crate::security::{User, UserService, TokenService};
 use super::token::AuthToken;
+use super::token_blacklist::{TokenBlacklist, RevocationReason};
 use qilbee_core::Result;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, RwLock};
@@ -113,6 +114,7 @@ impl Default for AuthConfig {
 pub struct AuthService {
     user_service: Arc<UserService>,
     token_service: Arc<TokenService>,
+    token_blacklist: Arc<TokenBlacklist>,
     sessions: Arc<RwLock<HashMap<String, Session>>>,
     login_attempts: Arc<RwLock<HashMap<String, LoginAttempt>>>,
     config: AuthConfig,
@@ -123,11 +125,13 @@ impl AuthService {
     pub fn new(
         user_service: Arc<UserService>,
         token_service: Arc<TokenService>,
+        token_blacklist: Arc<TokenBlacklist>,
         config: AuthConfig,
     ) -> Self {
         Self {
             user_service,
             token_service,
+            token_blacklist,
             sessions: Arc::new(RwLock::new(HashMap::new())),
             login_attempts: Arc::new(RwLock::new(HashMap::new())),
             config,
@@ -183,6 +187,18 @@ impl AuthService {
         // Validate JWT and extract claims
         let claims = self.token_service.validate_jwt(token)?;
 
+        // Check if token is blacklisted
+        if self.token_blacklist.is_revoked(&claims.jti) {
+            return Err(qilbee_core::Error::Internal("Token has been revoked".to_string()));
+        }
+
+        // Check if token was invalidated by a "revoke all" operation
+        let token_issued_at = DateTime::from_timestamp(claims.iat as i64, 0)
+            .ok_or_else(|| qilbee_core::Error::Internal("Invalid token issue time".to_string()))?;
+        if self.token_blacklist.is_invalidated_by_revoke_all(&claims.sub, token_issued_at) {
+            return Err(qilbee_core::Error::Internal("Token has been invalidated".to_string()));
+        }
+
         // Check if session exists and is valid
         let mut sessions = self.sessions.write().unwrap();
         if let Some(session) = sessions.get_mut(&claims.sub) {
@@ -208,6 +224,11 @@ impl AuthService {
             .ok_or_else(|| qilbee_core::Error::Internal("User not found".to_string()))
     }
 
+    /// Validate JWT token and return claims (for revocation)
+    pub fn validate_token_claims(&self, token: &str) -> Result<super::token::Claims> {
+        self.token_service.validate_jwt(token)
+    }
+
     /// Validate API key and return user
     pub fn validate_api_key(&self, api_key: &str) -> Result<User> {
         let user_id = self.token_service.validate_api_key(api_key)?;
@@ -219,6 +240,44 @@ impl AuthService {
     pub fn logout(&self, user_id: &str) -> Result<()> {
         self.sessions.write().unwrap().remove(user_id);
         Ok(())
+    }
+
+    /// Revoke a specific token
+    ///
+    /// The token will no longer be valid for authentication.
+    pub fn revoke_token(
+        &self,
+        token_id: String,
+        user_id: String,
+        username: String,
+        expires_at: DateTime<Utc>,
+        reason: RevocationReason,
+    ) -> Result<()> {
+        self.token_blacklist.revoke(token_id, user_id, username, expires_at, reason)
+    }
+
+    /// Revoke all tokens for a user
+    ///
+    /// All tokens issued before this call will be invalidated.
+    pub fn revoke_all_user_tokens(
+        &self,
+        user_id: &str,
+        username: &str,
+        reason: RevocationReason,
+    ) -> Result<usize> {
+        // Also remove the session
+        self.sessions.write().unwrap().remove(user_id);
+        self.token_blacklist.revoke_all_for_user(user_id, username, reason)
+    }
+
+    /// Get the token blacklist (for HTTP endpoints)
+    pub fn token_blacklist(&self) -> &Arc<TokenBlacklist> {
+        &self.token_blacklist
+    }
+
+    /// Cleanup expired blacklist entries
+    pub fn cleanup_blacklist(&self) -> usize {
+        self.token_blacklist.cleanup_expired()
     }
 
     /// Refresh JWT token
@@ -311,15 +370,21 @@ impl AuthService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::security::{Role, UserId};
+    use crate::security::{Role, UserId, BlacklistConfig};
+
+    fn create_test_blacklist() -> Arc<TokenBlacklist> {
+        Arc::new(TokenBlacklist::new(BlacklistConfig::default()))
+    }
 
     #[test]
     fn test_login_success() {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
         let auth_service = AuthService::new(
             user_service.clone(),
             token_service,
+            blacklist,
             AuthConfig::default(),
         );
 
@@ -343,9 +408,11 @@ mod tests {
     fn test_login_failure() {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
         let auth_service = AuthService::new(
             user_service.clone(),
             token_service,
+            blacklist,
             AuthConfig::default(),
         );
 
@@ -368,9 +435,11 @@ mod tests {
     fn test_token_validation() {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
         let auth_service = AuthService::new(
             user_service.clone(),
             token_service,
+            blacklist,
             AuthConfig::default(),
         );
 
@@ -396,11 +465,13 @@ mod tests {
     fn test_rate_limiting() {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
         let mut config = AuthConfig::default();
         config.max_login_attempts = 3;
         let auth_service = AuthService::new(
             user_service.clone(),
             token_service,
+            blacklist,
             config,
         );
 
@@ -433,9 +504,11 @@ mod tests {
     fn test_logout() {
         let user_service = Arc::new(UserService::new());
         let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
         let auth_service = AuthService::new(
             user_service.clone(),
             token_service,
+            blacklist,
             AuthConfig::default(),
         );
 
@@ -460,5 +533,95 @@ mod tests {
 
         // Verify session is removed
         assert_eq!(auth_service.active_session_count(), 0);
+    }
+
+    #[test]
+    fn test_token_revocation() {
+        let user_service = Arc::new(UserService::new());
+        let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
+        let auth_service = AuthService::new(
+            user_service.clone(),
+            token_service,
+            blacklist,
+            AuthConfig::default(),
+        );
+
+        // Create test user
+        user_service
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .unwrap();
+
+        // Login
+        let credentials = Credentials {
+            username: "testuser".to_string(),
+            password: "password123".to_string(),
+        };
+
+        let token = auth_service.login(credentials).unwrap();
+
+        // Token should be valid
+        let user = auth_service.validate_token(&token.access_token).unwrap();
+        assert_eq!(user.username, "testuser");
+
+        // Get claims for revocation
+        let claims = auth_service.validate_token_claims(&token.access_token).unwrap();
+        let expires_at = DateTime::from_timestamp(claims.exp as i64, 0).unwrap();
+
+        // Revoke the token
+        auth_service.revoke_token(
+            claims.jti.clone(),
+            claims.sub.clone(),
+            claims.username.clone(),
+            expires_at,
+            RevocationReason::Logout,
+        ).unwrap();
+
+        // Token should now be invalid
+        let result = auth_service.validate_token(&token.access_token);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("revoked"));
+    }
+
+    #[test]
+    fn test_revoke_all_user_tokens() {
+        let user_service = Arc::new(UserService::new());
+        let token_service = Arc::new(TokenService::new("test_secret".to_string()));
+        let blacklist = create_test_blacklist();
+        let auth_service = AuthService::new(
+            user_service.clone(),
+            token_service,
+            blacklist,
+            AuthConfig::default(),
+        );
+
+        // Create test user
+        let created_user = user_service
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .unwrap();
+
+        // Login
+        let credentials = Credentials {
+            username: "testuser".to_string(),
+            password: "password123".to_string(),
+        };
+
+        let token = auth_service.login(credentials).unwrap();
+
+        // Token should be valid
+        let user = auth_service.validate_token(&token.access_token).unwrap();
+        assert_eq!(user.username, "testuser");
+
+        // Revoke all tokens for the user
+        auth_service.revoke_all_user_tokens(
+            &created_user.id.0.to_string(),
+            &created_user.username,
+            RevocationReason::AdminRevoke,
+        ).unwrap();
+
+        // Token should now be invalid
+        let result = auth_service.validate_token(&token.access_token);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("invalidated"));
     }
 }

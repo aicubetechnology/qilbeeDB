@@ -33,19 +33,21 @@
 - [x] Rate limit policy management API (CRUD for policies)
 - [x] Documentation added to MkDocs (security/rate-limiting.md)
 
-### Phase 3: Audit Logging ⏳
-- [ ] Create AuditLog struct and storage (append-only log file)
-- [ ] Log authentication events:
-  - [ ] User login/logout
-  - [ ] Failed login attempts
-  - [ ] API key creation/revocation
-- [ ] Log authorization events:
-  - [ ] User creation/modification/deletion
-  - [ ] Role changes
-  - [ ] Permission denials (403 responses)
-- [ ] Add GET /api/v1/audit-logs endpoint (admin only)
-- [ ] Add audit log rotation/retention policy
-- [ ] Test audit logging
+### Phase 3: Audit Logging (Completed) ✅
+- [x] Create AuditLog struct and storage (append-only log file)
+- [x] Log authentication events:
+  - [x] User login/logout
+  - [x] Failed login attempts
+  - [x] API key creation/revocation
+- [x] Log authorization events:
+  - [x] User creation/modification/deletion
+  - [x] Role changes
+  - [x] Permission denials (403 responses)
+- [x] Add GET /api/v1/audit-logs endpoint (admin only)
+- [x] Add audit log rotation/retention policy
+- [x] Test audit logging (Python tests in python-test/test_audit_logging.py, python-test/test_sdk_audit_logs.py)
+- [x] Python SDK audit log methods (get_audit_logs, get_failed_logins, get_user_audit_events, get_security_events)
+- [x] Documentation (docs/security/audit.md, sdks/python/README.md, docs/client-libraries/python.md)
 
 ### Phase 4: Token Revocation ⏳
 - [ ] Implement token blacklist (in-memory + persistent storage)
@@ -71,7 +73,7 @@
 - [ ] Production deployment security checklist
 
 ## Current Priority
-**Phase 3: Audit Logging** - Implement comprehensive audit logging for security events.
+**Phase 4: Token Revocation** - Implement token blacklist for revoking JWT access tokens.
 
 ## Notes
 - All phases follow enterprise-grade security standards

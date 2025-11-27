@@ -97,6 +97,92 @@ curl -X POST http://localhost:7474/api/v1/auth/logout \
   -H "Authorization: Bearer your-token"
 ```
 
+## Token Revocation
+
+QilbeeDB supports token revocation to immediately invalidate tokens before they expire. This is essential for security scenarios like:
+
+- User logout from all devices
+- Compromised credential response
+- Session termination after permission changes
+- Emergency access revocation
+
+### Revoke a Single Token
+
+Revoke a specific JWT token to immediately invalidate it:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/auth/revoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "eyJhbGc...."
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Token revoked successfully",
+  "jti": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+The `jti` (JWT ID) is returned for audit trail purposes.
+
+### Revoke All Tokens for a User (Admin Only)
+
+Administrators can revoke all tokens for a specific user, forcing them to re-authenticate:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/auth/revoke-all \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "reason": "security_incident"
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "All tokens revoked for user",
+  "user_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+!!! warning "Revoke All Tokens"
+    This operation immediately invalidates ALL active sessions for the user.
+    The user will need to log in again to obtain new tokens.
+
+### Token Blacklist
+
+Revoked tokens are stored in a persistent blacklist that is checked on every authenticated request. The blacklist:
+
+- Persists across server restarts
+- Automatically cleans up expired tokens
+- Uses JWT ID (`jti`) for efficient lookup
+- Supports both individual token and user-wide revocation
+
+### Audit Trail
+
+All token revocation events are logged in the audit system:
+
+| Event Type | Description |
+|------------|-------------|
+| `token_revoked` | Single token was revoked |
+| `all_tokens_revoked` | All tokens for a user were revoked |
+
+Query revocation events:
+
+```bash
+curl -X GET "http://localhost:7474/api/v1/audit?event_type=token_revoked&limit=50" \
+  -H "Authorization: Bearer admin-token"
+```
+
 ## Rate Limiting
 
 All API endpoints are protected by rate limiting to prevent abuse and brute-force attacks.

@@ -24,7 +24,7 @@ use tower_http::trace::TraceLayer;
 use crate::security::{
     AuthService, UserService, TokenService, Credentials, AuthConfig,
     RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
-    AuditEventType, AuditResult,
+    AuditEventType, AuditResult, TokenBlacklist, BlacklistConfig, RevocationReason,
 };
 
 /// Shared application state
@@ -59,10 +59,14 @@ pub fn create_router(database: Arc<Database>) -> Router {
     // TODO: Replace with proper bootstrap process
     let _ = user_service.create_default_admin("Admin123!@#");
 
+    // Create token blacklist (in-memory for now, can add persistence later)
+    let token_blacklist = Arc::new(TokenBlacklist::new(BlacklistConfig::default()));
+
     let token_service_clone = token_service.clone();
     let auth_service = Arc::new(AuthService::new(
         user_service.clone(),
         token_service,
+        token_blacklist,
         AuthConfig::default(),
     ));
 
@@ -98,6 +102,8 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/api/v1/auth/login", post(auth_login))
         .route("/api/v1/auth/logout", post(auth_logout))
         .route("/api/v1/auth/refresh", post(auth_refresh))
+        .route("/api/v1/auth/revoke", post(auth_revoke))
+        .route("/api/v1/auth/revoke-all", post(auth_revoke_all))
         // API key management
         .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
         .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
@@ -972,6 +978,160 @@ async fn auth_refresh(
     }
 }
 
+// ==================== Token Revocation ====================
+
+/// Request to revoke a specific token
+#[derive(Debug, Deserialize)]
+struct RevokeTokenRequest {
+    /// The token to revoke (JWT access token)
+    token: String,
+}
+
+/// Revoke a specific token
+///
+/// POST /api/v1/auth/revoke
+/// Requires authentication (Bearer token or API key)
+async fn auth_revoke(
+    State(state): State<AppState>,
+    Json(request): Json<RevokeTokenRequest>,
+) -> impl IntoResponse {
+    // Get the token to revoke
+    let token_to_revoke = &request.token;
+
+    // Validate the token and extract claims
+    let claims = match state.auth_service.validate_token_claims(token_to_revoke) {
+        Ok(claims) => claims,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": format!("Invalid token: {}", e)})),
+            );
+        }
+    };
+
+    // Get the expiration time from the token
+    let expires_at = chrono::DateTime::from_timestamp(claims.exp as i64, 0)
+        .unwrap_or_else(|| chrono::Utc::now() + chrono::Duration::hours(1));
+
+    // Revoke the token
+    match state.auth_service.revoke_token(
+        claims.jti.clone(),
+        claims.sub.clone(),
+        claims.username.clone(),
+        expires_at,
+        RevocationReason::Logout,
+    ) {
+        Ok(_) => {
+            // Log the revocation
+            state.audit_service.log_auth_event(
+                AuditEventType::Logout,
+                &claims.username,
+                AuditResult::Success,
+                None, // IP address can be extracted from request if needed
+                None, // User agent
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "Token revoked successfully",
+                    "jti": claims.jti
+                })),
+            )
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to revoke token: {}", e)})),
+        ),
+    }
+}
+
+/// Request to revoke all tokens for a user
+#[derive(Debug, Deserialize)]
+struct RevokeAllTokensRequest {
+    /// User ID whose tokens should be revoked
+    user_id: String,
+    /// Optional reason for revocation
+    reason: Option<String>,
+}
+
+/// Revoke all tokens for a user (Admin only)
+///
+/// POST /api/v1/auth/revoke-all
+/// Requires Admin role
+async fn auth_revoke_all(
+    State(state): State<AppState>,
+    Json(request): Json<RevokeAllTokensRequest>,
+) -> impl IntoResponse {
+    // Get the user to validate they exist
+    let user_id = match uuid::Uuid::parse_str(&request.user_id) {
+        Ok(id) => id,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid user ID format"})),
+            );
+        }
+    };
+
+    let user = match state.user_service.get_user(&crate::security::UserId(user_id)) {
+        Some(user) => user,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "User not found"})),
+            );
+        }
+    };
+
+    // Determine the revocation reason
+    let reason = match request.reason.as_deref() {
+        Some("security_incident") => RevocationReason::SecurityIncident,
+        Some("password_changed") => RevocationReason::PasswordChanged,
+        _ => RevocationReason::AdminRevoke,
+    };
+
+    // Revoke all tokens for the user
+    match state.auth_service.revoke_all_user_tokens(
+        &request.user_id,
+        &user.username,
+        reason.clone(),
+    ) {
+        Ok(count) => {
+            // Log the revocation
+            state.audit_service.log_event(
+                AuditEventType::TokenRevoked,
+                Some(request.user_id.clone()),
+                Some(user.username.clone()),
+                "revoke_all_tokens".to_string(),
+                format!("user:{}", request.user_id),
+                AuditResult::Success,
+                None,
+                None,
+                json!({
+                    "reason": reason.to_string(),
+                    "previously_revoked_count": count
+                }),
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "All tokens revoked for user",
+                    "user_id": request.user_id,
+                    "previously_revoked_count": count
+                })),
+            )
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": format!("Failed to revoke tokens: {}", e)})),
+        ),
+    }
+}
+
 // ==================== API Key Management ====================
 
 #[derive(Debug, Deserialize)]
@@ -1286,13 +1446,15 @@ fn extract_admin_from_token(
         .strip_prefix("Bearer ")
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
-    match state.token_service.validate_jwt(token) {
-        Ok(claims) => {
-            // Check admin role
-            require_admin(&claims)?;
+    // Use auth_service.validate_token which checks the blacklist
+    match state.auth_service.validate_token(token) {
+        Ok(user) => {
+            // Check if user has Admin role
+            if !user.roles.contains(&super::security::rbac::Role::Admin) {
+                return Err(StatusCode::FORBIDDEN);
+            }
 
-            let uuid = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
-            Ok(UserId(uuid))
+            Ok(user.id)
         }
         Err(_) => Err(StatusCode::UNAUTHORIZED),
     }

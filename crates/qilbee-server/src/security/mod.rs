@@ -11,6 +11,7 @@ pub mod audit;
 pub mod token;
 pub mod bootstrap;
 pub mod rate_limit;
+pub mod token_blacklist;
 
 pub use auth::{AuthService, Credentials, AuthConfig, Session};
 pub use rbac::{Permission, Role, RbacService};
@@ -20,3 +21,4 @@ pub use audit::{AuditLog, AuditService, AuditEvent, AuditEventType, AuditResult,
 pub use token::{TokenService, ApiKey, AuthToken, Claims};
 pub use bootstrap::{BootstrapService, BootstrapState};
 pub use rate_limit::{RateLimitService, RateLimitPolicy, RateLimitKey, RateLimitInfo, EndpointType, PolicyId};
+pub use token_blacklist::{TokenBlacklist, BlacklistConfig, BlacklistedToken, RevocationReason};
