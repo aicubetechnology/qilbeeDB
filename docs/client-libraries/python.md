@@ -346,22 +346,90 @@ recommendations = graph.query("""
 """, {"user_id": "U001"})
 ```
 
+## Audit Logging
+
+Query and monitor security events (requires Admin role):
+
+```python
+from qilbeedb import QilbeeDB
+
+# Login as admin
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "Admin123!@#")
+
+# Query all audit logs
+result = db.get_audit_logs(limit=100)
+print(f"Total events: {result['count']}")
+for event in result['events']:
+    print(f"{event['event_time']}: {event['event_type']} - {event['result']}")
+```
+
+### Filtering Audit Logs
+
+```python
+# Filter by event type
+login_events = db.get_audit_logs(event_type="login", limit=50)
+
+# Filter by username
+user_events = db.get_audit_logs(username="admin", limit=50)
+
+# Filter by result
+failed_events = db.get_audit_logs(result="unauthorized", limit=50)
+
+# Filter by time range
+recent_events = db.get_audit_logs(
+    start_time="2025-01-01T00:00:00Z",
+    end_time="2025-12-31T23:59:59Z",
+    limit=100
+)
+```
+
+### Convenience Methods
+
+```python
+# Get recent failed login attempts
+failed_logins = db.get_failed_logins(limit=20)
+for event in failed_logins:
+    print(f"Failed login from {event['ip_address']} at {event['event_time']}")
+
+# Get all events for a specific user
+user_activity = db.get_user_audit_events("alice", limit=50)
+
+# Get security-relevant events (unauthorized/forbidden)
+security_events = db.get_security_events(limit=50)
+```
+
+### Audit Event Types
+
+| Category | Event Types |
+|----------|-------------|
+| Authentication | `login`, `logout`, `login_failed`, `token_refresh`, `token_refresh_failed` |
+| User Management | `user_created`, `user_updated`, `user_deleted`, `password_changed` |
+| Role Management | `role_assigned`, `role_removed` |
+| API Keys | `api_key_created`, `api_key_revoked`, `api_key_used`, `api_key_validation_failed` |
+| Authorization | `permission_denied`, `access_granted` |
+| Rate Limiting | `rate_limit_exceeded` |
+
 ## Error Handling
 
 ```python
 from qilbeedb.exceptions import (
     ConnectionError,
     QueryError,
-    NodeNotFoundError
+    NodeNotFoundError,
+    AuthenticationError
 )
 
 try:
     db = QilbeeDB("http://localhost:7474")
+    db.login("admin", "password")
     graph = db.graph("my_graph")
 
     # Your operations here
     node = graph.get_node(123)
 
+except AuthenticationError as e:
+    print(f"Authentication failed: {e}")
 except ConnectionError as e:
     print(f"Failed to connect: {e}")
 except QueryError as e:
