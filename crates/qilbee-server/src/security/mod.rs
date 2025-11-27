@@ -16,7 +16,7 @@ pub use auth::{AuthService, Credentials, AuthConfig, Session};
 pub use rbac::{Permission, Role, RbacService};
 pub use user::{User, UserService, UserId};
 pub use middleware::{AuthMiddleware, require_auth, require_permission, optional_auth, get_user, rate_limit, global_rate_limit};
-pub use audit::{AuditLog, AuditService, AuditEvent, AuditResult, AuditFilter, AuditConfig};
+pub use audit::{AuditLog, AuditService, AuditEvent, AuditEventType, AuditResult, AuditFilter, AuditConfig};
 pub use token::{TokenService, ApiKey, AuthToken, Claims};
 pub use bootstrap::{BootstrapService, BootstrapState};
 pub use rate_limit::{RateLimitService, RateLimitPolicy, RateLimitKey, RateLimitInfo, EndpointType, PolicyId};

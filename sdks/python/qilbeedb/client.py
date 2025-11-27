@@ -714,6 +714,151 @@ class QilbeeDB:
 
         return response.status_code == 200
 
+    # Audit Log Methods (Admin Only)
+
+    def get_audit_logs(
+        self,
+        event_type: Optional[str] = None,
+        user_id: Optional[str] = None,
+        username: Optional[str] = None,
+        result: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        limit: int = 100
+    ) -> Dict[str, Any]:
+        """
+        Query audit logs (admin only).
+
+        Args:
+            event_type: Filter by event type (e.g., 'login', 'login_failed', 'user_created')
+            user_id: Filter by user ID
+            username: Filter by username
+            result: Filter by result ('success', 'failure', 'unauthorized', 'forbidden')
+            ip_address: Filter by IP address
+            start_time: Filter events after this ISO8601 timestamp
+            end_time: Filter events before this ISO8601 timestamp
+            limit: Maximum events to return (default: 100, max: 1000)
+
+        Returns:
+            Dictionary with 'events', 'count', and 'limit' keys
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> logs = db.get_audit_logs(event_type="login_failed", limit=50)
+            >>> print(f"Found {logs['count']} failed login attempts")
+            >>> for event in logs['events']:
+            ...     print(f"{event['timestamp']}: {event['username']} - {event['result']}")
+        """
+        params = {"limit": limit}
+        if event_type:
+            params["event_type"] = event_type
+        if user_id:
+            params["user_id"] = user_id
+        if username:
+            params["username"] = username
+        if result:
+            params["result"] = result
+        if ip_address:
+            params["ip_address"] = ip_address
+        if start_time:
+            params["start_time"] = start_time
+        if end_time:
+            params["end_time"] = end_time
+
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/audit-logs"),
+            params=params,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+        if response.status_code == 403:
+            raise AuthenticationError("Admin role required to access audit logs")
+
+        response.raise_for_status()
+        return response.json()
+
+    def get_failed_logins(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Get failed login attempts (admin only).
+
+        Convenience method for querying login_failed events.
+
+        Args:
+            limit: Maximum events to return (default: 100)
+
+        Returns:
+            List of failed login audit events
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> failed = db.get_failed_logins(limit=10)
+            >>> for event in failed:
+            ...     print(f"{event['timestamp']}: {event.get('username', 'unknown')}")
+        """
+        result = self.get_audit_logs(event_type="login_failed", limit=limit)
+        return result.get("events", [])
+
+    def get_user_audit_events(self, username: str, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Get audit events for a specific user (admin only).
+
+        Args:
+            username: Username to filter by
+            limit: Maximum events to return (default: 100)
+
+        Returns:
+            List of audit events for the user
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> events = db.get_user_audit_events("alice", limit=50)
+            >>> for event in events:
+            ...     print(f"{event['event_type']}: {event['result']}")
+        """
+        result = self.get_audit_logs(username=username, limit=limit)
+        return result.get("events", [])
+
+    def get_security_events(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Get security-relevant events (admin only).
+
+        Returns events with 'unauthorized' or 'forbidden' results,
+        which indicate potential security issues.
+
+        Args:
+            limit: Maximum events to return (default: 100)
+
+        Returns:
+            List of security-relevant audit events
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> security_events = db.get_security_events(limit=50)
+            >>> for event in security_events:
+            ...     print(f"{event['event_type']}: {event['ip_address']}")
+        """
+        # Get unauthorized events
+        unauthorized = self.get_audit_logs(result="unauthorized", limit=limit)
+        # Get forbidden events
+        forbidden = self.get_audit_logs(result="forbidden", limit=limit)
+
+        # Combine and sort by timestamp (most recent first)
+        events = unauthorized.get("events", []) + forbidden.get("events", [])
+        events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+        return events[:limit]
+
     def close(self):
         """Close the database connection."""
         if self.session:

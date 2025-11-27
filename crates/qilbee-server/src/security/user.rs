@@ -102,7 +102,7 @@ impl User {
 }
 
 /// Hash password using Argon2
-fn hash_password(password: &str) -> Result<String> {
+pub fn hash_password(password: &str) -> Result<String> {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
 
@@ -115,7 +115,7 @@ fn hash_password(password: &str) -> Result<String> {
 }
 
 /// Verify password against hash
-fn verify_password(password: &str, hash: &str) -> Result<bool> {
+pub fn verify_password(password: &str, hash: &str) -> Result<bool> {
     let parsed_hash = PasswordHash::new(hash)
         .map_err(|e| qilbee_core::Error::Internal(format!("Invalid password hash: {}", e)))?;
 

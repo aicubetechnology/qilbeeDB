@@ -178,6 +178,10 @@ Main database client.
 - `is_authenticated() -> bool` - Check if authenticated
 - `set_api_key(api_key: str) -> None` - Switch to API key authentication
 - `refresh_token() -> str` - Manually refresh JWT access token
+- `get_audit_logs(**filters) -> Dict` - Query audit logs (admin only)
+- `get_failed_logins(limit: int) -> List` - Get failed login events
+- `get_user_audit_events(username: str, limit: int) -> List` - Get events for a user
+- `get_security_events(limit: int) -> List` - Get security-related events
 
 ### Graph
 
@@ -316,6 +320,56 @@ memory = db.agent_memory(
     episodic_retention_days=30
 )
 ```
+
+## Audit Logging (Admin Only)
+
+Query and monitor security events for compliance and debugging:
+
+```python
+from qilbeedb import QilbeeDB
+
+# Login as admin
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "Admin123!@#")
+
+# Query all audit logs
+result = db.get_audit_logs(limit=100)
+print(f"Total events: {result['count']}")
+for event in result['events']:
+    print(f"{event['event_time']}: {event['event_type']} - {event['result']}")
+
+# Filter by event type
+login_events = db.get_audit_logs(event_type="login", limit=50)
+
+# Filter by username
+user_events = db.get_audit_logs(username="admin", limit=50)
+
+# Filter by result
+failed_events = db.get_audit_logs(result="unauthorized", limit=50)
+
+# Filter by time range
+recent_events = db.get_audit_logs(
+    start_time="2025-01-01T00:00:00Z",
+    end_time="2025-12-31T23:59:59Z",
+    limit=100
+)
+
+# Convenience methods
+failed_logins = db.get_failed_logins(limit=20)
+user_activity = db.get_user_audit_events("admin", limit=50)
+security_events = db.get_security_events(limit=50)
+```
+
+### Audit Event Types
+
+| Category | Event Types |
+|----------|-------------|
+| Authentication | `login`, `logout`, `login_failed`, `token_refresh`, `token_refresh_failed` |
+| User Management | `user_created`, `user_updated`, `user_deleted`, `password_changed` |
+| Role Management | `role_assigned`, `role_removed` |
+| API Keys | `api_key_created`, `api_key_revoked`, `api_key_used`, `api_key_validation_failed` |
+| Authorization | `permission_denied`, `access_granted` |
+| Rate Limiting | `rate_limit_exceeded` |
 
 ## Error Handling
 
