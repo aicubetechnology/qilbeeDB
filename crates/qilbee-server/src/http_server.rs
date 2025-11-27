@@ -1,7 +1,7 @@
 //! HTTP/REST API server implementation using Axum
 
 use axum::{
-    extract::{Path, Query as AxumQuery, State},
+    extract::{Path, Query as AxumQuery, State, FromRef},
     http::StatusCode,
     response::{IntoResponse, Json},
     routing::{delete, get, post, put},
@@ -21,7 +21,10 @@ use std::time::Instant;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
-use crate::security::{AuthService, UserService, TokenService, Credentials, AuthConfig};
+use crate::security::{
+    AuthService, UserService, TokenService, Credentials, AuthConfig,
+    RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
+};
 
 /// Shared application state
 #[derive(Clone)]
@@ -32,6 +35,15 @@ pub struct AppState {
     pub auth_service: Arc<AuthService>,
     pub token_service: Arc<TokenService>,
     pub user_service: Arc<UserService>,
+    pub rate_limit_service: Arc<RateLimitService>,
+    pub auth_middleware: AuthMiddleware,
+}
+
+/// Implement FromRef to allow extracting AuthMiddleware from AppState in middleware
+impl FromRef<AppState> for AuthMiddleware {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth_middleware.clone()
+    }
 }
 
 /// Create HTTP server router
@@ -39,6 +51,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
     // Initialize security services
     let user_service = Arc::new(UserService::new());
     let token_service = Arc::new(TokenService::new("qilbee_jwt_secret_change_in_production".to_string()));
+    let rate_limit_service = Arc::new(RateLimitService::new());
 
     // Create bootstrap admin user for testing
     // TODO: Replace with proper bootstrap process
@@ -51,6 +64,18 @@ pub fn create_router(database: Arc<Database>) -> Router {
         AuthConfig::default(),
     ));
 
+    // Create RBAC and Audit services for AuthMiddleware
+    let rbac_service = Arc::new(RbacService::new());
+    let audit_service = Arc::new(AuditService::new(AuditConfig::default()));
+
+    // Create AuthMiddleware for rate limiting
+    let auth_middleware = AuthMiddleware {
+        auth_service: auth_service.clone(),
+        rbac_service,
+        audit_service,
+        rate_limit_service: rate_limit_service.clone(),
+    };
+
     let state = AppState {
         database,
         start_time: Instant::now(),
@@ -58,38 +83,34 @@ pub fn create_router(database: Arc<Database>) -> Router {
         auth_service,
         token_service: token_service_clone,
         user_service: user_service.clone(),
+        rate_limit_service,
+        auth_middleware: auth_middleware.clone(),
     };
 
+    // Build router with all routes and apply global rate limiting
     Router::new()
-        // Health check
+        // Health check (rate limiting skipped in global middleware)
         .route("/health", get(health_check))
-        // Authentication endpoints
+        // Auth endpoints
         .route("/api/v1/auth/login", post(auth_login))
         .route("/api/v1/auth/logout", post(auth_logout))
         .route("/api/v1/auth/refresh", post(auth_refresh))
-        // API Key management endpoints
+        // API key management
         .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
         .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
-        // User management endpoints
+        // User management
         .route("/api/v1/users", post(user_create).get(user_list))
         .route("/api/v1/users/:user_id", get(user_get).put(user_update).delete(user_delete))
         .route("/api/v1/users/:user_id/roles", put(user_update_roles))
-        // Graph management
-        .route("/graphs/:name", post(create_graph))
-        .route("/graphs/:name", delete(delete_graph))
-        // Node operations
-        .route("/graphs/:name/nodes", post(create_node))
-        .route("/graphs/:name/nodes", get(find_nodes))
-        .route("/graphs/:name/nodes/:id", get(get_node))
-        .route("/graphs/:name/nodes/:id", put(update_node))
-        .route("/graphs/:name/nodes/:id", delete(delete_node))
-        // Relationship operations
+        // Rate limit policy management
+        .route("/api/v1/rate-limits", post(rate_limit_create).get(rate_limit_list))
+        .route("/api/v1/rate-limits/:policy_id", get(rate_limit_get).put(rate_limit_update).delete(rate_limit_delete))
+        // Graph operations
+        .route("/graphs/:name", post(create_graph).delete(delete_graph))
+        .route("/graphs/:name/nodes", post(create_node).get(find_nodes))
+        .route("/graphs/:name/nodes/:id", get(get_node).put(update_node).delete(delete_node))
         .route("/graphs/:name/relationships", post(create_relationship))
-        .route(
-            "/graphs/:name/nodes/:id/relationships",
-            get(get_relationships),
-        )
-        // Query execution
+        .route("/graphs/:name/nodes/:id/relationships", get(get_relationships))
         .route("/graphs/:name/query", post(execute_query))
         // Memory operations
         .route("/memory/:agent_id/episodes", post(store_episode))
@@ -100,6 +121,9 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/memory/:agent_id/consolidate", post(consolidate_memory))
         .route("/memory/:agent_id/forget", post(forget_memory))
         .route("/memory/:agent_id", delete(clear_memory))
+        // Apply global rate limiting middleware (determines endpoint type from path)
+        // Uses from_fn_with_state for proper state access in middleware
+        .layer(axum::middleware::from_fn_with_state(auth_middleware, global_rate_limit))
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(state)
@@ -1563,6 +1587,284 @@ async fn user_update_roles(
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!({"error": format!("Failed to update user roles: {}", e)})),
+        ),
+    }
+}
+
+// ==================== Rate Limit Policy Management Endpoints ====================
+
+use crate::security::{RateLimitPolicy, PolicyId, EndpointType};
+
+/// Request/response DTOs for rate limit policy management
+#[derive(Debug, Deserialize)]
+struct CreateRateLimitPolicyRequest {
+    name: String,
+    endpoint_type: EndpointType,
+    max_requests: u32,
+    window_secs: u64,
+    enabled: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct UpdateRateLimitPolicyRequest {
+    name: Option<String>,
+    max_requests: Option<u32>,
+    window_secs: Option<u64>,
+    enabled: Option<bool>,
+}
+
+#[derive(Debug, Serialize)]
+struct RateLimitPolicyResponse {
+    id: String,
+    name: String,
+    endpoint_type: EndpointType,
+    max_requests: u32,
+    window_secs: u64,
+    enabled: bool,
+    created_at: String,
+    updated_at: String,
+    created_by: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ListRateLimitPoliciesResponse {
+    policies: Vec<RateLimitPolicyResponse>,
+}
+
+impl From<RateLimitPolicy> for RateLimitPolicyResponse {
+    fn from(policy: RateLimitPolicy) -> Self {
+        Self {
+            id: policy.id.0.to_string(),
+            name: policy.name,
+            endpoint_type: policy.endpoint_type,
+            max_requests: policy.max_requests,
+            window_secs: policy.window_secs,
+            enabled: policy.enabled,
+            created_at: policy.created_at.to_rfc3339(),
+            updated_at: policy.updated_at.to_rfc3339(),
+            created_by: policy.created_by,
+        }
+    }
+}
+
+/// Create a new rate limit policy (Admin only)
+async fn rate_limit_create(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Json(request): Json<CreateRateLimitPolicyRequest>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Create policy
+    let policy = RateLimitPolicy {
+        id: PolicyId::new(),
+        name: request.name,
+        endpoint_type: request.endpoint_type,
+        max_requests: request.max_requests,
+        window_secs: request.window_secs,
+        enabled: request.enabled,
+        created_at: chrono::Utc::now(),
+        updated_at: chrono::Utc::now(),
+        created_by: admin_id.0.to_string(),
+    };
+
+    let policy_id = state.rate_limit_service.create_policy(policy.clone());
+
+    // Get the stored policy to return the correct ID
+    let stored_policy = state.rate_limit_service.get_policy(policy_id).unwrap();
+    let response = RateLimitPolicyResponse::from(stored_policy);
+
+    (StatusCode::CREATED, Json(json!(response)))
+}
+
+/// List all rate limit policies (Admin only)
+async fn rate_limit_list(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    let policies = state.rate_limit_service.list_policies();
+    let policy_responses: Vec<RateLimitPolicyResponse> = policies
+        .into_iter()
+        .map(RateLimitPolicyResponse::from)
+        .collect();
+
+    (
+        StatusCode::OK,
+        Json(json!(ListRateLimitPoliciesResponse { policies: policy_responses })),
+    )
+}
+
+/// Get a specific rate limit policy (Admin only)
+async fn rate_limit_get(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(policy_id_str): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Parse policy ID
+    let policy_uuid = match Uuid::parse_str(&policy_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid policy ID format"})),
+            )
+        }
+    };
+    let policy_id = PolicyId(policy_uuid);
+
+    match state.rate_limit_service.get_policy(policy_id) {
+        Some(policy) => {
+            let response = RateLimitPolicyResponse::from(policy);
+            (StatusCode::OK, Json(json!(response)))
+        }
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "Rate limit policy not found"})),
+        ),
+    }
+}
+
+/// Update a rate limit policy (Admin only)
+async fn rate_limit_update(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(policy_id_str): axum::extract::Path<String>,
+    Json(request): Json<UpdateRateLimitPolicyRequest>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Parse policy ID
+    let policy_uuid = match Uuid::parse_str(&policy_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid policy ID format"})),
+            )
+        }
+    };
+    let policy_id = PolicyId(policy_uuid);
+
+    // Get existing policy
+    let mut policy = match state.rate_limit_service.get_policy(policy_id) {
+        Some(p) => p,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "Rate limit policy not found"})),
+            )
+        }
+    };
+
+    // Update fields
+    if let Some(name) = request.name {
+        policy.name = name;
+    }
+    if let Some(max_requests) = request.max_requests {
+        policy.max_requests = max_requests;
+    }
+    if let Some(window_secs) = request.window_secs {
+        policy.window_secs = window_secs;
+    }
+    if let Some(enabled) = request.enabled {
+        policy.enabled = enabled;
+    }
+
+    match state.rate_limit_service.update_policy(policy_id, policy.clone()) {
+        Some(_) => {
+            let response = RateLimitPolicyResponse::from(policy);
+            (StatusCode::OK, Json(json!(response)))
+        }
+        None => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": "Failed to update rate limit policy"})),
+        ),
+    }
+}
+
+/// Delete a rate limit policy (Admin only)
+async fn rate_limit_delete(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    axum::extract::Path(policy_id_str): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    use uuid::Uuid;
+
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Parse policy ID
+    let policy_uuid = match Uuid::parse_str(&policy_id_str) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Invalid policy ID format"})),
+            )
+        }
+    };
+    let policy_id = PolicyId(policy_uuid);
+
+    match state.rate_limit_service.delete_policy(policy_id) {
+        Some(_) => (
+            StatusCode::OK,
+            Json(json!({"success": true, "message": "Rate limit policy deleted"})),
+        ),
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "Rate limit policy not found"})),
         ),
     }
 }

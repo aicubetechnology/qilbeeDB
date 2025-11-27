@@ -8,7 +8,12 @@ QilbeeDB includes enterprise-grade security features designed for production dep
 - **JWT (JSON Web Tokens)** - RS256 algorithm for stateless authentication
 - **API Keys** - SHA-256 hashed tokens with custom prefixes
 - **Session Management** - Configurable expiration and inactivity timeouts
-- **Rate Limiting** - Brute-force protection with automatic account lockout
+
+### Rate Limiting
+- **Token Bucket Algorithm** - Smooth rate control with burst allowance
+- **Per-Endpoint Policies** - Different limits for different operations
+- **Global Protection** - Applied to all 24 API endpoints
+- **Dynamic Management** - Modify limits at runtime via API
 
 ### Authorization
 - **Role-Based Access Control (RBAC)** - Fine-grained permission system
@@ -40,6 +45,14 @@ QilbeeDB includes enterprise-grade security features designed for production dep
 ┌─────────────────────────────────────────────────────────┐
 │                    HTTP/Bolt Request                     │
 └──────────────────────┬──────────────────────────────────┘
+                       │
+                       ▼
+           ┌───────────────────────┐
+           │  Rate Limiting        │
+           │  - Token Bucket Check │
+           │  - Per-Endpoint Policy│
+           │  - 429 if exceeded    │
+           └───────────┬───────────┘
                        │
                        ▼
            ┌───────────────────────┐
@@ -76,17 +89,23 @@ QilbeeDB includes enterprise-grade security features designed for production dep
 - Configurable bind addresses
 - Port-based access control
 
-### Layer 2: Authentication
+### Layer 2: Rate Limiting
+- Token bucket algorithm for smooth traffic control
+- Per-endpoint rate limit policies
+- User and IP-based tracking
+- Automatic 429 response when exceeded
+
+### Layer 3: Authentication
 - Multiple authentication methods (JWT, API Keys)
 - Token expiration and refresh
 - Session timeout management
 
-### Layer 3: Authorization
+### Layer 4: Authorization
 - Role-based permission checking
 - Resource-level access control
 - Operation-specific permissions
 
-### Layer 4: Audit
+### Layer 5: Audit
 - Comprehensive event logging
 - Bi-temporal audit trail
 - Tamper-evident records
@@ -106,7 +125,8 @@ QilbeeDB includes enterprise-grade security features designed for production dep
 1. **[Bootstrap Setup](bootstrap.md)** - Initial admin account creation
 2. **[Authentication](authentication.md)** - Configure auth methods
 3. **[Authorization](authorization.md)** - Set up RBAC
-4. **[Audit Logging](audit.md)** - Enable audit trails
+4. **[Rate Limiting](rate-limiting.md)** - Configure rate limits
+5. **[Audit Logging](audit.md)** - Enable audit trails
 
 ## Security Best Practices
 
@@ -145,9 +165,21 @@ security:
   session_duration_secs: 86400  # 24 hours
   inactive_timeout_mins: 30
 
-  # Rate limiting
-  max_login_attempts: 5
-  lockout_duration_mins: 15
+  # Rate limiting (global protection for all endpoints)
+  rate_limiting:
+    enabled: true
+    login:
+      max_requests: 100
+      window_secs: 60
+    api_key_creation:
+      max_requests: 100
+      window_secs: 60
+    user_management:
+      max_requests: 1000
+      window_secs: 60
+    general_api:
+      max_requests: 100000
+      window_secs: 60
 
   # Audit logging
   audit:
@@ -173,4 +205,5 @@ export QILBEEDB_ADMIN_USERNAME=admin
 - [Bootstrap & Initial Setup](bootstrap.md) - Set up your first admin account
 - [Authentication Guide](authentication.md) - Configure authentication methods
 - [Authorization (RBAC)](authorization.md) - Set up roles and permissions
+- [Rate Limiting](rate-limiting.md) - Configure rate limit policies
 - [Audit Logging](audit.md) - Enable and query audit logs

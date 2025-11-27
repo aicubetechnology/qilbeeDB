@@ -350,5 +350,6 @@ Common issues:
 ## Next Steps
 
 - [Authentication](authentication.md) - Configure auth methods
+- [Rate Limiting](rate-limiting.md) - Configure rate limit policies
 - [Audit Logging](audit.md) - Track permission usage
 - [Security Overview](overview.md) - Complete security guide

@@ -117,6 +117,7 @@ nav:
     - Bootstrap & Initial Setup: security/bootstrap.md
     - Authentication: security/authentication.md
     - Authorization (RBAC): security/authorization.md
+    - Rate Limiting: security/rate-limiting.md
     - Audit Logging: security/audit.md
   - Operations:
     - Deployment: operations/deployment.md

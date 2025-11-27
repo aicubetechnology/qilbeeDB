@@ -8,7 +8,7 @@ use axum::{
 };
 use serde_json::json;
 use std::sync::Arc;
-use super::{AuthService, RbacService, Permission, User, AuditService, AuditResult};
+use super::{AuthService, RbacService, Permission, User, AuditService, AuditResult, RateLimitService, EndpointType, RateLimitKey};
 
 /// Shared authentication middleware state
 #[derive(Clone)]
@@ -16,6 +16,7 @@ pub struct AuthMiddleware {
     pub auth_service: Arc<AuthService>,
     pub rbac_service: Arc<RbacService>,
     pub audit_service: Arc<AuditService>,
+    pub rate_limit_service: Arc<RateLimitService>,
 }
 
 impl AuthMiddleware {
@@ -23,11 +24,13 @@ impl AuthMiddleware {
         auth_service: Arc<AuthService>,
         rbac_service: Arc<RbacService>,
         audit_service: Arc<AuditService>,
+        rate_limit_service: Arc<RateLimitService>,
     ) -> Self {
         Self {
             auth_service,
             rbac_service,
             audit_service,
+            rate_limit_service,
         }
     }
 }
@@ -250,6 +253,149 @@ pub fn get_user(req: &Request) -> Option<&User> {
     req.extensions().get::<User>()
 }
 
+/// Rate limiting middleware
+///
+/// Checks rate limits for the specified endpoint type using IP address or user ID
+/// Returns 429 Too Many Requests if limit exceeded with rate limit headers
+pub async fn rate_limit(
+    endpoint_type: EndpointType,
+    State(middleware): State<AuthMiddleware>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let headers = req.headers();
+
+    // Determine rate limit key (prefer user ID over IP)
+    let rate_limit_key = if let Some(user) = req.extensions().get::<User>() {
+        RateLimitKey::from_user_id(user.id.0.to_string())
+    } else {
+        // Fall back to IP address
+        let ip = extract_ip(headers).unwrap_or_else(|| "unknown".to_string());
+        RateLimitKey::from_ip(ip)
+    };
+
+    // Check rate limit
+    let rate_limit_info = middleware.rate_limit_service.check(endpoint_type.clone(), rate_limit_key);
+
+    if !rate_limit_info.allowed {
+        // Rate limit exceeded - return 429 with headers
+        let mut response = Json(json!({
+            "error": "Too Many Requests",
+            "message": format!("Rate limit exceeded for {:?}", endpoint_type),
+            "limit": rate_limit_info.limit,
+            "remaining": rate_limit_info.remaining,
+            "reset_in_seconds": rate_limit_info.reset
+        })).into_response();
+
+        // Add rate limit headers
+        let headers = response.headers_mut();
+        headers.insert("X-RateLimit-Limit", rate_limit_info.limit.to_string().parse().unwrap());
+        headers.insert("X-RateLimit-Remaining", rate_limit_info.remaining.to_string().parse().unwrap());
+        headers.insert("X-RateLimit-Reset", rate_limit_info.reset.to_string().parse().unwrap());
+
+        *response.status_mut() = StatusCode::TOO_MANY_REQUESTS;
+
+        return response;
+    }
+
+    // Rate limit OK - add headers and continue
+    let mut response = next.run(req).await;
+    let headers = response.headers_mut();
+    headers.insert("X-RateLimit-Limit", rate_limit_info.limit.to_string().parse().unwrap());
+    headers.insert("X-RateLimit-Remaining", rate_limit_info.remaining.to_string().parse().unwrap());
+    headers.insert("X-RateLimit-Reset", rate_limit_info.reset.to_string().parse().unwrap());
+
+    response
+}
+
+/// Determine endpoint type from request path
+fn determine_endpoint_type(path: &str) -> EndpointType {
+    // Login endpoint - most restrictive
+    if path == "/api/v1/auth/login" {
+        return EndpointType::Login;
+    }
+
+    // API key management
+    if path.starts_with("/api/v1/api-keys") {
+        return EndpointType::ApiKeyCreation;
+    }
+
+    // User management
+    if path.starts_with("/api/v1/users") {
+        return EndpointType::UserManagement;
+    }
+
+    // Everything else is general API
+    EndpointType::GeneralApi
+}
+
+/// Global rate limiting middleware that determines endpoint type from the request path
+///
+/// This middleware should be applied globally and will automatically route to the
+/// correct rate limit policy based on the request path.
+/// Uses from_fn_with_state pattern for proper middleware integration.
+pub async fn global_rate_limit(
+    State(middleware): State<AuthMiddleware>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let path = req.uri().path().to_string();
+
+    tracing::debug!("Global rate limit middleware called for path: {}", path);
+
+    // Skip rate limiting for health check
+    if path == "/health" {
+        return next.run(req).await;
+    }
+
+    let headers = req.headers();
+
+    // Determine endpoint type from path
+    let endpoint_type = determine_endpoint_type(&path);
+
+    // Determine rate limit key (prefer user ID over IP)
+    let rate_limit_key = if let Some(user) = req.extensions().get::<User>() {
+        RateLimitKey::from_user_id(user.id.0.to_string())
+    } else {
+        // Fall back to IP address
+        let ip = extract_ip(headers).unwrap_or_else(|| "unknown".to_string());
+        RateLimitKey::from_ip(ip)
+    };
+
+    // Check rate limit
+    let rate_limit_info = middleware.rate_limit_service.check(endpoint_type.clone(), rate_limit_key);
+
+    if !rate_limit_info.allowed {
+        // Rate limit exceeded - return 429 with headers
+        let mut response = Json(json!({
+            "error": "Too Many Requests",
+            "message": format!("Rate limit exceeded for {:?}", endpoint_type),
+            "limit": rate_limit_info.limit,
+            "remaining": rate_limit_info.remaining,
+            "reset_in_seconds": rate_limit_info.reset
+        })).into_response();
+
+        // Add rate limit headers
+        let headers = response.headers_mut();
+        headers.insert("X-RateLimit-Limit", rate_limit_info.limit.to_string().parse().unwrap());
+        headers.insert("X-RateLimit-Remaining", rate_limit_info.remaining.to_string().parse().unwrap());
+        headers.insert("X-RateLimit-Reset", rate_limit_info.reset.to_string().parse().unwrap());
+
+        *response.status_mut() = StatusCode::TOO_MANY_REQUESTS;
+
+        return response;
+    }
+
+    // Rate limit OK - add headers and continue
+    let mut response = next.run(req).await;
+    let headers = response.headers_mut();
+    headers.insert("X-RateLimit-Limit", rate_limit_info.limit.to_string().parse().unwrap());
+    headers.insert("X-RateLimit-Remaining", rate_limit_info.remaining.to_string().parse().unwrap());
+    headers.insert("X-RateLimit-Reset", rate_limit_info.reset.to_string().parse().unwrap());
+
+    response
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -269,6 +415,7 @@ mod tests {
         ));
         let rbac_service = Arc::new(RbacService::new());
         let audit_service = Arc::new(AuditService::new(AuditConfig::default()));
+        let rate_limit_service = Arc::new(RateLimitService::new());
 
         // Create test user
         user_service
@@ -279,7 +426,7 @@ mod tests {
             )
             .unwrap();
 
-        AuthMiddleware::new(auth_service, rbac_service, audit_service)
+        AuthMiddleware::new(auth_service, rbac_service, audit_service, rate_limit_service)
     }
 
     #[tokio::test]

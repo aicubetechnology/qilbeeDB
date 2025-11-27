@@ -19,16 +19,19 @@
 - [x] Update Python SDK documentation with API key examples
 - [x] Version bump to 0.2.0
 
-### Phase 2: Rate Limiting ⏳
-- [ ] Implement token bucket rate limiter in Rust
-- [ ] Add rate limiting middleware to Axum router
-- [ ] Configure limits for different endpoint types:
-  - [ ] Login endpoint: 5 requests/minute per IP
-  - [ ] API key creation: 10 requests/hour per user
-  - [ ] General API: 1000 requests/hour per user/API key
-- [ ] Add rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
-- [ ] Return 429 Too Many Requests when limit exceeded
-- [ ] Test rate limiting with Python script
+### Phase 2: Rate Limiting (Completed) ✅
+- [x] Implement token bucket rate limiter in Rust (rate_limit.rs)
+- [x] Add rate limiting middleware to Axum router (global_rate_limit middleware)
+- [x] Configure limits for different endpoint types:
+  - [x] Login endpoint: 100 requests/minute per IP
+  - [x] API key creation: 100 requests/minute per user
+  - [x] User management: 1000 requests/minute per user
+  - [x] General API: 100,000 requests/minute per user/API key
+- [x] Add rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset)
+- [x] Return 429 Too Many Requests when limit exceeded
+- [x] Test rate limiting with Python script (24/24 endpoints verified)
+- [x] Rate limit policy management API (CRUD for policies)
+- [x] Documentation added to MkDocs (security/rate-limiting.md)
 
 ### Phase 3: Audit Logging ⏳
 - [ ] Create AuditLog struct and storage (append-only log file)
@@ -61,14 +64,14 @@
 - [ ] Security headers (HSTS, CSP, X-Frame-Options, etc.)
 
 ### Phase 6: Documentation 📝
-- [ ] Security best practices guide
-- [ ] API key usage guide
-- [ ] Rate limiting documentation
+- [x] Security best practices guide (docs/security/overview.md)
+- [x] API key usage guide (docs/security/authentication.md, sdks/python/API_KEYS.md)
+- [x] Rate limiting documentation (docs/security/rate-limiting.md)
 - [ ] Audit log analysis guide
 - [ ] Production deployment security checklist
 
 ## Current Priority
-**Phase 1: Python SDK Update** - Add API key authentication support to match the new server capabilities.
+**Phase 3: Audit Logging** - Implement comprehensive audit logging for security events.
 
 ## Notes
 - All phases follow enterprise-grade security standards

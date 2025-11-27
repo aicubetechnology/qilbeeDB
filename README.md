@@ -277,6 +277,7 @@ Comprehensive documentation is available at:
 - [Python SDK](https://docs.qilbeedb.io/client-libraries/python/)
 - [Cypher Query Language](https://docs.qilbeedb.io/cypher/introduction/)
 - [Agent Memory](https://docs.qilbeedb.io/agent-memory/overview/)
+- [Security](https://docs.qilbeedb.io/security/overview/)
 - [Architecture](https://docs.qilbeedb.io/architecture/overview/)
 - [API Reference](https://docs.qilbeedb.io/api/http-api/)
 
@@ -325,7 +326,7 @@ qilbeeDB/
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Please read our [https://docs.qilbeedb.io/getting-started/installation/) for details on:
+We welcome contributions from the community! Please read our [Contributing Guide](https://docs.qilbeedb.io/contributing/setup/) for details on:
 
 - Development setup
 - Code style guidelines
@@ -344,7 +345,32 @@ We welcome contributions from the community! Please read our [https://docs.qilbe
 
 ## 🔒 Security
 
-Security is a top priority for QilbeeDB. If you discover a security vulnerability, please email contact@aicube.ca instead of using the issue tracker.
+QilbeeDB includes enterprise-grade security features:
+
+### Authentication
+- **JWT (JSON Web Tokens)** - RS256 algorithm for stateless authentication
+- **API Keys** - Long-lived tokens for applications and services
+- **Session Management** - Configurable expiration and inactivity timeouts
+
+### Authorization (RBAC)
+- **Role-Based Access Control** - Fine-grained permission system
+- **5 Predefined Roles** - Read, Developer, Analyst, Admin, SuperAdmin
+- **30+ Permissions** - Granular control over all operations
+- **Custom Roles** - Create roles with specific permission sets
+
+### Rate Limiting
+- **Token Bucket Algorithm** - Smooth rate control with burst allowance
+- **Per-Endpoint Policies** - Different limits for different operations
+- **Global Protection** - Applied to all API endpoints
+- **Dynamic Management** - Modify limits at runtime via API
+
+### Password Security
+- **Argon2id Hashing** - Memory-hard algorithm resistant to GPU attacks
+- **Strong Password Requirements** - Enforced complexity rules
+
+For complete security documentation, see our [Security Guide](https://docs.qilbeedb.io/security/overview/).
+
+If you discover a security vulnerability, please email contact@aicube.ca instead of using the issue tracker.
 
 ## 📊 Benchmarks
 
@@ -366,6 +392,9 @@ See our [benchmark documentation](https://docs.qilbeedb.io/operations/performanc
 - [x] HTTP REST API
 - [x] Bolt protocol support
 - [x] Python SDK
+- [x] Enterprise security (JWT, API Keys, RBAC)
+- [x] Rate limiting with token bucket algorithm
+- [ ] Audit logging
 - [ ] Distributed clustering
 - [ ] Graph algorithms library
 - [ ] Real-time streaming

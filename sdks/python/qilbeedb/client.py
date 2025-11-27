@@ -268,6 +268,452 @@ class QilbeeDB:
 
         return self._auth_handler.refresh_access_token()
 
+    # User Management Methods
+
+    def create_user(self, username: str, password: str, email: Optional[str] = None,
+                    roles: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Create a new user (admin only).
+
+        Args:
+            username: Username for the new user
+            password: Password for the new user
+            email: Email address for the new user (optional)
+            roles: List of roles (Admin, Developer, DataScientist, Agent, Read)
+
+        Returns:
+            Created user information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        payload = {
+            "username": username,
+            "password": password,
+            "roles": roles or ["Read"]
+        }
+        if email:
+            payload["email"] = email
+
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/users"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def list_users(self) -> List[Dict[str, Any]]:
+        """
+        List all users (admin only).
+
+        Returns:
+            List of user information dictionaries
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/users"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json().get("users", [])
+
+    def get_user(self, user_id: str) -> Dict[str, Any]:
+        """
+        Get user by ID (admin only).
+
+        Args:
+            user_id: User UUID
+
+        Returns:
+            User information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        response = self.session.get(
+            urljoin(self.base_url, f"/api/v1/users/{user_id}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def update_user(self, user_id: str, password: Optional[str] = None,
+                    roles: Optional[List[str]] = None) -> Dict[str, Any]:
+        """
+        Update user information (admin only).
+
+        Args:
+            user_id: User UUID
+            password: New password (optional)
+            roles: New roles list (optional)
+
+        Returns:
+            Updated user information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        payload = {}
+        if password:
+            payload["password"] = password
+        if roles:
+            payload["roles"] = roles
+
+        response = self.session.put(
+            urljoin(self.base_url, f"/api/v1/users/{user_id}"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def update_user_roles(self, user_id: str, roles: List[str]) -> Dict[str, Any]:
+        """
+        Update user roles (admin only).
+
+        This is a separate method because the server uses a dedicated endpoint
+        for role updates at PUT /api/v1/users/{user_id}/roles.
+
+        Args:
+            user_id: User UUID
+            roles: New roles list
+
+        Returns:
+            Updated user information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        response = self.session.put(
+            urljoin(self.base_url, f"/api/v1/users/{user_id}/roles"),
+            json={"roles": roles},
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def delete_user(self, user_id: str) -> bool:
+        """
+        Delete user (admin only).
+
+        Args:
+            user_id: User UUID
+
+        Returns:
+            True if deleted successfully
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+        """
+        response = self.session.delete(
+            urljoin(self.base_url, f"/api/v1/users/{user_id}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        return response.status_code == 200
+
+    # API Key Management Methods
+
+    def create_api_key(self, name: str) -> Dict[str, Any]:
+        """
+        Create a new API key.
+
+        Args:
+            name: Name/description for the API key
+
+        Returns:
+            Dictionary with 'id', 'key', 'name', and 'created_at'
+
+        Raises:
+            AuthenticationError: If not authenticated
+        """
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/api-keys"),
+            json={"name": name},
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        response.raise_for_status()
+        return response.json()
+
+    def list_api_keys(self) -> List[Dict[str, Any]]:
+        """
+        List all API keys for the current user.
+
+        Returns:
+            List of API key information (without the actual key values)
+
+        Raises:
+            AuthenticationError: If not authenticated
+        """
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/api-keys"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        response.raise_for_status()
+        return response.json().get("api_keys", [])
+
+    def delete_api_key(self, key_id: str) -> bool:
+        """
+        Delete an API key.
+
+        Args:
+            key_id: API key ID (UUID)
+
+        Returns:
+            True if deleted successfully
+
+        Raises:
+            AuthenticationError: If not authenticated
+        """
+        response = self.session.delete(
+            urljoin(self.base_url, f"/api/v1/api-keys/{key_id}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        return response.status_code == 200
+
+    # Rate Limit Policy Management Methods (Admin Only)
+
+    def create_rate_limit_policy(
+        self,
+        name: str,
+        endpoint_type: Union[str, Dict[str, str]],
+        max_requests: int,
+        window_secs: int,
+        enabled: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Create a new rate limit policy (admin only).
+
+        Args:
+            name: Name/description for the policy
+            endpoint_type: Endpoint type, either:
+                - String: "Login", "ApiKeyCreation", "GeneralApi", "UserManagement"
+                - Dict: {"Custom": "/api/path"} for custom endpoint pattern
+            max_requests: Maximum number of requests allowed
+            window_secs: Time window in seconds
+            enabled: Whether the policy is enabled (default: True)
+
+        Returns:
+            Created rate limit policy information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> db.create_rate_limit_policy(
+            ...     name="Test API Limit",
+            ...     endpoint_type={"Custom": "/api/test"},
+            ...     max_requests=100,
+            ...     window_secs=3600,
+            ...     enabled=True
+            ... )
+        """
+        payload = {
+            "name": name,
+            "endpoint_type": endpoint_type,
+            "max_requests": max_requests,
+            "window_secs": window_secs,
+            "enabled": enabled
+        }
+
+        response = self.session.post(
+            urljoin(self.base_url, "/api/v1/rate-limits"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def list_rate_limit_policies(self) -> List[Dict[str, Any]]:
+        """
+        List all rate limit policies (admin only).
+
+        Returns:
+            List of rate limit policy information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> policies = db.list_rate_limit_policies()
+            >>> for policy in policies:
+            ...     print(f"{policy['name']}: {policy['max_requests']} req/{policy['window_secs']}s")
+        """
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/rate-limits"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json().get("policies", [])
+
+    def get_rate_limit_policy(self, policy_id: str) -> Dict[str, Any]:
+        """
+        Get rate limit policy by ID (admin only).
+
+        Args:
+            policy_id: Rate limit policy UUID
+
+        Returns:
+            Rate limit policy information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> policy = db.get_rate_limit_policy("1132c011-cd65-4583-b1cc-1ffe3444698c")
+            >>> print(f"Policy: {policy['name']}, Limit: {policy['max_requests']}")
+        """
+        response = self.session.get(
+            urljoin(self.base_url, f"/api/v1/rate-limits/{policy_id}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def update_rate_limit_policy(
+        self,
+        policy_id: str,
+        name: Optional[str] = None,
+        max_requests: Optional[int] = None,
+        window_secs: Optional[int] = None,
+        enabled: Optional[bool] = None
+    ) -> Dict[str, Any]:
+        """
+        Update rate limit policy (admin only).
+
+        Args:
+            policy_id: Rate limit policy UUID
+            name: New policy name (optional)
+            max_requests: New max requests limit (optional)
+            window_secs: New window size in seconds (optional)
+            enabled: New enabled status (optional)
+
+        Returns:
+            Updated rate limit policy information
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> updated = db.update_rate_limit_policy(
+            ...     policy_id="1132c011-cd65-4583-b1cc-1ffe3444698c",
+            ...     max_requests=200,
+            ...     enabled=False
+            ... )
+        """
+        payload = {}
+        if name is not None:
+            payload["name"] = name
+        if max_requests is not None:
+            payload["max_requests"] = max_requests
+        if window_secs is not None:
+            payload["window_secs"] = window_secs
+        if enabled is not None:
+            payload["enabled"] = enabled
+
+        response = self.session.put(
+            urljoin(self.base_url, f"/api/v1/rate-limits/{policy_id}"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        response.raise_for_status()
+        return response.json()
+
+    def delete_rate_limit_policy(self, policy_id: str) -> bool:
+        """
+        Delete rate limit policy (admin only).
+
+        Args:
+            policy_id: Rate limit policy UUID
+
+        Returns:
+            True if deleted successfully
+
+        Raises:
+            AuthenticationError: If not authenticated or not admin
+
+        Example:
+            >>> db.delete_rate_limit_policy("1132c011-cd65-4583-b1cc-1ffe3444698c")
+            True
+        """
+        response = self.session.delete(
+            urljoin(self.base_url, f"/api/v1/rate-limits/{policy_id}"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed or insufficient permissions")
+
+        return response.status_code == 200
+
     def close(self):
         """Close the database connection."""
         if self.session:

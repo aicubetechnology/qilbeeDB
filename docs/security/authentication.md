@@ -99,16 +99,19 @@ curl -X POST http://localhost:7474/api/v1/auth/logout \
 
 ## Rate Limiting
 
-Protection against brute-force attacks:
+All API endpoints are protected by rate limiting to prevent abuse and brute-force attacks.
 
-```yaml
-security:
-  max_login_attempts: 5           # Maximum attempts
-  lockout_duration_mins: 15       # Lockout duration
-  attempt_window_mins: 15         # Time window for attempts
-```
+**Default Login Rate Limit:** 100 requests per minute
 
-After 5 failed login attempts within 15 minutes, the account is locked for 15 minutes.
+For detailed rate limiting configuration and management, see the [Rate Limiting](rate-limiting.md) documentation.
+
+!!! info "Rate Limit Headers"
+    Every API response includes rate limit headers:
+    ```
+    X-RateLimit-Limit: 100
+    X-RateLimit-Remaining: 95
+    X-RateLimit-Reset: 45
+    ```
 
 ## Password Requirements
 
@@ -260,5 +263,6 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Next Steps
 
 - [Authorization (RBAC)](authorization.md) - Configure permissions
+- [Rate Limiting](rate-limiting.md) - Configure rate limit policies
 - [Audit Logging](audit.md) - Track authentication events
 - [Bootstrap Setup](bootstrap.md) - Initial admin account setup
