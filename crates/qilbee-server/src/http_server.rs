@@ -24,6 +24,7 @@ use tower_http::trace::TraceLayer;
 use crate::security::{
     AuthService, UserService, TokenService, Credentials, AuthConfig,
     RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
+    AuditEventType, AuditResult,
 };
 
 /// Shared application state
@@ -36,6 +37,7 @@ pub struct AppState {
     pub token_service: Arc<TokenService>,
     pub user_service: Arc<UserService>,
     pub rate_limit_service: Arc<RateLimitService>,
+    pub audit_service: Arc<AuditService>,
     pub auth_middleware: AuthMiddleware,
 }
 
@@ -72,7 +74,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
     let auth_middleware = AuthMiddleware {
         auth_service: auth_service.clone(),
         rbac_service,
-        audit_service,
+        audit_service: audit_service.clone(),
         rate_limit_service: rate_limit_service.clone(),
     };
 
@@ -84,6 +86,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         token_service: token_service_clone,
         user_service: user_service.clone(),
         rate_limit_service,
+        audit_service,
         auth_middleware: auth_middleware.clone(),
     };
 
@@ -105,6 +108,8 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // Rate limit policy management
         .route("/api/v1/rate-limits", post(rate_limit_create).get(rate_limit_list))
         .route("/api/v1/rate-limits/:policy_id", get(rate_limit_get).put(rate_limit_update).delete(rate_limit_delete))
+        // Audit log query (Admin only)
+        .route("/api/v1/audit-logs", get(audit_logs_query))
         // Graph operations
         .route("/graphs/:name", post(create_graph).delete(delete_graph))
         .route("/graphs/:name/nodes", post(create_node).get(find_nodes))
@@ -885,6 +890,15 @@ async fn auth_login(
 
     match state.auth_service.login(credentials) {
         Ok(token) => {
+            // Log successful login
+            state.audit_service.log_auth_event(
+                AuditEventType::Login,
+                &request.username,
+                AuditResult::Success,
+                None,
+                None,
+            );
+
             // Get user_id from token claims (we should validate token to get claims)
             // For now, we'll just return the token info
             let response = LoginResponse {
@@ -897,10 +911,21 @@ async fn auth_login(
             };
             (StatusCode::OK, Json(json!(response)))
         }
-        Err(e) => (
-            StatusCode::UNAUTHORIZED,
-            Json(json!({"error": format!("Invalid username or password: {}", e)})),
-        ),
+        Err(e) => {
+            // Log failed login
+            state.audit_service.log_auth_event(
+                AuditEventType::LoginFailed,
+                &request.username,
+                AuditResult::Failure,
+                None,
+                None,
+            );
+
+            (
+                StatusCode::UNAUTHORIZED,
+                Json(json!({"error": format!("Invalid username or password: {}", e)})),
+            )
+        }
     }
 }
 
@@ -997,12 +1022,27 @@ async fn api_key_create(
         }
     };
 
+    // Get username for audit logging
+    let username = state.user_service.get_user(&user_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
+
     // Generate API key
     match state
         .token_service
         .generate_api_key(user_id, request.name.clone())
     {
         Ok((key, api_key)) => {
+            // Log successful API key creation
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyCreated,
+                &user_id.0.to_string(),
+                &username,
+                &api_key.id,
+                AuditResult::Success,
+                None,
+            );
+
             let response = CreateApiKeyResponse {
                 key,
                 id: api_key.id,
@@ -1013,10 +1053,22 @@ async fn api_key_create(
             };
             (StatusCode::CREATED, Json(json!(response)))
         }
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": format!("Failed to create API key: {}", e)})),
-        ),
+        Err(e) => {
+            // Log failed API key creation
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyCreated,
+                &user_id.0.to_string(),
+                &username,
+                "unknown",
+                AuditResult::Failure,
+                None,
+            );
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to create API key: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1062,7 +1114,7 @@ async fn api_key_revoke(
     axum::extract::Path(key_id): axum::extract::Path<String>,
 ) -> impl IntoResponse {
     // Extract user_id from JWT token to verify ownership
-    let _user_id = match extract_user_from_auth(&headers, &state) {
+    let user_id = match extract_user_from_auth(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1072,16 +1124,43 @@ async fn api_key_revoke(
         }
     };
 
+    // Get username for audit logging
+    let username = state.user_service.get_user(&user_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
+
     // Revoke API key by ID (key_hash in storage)
     match state.token_service.revoke_api_key(&key_id) {
-        Ok(_) => (
-            StatusCode::OK,
-            Json(json!({"success": true, "message": "API key revoked"})),
-        ),
-        Err(e) => (
-            StatusCode::NOT_FOUND,
-            Json(json!({"error": format!("Failed to revoke API key: {}", e)})),
-        ),
+        Ok(_) => {
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyRevoked,
+                &user_id.0.to_string(),
+                &username,
+                &key_id,
+                AuditResult::Success,
+                None,
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({"success": true, "message": "API key revoked"})),
+            )
+        }
+        Err(e) => {
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyRevoked,
+                &user_id.0.to_string(),
+                &username,
+                &key_id,
+                AuditResult::Failure,
+                None,
+            );
+
+            (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": format!("Failed to revoke API key: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1226,7 +1305,7 @@ async fn user_create(
     Json(request): Json<CreateUserRequest>,
 ) -> impl IntoResponse {
     // Require admin privileges
-    let _admin_id = match extract_admin_from_token(&headers, &state) {
+    let admin_id = match extract_admin_from_token(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1235,6 +1314,11 @@ async fn user_create(
             )
         }
     };
+
+    // Get admin username for audit logging
+    let admin_username = state.user_service.get_user(&admin_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
 
     // Create user with provided roles or default to Read
     let roles = request.roles.unwrap_or_else(|| vec![super::security::rbac::Role::Read]);
@@ -1246,7 +1330,22 @@ async fn user_create(
     ) {
         Ok(mut user) => {
             // Update roles if provided
-            user.roles = roles;
+            user.roles = roles.clone();
+
+            // Log successful user creation
+            state.audit_service.log_user_event(
+                AuditEventType::UserCreated,
+                &admin_id.0.to_string(),
+                &admin_username,
+                &user.id.0.to_string(),
+                AuditResult::Success,
+                None,
+                serde_json::json!({
+                    "new_username": user.username,
+                    "new_email": user.email,
+                    "roles": roles
+                }),
+            );
 
             let response = UserResponse {
                 id: user.id.0.to_string(),
@@ -1261,10 +1360,26 @@ async fn user_create(
 
             (StatusCode::CREATED, Json(json!(response)))
         }
-        Err(e) => (
-            StatusCode::BAD_REQUEST,
-            Json(json!({"error": format!("Failed to create user: {}", e)})),
-        ),
+        Err(e) => {
+            // Log failed user creation
+            state.audit_service.log_user_event(
+                AuditEventType::UserCreated,
+                &admin_id.0.to_string(),
+                &admin_username,
+                "unknown",
+                AuditResult::Failure,
+                None,
+                serde_json::json!({
+                    "attempted_username": request.username,
+                    "error": e.to_string()
+                }),
+            );
+
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": format!("Failed to create user: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1395,6 +1510,11 @@ async fn user_update(
         }
     };
 
+    // Get requester username for audit logging
+    let requester_username = state.user_service.get_user(&requester_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
+
     // Parse target user ID
     let target_uuid = match Uuid::parse_str(&user_id_str) {
         Ok(uuid) => uuid,
@@ -1434,18 +1554,24 @@ async fn user_update(
         }
     };
 
+    // Track what was updated for audit logging
+    let mut changes = serde_json::Map::new();
+    let password_changed = request.password.is_some();
+
     // Apply updates
-    if let Some(email) = request.email {
-        user.email = email;
+    if let Some(ref email) = request.email {
+        changes.insert("email_changed".to_string(), serde_json::json!(true));
+        user.email = email.clone();
     }
-    if let Some(password) = request.password {
+    if let Some(ref password) = request.password {
         // Re-hash password using user method
-        if let Err(e) = user.update_password(&password) {
+        if let Err(e) = user.update_password(password) {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(json!({"error": format!("Failed to hash password: {}", e)})),
             )
         }
+        changes.insert("password_changed".to_string(), serde_json::json!(true));
     }
     if let Some(is_active) = request.is_active {
         // Only admin can change is_active status
@@ -1455,11 +1581,29 @@ async fn user_update(
                 Json(json!({"error": "Only admin can change user active status"})),
             );
         }
+        changes.insert("is_active".to_string(), serde_json::json!(is_active));
         user.is_active = is_active;
     }
 
     match state.user_service.update_user(user.clone()) {
         Ok(_) => {
+            // Log the appropriate event type
+            let event_type = if password_changed {
+                AuditEventType::UserPasswordChanged
+            } else {
+                AuditEventType::UserUpdated
+            };
+
+            state.audit_service.log_user_event(
+                event_type,
+                &requester_id.0.to_string(),
+                &requester_username,
+                &target_id.0.to_string(),
+                AuditResult::Success,
+                None,
+                serde_json::Value::Object(changes),
+            );
+
             let response = UserResponse {
                 id: user.id.0.to_string(),
                 username: user.username,
@@ -1472,10 +1616,22 @@ async fn user_update(
             };
             (StatusCode::OK, Json(json!(response)))
         }
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": format!("Failed to update user: {}", e)})),
-        ),
+        Err(e) => {
+            state.audit_service.log_user_event(
+                AuditEventType::UserUpdated,
+                &requester_id.0.to_string(),
+                &requester_username,
+                &target_id.0.to_string(),
+                AuditResult::Failure,
+                None,
+                serde_json::json!({"error": e.to_string()}),
+            );
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to update user: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1489,7 +1645,7 @@ async fn user_delete(
     use crate::security::UserId;
 
     // Require admin privileges
-    let _admin_id = match extract_admin_from_token(&headers, &state) {
+    let admin_id = match extract_admin_from_token(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1498,6 +1654,11 @@ async fn user_delete(
             )
         }
     };
+
+    // Get admin username for audit logging
+    let admin_username = state.user_service.get_user(&admin_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
 
     // Parse target user ID
     let target_uuid = match Uuid::parse_str(&user_id_str) {
@@ -1511,15 +1672,44 @@ async fn user_delete(
     };
     let target_id = UserId(target_uuid);
 
+    // Get the target user info before deletion for audit log
+    let target_username = state.user_service.get_user(&target_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
+
     match state.user_service.delete_user(&target_id) {
-        Ok(_) => (
-            StatusCode::OK,
-            Json(json!({"success": true, "message": "User deleted"})),
-        ),
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": format!("Failed to delete user: {}", e)})),
-        ),
+        Ok(_) => {
+            state.audit_service.log_user_event(
+                AuditEventType::UserDeleted,
+                &admin_id.0.to_string(),
+                &admin_username,
+                &target_id.0.to_string(),
+                AuditResult::Success,
+                None,
+                serde_json::json!({"deleted_username": target_username}),
+            );
+
+            (
+                StatusCode::OK,
+                Json(json!({"success": true, "message": "User deleted"})),
+            )
+        }
+        Err(e) => {
+            state.audit_service.log_user_event(
+                AuditEventType::UserDeleted,
+                &admin_id.0.to_string(),
+                &admin_username,
+                &target_id.0.to_string(),
+                AuditResult::Failure,
+                None,
+                serde_json::json!({"error": e.to_string()}),
+            );
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to delete user: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1534,7 +1724,7 @@ async fn user_update_roles(
     use crate::security::UserId;
 
     // Require admin privileges
-    let _admin_id = match extract_admin_from_token(&headers, &state) {
+    let admin_id = match extract_admin_from_token(&headers, &state) {
         Ok(uid) => uid,
         Err(status) => {
             return (
@@ -1543,6 +1733,11 @@ async fn user_update_roles(
             )
         }
     };
+
+    // Get admin username for audit logging
+    let admin_username = state.user_service.get_user(&admin_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
 
     // Parse target user ID
     let target_uuid = match Uuid::parse_str(&user_id_str) {
@@ -1567,11 +1762,30 @@ async fn user_update_roles(
         }
     };
 
+    // Track old roles for audit log
+    let old_roles = user.roles.clone();
+    let new_roles = request.roles.clone();
+
     // Update roles
     user.roles = request.roles;
 
     match state.user_service.update_user(user.clone()) {
         Ok(_) => {
+            // Log role change as RoleAssigned event (covers both assignment and removal)
+            state.audit_service.log_user_event(
+                AuditEventType::RoleAssigned,
+                &admin_id.0.to_string(),
+                &admin_username,
+                &target_id.0.to_string(),
+                AuditResult::Success,
+                None,
+                serde_json::json!({
+                    "target_username": user.username,
+                    "old_roles": old_roles,
+                    "new_roles": new_roles
+                }),
+            );
+
             let response = UserResponse {
                 id: user.id.0.to_string(),
                 username: user.username,
@@ -1584,10 +1798,22 @@ async fn user_update_roles(
             };
             (StatusCode::OK, Json(json!(response)))
         }
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": format!("Failed to update user roles: {}", e)})),
-        ),
+        Err(e) => {
+            state.audit_service.log_user_event(
+                AuditEventType::RoleAssigned,
+                &admin_id.0.to_string(),
+                &admin_username,
+                &target_id.0.to_string(),
+                AuditResult::Failure,
+                None,
+                serde_json::json!({"error": e.to_string()}),
+            );
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": format!("Failed to update user roles: {}", e)})),
+            )
+        }
     }
 }
 
@@ -1867,6 +2093,159 @@ async fn rate_limit_delete(
             Json(json!({"error": "Rate limit policy not found"})),
         ),
     }
+}
+
+// ==================== Audit Log Query Endpoint ====================
+
+use crate::security::AuditFilter;
+
+/// Query parameters for audit log filtering
+#[derive(Debug, Deserialize)]
+struct AuditLogsQueryParams {
+    user_id: Option<String>,
+    username: Option<String>,
+    event_type: Option<String>,
+    action: Option<String>,
+    result: Option<String>,
+    ip_address: Option<String>,
+    start_time: Option<String>,
+    end_time: Option<String>,
+    limit: Option<usize>,
+}
+
+/// Response format for audit events
+#[derive(Debug, Serialize)]
+struct AuditEventResponse {
+    event_id: String,
+    event_type: String,
+    timestamp: String,
+    user_id: Option<String>,
+    username: Option<String>,
+    action: String,
+    resource: String,
+    result: String,
+    ip_address: Option<String>,
+    user_agent: Option<String>,
+    metadata: serde_json::Value,
+    transaction_time: String,
+}
+
+/// Query audit logs (Admin only)
+async fn audit_logs_query(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    AxumQuery(params): AxumQuery<AuditLogsQueryParams>,
+) -> impl IntoResponse {
+    // Require admin privileges
+    let _admin_id = match extract_admin_from_token(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: Admin access required"})),
+            )
+        }
+    };
+
+    // Build filter from query params
+    let mut filter = AuditFilter::new();
+
+    if let Some(user_id) = params.user_id {
+        filter = filter.user_id(user_id);
+    }
+    if let Some(username) = params.username {
+        filter = filter.username(username);
+    }
+    if let Some(event_type_str) = params.event_type {
+        // Parse event type from string
+        let event_type = match event_type_str.as_str() {
+            "login" => Some(AuditEventType::Login),
+            "login_failed" => Some(AuditEventType::LoginFailed),
+            "logout" => Some(AuditEventType::Logout),
+            "token_refresh" => Some(AuditEventType::TokenRefresh),
+            "token_refresh_failed" => Some(AuditEventType::TokenRefreshFailed),
+            "api_key_created" => Some(AuditEventType::ApiKeyCreated),
+            "api_key_revoked" => Some(AuditEventType::ApiKeyRevoked),
+            "api_key_used" => Some(AuditEventType::ApiKeyUsed),
+            "api_key_validation_failed" => Some(AuditEventType::ApiKeyValidationFailed),
+            "user_created" => Some(AuditEventType::UserCreated),
+            "user_updated" => Some(AuditEventType::UserUpdated),
+            "user_deleted" => Some(AuditEventType::UserDeleted),
+            "user_password_changed" => Some(AuditEventType::UserPasswordChanged),
+            "role_assigned" => Some(AuditEventType::RoleAssigned),
+            "role_removed" => Some(AuditEventType::RoleRemoved),
+            "permission_denied" => Some(AuditEventType::PermissionDenied),
+            "access_granted" => Some(AuditEventType::AccessGranted),
+            "rate_limit_exceeded" => Some(AuditEventType::RateLimitExceeded),
+            "system_startup" => Some(AuditEventType::SystemStartup),
+            "system_shutdown" => Some(AuditEventType::SystemShutdown),
+            "configuration_changed" => Some(AuditEventType::ConfigurationChanged),
+            _ => None,
+        };
+        if let Some(et) = event_type {
+            filter = filter.event_type(et);
+        }
+    }
+    if let Some(action) = params.action {
+        filter = filter.action(action);
+    }
+    if let Some(result_str) = params.result {
+        let result = match result_str.as_str() {
+            "success" => Some(AuditResult::Success),
+            "failure" => Some(AuditResult::Failure),
+            "unauthorized" => Some(AuditResult::Unauthorized),
+            "forbidden" => Some(AuditResult::Forbidden),
+            "error" => Some(AuditResult::Error),
+            _ => None,
+        };
+        if let Some(r) = result {
+            filter = filter.result(r);
+        }
+    }
+    if let Some(ip) = params.ip_address {
+        filter = filter.ip_address(ip);
+    }
+    if let (Some(start_str), Some(end_str)) = (&params.start_time, &params.end_time) {
+        if let (Ok(start), Ok(end)) = (
+            chrono::DateTime::parse_from_rfc3339(start_str),
+            chrono::DateTime::parse_from_rfc3339(end_str),
+        ) {
+            filter = filter.time_range(start.with_timezone(&chrono::Utc), end.with_timezone(&chrono::Utc));
+        }
+    }
+
+    let limit = params.limit.unwrap_or(100).min(1000); // Max 1000 events per query
+
+    // Query events
+    let events = state.audit_service.query_events(filter, limit);
+
+    // Convert to response format
+    let event_responses: Vec<AuditEventResponse> = events
+        .into_iter()
+        .map(|e| AuditEventResponse {
+            event_id: e.event_id,
+            event_type: e.event_type.to_string(),
+            timestamp: e.timestamp.to_rfc3339(),
+            user_id: e.user_id,
+            username: e.username,
+            action: e.action,
+            resource: e.resource,
+            result: e.result.to_string(),
+            ip_address: e.ip_address,
+            user_agent: e.user_agent,
+            metadata: e.metadata,
+            transaction_time: e.transaction_time.to_rfc3339(),
+        })
+        .collect();
+
+    (
+        StatusCode::OK,
+        Json(json!({
+            "events": event_responses,
+            "count": event_responses.len(),
+            "limit": limit
+        })),
+    )
 }
 
 // ==================== Helper Functions ====================

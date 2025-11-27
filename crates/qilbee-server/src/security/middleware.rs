@@ -8,7 +8,7 @@ use axum::{
 };
 use serde_json::json;
 use std::sync::Arc;
-use super::{AuthService, RbacService, Permission, User, AuditService, AuditResult, RateLimitService, EndpointType, RateLimitKey};
+use super::{AuthService, RbacService, Permission, User, AuditService, AuditResult, AuditEventType, RateLimitService, EndpointType, RateLimitKey};
 
 /// Shared authentication middleware state
 #[derive(Clone)]
@@ -65,7 +65,7 @@ pub async fn require_auth(
 ) -> Result<Response, impl IntoResponse> {
     let headers = req.headers();
     let ip_address = extract_ip(headers);
-    let _user_agent = extract_user_agent(headers);
+    let user_agent = extract_user_agent(headers);
 
     // Try Bearer token first
     if let Some(auth_header) = headers.get("authorization").and_then(|h| h.to_str().ok()) {
@@ -75,10 +75,11 @@ pub async fn require_auth(
                 Ok(user) => {
                     // Log successful authentication
                     middleware.audit_service.log_auth_event(
+                        AuditEventType::TokenRefresh,
                         &user.username,
-                        "validate_token",
                         AuditResult::Success,
-                        ip_address,
+                        ip_address.clone(),
+                        user_agent.clone(),
                     );
 
                     // Insert user into request extensions
@@ -87,10 +88,11 @@ pub async fn require_auth(
                 }
                 Err(e) => {
                     middleware.audit_service.log_auth_event(
+                        AuditEventType::TokenRefreshFailed,
                         "unknown",
-                        "validate_token",
                         AuditResult::Unauthorized,
-                        ip_address,
+                        ip_address.clone(),
+                        user_agent.clone(),
                     );
 
                     return Err((
@@ -111,10 +113,11 @@ pub async fn require_auth(
             Ok(user) => {
                 // Log successful API key authentication
                 middleware.audit_service.log_auth_event(
+                    AuditEventType::ApiKeyUsed,
                     &user.username,
-                    "validate_api_key",
                     AuditResult::Success,
-                    ip_address,
+                    ip_address.clone(),
+                    user_agent.clone(),
                 );
 
                 req.extensions_mut().insert(user);
@@ -122,10 +125,11 @@ pub async fn require_auth(
             }
             Err(e) => {
                 middleware.audit_service.log_auth_event(
+                    AuditEventType::ApiKeyValidationFailed,
                     "unknown",
-                    "validate_api_key",
                     AuditResult::Unauthorized,
-                    ip_address,
+                    ip_address.clone(),
+                    user_agent.clone(),
                 );
 
                 return Err((
@@ -141,10 +145,11 @@ pub async fn require_auth(
 
     // No authentication provided
     middleware.audit_service.log_auth_event(
+        AuditEventType::LoginFailed,
         "unknown",
-        "authentication_missing",
         AuditResult::Unauthorized,
         ip_address,
+        user_agent,
     );
 
     Err((
@@ -349,6 +354,7 @@ pub async fn global_rate_limit(
     }
 
     let headers = req.headers();
+    let ip_address = extract_ip(headers);
 
     // Determine endpoint type from path
     let endpoint_type = determine_endpoint_type(&path);
@@ -358,7 +364,7 @@ pub async fn global_rate_limit(
         RateLimitKey::from_user_id(user.id.0.to_string())
     } else {
         // Fall back to IP address
-        let ip = extract_ip(headers).unwrap_or_else(|| "unknown".to_string());
+        let ip = ip_address.clone().unwrap_or_else(|| "unknown".to_string());
         RateLimitKey::from_ip(ip)
     };
 
@@ -366,6 +372,20 @@ pub async fn global_rate_limit(
     let rate_limit_info = middleware.rate_limit_service.check(endpoint_type.clone(), rate_limit_key);
 
     if !rate_limit_info.allowed {
+        // Log rate limit exceeded event
+        let (user_id, username) = if let Some(user) = req.extensions().get::<User>() {
+            (Some(user.id.0.to_string()), Some(user.username.clone()))
+        } else {
+            (None, None)
+        };
+
+        middleware.audit_service.log_rate_limit_exceeded(
+            user_id,
+            username,
+            &path,
+            ip_address,
+        );
+
         // Rate limit exceeded - return 429 with headers
         let mut response = Json(json!({
             "error": "Too Many Requests",
