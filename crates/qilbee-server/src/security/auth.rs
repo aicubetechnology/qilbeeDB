@@ -142,7 +142,7 @@ impl AuthService {
     pub fn login(&self, credentials: Credentials) -> Result<AuthToken> {
         // Check if account is locked
         if self.is_account_locked(&credentials.username) {
-            return Err(qilbee_core::Error::Internal(
+            return Err(qilbee_core::Error::AuthenticationFailed(
                 "Account temporarily locked due to too many failed login attempts".to_string(),
             ));
         }
@@ -189,14 +189,14 @@ impl AuthService {
 
         // Check if token is blacklisted
         if self.token_blacklist.is_revoked(&claims.jti) {
-            return Err(qilbee_core::Error::Internal("Token has been revoked".to_string()));
+            return Err(qilbee_core::Error::TokenRevoked("Token has been revoked".to_string()));
         }
 
         // Check if token was invalidated by a "revoke all" operation
         let token_issued_at = DateTime::from_timestamp(claims.iat as i64, 0)
             .ok_or_else(|| qilbee_core::Error::Internal("Invalid token issue time".to_string()))?;
         if self.token_blacklist.is_invalidated_by_revoke_all(&claims.sub, token_issued_at) {
-            return Err(qilbee_core::Error::Internal("Token has been invalidated".to_string()));
+            return Err(qilbee_core::Error::TokenRevoked("Token has been invalidated".to_string()));
         }
 
         // Check if session exists and is valid

@@ -12,6 +12,7 @@ pub mod token;
 pub mod bootstrap;
 pub mod rate_limit;
 pub mod token_blacklist;
+pub mod account_lockout;
 
 pub use auth::{AuthService, Credentials, AuthConfig, Session};
 pub use rbac::{Permission, Role, RbacService};
@@ -22,3 +23,4 @@ pub use token::{TokenService, ApiKey, AuthToken, Claims};
 pub use bootstrap::{BootstrapService, BootstrapState};
 pub use rate_limit::{RateLimitService, RateLimitPolicy, RateLimitKey, RateLimitInfo, EndpointType, PolicyId};
 pub use token_blacklist::{TokenBlacklist, BlacklistConfig, BlacklistedToken, RevocationReason};
+pub use account_lockout::{AccountLockoutService, LockoutConfig, LockoutStatus};

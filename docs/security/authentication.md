@@ -199,6 +199,189 @@ For detailed rate limiting configuration and management, see the [Rate Limiting]
     X-RateLimit-Reset: 45
     ```
 
+## Account Lockout
+
+QilbeeDB automatically locks accounts after multiple failed login attempts to protect against brute-force attacks.
+
+### How Lockout Works
+
+| Setting | Default Value |
+|---------|---------------|
+| Max failed attempts | 5 |
+| Initial lockout duration | 15 minutes |
+| Lockout multiplier | 2x per subsequent lockout |
+| Maximum lockout duration | 24 hours |
+
+**Progressive Lockout:** Each subsequent lockout doubles in duration, up to 24 hours maximum.
+
+- 1st lockout: 15 minutes
+- 2nd lockout: 30 minutes
+- 3rd lockout: 1 hour
+- 4th lockout: 2 hours
+- ... up to 24 hours
+
+### Failed Login Response
+
+When a login attempt fails, the response includes lockout tracking information:
+
+```json
+{
+  "error": "Invalid username or password",
+  "failed_attempts": 3,
+  "remaining_attempts": 2
+}
+```
+
+### Locked Account Response (HTTP 429)
+
+When an account is locked, login attempts return HTTP 429 Too Many Requests:
+
+```json
+{
+  "error": "Account locked due to too many failed login attempts",
+  "locked": true,
+  "lockout_expires": "2025-01-01T12:15:00Z",
+  "lockout_remaining_seconds": 850
+}
+```
+
+### Admin Lockout Management
+
+Administrators can view and manage locked accounts through the lockout management API.
+
+#### Get All Locked Accounts
+
+```bash
+curl -X GET http://localhost:7474/api/v1/lockouts \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "count": 2,
+  "locked_users": [
+    ["user1", {
+      "locked": true,
+      "failed_attempts": 5,
+      "lockout_count": 1,
+      "lockout_expires": "2025-01-01T12:15:00Z",
+      "lockout_remaining_seconds": 850,
+      "remaining_attempts": 0
+    }],
+    ["user2", {
+      "locked": true,
+      "failed_attempts": 5,
+      "lockout_count": 2,
+      "lockout_expires": "2025-01-01T12:30:00Z",
+      "lockout_remaining_seconds": 1750,
+      "remaining_attempts": 0
+    }]
+  ]
+}
+```
+
+#### Get Lockout Status for a User
+
+```bash
+curl -X GET http://localhost:7474/api/v1/lockouts/{username} \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "username": "user1",
+  "status": {
+    "locked": true,
+    "failed_attempts": 5,
+    "lockout_count": 1,
+    "lockout_expires": "2025-01-01T12:15:00Z",
+    "lockout_remaining_seconds": 850,
+    "remaining_attempts": 0
+  }
+}
+```
+
+#### Manually Lock an Account
+
+Administrators can manually lock an account with a reason:
+
+```bash
+curl -X POST http://localhost:7474/api/v1/lockouts/{username}/lock \
+  -H "Authorization: Bearer admin-token" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Suspicious activity detected"}'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Account 'user1' has been locked"
+}
+```
+
+#### Unlock an Account
+
+```bash
+curl -X DELETE http://localhost:7474/api/v1/lockouts/{username} \
+  -H "Authorization: Bearer admin-token"
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Account 'user1' has been unlocked"
+}
+```
+
+### Python SDK
+
+```python
+from qilbeedb import QilbeeDB
+
+# Connect as admin
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+
+# Get all locked accounts
+locked = db.get_locked_accounts()
+print(f"Locked accounts: {locked['count']}")
+
+# Get lockout status for a specific user
+status = db.get_lockout_status("user1")
+print(f"User locked: {status['status']['locked']}")
+
+# Manually lock an account
+db.lock_account("user1", reason="Security review")
+
+# Unlock an account
+db.unlock_account("user1")
+```
+
+### Audit Events
+
+Account lockout events are logged in the audit system:
+
+| Event Type | Description |
+|------------|-------------|
+| `account_lockout_triggered` | Account locked after failed attempts |
+| `account_locked` | Admin manually locked an account |
+| `account_unlocked` | Account was unlocked (manual or time-based) |
+
+Query lockout events:
+
+```bash
+curl -X GET "http://localhost:7474/api/v1/audit?event_type=account_lockout_triggered&limit=50" \
+  -H "Authorization: Bearer admin-token"
+```
+
 ## Password Requirements
 
 !!! info "Strong Passwords"

@@ -49,16 +49,26 @@
 - [x] Python SDK audit log methods (get_audit_logs, get_failed_logins, get_user_audit_events, get_security_events)
 - [x] Documentation (docs/security/audit.md, sdks/python/README.md, docs/client-libraries/python.md)
 
-### Phase 4: Token Revocation ⏳
-- [ ] Implement token blacklist (in-memory + persistent storage)
-- [ ] Add POST /api/v1/auth/revoke endpoint
-- [ ] Update JWT validation to check blacklist
-- [ ] Add token expiration time to blacklist entries
-- [ ] Implement blacklist cleanup for expired tokens
-- [ ] Test token revocation
+### Phase 4: Token Revocation (Completed) ✅
+- [x] Implement token blacklist (in-memory + persistent storage)
+- [x] Add POST /api/v1/auth/revoke endpoint
+- [x] Add POST /api/v1/auth/revoke-all endpoint (admin bulk revocation)
+- [x] Update JWT validation to check blacklist
+- [x] Add token expiration time to blacklist entries
+- [x] Implement blacklist cleanup for expired tokens
+- [x] Test token revocation (7/7 Python tests pass)
+- [x] Python SDK methods (revoke_token, revoke_all_tokens)
+- [x] Documentation updated
 
 ### Phase 5: Additional Security Enhancements ⏳
-- [ ] Account lockout after N failed login attempts
+- [x] Account lockout after N failed login attempts
+  - [x] AccountLockoutService with configurable thresholds
+  - [x] Track failed attempts by username and IP address
+  - [x] Progressive lockout (duration increases with each lockout)
+  - [x] Time-based automatic unlock
+  - [x] Manual admin lock/unlock via HTTP API
+  - [x] Audit logging for lockout events
+  - [x] Python SDK methods (get_locked_accounts, get_lockout_status, lock_account, unlock_account)
 - [ ] Password complexity validation
 - [ ] API key expiration and rotation
 - [ ] HTTPS enforcement configuration
@@ -69,11 +79,12 @@
 - [x] Security best practices guide (docs/security/overview.md)
 - [x] API key usage guide (docs/security/authentication.md, sdks/python/API_KEYS.md)
 - [x] Rate limiting documentation (docs/security/rate-limiting.md)
+- [x] Token revocation documentation (docs/security/authentication.md)
 - [ ] Audit log analysis guide
 - [ ] Production deployment security checklist
 
 ## Current Priority
-**Phase 4: Token Revocation** - Implement token blacklist for revoking JWT access tokens.
+**Phase 5: Additional Security Enhancements** - Account lockout, password validation, API key rotation, security headers.
 
 ## Notes
 - All phases follow enterprise-grade security standards
