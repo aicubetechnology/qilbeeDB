@@ -11,6 +11,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use qilbee_core::Result;
 use super::rbac::Role;
+use super::password::validate_password;
 
 /// Unique user identifier
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -46,7 +47,11 @@ pub struct User {
 
 impl User {
     /// Create a new user with hashed password
+    /// Validates password complexity before creation
     pub fn new(username: String, email: String, password: &str) -> Result<Self> {
+        // Validate password complexity
+        validate_password(password)?;
+
         let password_hash = hash_password(password)?;
 
         Ok(Self {
@@ -69,7 +74,11 @@ impl User {
     }
 
     /// Update password
+    /// Validates password complexity before updating
     pub fn update_password(&mut self, new_password: &str) -> Result<()> {
+        // Validate password complexity
+        validate_password(new_password)?;
+
         self.password_hash = hash_password(new_password)?;
         self.updated_at = Utc::now();
         Ok(())
@@ -251,9 +260,12 @@ impl Default for UserService {
 mod tests {
     use super::*;
 
+    // Strong password for testing
+    const TEST_PASSWORD: &str = "SecureP@ss123!";
+
     #[test]
     fn test_password_hashing() {
-        let password = "secure_password_123";
+        let password = TEST_PASSWORD;
         let hash = hash_password(password).unwrap();
         assert!(verify_password(password, &hash).unwrap());
         assert!(!verify_password("wrong_password", &hash).unwrap());
@@ -264,12 +276,25 @@ mod tests {
         let user = User::new(
             "testuser".to_string(),
             "test@example.com".to_string(),
-            "password123",
+            TEST_PASSWORD,
         ).unwrap();
 
         assert_eq!(user.username, "testuser");
-        assert!(user.verify_password("password123").unwrap());
-        assert!(!user.verify_password("wrongpassword").unwrap());
+        assert!(user.verify_password(TEST_PASSWORD).unwrap());
+        assert!(!user.verify_password("WrongP@ssword1!").unwrap());
+    }
+
+    #[test]
+    fn test_user_creation_weak_password() {
+        // Should fail with weak password
+        let result = User::new(
+            "testuser".to_string(),
+            "test@example.com".to_string(),
+            "weakpassword",
+        );
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(err.contains("Weak password"));
     }
 
     #[test]
@@ -277,7 +302,7 @@ mod tests {
         let service = UserService::new();
 
         let user = service
-            .create_user("alice".to_string(), "alice@example.com".to_string(), "password123")
+            .create_user("alice".to_string(), "alice@example.com".to_string(), TEST_PASSWORD)
             .unwrap();
 
         assert_eq!(user.username, "alice");
@@ -285,7 +310,15 @@ mod tests {
         let retrieved = service.get_user_by_username("alice").unwrap();
         assert_eq!(retrieved.id, user.id);
 
-        let authed = service.authenticate("alice", "password123").unwrap();
+        let authed = service.authenticate("alice", TEST_PASSWORD).unwrap();
         assert_eq!(authed.id, user.id);
+    }
+
+    #[test]
+    fn test_user_service_weak_password() {
+        let service = UserService::new();
+
+        let result = service.create_user("bob".to_string(), "bob@example.com".to_string(), "weak");
+        assert!(result.is_err());
     }
 }

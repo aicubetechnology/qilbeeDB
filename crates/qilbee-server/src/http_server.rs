@@ -18,14 +18,14 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Instant;
-use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::security::{
     AuthService, UserService, TokenService, Credentials, AuthConfig,
     RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
     AuditEventType, AuditResult, TokenBlacklist, BlacklistConfig, RevocationReason,
-    AccountLockoutService, LockoutConfig,
+    AccountLockoutService, LockoutConfig, security_headers_middleware, CorsConfig,
+    https_redirect_middleware,
 };
 
 /// Shared application state
@@ -59,7 +59,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
 
     // Create bootstrap admin user for testing
     // TODO: Replace with proper bootstrap process
-    let _ = user_service.create_default_admin("Admin123!@#");
+    let _ = user_service.create_default_admin("SecureAdmin@123!");
 
     // Create token blacklist (in-memory for now, can add persistence later)
     let token_blacklist = Arc::new(TokenBlacklist::new(BlacklistConfig::default()));
@@ -113,6 +113,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // API key management
         .route("/api/v1/api-keys", post(api_key_create).get(api_key_list))
         .route("/api/v1/api-keys/:key_id", delete(api_key_revoke))
+        .route("/api/v1/api-keys/rotate", post(api_key_rotate))
         // User management
         .route("/api/v1/users", post(user_create).get(user_list))
         .route("/api/v1/users/:user_id", get(user_get).put(user_update).delete(user_delete))
@@ -145,8 +146,15 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // Apply global rate limiting middleware (determines endpoint type from path)
         // Uses from_fn_with_state for proper state access in middleware
         .layer(axum::middleware::from_fn_with_state(auth_middleware, global_rate_limit))
-        .layer(CorsLayer::permissive())
+        // CORS configuration: reads from environment variables or uses permissive defaults for development
+        // Set CORS_ALLOWED_ORIGINS env var for production (comma-separated list of origins)
+        .layer(CorsConfig::from_env().build_layer())
         .layer(TraceLayer::new_for_http())
+        // Add security headers to all responses
+        .layer(axum::middleware::from_fn(security_headers_middleware))
+        // HTTPS redirect middleware (disabled by default, enable with HTTPS_ENFORCE=true)
+        // When enabled, redirects HTTP requests to HTTPS (respects X-Forwarded-Proto for proxies)
+        .layer(axum::middleware::from_fn(https_redirect_middleware))
         .with_state(state)
 }
 
@@ -1314,10 +1322,10 @@ async fn api_key_create(
         .map(|u| u.username)
         .unwrap_or_else(|| "unknown".to_string());
 
-    // Generate API key
+    // Generate API key with optional expiration
     match state
         .token_service
-        .generate_api_key(user_id, request.name.clone())
+        .generate_api_key(user_id, request.name.clone(), request.expires_in_days)
     {
         Ok((key, api_key)) => {
             // Log successful API key creation
@@ -1416,8 +1424,8 @@ async fn api_key_revoke(
         .map(|u| u.username)
         .unwrap_or_else(|| "unknown".to_string());
 
-    // Revoke API key by ID (key_hash in storage)
-    match state.token_service.revoke_api_key(&key_id) {
+    // Revoke API key by ID
+    match state.token_service.revoke_api_key_by_id(&key_id) {
         Ok(_) => {
             state.audit_service.log_api_key_event(
                 AuditEventType::ApiKeyRevoked,
@@ -1446,6 +1454,80 @@ async fn api_key_revoke(
             (
                 StatusCode::NOT_FOUND,
                 Json(json!({"error": format!("Failed to revoke API key: {}", e)})),
+            )
+        }
+    }
+}
+
+// ==================== API Key Rotation ====================
+
+#[derive(Debug, Deserialize)]
+struct RotateApiKeyRequest {
+    current_key: String,
+    new_name: Option<String>,
+    expires_in_days: Option<u32>,
+}
+
+async fn api_key_rotate(
+    State(state): State<AppState>,
+    headers: axum::http::HeaderMap,
+    Json(request): Json<RotateApiKeyRequest>,
+) -> impl IntoResponse {
+    // Extract user_id from JWT token or API key
+    let user_id = match extract_user_from_auth(&headers, &state) {
+        Ok(uid) => uid,
+        Err(status) => {
+            return (
+                status,
+                Json(json!({"error": "Unauthorized: invalid or missing authentication"})),
+            )
+        }
+    };
+
+    // Get username for audit logging
+    let username = state.user_service.get_user(&user_id)
+        .map(|u| u.username)
+        .unwrap_or_else(|| "unknown".to_string());
+
+    // Rotate API key
+    match state
+        .token_service
+        .rotate_api_key(&request.current_key, request.new_name.clone(), request.expires_in_days)
+    {
+        Ok((new_key, api_key)) => {
+            // Log successful API key rotation
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyCreated,
+                &user_id.0.to_string(),
+                &username,
+                &api_key.id,
+                AuditResult::Success,
+                Some("rotated from previous key".to_string()),
+            );
+
+            let response = CreateApiKeyResponse {
+                key: new_key,
+                id: api_key.id,
+                prefix: api_key.prefix,
+                name: api_key.name,
+                created_at: api_key.created_at.to_rfc3339(),
+                expires_at: api_key.expires_at.map(|dt| dt.to_rfc3339()),
+            };
+            (StatusCode::CREATED, Json(json!(response)))
+        }
+        Err(e) => {
+            state.audit_service.log_api_key_event(
+                AuditEventType::ApiKeyCreated,
+                &user_id.0.to_string(),
+                &username,
+                "unknown",
+                AuditResult::Failure,
+                Some(format!("rotation failed: {}", e)),
+            );
+
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": format!("Failed to rotate API key: {}", e)})),
             )
         }
     }

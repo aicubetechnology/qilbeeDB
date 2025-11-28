@@ -60,7 +60,7 @@
 - [x] Python SDK methods (revoke_token, revoke_all_tokens)
 - [x] Documentation updated
 
-### Phase 5: Additional Security Enhancements ⏳
+### Phase 5: Additional Security Enhancements (Completed) ✅
 - [x] Account lockout after N failed login attempts
   - [x] AccountLockoutService with configurable thresholds
   - [x] Track failed attempts by username and IP address
@@ -69,11 +69,68 @@
   - [x] Manual admin lock/unlock via HTTP API
   - [x] Audit logging for lockout events
   - [x] Python SDK methods (get_locked_accounts, get_lockout_status, lock_account, unlock_account)
-- [ ] Password complexity validation
-- [ ] API key expiration and rotation
-- [ ] HTTPS enforcement configuration
-- [ ] CORS configuration for production
-- [ ] Security headers (HSTS, CSP, X-Frame-Options, etc.)
+- [x] Password complexity validation
+  - [x] Minimum 12 characters required
+  - [x] Must contain uppercase letter
+  - [x] Must contain lowercase letter
+  - [x] Must contain digit
+  - [x] Must contain special character (!@#$%^&*()_+-=[]{}|;:,.<>?)
+  - [x] password.rs module with validate_password() and PasswordPolicy
+  - [x] WeakPassword error type in qilbee-core
+  - [x] Validation on user creation and password update
+  - [x] Python HTTP API test (python-test/test_password_validation.py)
+- [x] API key expiration and rotation
+  - [x] Optional expires_in_days parameter on API key creation
+  - [x] POST /api/v1/api-keys/rotate endpoint for key rotation
+  - [x] Atomic rotation (old key revoked, new key created)
+  - [x] Unit tests for expiration and rotation (token.rs)
+  - [x] Integration tests updated (security_integration_test.rs)
+  - [x] Python HTTP API test (python-test/test_api_key_rotation.py)
+- [x] Security headers (HSTS, CSP, X-Frame-Options, etc.)
+  - [x] security_headers.rs middleware module
+  - [x] SecurityHeadersConfig with development/production presets
+  - [x] X-Content-Type-Options: nosniff (prevents MIME sniffing)
+  - [x] X-Frame-Options: DENY (prevents clickjacking)
+  - [x] X-XSS-Protection: 1; mode=block (XSS filter)
+  - [x] Strict-Transport-Security (HSTS) with configurable max-age
+  - [x] Content-Security-Policy (CSP) with restrictive defaults
+  - [x] Permissions-Policy (disables geolocation, camera, microphone)
+  - [x] Referrer-Policy: strict-origin-when-cross-origin
+  - [x] Cache-Control: no-store (for sensitive endpoints)
+  - [x] X-Permitted-Cross-Domain-Policies: none
+  - [x] X-Download-Options: noopen
+  - [x] Python HTTP API test (python-test/test_security_headers.py)
+- [x] CORS configuration for production
+  - [x] cors.rs module with CorsConfig struct
+  - [x] Development mode (permissive, allow all origins)
+  - [x] Production mode (strict, whitelist specific origins)
+  - [x] Environment variable configuration:
+    - CORS_ALLOWED_ORIGINS: Comma-separated list of allowed origins
+    - CORS_ALLOW_CREDENTIALS: "true" or "false"
+    - CORS_MAX_AGE: Max age in seconds for preflight cache
+    - CORS_PERMISSIVE: "true" for development mode
+  - [x] Allowed headers: Content-Type, Authorization, X-API-Key, X-Request-ID
+  - [x] Exposed headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+  - [x] Preflight (OPTIONS) request handling
+  - [x] Unit tests (7/7 pass)
+  - [x] Python HTTP API test (python-test/test_cors.py)
+- [x] HTTPS enforcement configuration
+  - [x] https.rs module with HttpsConfig struct
+  - [x] Development mode (disabled by default)
+  - [x] Production mode (strict enforcement)
+  - [x] Behind-proxy mode (trust X-Forwarded-Proto)
+  - [x] Environment variable configuration:
+    - HTTPS_ENFORCE: Enable HTTPS enforcement ("true" or "false")
+    - HTTPS_PORT: HTTPS port to redirect to (default: 443)
+    - HTTPS_ALLOW_LOCALHOST: Allow HTTP for localhost (default: true)
+    - HTTPS_TRUST_PROXY: Trust X-Forwarded-Proto header (default: true)
+    - HTTPS_EXEMPT_PATHS: Comma-separated paths exempt from HTTPS
+  - [x] TLS configuration support (TLS_CERT_PATH, TLS_KEY_PATH, TLS_MIN_VERSION)
+  - [x] Health/ready/metrics endpoints exempt by default
+  - [x] Localhost and 127.0.0.1 exemption for development
+  - [x] HTTP to HTTPS redirect (301 Permanent Redirect)
+  - [x] Unit tests (11/11 pass)
+  - [x] Python HTTP API test (python-test/test_https_enforcement.py)
 
 ### Phase 6: Documentation 📝
 - [x] Security best practices guide (docs/security/overview.md)
@@ -84,7 +141,7 @@
 - [ ] Production deployment security checklist
 
 ## Current Priority
-**Phase 5: Additional Security Enhancements** - Account lockout, password validation, API key rotation, security headers.
+**Phase 6: Documentation** - Audit log analysis guide, Production deployment security checklist.
 
 ## Notes
 - All phases follow enterprise-grade security standards

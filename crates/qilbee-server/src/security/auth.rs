@@ -33,6 +33,10 @@ impl Session {
     }
 
     pub fn is_inactive(&self, inactive_timeout_mins: i64) -> bool {
+        // 0 means inactivity timeout is disabled
+        if inactive_timeout_mins <= 0 {
+            return false;
+        }
         Utc::now() > self.last_activity + Duration::minutes(inactive_timeout_mins)
     }
 
@@ -390,13 +394,13 @@ mod tests {
 
         // Create test user
         let user = user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(),
+            password: "SecureP@ss123!".to_string(),
         };
 
         let token = auth_service.login(credentials).unwrap();
@@ -418,7 +422,7 @@ mod tests {
 
         // Create test user
         user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login with wrong password
@@ -445,13 +449,13 @@ mod tests {
 
         // Create test user
         user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(),
+            password: "SecureP@ss123!".to_string(),
         };
 
         let token = auth_service.login(credentials).unwrap();
@@ -477,7 +481,7 @@ mod tests {
 
         // Create test user
         user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Attempt login with wrong password multiple times
@@ -492,7 +496,7 @@ mod tests {
         // Next attempt should be locked
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(), // Even correct password
+            password: "SecureP@ss123!".to_string(), // Even correct password
         };
 
         let result = auth_service.login(credentials);
@@ -514,13 +518,13 @@ mod tests {
 
         // Create test user
         let user = user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(),
+            password: "SecureP@ss123!".to_string(),
         };
 
         auth_service.login(credentials).unwrap();
@@ -549,13 +553,13 @@ mod tests {
 
         // Create test user
         user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(),
+            password: "SecureP@ss123!".to_string(),
         };
 
         let token = auth_service.login(credentials).unwrap();
@@ -597,13 +601,13 @@ mod tests {
 
         // Create test user
         let created_user = user_service
-            .create_user("testuser".to_string(), "test@example.com".to_string(), "password123")
+            .create_user("testuser".to_string(), "test@example.com".to_string(), "SecureP@ss123!")
             .unwrap();
 
         // Login
         let credentials = Credentials {
             username: "testuser".to_string(),
-            password: "password123".to_string(),
+            password: "SecureP@ss123!".to_string(),
         };
 
         let token = auth_service.login(credentials).unwrap();
