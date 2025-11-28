@@ -16,6 +16,9 @@ test/
 **/test/
 python-test/
 
+# Todo files (local development tracking)
+todo/
+
 # MkDocs site output (excluded per user requirement)
 /site/
 site.zip
