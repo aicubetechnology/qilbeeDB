@@ -13,6 +13,10 @@ pub mod bootstrap;
 pub mod rate_limit;
 pub mod token_blacklist;
 pub mod account_lockout;
+pub mod password;
+pub mod security_headers;
+pub mod cors;
+pub mod https;
 
 pub use auth::{AuthService, Credentials, AuthConfig, Session};
 pub use rbac::{Permission, Role, RbacService};
@@ -24,3 +28,7 @@ pub use bootstrap::{BootstrapService, BootstrapState};
 pub use rate_limit::{RateLimitService, RateLimitPolicy, RateLimitKey, RateLimitInfo, EndpointType, PolicyId};
 pub use token_blacklist::{TokenBlacklist, BlacklistConfig, BlacklistedToken, RevocationReason};
 pub use account_lockout::{AccountLockoutService, LockoutConfig, LockoutStatus};
+pub use password::{validate_password, PasswordPolicy, PasswordValidationResult, PASSWORD_REQUIREMENTS};
+pub use security_headers::{security_headers_middleware, SecurityHeadersConfig};
+pub use cors::CorsConfig;
+pub use https::{HttpsConfig, TlsConfig, TlsVersion, https_redirect_middleware, check_tls_config};

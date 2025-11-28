@@ -105,6 +105,13 @@ pub enum Error {
     #[error("Unauthorized: {0}")]
     Unauthorized(String),
 
+    // ========== Validation Errors ==========
+    #[error("Weak password: {0}")]
+    WeakPassword(String),
+
+    #[error("Validation error: {0}")]
+    ValidationError(String),
+
     // ========== Internal Errors ==========
     #[error("Internal error: {0}")]
     Internal(String),

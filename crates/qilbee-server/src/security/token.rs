@@ -108,8 +108,8 @@ impl TokenService {
         Ok(token_data.claims)
     }
 
-    /// Generate API key
-    pub fn generate_api_key(&self, user_id: UserId, name: String) -> Result<(String, ApiKey)> {
+    /// Generate API key with optional expiration
+    pub fn generate_api_key(&self, user_id: UserId, name: String, expires_in_days: Option<u32>) -> Result<(String, ApiKey)> {
         let key: String = rand::thread_rng()
             .sample_iter(&Alphanumeric)
             .take(32)
@@ -123,6 +123,10 @@ impl TokenService {
         hasher.update(full_key.as_bytes());
         let key_hash = format!("{:x}", hasher.finalize());
 
+        let expires_at = expires_in_days.map(|days| {
+            Utc::now() + Duration::days(days as i64)
+        });
+
         let api_key = ApiKey {
             id: Uuid::new_v4().to_string(),
             user_id,
@@ -130,7 +134,7 @@ impl TokenService {
             prefix: prefix.to_string(),
             name,
             created_at: Utc::now(),
-            expires_at: None,
+            expires_at,
             last_used: None,
             is_active: true,
         };
@@ -138,6 +142,61 @@ impl TokenService {
         self.api_keys.write().unwrap().insert(key_hash, api_key.clone());
 
         Ok((full_key, api_key))
+    }
+
+    /// Rotate API key - creates a new key and revokes the old one
+    pub fn rotate_api_key(&self, old_key: &str, new_name: Option<String>, expires_in_days: Option<u32>) -> Result<(String, ApiKey)> {
+        // Validate the old key first
+        let mut hasher = Sha256::new();
+        hasher.update(old_key.as_bytes());
+        let old_key_hash = format!("{:x}", hasher.finalize());
+
+        let (user_id, name) = {
+            let api_keys = self.api_keys.read().unwrap();
+            let old_api_key = api_keys
+                .get(&old_key_hash)
+                .ok_or_else(|| qilbee_core::Error::Internal("Invalid API key".to_string()))?;
+
+            if !old_api_key.is_active {
+                return Err(qilbee_core::Error::Internal("API key is inactive".to_string()));
+            }
+
+            (old_api_key.user_id, new_name.unwrap_or_else(|| old_api_key.name.clone()))
+        };
+
+        // Generate new key
+        let (new_key, new_api_key) = self.generate_api_key(user_id, name, expires_in_days)?;
+
+        // Revoke old key
+        self.api_keys.write().unwrap().remove(&old_key_hash);
+
+        Ok((new_key, new_api_key))
+    }
+
+    /// Get API key by ID
+    pub fn get_api_key_by_id(&self, key_id: &str) -> Option<ApiKey> {
+        self.api_keys
+            .read()
+            .unwrap()
+            .values()
+            .find(|k| k.id == key_id)
+            .cloned()
+    }
+
+    /// Revoke API key by ID (not by raw key)
+    pub fn revoke_api_key_by_id(&self, key_id: &str) -> Result<()> {
+        let mut api_keys = self.api_keys.write().unwrap();
+        let key_hash = api_keys
+            .iter()
+            .find(|(_, k)| k.id == key_id)
+            .map(|(hash, _)| hash.clone());
+
+        if let Some(hash) = key_hash {
+            api_keys.remove(&hash);
+            Ok(())
+        } else {
+            Err(qilbee_core::Error::Internal("API key not found".to_string()))
+        }
     }
 
     /// Validate API key
@@ -167,8 +226,13 @@ impl TokenService {
     }
 
     /// Revoke API key
-    pub fn revoke_api_key(&self, key_hash: &str) -> Result<()> {
-        self.api_keys.write().unwrap().remove(key_hash);
+    pub fn revoke_api_key(&self, key: &str) -> Result<()> {
+        // Hash the raw key to find the stored entry
+        let mut hasher = Sha256::new();
+        hasher.update(key.as_bytes());
+        let key_hash = format!("{:x}", hasher.finalize());
+
+        self.api_keys.write().unwrap().remove(&key_hash);
         Ok(())
     }
 
@@ -209,13 +273,82 @@ mod tests {
         let user_id = UserId::new();
 
         let (key, api_key) = service
-            .generate_api_key(user_id, "Test Key".to_string())
+            .generate_api_key(user_id, "Test Key".to_string(), None)
             .unwrap();
 
         assert!(key.starts_with("qilbee_live_"));
         assert_eq!(api_key.name, "Test Key");
+        assert!(api_key.expires_at.is_none());
 
         let validated_user_id = service.validate_api_key(&key).unwrap();
         assert_eq!(validated_user_id, user_id);
+    }
+
+    #[test]
+    fn test_api_key_with_expiration() {
+        let service = TokenService::new("test_secret".to_string());
+        let user_id = UserId::new();
+
+        let (key, api_key) = service
+            .generate_api_key(user_id, "Expiring Key".to_string(), Some(30))
+            .unwrap();
+
+        assert!(key.starts_with("qilbee_live_"));
+        assert!(api_key.expires_at.is_some());
+
+        // Check expiration is ~30 days from now
+        let expires = api_key.expires_at.unwrap();
+        let expected = Utc::now() + Duration::days(30);
+        assert!((expires - expected).num_seconds().abs() < 5);
+
+        // Key should be valid
+        let validated_user_id = service.validate_api_key(&key).unwrap();
+        assert_eq!(validated_user_id, user_id);
+    }
+
+    #[test]
+    fn test_api_key_rotation() {
+        let service = TokenService::new("test_secret".to_string());
+        let user_id = UserId::new();
+
+        // Create original key
+        let (old_key, old_api_key) = service
+            .generate_api_key(user_id, "Original Key".to_string(), None)
+            .unwrap();
+
+        // Rotate the key
+        let (new_key, new_api_key) = service
+            .rotate_api_key(&old_key, Some("Rotated Key".to_string()), Some(90))
+            .unwrap();
+
+        // New key should work
+        assert!(new_key.starts_with("qilbee_live_"));
+        assert_eq!(new_api_key.name, "Rotated Key");
+        assert!(new_api_key.expires_at.is_some());
+
+        let validated_user_id = service.validate_api_key(&new_key).unwrap();
+        assert_eq!(validated_user_id, user_id);
+
+        // Old key should no longer work
+        assert!(service.validate_api_key(&old_key).is_err());
+    }
+
+    #[test]
+    fn test_revoke_api_key_by_id() {
+        let service = TokenService::new("test_secret".to_string());
+        let user_id = UserId::new();
+
+        let (key, api_key) = service
+            .generate_api_key(user_id, "Test Key".to_string(), None)
+            .unwrap();
+
+        // Key should be valid
+        assert!(service.validate_api_key(&key).is_ok());
+
+        // Revoke by ID
+        service.revoke_api_key_by_id(&api_key.id).unwrap();
+
+        // Key should no longer be valid
+        assert!(service.validate_api_key(&key).is_err());
     }
 }
