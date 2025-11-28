@@ -119,6 +119,8 @@ nav:
     - Authorization (RBAC): security/authorization.md
     - Rate Limiting: security/rate-limiting.md
     - Audit Logging: security/audit.md
+    - Audit Log Analysis: security/audit-analysis.md
+    - Production Checklist: security/production-checklist.md
   - Operations:
     - Deployment: operations/deployment.md
     - Docker: operations/docker.md
