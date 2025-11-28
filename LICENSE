@@ -1,47 +1,47 @@
-Business Source License 1.1
+# Business Source License 1.1 - Enhanced IP Protection Version
 
-License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
-"Business Source License" is a trademark of MariaDB Corporation Ab.
+This software is provided under a Business Source–style license with enhanced
+intellectual property protection provisions.
 
------------------------------------------------------------------------------
-
-Parameters
-
-Licensor:             AICUBE TECHNOLOGY LLC
-Licensed Work:        QilbeeDB
-                      The Licensed Work is (c) 2024-2025 AICUBE TECHNOLOGY LLC.
-Additional Use Grant: You may make use of the Licensed Work, provided that you
-                      do not use the Licensed Work for a Database Service.
-
-                      A "Database Service" is a commercial offering that allows
-                      third parties (other than your employees and contractors
-                      acting on your behalf) to access the functionality of the
-                      Licensed Work by creating tables, graphs, or executing
-                      queries against the Licensed Work.
-
-                      For the avoidance of doubt, the following uses are permitted:
-
-                      1. Internal Use: You may use the Licensed Work for your
-                         own internal business operations.
-
-                      2. Development and Testing: You may use the Licensed Work
-                         for development, testing, and evaluation purposes.
-
-                      3. Non-Commercial Use: You may use the Licensed Work for
-                         personal, educational, or non-commercial purposes.
-
-                      4. Embedded Use: You may embed or integrate the Licensed
-                         Work into your own applications, provided that you do
-                         not offer the Licensed Work's database functionality
-                         as a standalone service to third parties.
-
-Change Date:          January 1, 2029
-
-Change License:       Apache License, Version 2.0
+License text copyright (c) 2025 AICUBE TECHNOLOGY LLC, All Rights Reserved.
 
 -----------------------------------------------------------------------------
 
-Terms
+## Parameters
+
+**Licensor:**             AICUBE TECHNOLOGY LLC  
+**Licensed Work:**        QilbeeDB  
+                          The Licensed Work is (c) 2025-2030 AICUBE TECHNOLOGY LLC.
+
+**Additional Use Grant:** You may make use of the Licensed Work, provided that you
+                          do not use the Licensed Work for a Database Service.
+
+                          A "Database Service" is a commercial offering that allows
+                          third parties (other than your employees and contractors
+                          acting on your behalf) to access the functionality of the
+                          Licensed Work by creating tables, graphs, or executing
+                          queries against the Licensed Work.
+
+                          For the avoidance of doubt, the following uses are permitted:
+
+                          1. **Internal Use:** You may use the Licensed Work for your
+                             own internal business operations.
+
+                          2. **Development and Testing:** You may use the Licensed Work
+                             for development, testing, and evaluation purposes.
+
+                          3. **Non-Commercial Use:** You may use the Licensed Work for
+                             personal, educational, or non-commercial purposes.
+
+                          4. **Embedded Use:** You may embed or integrate the Licensed
+                             Work into your own applications, provided that you do
+                             not offer the Licensed Work's database functionality
+                             as a standalone service to third parties.
+
+
+-----------------------------------------------------------------------------
+
+## Standard BSL 1.1 Terms
 
 The Licensor hereby grants you the right to copy, modify, create derivative
 works, redistribute, and make non-production use of the Licensed Work. The
@@ -83,189 +83,781 @@ EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND
 TITLE.
 
-MariaDB hereby grants you permission to use this License's text to license
-your works, and to refer to it using the trademark "Business Source License",
-as long as you comply with the Covenants of Licensor below.
-
 -----------------------------------------------------------------------------
 
-Covenants of Licensor
-
-In consideration of the right to use this License's text and the "Business
-Source License" name and trademark, Licensor covenants to MariaDB, and to all
-other recipients of the licensed work to be provided by Licensor:
-
-1. To specify as the Change License the GPL Version 2.0 or any later version,
-   or a license that is compatible with GPL Version 2.0 or a later version,
-   where "compatible" means that software provided under the Change License can
-   be included in a program with software provided under GPL Version 2.0 or a
-   later version. Licensor may specify additional Change Licenses without
-   limitation.
-
-2. To either: (a) specify an additional grant of rights to use that does not
-   impose any additional restriction on the right granted in this License, as
-   the Additional Use Grant; or (b) insert the text "None".
-
-3. To specify a Change Date.
-
-4. Not to modify this License in any other way.
-
------------------------------------------------------------------------------
-
-Notice
-
-The Business Source License (this document, or the "License") is not an Open
-Source license. However, the Licensed Work will eventually be made available
-under an Open Source License, as stated in this License.
-
------------------------------------------------------------------------------
-
-QILBEEDB SPECIFIC TERMS AND CONDITIONS
+## QILBEEDB ENHANCED PROTECTION TERMS
 
 Copyright (c) 2024-2025 AICUBE TECHNOLOGY LLC. All Rights Reserved.
 
-1. DEFINITIONS
+### 1. DEFINITIONS
 
-   "Commercial Use" means any use of the Licensed Work that is primarily
-   intended for or directed towards commercial advantage or monetary
-   compensation.
+1.1 **"Commercial Use"** means any use of the Licensed Work that is primarily
+    intended for or directed towards commercial advantage or monetary
+    compensation, including but not limited to:
+    - Revenue-generating applications
+    - Commercial SaaS offerings
+    - Fee-based services
+    - Monetization through advertising or data collection
 
-   "Database-as-a-Service" or "DBaaS" means hosting, operating, or offering
-   the Licensed Work as a managed database service to third parties, whether
-   for a fee or free of charge.
+1.2 **"Competitive Product"** means any product, service, or offering that:
+    - Provides functionality substantially similar to QilbeeDB
+    - Competes directly with QilbeeDB in the database market
+    - Uses the Licensed Work to develop a competing database solution
+    - Benchmarks or performance tests for competitive purposes without
+      prior written consent
 
-   "Derivative Work" means any work that is based on or derived from the
-   Licensed Work.
+1.3 **"Database-as-a-Service"** or **"DBaaS"** means:
+    - Hosting, operating, or offering the Licensed Work as a managed
+      database service to third parties
+    - Cloud-based database offerings using the Licensed Work
+    - Multi-tenant database services
+    - Managed database platforms
+    Whether provided for a fee or free of charge
 
-   "Licensed Work" means QilbeeDB, including all source code, object code,
-   documentation, and any associated materials.
+1.4 **"Derivative Work"** means:
+    - Any work based on or derived from the Licensed Work
+    - Modifications, enhancements, or extensions
+    - Works that incorporate any portion of the Licensed Work
+    - Translated versions or ports to other languages or platforms
 
-2. PROHIBITED USES
+1.5 **"Proprietary Components"** include but are not limited to:
+    - Core algorithms and data structures
+    - Query optimization techniques
+    - Memory management systems
+    - Graph traversal algorithms
+    - AI-specific indexing mechanisms
+    - Performance optimization methods
+    - Proprietary protocols and APIs
+    - Trade secrets and know-how embedded in the code
 
-   Without obtaining a separate commercial license from AICUBE TECHNOLOGY LLC,
-   you may NOT:
+1.6 **"Third Party"** means any individual or entity other than:
+    - You (the licensee)
+    - Your employees performing work on your behalf
+    - Your contractors under written agreement to be bound by this License
 
-   a) Offer QilbeeDB as a Database-as-a-Service (DBaaS) or managed database
-      service to third parties.
+### 2. ENHANCED PROHIBITED USES
 
-   b) Sell, lease, or sublicense the Licensed Work or any Derivative Work as
-      a standalone database product.
+Without obtaining a separate commercial license from AICUBE TECHNOLOGY LLC,
+you are STRICTLY PROHIBITED from:
 
-   c) Use the Licensed Work to provide database hosting services, whether
-      directly or through cloud infrastructure providers.
+2.1 **Database Service Offerings:**
+    - Offering QilbeeDB as DBaaS to any Third Party
+    - Providing managed database services using the Licensed Work
+    - Operating multi-tenant database platforms using the Licensed Work
+    - Reselling database capacity or access powered by QilbeeDB
+    - Offering database hosting services through any cloud infrastructure
 
-   d) Remove, alter, or obscure any proprietary notices, labels, or marks on
-      the Licensed Work.
+2.2 **Competitive Activities:**
+    - Creating, marketing, or distributing a Competitive Product
+    - Using the Licensed Work to develop competing database solutions
+    - Benchmarking the Licensed Work against other databases for
+      competitive marketing purposes without express written permission
+    - Reverse engineering the Licensed Work to create competing products
+    - Using insights gained from the Licensed Work to develop competing
+      algorithms or techniques
 
-   e) Use AICUBE TECHNOLOGY LLC's trademarks, service marks, trade names, or
-      logos without prior written permission.
+2.3 **Commercial Distribution:**
+    - Selling, leasing, renting, or sublicensing the Licensed Work
+    - Distributing the Licensed Work as part of commercial software bundles
+    - Offering the Licensed Work through app stores or software marketplaces
+    - Including the Licensed Work in commercial OEM agreements
+    - Using the Licensed Work in white-label products or services
 
-   f) Represent that any Derivative Work is officially endorsed or supported
-      by AICUBE TECHNOLOGY LLC.
+2.4 **Intellectual Property Violations:**
+    - Removing, altering, obscuring, or modifying any proprietary notices,
+      copyright notices, labels, or marks
+    - Claiming ownership of the Licensed Work or any Proprietary Components
+    - Filing patents based on inventions embodied in the Licensed Work
+    - Registering trademarks confusingly similar to AICUBE TECHNOLOGY LLC
+      or QilbeeDB marks
 
-3. PERMITTED USES
+2.5 **Reverse Engineering:**
+    - Reverse engineering, decompiling, or disassembling the Licensed Work
+      for competitive purposes
+    - Extracting or isolating Proprietary Components for use in other projects
+    - Analyzing the Licensed Work to replicate its functionality in
+      competing products
+    - Creating clean-room implementations based on the Licensed Work
 
-   Subject to the terms of this License, you MAY:
+2.6 **Misrepresentation:**
+    - Representing that any Derivative Work is officially endorsed by
+      AICUBE TECHNOLOGY LLC
+    - Implying partnership, sponsorship, or affiliation without written
+      permission
+    - Using AICUBE TECHNOLOGY LLC or QilbeeDB branding without authorization
+    - Making false or misleading statements about the Licensed Work
 
-   a) Use the Licensed Work for internal business purposes within your
-      organization.
+2.7 **Unauthorized Sublicensing:**
+    - Granting sublicenses or rights to Third Parties beyond permitted uses
+    - Allowing Third Parties to access the source code without proper
+      licensing
+    - Distributing modified versions without preserving license terms
+    - Creating or participating in fork communities for competitive purposes
 
-   b) Develop applications that use the Licensed Work as an embedded
-      component, provided those applications are not Database Services.
+2.8 **Cloud Provider Restrictions:**
+    - Offering QilbeeDB through AWS Marketplace, Azure Marketplace, Google
+      Cloud Platform, or similar without a separate agreement
+    - Providing QilbeeDB as part of cloud infrastructure services
+    - Including QilbeeDB in managed service offerings on any cloud platform
+    - Reselling or redistributing QilbeeDB through cloud channels
 
-   c) Modify and create Derivative Works for your own internal use.
+### 3. PERMITTED USES AND CONDITIONS
 
-   d) Use the Licensed Work for research, education, and non-commercial
-      purposes.
+Subject to strict compliance with all terms of this License, you MAY:
 
-   e) Distribute the Licensed Work to contractors working on your behalf,
-      provided they agree to be bound by this License.
+3.1 **Internal Business Use:**
+    - Use the Licensed Work for your organization's internal operations
+    - Deploy within your own infrastructure for your own applications
+    - Use for your internal data management and analytics
+    - Provided: No Third Party access to database functionality
 
-4. ATTRIBUTION REQUIREMENTS
+3.2 **Embedded Applications:**
+    - Embed the Licensed Work in your applications as a component
+    - Distribute applications that include the Licensed Work
+    - Provided:
+      a) The application provides substantial additional functionality
+      b) The Licensed Work is not the primary value proposition
+      c) End users cannot directly access the database functionality
+      d) The application is not a Competitive Product
+      e) Full compliance with attribution requirements
 
-   If you distribute the Licensed Work or any Derivative Work, you must:
+3.3 **Development and Testing:**
+    - Use for software development, testing, and quality assurance
+    - Use in staging and pre-production environments
+    - Create development and test instances
+    - Provided: Not for production use without commercial license
 
-   a) Include a complete copy of this License.
+3.4 **Research and Education:**
+    - Use for academic research and educational purposes
+    - Use in university courses and training programs
+    - Use for personal learning and skill development
+    - Provided:
+      a) Purely non-commercial use
+      b) Proper attribution in publications
+      c) No commercial exploitation of research results
 
-   b) Retain all copyright notices and attributions.
+3.5 **Modifications for Internal Use:**
+    - Modify and create Derivative Works for internal use only
+    - Customize for your specific requirements
+    - Extend functionality for internal applications
+    - Provided:
+      a) Modifications remain confidential
+      b) No distribution to Third Parties
+      c) Compliance with all license terms
 
-   c) Clearly indicate any modifications you have made.
+3.6 **Contractor Access:**
+    - Provide access to contractors working on your behalf
+    - Include in contractor development environments
+    - Provided:
+      a) Contractors sign agreements to be bound by this License
+      b) Access is limited to work performed for you
+      c) Contractors do not retain rights post-engagement
+      d) You remain responsible for contractor compliance
 
-   d) Include the following attribution in any user-facing documentation or
-      about screens:
+### 4. PATENT LICENSE AND COVENANT
 
+4.1 **Patent Grant:**
+    Subject to the terms of this License, AICUBE TECHNOLOGY LLC grants you
+    a limited, non-exclusive, non-transferable, revocable patent license to
+    make, use, and run unmodified copies of the Licensed Work, where such
+    license applies only to patent claims licensable by AICUBE TECHNOLOGY LLC
+    that are necessarily infringed by the unmodified Licensed Work.
+
+4.2 **Patent Termination:**
+    If you initiate patent litigation (including cross-claims or
+    counterclaims) against AICUBE TECHNOLOGY LLC or any entity alleging
+    that the Licensed Work or any Derivative Work infringes any patent,
+    then all patent licenses granted under this License terminate
+    immediately.
+
+4.3 **Patent Non-Assert:**
+    You covenant not to assert any patent claims against AICUBE TECHNOLOGY
+    LLC, its affiliates, licensees, or customers based on any use of the
+    Licensed Work that complies with this License.
+
+4.4 **Defensive Termination:**
+    If you or your affiliates file patent applications covering inventions
+    disclosed in or derived from the Licensed Work, all rights under this
+    License terminate automatically.
+
+### 5. ENHANCED ATTRIBUTION AND NOTICE REQUIREMENTS
+
+5.1 **Source Code Attribution:**
+    All source code distributions must:
+    - Include complete copy of this License in the root directory
+    - Retain all copyright, patent, trademark, and attribution notices
+    - Maintain all AICUBE TECHNOLOGY LLC proprietary headers
+    - Include prominent notice of any modifications made
+    - Preserve all license compatibility statements
+
+5.2 **Binary Distribution Attribution:**
+    All binary distributions must:
+    - Include complete copy of this License
+    - Provide clear access to corresponding source code
+    - Display AICUBE TECHNOLOGY LLC copyright in documentation
+    - Include attribution in any installer or setup program
+
+5.3 **Application Attribution:**
+    Applications using the Licensed Work must include:
+    - Prominent display in "About" or "Credits" section:
       "Powered by QilbeeDB - Copyright (c) 2024-2025 AICUBE TECHNOLOGY LLC"
+    - Link to https://qilbeedb.io where technically feasible
+    - Attribution in user documentation and technical documentation
+    - Credit in any marketing materials mentioning database technology
 
-5. COMMERCIAL LICENSING
+5.4 **Modified Work Notice:**
+    Modified versions must:
+    - Clearly indicate changes made and dates of modifications
+    - Use different version numbers than official releases
+    - Not represent modified versions as official QilbeeDB releases
+    - Include "Modified Version" label in all user-facing materials
 
-   For uses not permitted under this License, commercial licenses are
-   available from AICUBE TECHNOLOGY LLC. Contact: licensing@aicube.ca
+5.5 **Publication Attribution:**
+    Academic publications, research papers, or technical articles using
+    the Licensed Work must:
+    - Cite QilbeeDB in methodology sections
+    - Include bibliographic reference to official QilbeeDB documentation
+    - Acknowledge AICUBE TECHNOLOGY LLC in acknowledgments section
+    - Provide proper attribution in any performance benchmarks
 
-6. INTELLECTUAL PROPERTY
+### 6. AUDIT RIGHTS AND COMPLIANCE
 
-   AICUBE TECHNOLOGY LLC retains all right, title, and interest in and to the
-   Licensed Work, including all intellectual property rights. This License
-   does not grant you any ownership rights in the Licensed Work.
+6.1 **Audit Rights:**
+    AICUBE TECHNOLOGY LLC reserves the right, upon reasonable notice, to:
+    - Audit your use of the Licensed Work for compliance
+    - Request documentation of deployment and usage
+    - Verify permitted use conditions are satisfied
+    - Inspect implementations to ensure license compliance
 
-7. NO TRADEMARK LICENSE
+6.2 **Documentation Requirements:**
+    You must maintain and provide upon request:
+    - Records of all installations and deployments
+    - Documentation of Derivative Works created
+    - Information about distribution to contractors
+    - Evidence of attribution compliance
+    - Details of any embedded use cases
 
-   This License does not grant permission to use the trade names, trademarks,
-   service marks, or product names of AICUBE TECHNOLOGY LLC, except as
-   required for describing the origin of the Licensed Work and reproducing
-   the content of this License.
+6.3 **Compliance Certification:**
+    You may be required to provide written certification annually that:
+    - Your use complies with all license terms
+    - No prohibited uses have occurred
+    - All Third Party access has been properly licensed
+    - Attribution requirements have been satisfied
 
-8. TERMINATION
+6.4 **Audit Costs:**
+    If an audit reveals non-compliance exceeding 5% of deployments or
+    usage, you shall reimburse AICUBE TECHNOLOGY LLC for reasonable audit
+    costs.
 
-   a) This License and the rights granted hereunder will terminate
-      automatically if you fail to comply with the terms herein.
+6.5 **Remediation:**
+    Upon discovery of non-compliance, you must:
+    - Immediately cease non-compliant activities
+    - Provide detailed remediation plan within 15 days
+    - Implement remediation within 30 days
+    - Obtain commercial licenses for non-compliant uses retroactively
 
-   b) Upon termination, you must cease all use of the Licensed Work and
-      destroy all copies in your possession.
+### 7. CONFIDENTIALITY OF PROPRIETARY COMPONENTS
 
-   c) Sections 6, 7, 9, and 10 shall survive termination.
+7.1 **Confidential Information:**
+    You acknowledge that Proprietary Components constitute confidential
+    and proprietary information of AICUBE TECHNOLOGY LLC, including:
+    - Source code implementation details
+    - Algorithm designs and optimizations
+    - Performance tuning techniques
+    - Architectural decisions and trade-offs
+    - Internal APIs and data structures
 
-9. DISCLAIMER OF WARRANTIES
+7.2 **Confidentiality Obligations:**
+    You agree to:
+    - Maintain strict confidentiality of Proprietary Components
+    - Not disclose implementation details to Third Parties
+    - Use reasonable security measures to protect source code
+    - Limit access to personnel with legitimate need
+    - Not discuss proprietary algorithms in public forums
 
-   THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
-   NON-INFRINGEMENT. IN NO EVENT SHALL AICUBE TECHNOLOGY LLC BE LIABLE FOR
-   ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-   TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
-   LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
+7.3 **Permitted Disclosures:**
+    Confidentiality obligations do not apply to information that:
+    - Becomes publicly available through no fault of yours
+    - Was rightfully in your possession before disclosure
+    - Is independently developed without reference to Licensed Work
+    - Must be disclosed pursuant to legal requirement with notice to
+      AICUBE TECHNOLOGY LLC
 
-10. LIMITATION OF LIABILITY
+7.4 **Duration:**
+    Confidentiality obligations survive termination and continue until
+    information becomes publicly available through authorized disclosure
+    or Change Date occurs.
 
-    TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
-    AICUBE TECHNOLOGY LLC BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
-    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-    PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-    LICENSED WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+### 8. COMMERCIAL LICENSING
 
-11. GOVERNING LAW
+8.1 **Commercial License Availability:**
+    For uses not permitted under this License, commercial licenses are
+    available from AICUBE TECHNOLOGY LLC with terms including:
+    - Database-as-a-Service offerings
+    - Competitive product development
+    - OEM and white-label distributions
+    - Cloud marketplace offerings
+    - Enterprise support and warranties
 
-    This License shall be governed by and construed in accordance with the
-    laws of the State of Delaware, United States of America, without regard
-    to conflicts of law principles.
+8.2 **Contact Information:**
+    Commercial licensing inquiries:
+    - Email: licensing@aicube.ca
+    - Website: https://aicube.ca
+    - Subject: QilbeeDB Commercial License Request
 
-12. ENTIRE AGREEMENT
+8.3 **Pricing Models:**
+    Commercial licenses available with various models:
+    - Per-instance licensing
+    - Subscription-based licensing
+    - Enterprise site licenses
+    - OEM redistribution rights
+    - Custom partnership agreements
 
-    This License constitutes the entire agreement between you and AICUBE
-    TECHNOLOGY LLC concerning the Licensed Work and supersedes all prior or
-    contemporaneous oral or written communications, proposals, and
-    representations with respect to the Licensed Work.
+8.4 **Negotiation:**
+    License terms, pricing, and conditions are subject to negotiation
+    based on use case, scale, and commercial requirements.
+
+### 9. INTELLECTUAL PROPERTY RIGHTS
+
+9.1 **Ownership:**
+    AICUBE TECHNOLOGY LLC retains all right, title, and interest in and
+    to the Licensed Work, including:
+    - All copyrights and moral rights
+    - All patent rights and inventions
+    - All trade secrets and confidential information
+    - All trademarks and service marks
+    - All other intellectual property rights
+
+9.2 **No Transfer:**
+    This License grants only the limited rights expressly stated herein.
+    No ownership rights, title, or interest in the Licensed Work
+    transfers to you under this License.
+
+9.3 **Derivative Work IP:**
+    While you may create Derivative Works under permitted uses:
+    - AICUBE TECHNOLOGY LLC retains all rights in original components
+    - You own only original contributions you add
+    - Derivative Works remain subject to this License
+    - Distribution of Derivative Works requires compliance with all terms
+
+9.4 **Contributions:**
+    Any contributions, feedback, or suggestions you provide regarding
+    the Licensed Work may be used by AICUBE TECHNOLOGY LLC without
+    obligation or compensation, and you hereby grant AICUBE TECHNOLOGY LLC
+    all necessary rights to use such contributions.
+
+9.5 **Patents and Innovations:**
+    If the Licensed Work embodies any patented or patentable inventions:
+    - All patent rights remain with AICUBE TECHNOLOGY LLC
+    - Use license is subject to patent license terms in Section 4
+    - You may not file patent applications covering embodied inventions
+    - Derivative inventions may be claimed only for genuinely new
+      contributions
+
+### 10. NO TRADEMARK LICENSE
+
+10.1 **Trademark Restrictions:**
+     This License does not grant permission to use:
+     - Trade names: "AICUBE", "AICUBE TECHNOLOGY", "QilbeeDB"
+     - Trademarks: QilbeeDB logo and design marks
+     - Service marks: Any service offerings marks
+     - Product names: Official product designations
+     - Domain names: aicube.ca, qilbeedb.io, or confusingly similar
+
+10.2 **Exceptions:**
+     Trademark use permitted only as required for:
+     - Accurately describing origin of Licensed Work
+     - Reproducing content of this License
+     - Factual attribution statements
+     - Compatibility claims that are truthful and not misleading
+
+10.3 **Proper Attribution Format:**
+     When referring to the Licensed Work, use formats such as:
+     - "Based on QilbeeDB technology"
+     - "Built with QilbeeDB by AICUBE TECHNOLOGY LLC"
+     - "Powered by QilbeeDB"
+     Without implying endorsement or affiliation
+
+10.4 **Brand Guidelines:**
+     Any permitted trademark use must comply with AICUBE TECHNOLOGY LLC
+     brand guidelines available at https://aicube.ca/brand-guidelines
+
+### 11. TERMINATION AND CONSEQUENCES
+
+11.1 **Automatic Termination:**
+     This License and all rights granted terminate automatically if you:
+     - Violate any provision of this License
+     - Fail to cure breach within 15 days of written notice
+     - Initiate patent litigation as described in Section 4.2
+     - Challenge validity of AICUBE TECHNOLOGY LLC IP rights
+     - Use the Licensed Work for prohibited purposes
+
+11.2 **Termination for Convenience:**
+     AICUBE TECHNOLOGY LLC may terminate this License:
+     - For persistent non-compliance after multiple warnings
+     - If you become competitor or affiliate of competitor
+     - Upon material misrepresentation in compliance certifications
+     - With 30 days notice for any reason with refund of prepaid fees
+
+11.3 **Obligations Upon Termination:**
+     Immediately upon termination, you must:
+     - Cease all use of the Licensed Work
+     - Destroy or return all copies in any form
+     - Delete all installations and deployments
+     - Certify destruction in writing within 10 days
+     - Cease all distribution of Derivative Works
+     - Remove all public references and attributions
+
+11.4 **Survival:**
+     The following provisions survive termination:
+     - Section 6 (Audit Rights) - for 2 years post-termination
+     - Section 7 (Confidentiality) - indefinitely until public disclosure
+     - Section 9 (Intellectual Property Rights) - indefinitely
+     - Section 10 (No Trademark License) - indefinitely
+     - Section 13 (Indemnification) - indefinitely
+     - Section 14 (Limitation of Liability) - indefinitely
+     - Section 16 (Governing Law and Dispute Resolution) - indefinitely
+
+11.5 **Effect on Sublicensees:**
+     Termination of your license automatically terminates all sublicenses
+     (if any were granted in violation of this License).
+
+11.6 **Right to Injunctive Relief:**
+     You acknowledge that breach may cause irreparable harm for which
+     monetary damages are inadequate, and AICUBE TECHNOLOGY LLC is
+     entitled to seek injunctive relief without posting bond.
+
+### 12. WARRANTY DISCLAIMER
+
+12.1 **AS-IS BASIS:**
+     THE LICENSED WORK IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT
+     WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT
+     LIMITED TO:
+     - MERCHANTABILITY
+     - FITNESS FOR A PARTICULAR PURPOSE
+     - TITLE
+     - NON-INFRINGEMENT
+     - ACCURACY OR COMPLETENESS
+     - RELIABILITY OR AVAILABILITY
+     - SECURITY OR FREEDOM FROM VIRUSES
+     - QUIET ENJOYMENT
+     - INTEGRATION OR COMPATIBILITY
+     - CONFORMITY TO DESCRIPTION
+
+12.2 **No Representations:**
+     AICUBE TECHNOLOGY LLC makes no representations or warranties that:
+     - The Licensed Work will meet your requirements
+     - Operation will be uninterrupted or error-free
+     - Defects will be corrected
+     - The Licensed Work is free from harmful components
+     - Results obtained will be accurate or reliable
+
+12.3 **Your Responsibility:**
+     You assume all risks and responsibility for:
+     - Selection of the Licensed Work for your purposes
+     - Installation, use, and results obtained
+     - Backup and disaster recovery procedures
+     - Data loss prevention and security measures
+
+12.4 **No Support Obligation:**
+     AICUBE TECHNOLOGY LLC has no obligation to provide:
+     - Technical support or assistance
+     - Updates, patches, or bug fixes
+     - Training or documentation beyond what's provided
+     - Compatibility with future versions
+
+### 13. INDEMNIFICATION
+
+13.1 **Your Indemnification Obligations:**
+     You agree to indemnify, defend, and hold harmless AICUBE TECHNOLOGY
+     LLC, its affiliates, officers, directors, employees, agents, and
+     licensors from and against any and all claims, liabilities, damages,
+     losses, costs, expenses (including reasonable attorneys' fees and
+     court costs) arising from or relating to:
+
+     a) Your use or misuse of the Licensed Work
+     b) Your violation of this License
+     c) Your violation of any third-party rights
+     d) Your Derivative Works or modifications
+     e) Your distribution or sublicensing activities
+     f) Any claims by your customers or end users
+     g) Your breach of confidentiality obligations
+     h) Your violation of applicable laws or regulations
+     i) Any negligent or wrongful acts or omissions
+
+13.2 **Defense and Settlement:**
+     AICUBE TECHNOLOGY LLC may, at its option:
+     - Assume exclusive defense and control of any matter subject to
+       indemnification
+     - Require your participation in defense at your expense
+     - Approve any settlement that may affect its rights or interests
+     You may not settle any claim without prior written consent.
+
+13.3 **Cooperation:**
+     You agree to cooperate fully with AICUBE TECHNOLOGY LLC in the
+     defense of any claims, providing information, documents, and
+     testimony as reasonably requested.
+
+### 14. LIMITATION OF LIABILITY
+
+14.1 **Exclusion of Damages:**
+     TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL
+     AICUBE TECHNOLOGY LLC, ITS AFFILIATES, OFFICERS, DIRECTORS,
+     EMPLOYEES, AGENTS, OR LICENSORS BE LIABLE FOR ANY:
+
+     - INDIRECT DAMAGES
+     - INCIDENTAL DAMAGES
+     - SPECIAL DAMAGES
+     - EXEMPLARY DAMAGES
+     - PUNITIVE DAMAGES
+     - CONSEQUENTIAL DAMAGES
+     - LOST PROFITS OR REVENUE
+     - LOSS OF USE OR DATA
+     - LOSS OF GOODWILL
+     - BUSINESS INTERRUPTION
+     - COST OF SUBSTITUTE GOODS OR SERVICES
+     - LOSS OF BUSINESS OPPORTUNITY
+     - LOSS OF ANTICIPATED SAVINGS
+
+     WHETHER BASED ON CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT
+     LIABILITY, OR ANY OTHER LEGAL THEORY, EVEN IF ADVISED OF THE
+     POSSIBILITY OF SUCH DAMAGES.
+
+14.2 **Cap on Direct Damages:**
+     AICUBE TECHNOLOGY LLC's total aggregate liability for any and all
+     claims arising from or related to this License or the Licensed Work
+     shall not exceed the greater of:
+     - US $100 (one hundred dollars), or
+     - Amounts actually paid by you to AICUBE TECHNOLOGY LLC for
+       commercial licenses (if any) in the 12 months preceding the claim
+
+14.3 **Allocation of Risk:**
+     You acknowledge that these limitations of liability reflect the
+     allocation of risk between the parties and that AICUBE TECHNOLOGY LLC
+     would not provide the Licensed Work without these limitations.
+
+14.4 **Essential Purpose:**
+     The limitations in this section apply even if any limited remedy
+     fails its essential purpose.
+
+14.5 **Jurisdiction-Specific Limits:**
+     Some jurisdictions do not allow exclusion of implied warranties or
+     limitation of liability for incidental or consequential damages.
+     In such jurisdictions, liability is limited to the maximum extent
+     permitted by law.
+
+### 15. EXPORT COMPLIANCE
+
+15.1 **Export Control:**
+     The Licensed Work may be subject to export control laws and
+     regulations of the United States and other jurisdictions. You agree:
+     - To comply with all applicable export and import control laws
+     - Not to export, re-export, or transfer the Licensed Work to
+       prohibited countries or entities
+     - Not to use the Licensed Work for prohibited end-uses
+     - To obtain all necessary licenses and authorizations
+
+15.2 **Restricted Parties:**
+     You represent that neither you nor your end users are:
+     - Listed on any U.S. government denied-parties list
+     - Located in or nationals of embargoed countries
+     - Subject to any trade sanctions or restrictions
+     - Engaged in activities related to weapons proliferation
+
+15.3 **Encryption:**
+     The Licensed Work may contain encryption technology. You acknowledge
+     responsibility for compliance with encryption export regulations.
+
+15.4 **Your Responsibility:**
+     You are solely responsible for determining export classification
+     and obtaining necessary authorizations for your specific use cases.
+
+### 16. GOVERNING LAW AND DISPUTE RESOLUTION
+
+16.1 **Governing Law:**
+     This License shall be governed by and construed in accordance with
+     the laws of the State of Delaware, United States of America,
+     without regard to its conflicts of law principles.
+
+16.2 **Jurisdiction and Venue:**
+     The parties irrevocably consent to the exclusive jurisdiction and
+     venue of the state and federal courts located in Delaware for any
+     disputes arising from this License.
+
+16.3 **Waiver of Jury Trial:**
+     EACH PARTY IRREVOCABLY WAIVES ANY RIGHT TO TRIAL BY JURY IN ANY
+     ACTION OR PROCEEDING ARISING OUT OF OR RELATED TO THIS LICENSE.
+
+16.4 **Dispute Resolution Process:**
+     Before initiating litigation, parties agree to attempt resolution
+     through:
+     1. Good faith negotiations for 30 days
+     2. Mediation with mutually agreed mediator for 30 days
+     3. Litigation only if mediation is unsuccessful
+
+16.5 **Injunctive Relief:**
+     Notwithstanding the above, either party may seek immediate
+     injunctive relief in any court of competent jurisdiction to prevent
+     irreparable harm.
+
+16.6 **Attorneys' Fees:**
+     In any litigation, the prevailing party shall be entitled to recover
+     reasonable attorneys' fees, costs, and expenses.
+
+### 17. GENERAL PROVISIONS
+
+17.1 **Entire Agreement:**
+     This License constitutes the entire agreement between you and
+     AICUBE TECHNOLOGY LLC concerning the Licensed Work and supersedes
+     all prior or contemporaneous oral or written communications,
+     proposals, representations, understandings, and agreements.
+
+17.2 **Amendments:**
+     AICUBE TECHNOLOGY LLC may update this License from time to time.
+     Updated versions will be posted at https://github.com/aicubetechnology/qilbeeDB/edit/main/LICENSE
+     - Continued use after update constitutes acceptance
+     - Material changes will be announced with 30 days notice
+     - You may terminate if you disagree with material changes
+
+17.3 **Severability:**
+     If any provision is found invalid or unenforceable, it shall be
+     modified to the minimum extent necessary to make it valid and
+     enforceable, or if not possible, severed, and the remainder shall
+     continue in full force and effect.
+
+17.4 **Waiver:**
+     No waiver of any provision shall be effective unless in writing and
+     signed by AICUBE TECHNOLOGY LLC. Failure to enforce any right or
+     provision does not constitute waiver of such right or provision.
+
+17.5 **Assignment:**
+     You may not assign, transfer, or delegate this License or any rights
+     or obligations hereunder without prior written consent of AICUBE
+     TECHNOLOGY LLC. Any attempted assignment in violation is void.
+     AICUBE TECHNOLOGY LLC may freely assign this License.
+
+17.6 **Force Majeure:**
+     Neither party shall be liable for failure or delay in performance
+     due to causes beyond reasonable control, including acts of God,
+     war, terrorism, labor disputes, or government actions.
+
+17.7 **Notices:**
+     All notices must be in writing and sent to:
+     - AICUBE TECHNOLOGY LLC: contact@aicube.ca
+     - You: Your registered email address or last known address
+
+17.8 **Headings:**
+     Section headings are for convenience only and do not affect
+     interpretation of this License.
+
+17.9 **Language:**
+     This License is executed in English. Any translation is for
+     convenience only, and the English version shall govern in case of
+     conflicts.
+
+17.10 **Counterparts:**
+      This License may be executed in counterparts, each of which shall
+      be deemed an original and together constitute one instrument.
+
+### 18. THIRD-PARTY COMPONENTS
+
+18.1 **Open Source Components:**
+     The Licensed Work may include third-party open source components.
+     Such components remain subject to their original licenses, which
+     are included in the distribution.
+
+18.2 **No Additional Restrictions:**
+     You may not impose additional restrictions on third-party open
+     source components beyond those in their original licenses.
+
+18.3 **Component Listing:**
+     A complete listing of third-party components and licenses is
+     available in the THIRD-PARTY-LICENSES.md file.
+
+### 19. DATA PRIVACY AND SECURITY
+
+19.1 **No Data Collection:**
+     AICUBE TECHNOLOGY LLC does not collect telemetry or usage data from
+     the Licensed Work unless you explicitly enable such features.
+
+19.2 **Your Responsibilities:**
+     You are solely responsible for:
+     - Compliance with applicable data protection laws
+     - Security of data stored in the Licensed Work
+     - Obtaining necessary consents for data processing
+     - Implementing appropriate security measures
+
+19.3 **Security Vulnerabilities:**
+     To report security vulnerabilities:
+     - Email: contact@aicube.ca
+     - Use encrypted communication when providing details
+     - Allow reasonable time for response before public disclosure
+
+### 20. FEEDBACK AND IMPROVEMENTS
+
+20.1 **Voluntary Feedback:**
+     Any feedback, suggestions, or ideas you provide regarding the
+     Licensed Work are voluntary and non-confidential.
+
+20.2 **License to Use:**
+     By providing feedback, you grant AICUBE TECHNOLOGY LLC a perpetual,
+     irrevocable, worldwide, royalty-free license to use, modify,
+     incorporate, and commercialize such feedback without obligation.
+
+20.3 **No Obligation:**
+     AICUBE TECHNOLOGY LLC has no obligation to:
+     - Use or implement feedback
+     - Provide attribution for incorporated feedback
+     - Compensate for feedback
 
 -----------------------------------------------------------------------------
 
-For commercial licensing inquiries, please contact:
+## ACCEPTANCE OF TERMS
 
-AICUBE TECHNOLOGY LLC
-Email: licensing@aicube.ca
-Website: https://aicube.ca
+BY USING, COPYING, MODIFYING, OR DISTRIBUTING THE LICENSED WORK, YOU
+ACKNOWLEDGE THAT YOU HAVE READ THIS LICENSE, UNDERSTAND IT, AND AGREE TO
+BE BOUND BY ITS TERMS AND CONDITIONS.
 
-For support and documentation:
-Website: https://qilbeedb.io
-Documentation: https://docs.qilbeedb.io
+IF YOU DO NOT AGREE TO THESE TERMS, YOU MUST NOT USE THE LICENSED WORK
+AND MUST DESTROY ALL COPIES IN YOUR POSSESSION.
+
+IF YOU ARE ACCEPTING THIS LICENSE ON BEHALF OF AN ORGANIZATION, YOU
+REPRESENT AND WARRANT THAT YOU HAVE AUTHORITY TO BIND THAT ORGANIZATION
+TO THIS LICENSE, AND YOUR ACCEPTANCE BINDS THAT ORGANIZATION.
+
+-----------------------------------------------------------------------------
+
+## CONTACT INFORMATION
+
+**AICUBE TECHNOLOGY LLC**
+
+**Commercial Licensing:**
+- Email: contact@aicube.ca
+- Website: https://aicube.ca
+
+**Technical Support (Commercial Licensees Only):**
+- Email: contact@aicube.ca
+- Documentation: https://docs.qilbeedb.io
+
+**Security Issues:**
+- Email: contact@aicube.ca
+
+**General Inquiries:**
+- Website: https://qilbeedb.io
+- Email: contact@aicube.ca
+
+**Legal Department:**
+- Email: contact@aicube.ca
+
+-----------------------------------------------------------------------------
+
+## VERSION INFORMATION
+
+**License Version:** 1.1-Enhanced  
+**Effective Date:** January 1, 2025  
+**Last Updated:** November 15, 2025  
+**Replaces:** Business Source License 1.1 (Standard)
+
+-----------------------------------------------------------------------------
+
+END OF LICENSE
