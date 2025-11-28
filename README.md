@@ -5,7 +5,7 @@
 
 **Enterprise-Grade Graph Database with Bi-Temporal Agent Memory**
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-BSL%201.1-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![Documentation](https://img.shields.io/badge/docs-online-green.svg)](https://docs.qilbeedb.io/)
 [![GitHub](https://img.shields.io/github/stars/aicubetechnology/qilbeeDB?style=social)](https://github.com/aicubetechnology/qilbeeDB)
@@ -404,22 +404,36 @@ See our [benchmark documentation](https://docs.qilbeedb.io/operations/performanc
 
 ## 📄 License
 
-QilbeeDB is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+QilbeeDB is licensed under the **Business Source License 1.1 (BSL 1.1)**. See [LICENSE](LICENSE) for full details.
+
+### Key License Terms
+
+- **Licensor**: AICUBE TECHNOLOGY LLC (Delaware, USA)
+- **Change Date**: January 1, 2029
+- **Change License**: Apache License, Version 2.0
+
+### What You CAN Do
+
+- Use QilbeeDB for internal business operations
+- Develop applications that embed QilbeeDB
+- Modify and create derivative works for internal use
+- Use for research, education, and non-commercial purposes
+- Distribute to contractors working on your behalf
+
+### What You CANNOT Do (Without Commercial License)
+
+- Offer QilbeeDB as a Database-as-a-Service (DBaaS)
+- Sell, lease, or sublicense as a standalone database product
+- Provide database hosting services to third parties
+
+### Commercial Licensing
+
+For uses not permitted under BSL 1.1, commercial licenses are available.
+Contact: licensing@aicube.ca
 
 ```
-Copyright 2024 AICUBE TECHNOLOGY LLC
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Copyright (c) 2024-2025 AICUBE TECHNOLOGY LLC. All Rights Reserved.
+Licensed under the Business Source License 1.1
 ```
 
 ## 🙏 Acknowledgments
