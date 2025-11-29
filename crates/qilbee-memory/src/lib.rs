@@ -15,12 +15,28 @@
 //! - Memory consolidation (STM -> LTM)
 //! - Active forgetting with relevance decay
 //! - Temporal queries and time-travel
+//! - Persistent storage with RocksDB backend
+//! - Write-ahead logging for durability
 
 pub mod agent;
 pub mod consolidation;
+pub mod embeddings;
 pub mod episode;
+pub mod storage;
 pub mod types;
+pub mod vector_index;
 
-pub use agent::{AgentMemory, MemoryStatistics};
+pub use agent::{
+    AgentMemory, HybridSearchResult, MemoryStatistics, PersistentAgentMemory, SemanticSearchConfig,
+    SemanticSearchResult,
+};
+pub use embeddings::{
+    cosine_similarity, create_provider, dot_product, euclidean_distance, find_top_k,
+    normalize_vector, similarity, EmbeddingConfig, EmbeddingError, EmbeddingProvider,
+    EmbeddingProviderType, EmbeddingResult, MockEmbeddingProvider, SimilarityMetric,
+    SimilarityResult,
+};
 pub use episode::{Episode, EpisodeContent, EpisodeType};
+pub use storage::{InMemoryStorage, MemoryStorage, MemoryStorageConfig, RocksDbMemoryStorage};
 pub use types::{MemoryConfig, MemoryType};
+pub use vector_index::{HnswConfig, HnswError, HnswIndex, HnswResult, SearchResult};

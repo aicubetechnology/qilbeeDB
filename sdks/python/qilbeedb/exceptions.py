@@ -71,3 +71,23 @@ class RateLimitError(QilbeeDBError):
 class SecurityError(QilbeeDBError):
     """General security-related error."""
     pass
+
+
+class NotFoundError(QilbeeDBError):
+    """Resource not found (404)."""
+    pass
+
+
+class ValidationError(QilbeeDBError):
+    """Request validation failed (400)."""
+    pass
+
+
+class ServerError(QilbeeDBError):
+    """Server-side error (500)."""
+    pass
+
+
+class TimeoutError(QilbeeDBError):
+    """Request timed out."""
+    pass

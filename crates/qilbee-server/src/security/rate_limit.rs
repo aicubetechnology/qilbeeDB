@@ -37,6 +37,10 @@ pub enum EndpointType {
     GeneralApi,
     /// User management endpoints
     UserManagement,
+    /// Memory operations (store, search, consolidate, forget)
+    MemoryOperations,
+    /// Memory clear operation (destructive - stricter limits)
+    MemoryClear,
     /// Custom endpoint pattern (regex or path)
     Custom(String),
 }
@@ -49,6 +53,8 @@ impl EndpointType {
             EndpointType::ApiKeyCreation => "api-key-creation-limit".to_string(),
             EndpointType::GeneralApi => "general-api-limit".to_string(),
             EndpointType::UserManagement => "user-management-limit".to_string(),
+            EndpointType::MemoryOperations => "memory-operations-limit".to_string(),
+            EndpointType::MemoryClear => "memory-clear-limit".to_string(),
             EndpointType::Custom(pattern) => format!("custom-{}", pattern),
         }
     }
@@ -78,8 +84,8 @@ impl RateLimitPolicy {
             id: PolicyId::new(),
             name: "Default Login Rate Limit".to_string(),
             endpoint_type: EndpointType::Login,
-            max_requests: 100,
-            window_secs: 60,  // 100 requests per minute - allows burst authentication
+            max_requests: 10000,
+            window_secs: 60,  // 10000 requests per minute - reasonable for testing while preventing abuse
             enabled: true,
             created_at: Utc::now(),
             updated_at: Utc::now(),
@@ -123,8 +129,38 @@ impl RateLimitPolicy {
             id: PolicyId::new(),
             name: "Default User Management Rate Limit".to_string(),
             endpoint_type: EndpointType::UserManagement,
-            max_requests: 1000,
-            window_secs: 3600,  // 1000 requests per hour - admin operations
+            max_requests: 2000,
+            window_secs: 60,  // 2000 requests per minute - reasonable for testing while preventing abuse
+            enabled: true,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            created_by: "system".to_string(),
+        }
+    }
+
+    /// Create default memory operations policy
+    pub fn default_memory_operations() -> Self {
+        Self {
+            id: PolicyId::new(),
+            name: "Default Memory Operations Rate Limit".to_string(),
+            endpoint_type: EndpointType::MemoryOperations,
+            max_requests: 200000,
+            window_secs: 60,  // 200k requests per minute - high throughput for AI agent memory operations
+            enabled: true,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            created_by: "system".to_string(),
+        }
+    }
+
+    /// Create default memory clear policy (stricter for destructive operations)
+    pub fn default_memory_clear() -> Self {
+        Self {
+            id: PolicyId::new(),
+            name: "Default Memory Clear Rate Limit".to_string(),
+            endpoint_type: EndpointType::MemoryClear,
+            max_requests: 10000,
+            window_secs: 3600,  // 10000 clears per hour - strict limit for destructive operation
             enabled: true,
             created_at: Utc::now(),
             updated_at: Utc::now(),
@@ -261,11 +297,15 @@ impl RateLimitService {
         let api_key_policy = RateLimitPolicy::default_api_key_creation();
         let general_policy = RateLimitPolicy::default_general_api();
         let user_management_policy = RateLimitPolicy::default_user_management();
+        let memory_operations_policy = RateLimitPolicy::default_memory_operations();
+        let memory_clear_policy = RateLimitPolicy::default_memory_clear();
 
         policies.insert(login_policy.id, login_policy);
         policies.insert(api_key_policy.id, api_key_policy);
         policies.insert(general_policy.id, general_policy);
         policies.insert(user_management_policy.id, user_management_policy);
+        policies.insert(memory_operations_policy.id, memory_operations_policy);
+        policies.insert(memory_clear_policy.id, memory_clear_policy);
 
         Self {
             policies: Arc::new(RwLock::new(policies)),

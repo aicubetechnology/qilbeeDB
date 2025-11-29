@@ -60,6 +60,11 @@ pub enum AuditEventType {
     SystemStartup,
     SystemShutdown,
     ConfigurationChanged,
+
+    // Memory operation events
+    MemoryConsolidated,
+    MemoryForgotten,
+    MemoryCleared,
 }
 
 impl std::fmt::Display for AuditEventType {
@@ -91,6 +96,9 @@ impl std::fmt::Display for AuditEventType {
             AuditEventType::SystemStartup => write!(f, "system_startup"),
             AuditEventType::SystemShutdown => write!(f, "system_shutdown"),
             AuditEventType::ConfigurationChanged => write!(f, "configuration_changed"),
+            AuditEventType::MemoryConsolidated => write!(f, "memory_consolidated"),
+            AuditEventType::MemoryForgotten => write!(f, "memory_forgotten"),
+            AuditEventType::MemoryCleared => write!(f, "memory_cleared"),
         }
     }
 }
@@ -661,6 +669,30 @@ impl AuditService {
             ip_address,
             None,
             serde_json::json!({"endpoint": endpoint}),
+        );
+    }
+
+    /// Log memory operation event (consolidate, forget, clear)
+    pub fn log_memory_event(
+        &self,
+        event_type: AuditEventType,
+        user_id: Option<String>,
+        username: Option<String>,
+        agent_id: &str,
+        result: AuditResult,
+        ip_address: Option<String>,
+        metadata: serde_json::Value,
+    ) {
+        self.log_event(
+            event_type.clone(),
+            user_id,
+            username,
+            event_type.to_string(),
+            format!("agent_memory:{}", agent_id),
+            result,
+            ip_address,
+            None,
+            metadata,
         );
     }
 

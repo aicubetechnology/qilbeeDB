@@ -12,12 +12,14 @@ qilbee-graph = { workspace = true }
 
 serde = { workspace = true }
 serde_json = { workspace = true }
+bincode = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
+rocksdb = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

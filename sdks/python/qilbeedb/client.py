@@ -492,7 +492,7 @@ class QilbeeDB:
             raise AuthenticationError("Authentication failed")
 
         response.raise_for_status()
-        return response.json().get("api_keys", [])
+        return response.json().get("keys", [])
 
     def delete_api_key(self, key_id: str) -> bool:
         """

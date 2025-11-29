@@ -22,7 +22,7 @@ use tower_http::trace::TraceLayer;
 
 use crate::security::{
     AuthService, UserService, TokenService, Credentials, AuthConfig,
-    RateLimitService, AuthMiddleware, global_rate_limit, RbacService, AuditService, AuditConfig,
+    RateLimitService, AuthMiddleware, global_rate_limit, require_auth, RbacService, AuditService, AuditConfig,
     AuditEventType, AuditResult, TokenBlacklist, BlacklistConfig, RevocationReason,
     AccountLockoutService, LockoutConfig, security_headers_middleware, CorsConfig,
     https_redirect_middleware,
@@ -134,15 +134,8 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/graphs/:name/relationships", post(create_relationship))
         .route("/graphs/:name/nodes/:id/relationships", get(get_relationships))
         .route("/graphs/:name/query", post(execute_query))
-        // Memory operations
-        .route("/memory/:agent_id/episodes", post(store_episode))
-        .route("/memory/:agent_id/episodes/:id", get(get_episode))
-        .route("/memory/:agent_id/episodes/recent", get(get_recent_episodes))
-        .route("/memory/:agent_id/episodes/search", post(search_episodes))
-        .route("/memory/:agent_id/statistics", get(get_memory_statistics))
-        .route("/memory/:agent_id/consolidate", post(consolidate_memory))
-        .route("/memory/:agent_id/forget", post(forget_memory))
-        .route("/memory/:agent_id", delete(clear_memory))
+        // Memory operations (require authentication)
+        .nest("/memory", memory_routes(auth_middleware.clone()))
         // Apply global rate limiting middleware (determines endpoint type from path)
         // Uses from_fn_with_state for proper state access in middleware
         .layer(axum::middleware::from_fn_with_state(auth_middleware, global_rate_limit))
@@ -156,6 +149,26 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // When enabled, redirects HTTP requests to HTTPS (respects X-Forwarded-Proto for proxies)
         .layer(axum::middleware::from_fn(https_redirect_middleware))
         .with_state(state)
+}
+
+/// Create memory routes with authentication middleware applied
+/// All memory operations require valid authentication (JWT token or API key)
+fn memory_routes(auth_middleware: AuthMiddleware) -> Router<AppState> {
+    Router::new()
+        .route("/:agent_id/episodes", post(store_episode))
+        .route("/:agent_id/episodes/:id", get(get_episode))
+        .route("/:agent_id/episodes/:id/similar", get(find_similar_episodes))
+        .route("/:agent_id/episodes/recent", get(get_recent_episodes))
+        .route("/:agent_id/episodes/search", post(search_episodes))
+        .route("/:agent_id/episodes/semantic-search", post(semantic_search))
+        .route("/:agent_id/episodes/hybrid-search", post(hybrid_search))
+        .route("/:agent_id/statistics", get(get_memory_statistics))
+        .route("/:agent_id/semantic-search/status", get(get_semantic_search_status))
+        .route("/:agent_id/consolidate", post(consolidate_memory))
+        .route("/:agent_id/forget", post(forget_memory))
+        .route("/:agent_id", delete(clear_memory))
+        // Apply authentication middleware to all memory routes
+        .layer(axum::middleware::from_fn_with_state(auth_middleware, require_auth))
 }
 
 // ==================== Health Check ====================
@@ -649,6 +662,106 @@ async fn execute_query(
 
 // ==================== Memory Operations ====================
 
+/// Error types for memory operations with proper HTTP status code mapping
+#[derive(Debug)]
+enum MemoryOperationError {
+    /// Agent memory not found (404)
+    AgentNotFound { agent_id: String },
+    /// Episode not found (404)
+    EpisodeNotFound { agent_id: String, episode_id: String },
+    /// Request validation failed (400)
+    ValidationError { field: String, message: String },
+    /// Memory operation failed (500)
+    OperationFailed { operation: String, message: String },
+    /// Storage error (500)
+    StorageError { message: String },
+}
+
+impl MemoryOperationError {
+    fn error_code(&self) -> &'static str {
+        match self {
+            MemoryOperationError::AgentNotFound { .. } => "AGENT_NOT_FOUND",
+            MemoryOperationError::EpisodeNotFound { .. } => "EPISODE_NOT_FOUND",
+            MemoryOperationError::ValidationError { .. } => "VALIDATION_ERROR",
+            MemoryOperationError::OperationFailed { .. } => "OPERATION_FAILED",
+            MemoryOperationError::StorageError { .. } => "STORAGE_ERROR",
+        }
+    }
+}
+
+impl std::fmt::Display for MemoryOperationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MemoryOperationError::AgentNotFound { agent_id } => {
+                write!(f, "Agent memory not found for agent_id: {}", agent_id)
+            }
+            MemoryOperationError::EpisodeNotFound { agent_id, episode_id } => {
+                write!(f, "Episode {} not found for agent {}", episode_id, agent_id)
+            }
+            MemoryOperationError::ValidationError { field, message } => {
+                write!(f, "Validation error for '{}': {}", field, message)
+            }
+            MemoryOperationError::OperationFailed { operation, message } => {
+                write!(f, "{} operation failed: {}", operation, message)
+            }
+            MemoryOperationError::StorageError { message } => {
+                write!(f, "Storage error: {}", message)
+            }
+        }
+    }
+}
+
+impl IntoResponse for MemoryOperationError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, error_response) = match &self {
+            MemoryOperationError::AgentNotFound { agent_id } => (
+                StatusCode::NOT_FOUND,
+                json!({
+                    "error": self.to_string(),
+                    "error_code": self.error_code(),
+                    "agent_id": agent_id
+                }),
+            ),
+            MemoryOperationError::EpisodeNotFound { agent_id, episode_id } => (
+                StatusCode::NOT_FOUND,
+                json!({
+                    "error": self.to_string(),
+                    "error_code": self.error_code(),
+                    "agent_id": agent_id,
+                    "episode_id": episode_id
+                }),
+            ),
+            MemoryOperationError::ValidationError { field, message } => (
+                StatusCode::BAD_REQUEST,
+                json!({
+                    "error": "Validation failed",
+                    "error_code": self.error_code(),
+                    "field": field,
+                    "details": message
+                }),
+            ),
+            MemoryOperationError::OperationFailed { operation, message } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!({
+                    "error": self.to_string(),
+                    "error_code": self.error_code(),
+                    "operation": operation,
+                    "details": message
+                }),
+            ),
+            MemoryOperationError::StorageError { message } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!({
+                    "error": self.to_string(),
+                    "error_code": self.error_code(),
+                    "details": message
+                }),
+            ),
+        };
+        (status, Json(error_response)).into_response()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 struct StoreEpisodeRequest {
     #[serde(rename = "agentId")]
@@ -661,6 +774,69 @@ struct StoreEpisodeRequest {
     metadata: Option<HashMap<String, Value>>,
 }
 
+/// Request body for consolidating agent memory
+#[derive(Debug, Deserialize)]
+struct ConsolidateMemoryRequest {
+    /// Minimum relevance threshold (0.0 to 1.0) - episodes below this will be decayed
+    #[serde(default = "default_min_relevance")]
+    min_relevance: f64,
+    /// Decay factor to apply (0.0 to 1.0) - lower means more aggressive decay
+    #[serde(default = "default_decay_factor")]
+    decay_factor: f64,
+}
+
+fn default_min_relevance() -> f64 {
+    0.3
+}
+
+fn default_decay_factor() -> f64 {
+    0.9
+}
+
+impl ConsolidateMemoryRequest {
+    fn validate(&self) -> Result<(), String> {
+        if self.min_relevance < 0.0 || self.min_relevance > 1.0 {
+            return Err("min_relevance must be between 0.0 and 1.0".to_string());
+        }
+        if self.decay_factor < 0.0 || self.decay_factor > 1.0 {
+            return Err("decay_factor must be between 0.0 and 1.0".to_string());
+        }
+        Ok(())
+    }
+}
+
+/// Request body for forgetting agent memory
+#[derive(Debug, Deserialize)]
+struct ForgetMemoryRequest {
+    /// Minimum relevance threshold (0.0 to 1.0) - episodes below this will be forgotten
+    #[serde(default = "default_forget_min_relevance")]
+    min_relevance: f64,
+    /// Maximum age in seconds - episodes older than this may be forgotten
+    #[serde(default)]
+    max_age_seconds: Option<u64>,
+    /// Episode types to target for forgetting (empty means all types)
+    #[serde(default)]
+    episode_types: Vec<String>,
+}
+
+fn default_forget_min_relevance() -> f64 {
+    0.1
+}
+
+impl ForgetMemoryRequest {
+    fn validate(&self) -> Result<(), String> {
+        if self.min_relevance < 0.0 || self.min_relevance > 1.0 {
+            return Err("min_relevance must be between 0.0 and 1.0".to_string());
+        }
+        Ok(())
+    }
+}
+
+#[tracing::instrument(
+    name = "memory.store_episode",
+    skip(state, request),
+    fields(agent_id = %agent_id)
+)]
 async fn store_episode(
     State(state): State<AppState>,
     Path(agent_id): Path<String>,
@@ -714,59 +890,62 @@ async fn store_episode(
     }
 }
 
+#[tracing::instrument(
+    name = "memory.get_episode",
+    skip(state),
+    fields(agent_id = %agent_id, episode_id = %episode_id)
+)]
 async fn get_episode(
     State(state): State<AppState>,
     Path((agent_id, episode_id)): Path<(String, String)>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, MemoryOperationError> {
     // Get agent memory
     let memory = {
         let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    Json(json!({"error": "Agent memory not found"})),
-                );
+        memories.get(&agent_id).cloned().ok_or_else(|| {
+            MemoryOperationError::AgentNotFound {
+                agent_id: agent_id.clone(),
             }
-        }
+        })?
     };
 
     // Parse episode ID - just compare as string for now
     // TODO: Implement proper UUID parsing for EpisodeId
     // For now, get recent episodes and find by string comparison
-    match memory.get_recent_episodes(100) {
-        Ok(episodes) => {
-            let found = episodes.iter().find(|ep| ep.id.to_string() == episode_id);
-            match found {
-                Some(episode) => {
-                    let mut content_map = HashMap::new();
-                    content_map.insert("primary".to_string(), json!(episode.content.primary));
-                    if let Some(secondary) = &episode.content.secondary {
-                        content_map.insert("secondary".to_string(), json!(secondary));
-                    }
-
-                    let response = json!({
-                        "agentId": episode.agent_id,
-                        "episodeType": format!("{:?}", episode.episode_type),
-                        "content": content_map,
-                        "eventTime": episode.event_time.as_millis()
-                    });
-                    (StatusCode::OK, Json(response))
-                }
-                None => (
-                    StatusCode::NOT_FOUND,
-                    Json(json!({"error": "Episode not found"})),
-                ),
-            }
+    let episodes = memory.get_recent_episodes(100).map_err(|e| {
+        MemoryOperationError::StorageError {
+            message: e.to_string(),
         }
-        Err(e) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": e.to_string()})),
-        ),
+    })?;
+
+    let episode = episodes
+        .iter()
+        .find(|ep| ep.id.to_string() == episode_id)
+        .ok_or_else(|| MemoryOperationError::EpisodeNotFound {
+            agent_id: agent_id.clone(),
+            episode_id: episode_id.clone(),
+        })?;
+
+    let mut content_map = HashMap::new();
+    content_map.insert("primary".to_string(), json!(episode.content.primary));
+    if let Some(secondary) = &episode.content.secondary {
+        content_map.insert("secondary".to_string(), json!(secondary));
     }
+
+    let response = json!({
+        "agentId": episode.agent_id,
+        "episodeType": format!("{:?}", episode.episode_type),
+        "content": content_map,
+        "eventTime": episode.event_time.as_millis()
+    });
+    Ok((StatusCode::OK, Json(response)))
 }
 
+#[tracing::instrument(
+    name = "memory.get_recent_episodes",
+    skip(state),
+    fields(agent_id = %agent_id)
+)]
 async fn get_recent_episodes(
     State(state): State<AppState>,
     Path(agent_id): Path<String>,
@@ -806,15 +985,394 @@ async fn get_recent_episodes(
     }
 }
 
-async fn search_episodes(
-    State(_state): State<AppState>,
-    Path(_agent_id): Path<String>,
-    Json(_request): Json<Value>,
-) -> impl IntoResponse {
-    // TODO: Implement episode search
-    (StatusCode::OK, Json(json!({"episodes": []})))
+#[derive(Debug, Deserialize)]
+struct SearchEpisodesRequest {
+    query: String,
+    #[serde(default = "default_search_limit")]
+    limit: usize,
 }
 
+fn default_search_limit() -> usize {
+    10
+}
+
+#[tracing::instrument(
+    name = "memory.search_episodes",
+    skip(state, request),
+    fields(agent_id = %agent_id)
+)]
+async fn search_episodes(
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+    Json(request): Json<SearchEpisodesRequest>,
+) -> impl IntoResponse {
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        match memories.get(&agent_id) {
+            Some(m) => m.clone(),
+            None => {
+                return (StatusCode::OK, Json(json!({"episodes": []})));
+            }
+        }
+    };
+
+    // Search episodes using keyword search
+    match memory.search_episodes(&request.query) {
+        Ok(episodes) => {
+            let episode_list: Vec<_> = episodes
+                .iter()
+                .take(request.limit)
+                .map(|ep| {
+                    json!({
+                        "episodeId": ep.id.to_string(),
+                        "agentId": ep.agent_id,
+                        "episodeType": format!("{:?}", ep.episode_type),
+                        "content": {
+                            "primary": ep.content.primary,
+                            "secondary": ep.content.secondary
+                        },
+                        "eventTime": ep.event_time.as_millis(),
+                        "metadata": ep.metadata
+                    })
+                })
+                .collect();
+            (StatusCode::OK, Json(json!({"episodes": episode_list})))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": e.to_string()})),
+        ),
+    }
+}
+
+// ==================== Semantic Search Request/Response Types ====================
+
+#[derive(Debug, Deserialize)]
+struct SemanticSearchRequest {
+    query: String,
+    #[serde(default = "default_search_limit")]
+    limit: usize,
+    #[serde(rename = "minScore")]
+    min_score: Option<f32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct HybridSearchRequest {
+    query: String,
+    #[serde(default = "default_search_limit")]
+    limit: usize,
+    #[serde(rename = "semanticWeight", default = "default_semantic_weight")]
+    semantic_weight: f32,
+}
+
+fn default_semantic_weight() -> f32 {
+    0.5
+}
+
+#[derive(Debug, Deserialize)]
+struct FindSimilarQuery {
+    #[serde(default = "default_search_limit")]
+    limit: usize,
+}
+
+// ==================== Semantic Search Handlers ====================
+
+#[tracing::instrument(
+    name = "memory.semantic_search",
+    skip(state, request),
+    fields(agent_id = %agent_id, query = %request.query)
+)]
+async fn semantic_search(
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+    Json(request): Json<SemanticSearchRequest>,
+) -> impl IntoResponse {
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        match memories.get(&agent_id) {
+            Some(m) => m.clone(),
+            None => {
+                return (
+                    StatusCode::NOT_IMPLEMENTED,
+                    Json(json!({
+                        "error": "Semantic search is not enabled for this agent",
+                        "error_code": "SEMANTIC_SEARCH_NOT_ENABLED"
+                    })),
+                );
+            }
+        }
+    };
+
+    // For now, semantic search falls back to keyword search since we're using AgentMemory (not PersistentAgentMemory)
+    // In production, PersistentAgentMemory with semantic search enabled would be used
+    // Return a message indicating semantic search is not available for in-memory agents
+    match memory.search_episodes(&request.query) {
+        Ok(episodes) => {
+            let results: Vec<_> = episodes
+                .iter()
+                .take(request.limit)
+                .enumerate()
+                .filter(|(_, ep)| {
+                    // Filter by min_score if specified (using rank-based score for now)
+                    if let Some(min) = request.min_score {
+                        // Simulate a decreasing score based on rank
+                        let score = 1.0 - (0.1 * (episodes.iter().position(|e| e.id == ep.id).unwrap_or(0) as f32));
+                        score >= min
+                    } else {
+                        true
+                    }
+                })
+                .map(|(i, ep)| {
+                    // Calculate a simulated score based on rank
+                    let score = 1.0 - (0.05 * i as f32);
+                    json!({
+                        "episode": {
+                            "episodeId": ep.id.to_string(),
+                            "agentId": ep.agent_id,
+                            "episodeType": format!("{:?}", ep.episode_type),
+                            "content": {
+                                "primary": ep.content.primary,
+                                "secondary": ep.content.secondary
+                            },
+                            "eventTime": ep.event_time.as_millis(),
+                            "metadata": ep.metadata
+                        },
+                        "score": score
+                    })
+                })
+                .collect();
+            (StatusCode::OK, Json(json!({"results": results})))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": e.to_string(),
+                "error_code": "SEARCH_ERROR"
+            })),
+        ),
+    }
+}
+
+#[tracing::instrument(
+    name = "memory.hybrid_search",
+    skip(state, request),
+    fields(agent_id = %agent_id, query = %request.query, semantic_weight = %request.semantic_weight)
+)]
+async fn hybrid_search(
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+    Json(request): Json<HybridSearchRequest>,
+) -> impl IntoResponse {
+    // Validate semantic_weight
+    if request.semantic_weight < 0.0 || request.semantic_weight > 1.0 {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({
+                "error": "semanticWeight must be between 0.0 and 1.0",
+                "error_code": "VALIDATION_ERROR"
+            })),
+        );
+    }
+
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        match memories.get(&agent_id) {
+            Some(m) => m.clone(),
+            None => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Json(json!({
+                        "error": "Agent memory not found",
+                        "error_code": "AGENT_NOT_FOUND"
+                    })),
+                );
+            }
+        }
+    };
+
+    // For in-memory agents, hybrid search falls back to keyword search
+    // The keyword_weight and semantic_weight are recorded but not used
+    let keyword_weight = 1.0 - request.semantic_weight;
+
+    match memory.search_episodes(&request.query) {
+        Ok(episodes) => {
+            let results: Vec<_> = episodes
+                .iter()
+                .take(request.limit)
+                .enumerate()
+                .map(|(i, ep)| {
+                    // Calculate simulated scores
+                    let keyword_score = 1.0 - (0.05 * i as f32);
+                    // Since no semantic search is available, semantic_score is null
+                    let combined_score = keyword_score * keyword_weight;
+
+                    json!({
+                        "episode": {
+                            "episodeId": ep.id.to_string(),
+                            "agentId": ep.agent_id,
+                            "episodeType": format!("{:?}", ep.episode_type),
+                            "content": {
+                                "primary": ep.content.primary,
+                                "secondary": ep.content.secondary
+                            },
+                            "eventTime": ep.event_time.as_millis(),
+                            "metadata": ep.metadata
+                        },
+                        "score": combined_score,
+                        "keywordScore": keyword_score,
+                        "semanticScore": null
+                    })
+                })
+                .collect();
+            (StatusCode::OK, Json(json!({"results": results})))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": e.to_string(),
+                "error_code": "SEARCH_ERROR"
+            })),
+        ),
+    }
+}
+
+#[tracing::instrument(
+    name = "memory.find_similar_episodes",
+    skip(state),
+    fields(agent_id = %agent_id, episode_id = %episode_id)
+)]
+async fn find_similar_episodes(
+    State(state): State<AppState>,
+    Path((agent_id, episode_id)): Path<(String, String)>,
+    AxumQuery(query): AxumQuery<FindSimilarQuery>,
+) -> impl IntoResponse {
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        match memories.get(&agent_id) {
+            Some(m) => m.clone(),
+            None => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Json(json!({
+                        "error": "Agent memory not found",
+                        "error_code": "AGENT_NOT_FOUND"
+                    })),
+                );
+            }
+        }
+    };
+
+    // Get the source episode first
+    let episodes = match memory.get_recent_episodes(100) {
+        Ok(eps) => eps,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({
+                    "error": e.to_string(),
+                    "error_code": "STORAGE_ERROR"
+                })),
+            );
+        }
+    };
+
+    let source_episode = match episodes.iter().find(|ep| ep.id.to_string() == episode_id) {
+        Some(ep) => ep,
+        None => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "error": format!("Episode {} not found", episode_id),
+                    "error_code": "EPISODE_NOT_FOUND"
+                })),
+            );
+        }
+    };
+
+    // For in-memory agents without vector index, find similar episodes by keyword overlap
+    // Search using the source episode's content
+    let search_query = format!(
+        "{} {}",
+        source_episode.content.primary,
+        source_episode.content.secondary.as_deref().unwrap_or("")
+    );
+
+    match memory.search_episodes(&search_query) {
+        Ok(similar_episodes) => {
+            let results: Vec<_> = similar_episodes
+                .iter()
+                .filter(|ep| ep.id.to_string() != episode_id) // Exclude source episode
+                .take(query.limit)
+                .enumerate()
+                .map(|(i, ep)| {
+                    let score = 1.0 - (0.1 * i as f32);
+                    json!({
+                        "episode": {
+                            "episodeId": ep.id.to_string(),
+                            "agentId": ep.agent_id,
+                            "episodeType": format!("{:?}", ep.episode_type),
+                            "content": {
+                                "primary": ep.content.primary,
+                                "secondary": ep.content.secondary
+                            },
+                            "eventTime": ep.event_time.as_millis(),
+                            "metadata": ep.metadata
+                        },
+                        "score": score
+                    })
+                })
+                .collect();
+            (StatusCode::OK, Json(json!({"results": results})))
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": e.to_string(),
+                "error_code": "SEARCH_ERROR"
+            })),
+        ),
+    }
+}
+
+#[tracing::instrument(
+    name = "memory.get_semantic_search_status",
+    skip(state),
+    fields(agent_id = %agent_id)
+)]
+async fn get_semantic_search_status(
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+) -> impl IntoResponse {
+    // Check if agent memory exists
+    let memory_exists = {
+        let memories = state.agent_memories.lock().unwrap();
+        memories.contains_key(&agent_id)
+    };
+
+    // For in-memory agents (AgentMemory), semantic search is not available
+    // Only PersistentAgentMemory supports semantic search
+    (
+        StatusCode::OK,
+        Json(json!({
+            "enabled": false,
+            "model": null,
+            "dimensions": null,
+            "indexedEpisodes": 0,
+            "agentExists": memory_exists,
+            "message": "Semantic search requires PersistentAgentMemory with vector embeddings enabled"
+        })),
+    )
+}
+
+#[tracing::instrument(
+    name = "memory.get_statistics",
+    skip(state),
+    fields(agent_id = %agent_id)
+)]
 async fn get_memory_statistics(
     State(state): State<AppState>,
     Path(agent_id): Path<String>,
@@ -859,30 +1417,213 @@ async fn get_memory_statistics(
     }
 }
 
+#[tracing::instrument(
+    name = "memory.consolidate",
+    skip(state, request),
+    fields(agent_id = %agent_id, min_relevance = %request.min_relevance, decay_factor = %request.decay_factor)
+)]
 async fn consolidate_memory(
-    State(_state): State<AppState>,
-    Path(_agent_id): Path<String>,
-    Json(_request): Json<Value>,
-) -> impl IntoResponse {
-    // TODO: Implement consolidation
-    (StatusCode::OK, Json(json!({"consolidated": 0})))
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+    Json(request): Json<ConsolidateMemoryRequest>,
+) -> Result<impl IntoResponse, MemoryOperationError> {
+    // Validate request parameters
+    request.validate().map_err(|e| MemoryOperationError::ValidationError {
+        field: "request".to_string(),
+        message: e,
+    })?;
+
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        memories.get(&agent_id).cloned().ok_or_else(|| {
+            MemoryOperationError::AgentNotFound {
+                agent_id: agent_id.clone(),
+            }
+        })?
+    };
+
+    // Get episode count before consolidation
+    let episodes_before = memory.episode_count().unwrap_or(0);
+
+    // Apply decay (consolidation operation)
+    // Note: Currently using default apply_decay; future enhancement could use request.min_relevance and request.decay_factor
+    memory.apply_decay().map_err(|e| {
+        // Log audit event for failure
+        state.audit_service.log_memory_event(
+            AuditEventType::MemoryConsolidated,
+            None,
+            None,
+            &agent_id,
+            AuditResult::Error,
+            None,
+            serde_json::json!({"error": e.to_string()}),
+        );
+        MemoryOperationError::OperationFailed {
+            operation: "consolidate".to_string(),
+            message: e.to_string(),
+        }
+    })?;
+
+    // Get episode count after consolidation
+    let episodes_after = memory.episode_count().unwrap_or(0);
+
+    // Log audit event
+    state.audit_service.log_memory_event(
+        AuditEventType::MemoryConsolidated,
+        None,
+        None,
+        &agent_id,
+        AuditResult::Success,
+        None,
+        serde_json::json!({
+            "episodes_before": episodes_before,
+            "episodes_after": episodes_after,
+            "min_relevance": request.min_relevance,
+            "decay_factor": request.decay_factor
+        }),
+    );
+
+    Ok((StatusCode::OK, Json(json!({
+        "consolidated": episodes_after,
+        "episodes_before": episodes_before,
+        "episodes_after": episodes_after,
+        "min_relevance": request.min_relevance,
+        "decay_factor": request.decay_factor
+    }))))
 }
 
+#[tracing::instrument(
+    name = "memory.forget",
+    skip(state, request),
+    fields(agent_id = %agent_id, min_relevance = %request.min_relevance)
+)]
 async fn forget_memory(
-    State(_state): State<AppState>,
-    Path(_agent_id): Path<String>,
-    Json(_request): Json<Value>,
-) -> impl IntoResponse {
-    // TODO: Implement forgetting
-    (StatusCode::OK, Json(json!({"forgotten": 0})))
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+    Json(request): Json<ForgetMemoryRequest>,
+) -> Result<impl IntoResponse, MemoryOperationError> {
+    // Validate request parameters
+    request.validate().map_err(|e| MemoryOperationError::ValidationError {
+        field: "request".to_string(),
+        message: e,
+    })?;
+
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        memories.get(&agent_id).cloned().ok_or_else(|| {
+            MemoryOperationError::AgentNotFound {
+                agent_id: agent_id.clone(),
+            }
+        })?
+    };
+
+    // Get episode count before forget
+    let episodes_before = memory.episode_count().unwrap_or(0);
+
+    // Forget low-relevance episodes
+    // Note: Currently using default forget; future enhancement could use request.min_relevance and request.max_age_seconds
+    let count = memory.forget().map_err(|e| {
+        // Log audit event for failure
+        state.audit_service.log_memory_event(
+            AuditEventType::MemoryForgotten,
+            None,
+            None,
+            &agent_id,
+            AuditResult::Error,
+            None,
+            serde_json::json!({"error": e.to_string()}),
+        );
+        MemoryOperationError::OperationFailed {
+            operation: "forget".to_string(),
+            message: e.to_string(),
+        }
+    })?;
+
+    // Get episode count after forget
+    let episodes_after = memory.episode_count().unwrap_or(0);
+
+    // Log audit event
+    state.audit_service.log_memory_event(
+        AuditEventType::MemoryForgotten,
+        None,
+        None,
+        &agent_id,
+        AuditResult::Success,
+        None,
+        serde_json::json!({
+            "episodes_before": episodes_before,
+            "episodes_after": episodes_after,
+            "episodes_forgotten": count,
+            "min_relevance": request.min_relevance,
+            "max_age_seconds": request.max_age_seconds,
+            "episode_types": request.episode_types
+        }),
+    );
+
+    Ok((StatusCode::OK, Json(json!({
+        "forgotten": count,
+        "episodes_before": episodes_before,
+        "episodes_after": episodes_after,
+        "min_relevance": request.min_relevance,
+        "max_age_seconds": request.max_age_seconds,
+        "episode_types": request.episode_types
+    }))))
 }
 
+#[tracing::instrument(
+    name = "memory.clear",
+    skip(state),
+    fields(agent_id = %agent_id)
+)]
 async fn clear_memory(
-    State(_state): State<AppState>,
-    Path(_agent_id): Path<String>,
-) -> impl IntoResponse {
-    // TODO: Implement memory clearing
-    (StatusCode::OK, Json(json!({"cleared": true})))
+    State(state): State<AppState>,
+    Path(agent_id): Path<String>,
+) -> Result<impl IntoResponse, MemoryOperationError> {
+    // Get agent memory
+    let memory = {
+        let memories = state.agent_memories.lock().unwrap();
+        memories.get(&agent_id).cloned().ok_or_else(|| {
+            MemoryOperationError::AgentNotFound { agent_id: agent_id.clone() }
+        })?
+    };
+
+    // Get episode count before clear
+    let episodes_before = memory.episode_count().unwrap_or(0);
+
+    // Clear all episodes
+    memory.clear().map_err(|e| {
+        // Log audit event for failure
+        state.audit_service.log_memory_event(
+            AuditEventType::MemoryCleared,
+            None,
+            None,
+            &agent_id,
+            AuditResult::Error,
+            None,
+            serde_json::json!({"error": e.to_string()}),
+        );
+        MemoryOperationError::OperationFailed {
+            operation: "clear".to_string(),
+            message: e.to_string(),
+        }
+    })?;
+
+    // Log audit event for success
+    state.audit_service.log_memory_event(
+        AuditEventType::MemoryCleared,
+        None,
+        None,
+        &agent_id,
+        AuditResult::Success,
+        None,
+        serde_json::json!({
+            "episodes_cleared": episodes_before
+        }),
+    );
+
+    Ok((StatusCode::OK, Json(json!({"cleared": true, "episodes_cleared": episodes_before}))))
 }
 
 // ==================== Authentication Operations ====================

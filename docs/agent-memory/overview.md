@@ -322,11 +322,13 @@ support_memory.store_episode(Episode.conversation(
 - **Scalability** - Efficient storage with automatic pruning
 - **Observability** - Built-in statistics and metrics
 - **Reliability** - ACID transactions and WAL support
+- **Durability** - RocksDB-backed persistence with automatic recovery
 
 ## Next Steps
 
 - Learn about [Episodes](episodes.md) in detail
 - Understand [Memory Types](memory-types.md)
+- Configure [Persistence](persistence.md) and storage
 - Explore [Consolidation](consolidation.md) mechanisms
 - Configure [Forgetting](forgetting.md) policies
 - Review [Statistics](statistics.md) and monitoring
