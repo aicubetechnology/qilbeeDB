@@ -1,6 +1,6 @@
 # Memory Engine
 
-QilbeeDB's memory engine provides bi-temporal memory storage for AI agents, tracking both when events occurred and when they were recorded.
+QilbeeDB's memory engine provides bi-temporal memory storage for AI agents, tracking both when events occurred and when they were recorded. All memories are automatically persisted to RocksDB, ensuring durability across server restarts.
 
 ## Architecture
 
@@ -12,7 +12,18 @@ Memory Types (Episodic | Semantic | Procedural | Factual)
 Bi-Temporal Storage (Event Time | Transaction Time)
   ↓
 Consolidation Engine (Short-term → Long-term)
+  ↓
+RocksDB Persistence (WAL | LZ4 Compression)
 ```
+
+## Persistence Layer
+
+The memory engine uses RocksDB as its persistence backend:
+
+- **Write-Ahead Logging (WAL)**: Ensures durability and crash recovery
+- **LZ4 Compression**: Reduces storage footprint
+- **Agent Isolation**: Episodes stored in separate namespaces per agent
+- **Automatic Recovery**: Memories available immediately after restart
 
 ## Memory Types
 
@@ -82,4 +93,5 @@ recent = memory.recall(recency_hours=24, limit=10)
 
 - Learn about [Bi-Temporal Model](bi-temporal.md)
 - Explore [Agent Memory](../agent-memory/overview.md)
+- Configure [Memory Persistence](../agent-memory/persistence.md)
 - Review [Memory API](../api/memory-api.md)

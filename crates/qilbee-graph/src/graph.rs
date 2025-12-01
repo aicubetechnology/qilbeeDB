@@ -159,19 +159,37 @@ impl Graph {
         self.storage.get_all_nodes(self.id)
     }
 
-    /// Find nodes by label and property value
+    /// Find nodes by label and property value using property index
+    /// This is an efficient lookup that uses the property index
     pub fn find_nodes_by_label_and_property(
         &self,
         label: &str,
         property: &str,
         value: &PropertyValue,
     ) -> Result<Vec<Node>> {
-        let nodes = self.storage.get_nodes_by_label(self.id, label)?;
+        // Use property index for efficient lookup
+        self.storage.get_nodes_by_property(self.id, label, property, value)
+    }
 
-        Ok(nodes
-            .into_iter()
-            .filter(|n| n.get_property(property) == Some(value))
-            .collect())
+    /// Find nodes by label and property range
+    /// Returns nodes where the property value is between min and max (inclusive)
+    pub fn find_nodes_by_property_range(
+        &self,
+        label: &str,
+        property: &str,
+        min_value: Option<&PropertyValue>,
+        max_value: Option<&PropertyValue>,
+    ) -> Result<Vec<Node>> {
+        self.storage.get_nodes_by_property_range(self.id, label, property, min_value, max_value)
+    }
+
+    /// Find nodes that have a specific property (any value)
+    pub fn find_nodes_with_property(
+        &self,
+        label: &str,
+        property: &str,
+    ) -> Result<Vec<Node>> {
+        self.storage.get_nodes_with_property(self.id, label, property)
     }
 
     // ========== Relationship Operations ==========
@@ -540,5 +558,150 @@ mod tests {
         props2.set("email", "alice@example.com");
         let result = graph.create_node_with_properties(["User"], props2);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_find_nodes_by_property() {
+        let (graph, _dir) = create_test_graph();
+
+        // Create nodes with properties
+        let mut props1 = Property::new();
+        props1.set("name", "Alice");
+        props1.set("age", 30i64);
+        graph.create_node_with_properties(["Person"], props1).unwrap();
+
+        let mut props2 = Property::new();
+        props2.set("name", "Bob");
+        props2.set("age", 25i64);
+        graph.create_node_with_properties(["Person"], props2).unwrap();
+
+        let mut props3 = Property::new();
+        props3.set("name", "Alice");
+        props3.set("age", 35i64);
+        graph.create_node_with_properties(["Person"], props3).unwrap();
+
+        // Find by name
+        let alices = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alice".to_string()))
+            .unwrap();
+        assert_eq!(alices.len(), 2);
+
+        let bobs = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Bob".to_string()))
+            .unwrap();
+        assert_eq!(bobs.len(), 1);
+    }
+
+    #[test]
+    fn test_find_nodes_with_property() {
+        let (graph, _dir) = create_test_graph();
+
+        // Create nodes - some with email, some without
+        let mut props1 = Property::new();
+        props1.set("name", "Alice");
+        props1.set("email", "alice@example.com");
+        graph.create_node_with_properties(["Person"], props1).unwrap();
+
+        let mut props2 = Property::new();
+        props2.set("name", "Bob");
+        // No email
+        graph.create_node_with_properties(["Person"], props2).unwrap();
+
+        let mut props3 = Property::new();
+        props3.set("name", "Charlie");
+        props3.set("email", "charlie@example.com");
+        graph.create_node_with_properties(["Person"], props3).unwrap();
+
+        // Find nodes that have email property
+        let with_email = graph.find_nodes_with_property("Person", "email").unwrap();
+        assert_eq!(with_email.len(), 2);
+
+        // Find nodes that have name property
+        let with_name = graph.find_nodes_with_property("Person", "name").unwrap();
+        assert_eq!(with_name.len(), 3);
+    }
+
+    #[test]
+    fn test_find_nodes_by_property_range() {
+        let (graph, _dir) = create_test_graph();
+
+        // Create nodes with integer properties
+        for age in [20i64, 30, 40, 50] {
+            let mut props = Property::new();
+            props.set("age", age);
+            graph.create_node_with_properties(["Person"], props).unwrap();
+        }
+
+        // Range: 25 <= age <= 45
+        let min_age = PropertyValue::Integer(25);
+        let max_age = PropertyValue::Integer(45);
+        let in_range = graph
+            .find_nodes_by_property_range("Person", "age", Some(&min_age), Some(&max_age))
+            .unwrap();
+        assert_eq!(in_range.len(), 2); // ages 30 and 40
+
+        // Range: age >= 35
+        let min_age = PropertyValue::Integer(35);
+        let at_least_35 = graph
+            .find_nodes_by_property_range("Person", "age", Some(&min_age), None)
+            .unwrap();
+        assert_eq!(at_least_35.len(), 2); // ages 40 and 50
+    }
+
+    #[test]
+    fn test_property_index_after_update() {
+        let (graph, _dir) = create_test_graph();
+
+        // Create a node
+        let mut props = Property::new();
+        props.set("name", "Alice");
+        let mut node = graph.create_node_with_properties(["Person"], props).unwrap();
+
+        // Verify initial index
+        let alices = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alice".to_string()))
+            .unwrap();
+        assert_eq!(alices.len(), 1);
+
+        // Update the node
+        node.set_property("name", "Alicia");
+        graph.update_node(&node).unwrap();
+
+        // Old value should not be found
+        let alices = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alice".to_string()))
+            .unwrap();
+        assert_eq!(alices.len(), 0);
+
+        // New value should be found
+        let alicias = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alicia".to_string()))
+            .unwrap();
+        assert_eq!(alicias.len(), 1);
+    }
+
+    #[test]
+    fn test_property_index_after_delete() {
+        let (graph, _dir) = create_test_graph();
+
+        // Create a node
+        let mut props = Property::new();
+        props.set("name", "Alice");
+        let node = graph.create_node_with_properties(["Person"], props).unwrap();
+
+        // Verify index
+        let alices = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alice".to_string()))
+            .unwrap();
+        assert_eq!(alices.len(), 1);
+
+        // Delete the node
+        graph.delete_node(node.id).unwrap();
+
+        // Index should be empty
+        let alices = graph
+            .find_nodes_by_label_and_property("Person", "name", &PropertyValue::String("Alice".to_string()))
+            .unwrap();
+        assert_eq!(alices.len(), 0);
     }
 }

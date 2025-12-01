@@ -314,7 +314,7 @@ pub async fn rate_limit(
 }
 
 /// Determine endpoint type from request path
-fn determine_endpoint_type(path: &str) -> EndpointType {
+fn determine_endpoint_type(path: &str, method: &str) -> EndpointType {
     // Login endpoint - most restrictive
     if path == "/api/v1/auth/login" {
         return EndpointType::Login;
@@ -328,6 +328,18 @@ fn determine_endpoint_type(path: &str) -> EndpointType {
     // User management
     if path.starts_with("/api/v1/users") {
         return EndpointType::UserManagement;
+    }
+
+    // Memory operations - check for destructive clear operation (DELETE /memory/:agent_id)
+    if path.starts_with("/memory/") {
+        // DELETE on /memory/:agent_id (no additional path segments) is the clear operation
+        // Path format: /memory/:agent_id (exactly 2 segments after split)
+        let segments: Vec<&str> = path.trim_start_matches('/').split('/').collect();
+        if method == "DELETE" && segments.len() == 2 {
+            return EndpointType::MemoryClear;
+        }
+        // All other memory operations (store, get, search, consolidate, forget)
+        return EndpointType::MemoryOperations;
     }
 
     // Everything else is general API
@@ -345,8 +357,9 @@ pub async fn global_rate_limit(
     next: Next,
 ) -> Response {
     let path = req.uri().path().to_string();
+    let method = req.method().as_str().to_string();
 
-    tracing::debug!("Global rate limit middleware called for path: {}", path);
+    tracing::debug!("Global rate limit middleware called for path: {} method: {}", path, method);
 
     // Skip rate limiting for health check
     if path == "/health" {
@@ -356,8 +369,8 @@ pub async fn global_rate_limit(
     let headers = req.headers();
     let ip_address = extract_ip(headers);
 
-    // Determine endpoint type from path
-    let endpoint_type = determine_endpoint_type(&path);
+    // Determine endpoint type from path and method
+    let endpoint_type = determine_endpoint_type(&path, &method);
 
     // Determine rate limit key (prefer user ID over IP)
     let rate_limit_key = if let Some(user) = req.extensions().get::<User>() {

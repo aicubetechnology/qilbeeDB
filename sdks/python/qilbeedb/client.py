@@ -492,7 +492,7 @@ class QilbeeDB:
             raise AuthenticationError("Authentication failed")
 
         response.raise_for_status()
-        return response.json().get("api_keys", [])
+        return response.json().get("keys", [])
 
     def delete_api_key(self, key_id: str) -> bool:
         """
@@ -1080,6 +1080,115 @@ class QilbeeDB:
 
         if response.status_code == 404:
             return response.json()  # Return error message about no lockout record
+
+        response.raise_for_status()
+        return response.json()
+
+    # LLM Configuration Methods
+
+    def get_llm_status(self) -> Dict[str, Any]:
+        """
+        Get current LLM configuration status.
+
+        Returns information about the configured LLM provider for
+        memory consolidation and other AI-powered features.
+
+        Returns:
+            Dictionary containing:
+                - configured: Whether a real LLM provider is configured
+                - provider: Provider type ('openai' or 'mock')
+                - model: Model name (e.g., 'gpt-4o-mini')
+                - temperature: Temperature setting (0.0-2.0)
+                - max_tokens: Maximum tokens for responses
+
+        Raises:
+            AuthenticationError: If not authenticated
+
+        Example:
+            >>> status = db.get_llm_status()
+            >>> if status['configured']:
+            ...     print(f"LLM: {status['provider']} - {status['model']}")
+            ... else:
+            ...     print("LLM not configured (using mock)")
+        """
+        response = self.session.get(
+            urljoin(self.base_url, "/api/v1/llm/status"),
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        response.raise_for_status()
+        return response.json()
+
+    def configure_llm(
+        self,
+        provider: str,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Configure LLM provider at runtime.
+
+        Updates the LLM configuration used for memory consolidation,
+        summarization, fact extraction, and other AI-powered features.
+
+        Args:
+            provider: Provider type - 'openai' or 'mock'
+            api_key: API key (required for OpenAI)
+            model: Model name (default: 'gpt-4o-mini' for OpenAI)
+            temperature: Temperature for generation (0.0-2.0, default: 0.3)
+            max_tokens: Maximum tokens in response (default: 1024)
+
+        Returns:
+            Dictionary with 'success', 'configured', 'provider', and 'model'
+
+        Raises:
+            AuthenticationError: If not authenticated
+            ValueError: If required parameters are missing
+
+        Example:
+            >>> # Configure OpenAI provider
+            >>> db.configure_llm(
+            ...     provider='openai',
+            ...     api_key='sk-...',
+            ...     model='gpt-4o-mini',
+            ...     temperature=0.3
+            ... )
+            {'success': True, 'configured': True, 'provider': 'openai', 'model': 'gpt-4o-mini'}
+
+            >>> # Switch to mock provider for testing
+            >>> db.configure_llm(provider='mock')
+            {'success': True, 'configured': False, 'provider': 'mock', 'model': 'mock-llm'}
+        """
+        payload: Dict[str, Any] = {"provider": provider}
+
+        if api_key is not None:
+            payload["api_key"] = api_key
+        if model is not None:
+            payload["model"] = model
+        if temperature is not None:
+            payload["temperature"] = temperature
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
+
+        response = self.session.put(
+            urljoin(self.base_url, "/api/v1/llm/config"),
+            json=payload,
+            timeout=self.timeout,
+            verify=self.verify_ssl
+        )
+
+        if response.status_code == 401:
+            raise AuthenticationError("Authentication failed")
+
+        if response.status_code == 400:
+            error_data = response.json()
+            raise ValueError(error_data.get("error", "Invalid LLM configuration"))
 
         response.raise_for_status()
         return response.json()

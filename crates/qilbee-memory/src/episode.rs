@@ -237,6 +237,21 @@ impl Episode {
     pub fn get_metadata(&self, key: &str) -> Option<&qilbee_core::PropertyValue> {
         self.metadata.get(key)
     }
+
+    /// Get searchable text representation of the episode
+    pub fn to_searchable_text(&self) -> String {
+        let mut parts = vec![self.content.primary.clone()];
+
+        if let Some(ref secondary) = self.content.secondary {
+            parts.push(secondary.clone());
+        }
+
+        if let Some(ref context) = self.content.context {
+            parts.push(context.clone());
+        }
+
+        parts.join(" ")
+    }
 }
 
 /// Builder for episodes

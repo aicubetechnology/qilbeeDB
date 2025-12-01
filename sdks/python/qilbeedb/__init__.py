@@ -16,7 +16,7 @@ __license__ = "Apache-2.0"
 
 from .client import QilbeeDB
 from .graph import Graph, Node, Relationship
-from .memory import AgentMemory, Episode, MemoryConfig
+from .memory import AgentMemory, Episode, MemoryConfig, SemanticSearchResult, HybridSearchResult
 from .query import Query, QueryResult
 from .exceptions import (
     QilbeeDBError,
@@ -34,6 +34,8 @@ __all__ = [
     "AgentMemory",
     "Episode",
     "MemoryConfig",
+    "SemanticSearchResult",
+    "HybridSearchResult",
     "Query",
     "QueryResult",
     "QilbeeDBError",

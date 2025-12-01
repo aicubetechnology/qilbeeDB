@@ -109,6 +109,8 @@ nav:
     - Overview: agent-memory/overview.md
     - Episodes: agent-memory/episodes.md
     - Memory Types: agent-memory/memory-types.md
+    - Semantic Search: agent-memory/semantic-search.md
+    - Persistence: agent-memory/persistence.md
     - Consolidation: agent-memory/consolidation.md
     - Forgetting: agent-memory/forgetting.md
     - Statistics: agent-memory/statistics.md

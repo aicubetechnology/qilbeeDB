@@ -109,6 +109,8 @@ result = (
 
 ### Agent Memory
 
+QilbeeDB provides enterprise-grade agent memory with automatic persistence. All episodes are stored in RocksDB with write-ahead logging, ensuring durability across server restarts.
+
 ```python
 from qilbeedb.memory import Episode
 
@@ -119,13 +121,14 @@ memory = db.agent_memory(
     min_relevance=0.1
 )
 
-# Store conversation
+# Store conversation (automatically persisted to disk)
 episode = Episode.conversation(
     "agent-001",
     "What is the capital of France?",
     "The capital of France is Paris."
 )
-memory.store_episode(episode)
+episode_id = memory.store_episode(episode)
+print(f"Stored episode: {episode_id}")  # Episode survives server restart
 
 # Store observation
 obs = Episode.observation(
@@ -134,13 +137,27 @@ obs = Episode.observation(
 )
 memory.store_episode(obs)
 
+# Store action with result
+action = Episode.action(
+    "agent-001",
+    "Searched knowledge base for European capitals",
+    "Found 47 capital cities"
+)
+memory.store_episode(action)
+
 # Retrieve recent memories
 recent = memory.get_recent_episodes(10)
 for ep in recent:
-    print(ep.content)
+    print(f"[{ep.episode_type}] {ep.content}")
+
+# Get a specific episode by ID
+retrieved = memory.get_episode(episode_id)
 
 # Search memories
 results = memory.search_episodes("France")
+
+# Delete a specific episode
+memory.delete_episode(episode_id)
 
 # Get statistics
 stats = memory.get_statistics()
@@ -150,7 +167,64 @@ print(f"Average relevance: {stats.avg_relevance:.2f}")
 # Consolidate and forget
 memory.consolidate()
 memory.forget(min_relevance=0.2)
+
+# Clear all memories for an agent
+memory.clear()
 ```
+
+### Semantic Search
+
+Find memories by meaning, not just keywords. Semantic search uses vector embeddings to find conceptually similar content.
+
+```python
+from qilbeedb import QilbeeDB
+from qilbeedb.memory import Episode
+
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+memory = db.agent_memory("my-agent")
+
+# Store some episodes
+memory.store_episode(Episode.conversation(
+    "my-agent",
+    "What is machine learning?",
+    "ML is a subset of artificial intelligence..."
+))
+memory.store_episode(Episode.conversation(
+    "my-agent",
+    "How do neural networks work?",
+    "Neural networks are computing systems inspired by the brain..."
+))
+
+# Semantic search - finds related content even with different words
+results = memory.semantic_search("AI training techniques", limit=5)
+for result in results:
+    print(f"Score: {result.score:.2f}")
+    print(f"Episode: {result.episode.content}")
+
+# Hybrid search - combines keyword and semantic matching
+results = memory.hybrid_search(
+    "machine learning",
+    limit=10,
+    semantic_weight=0.5  # 0.0 = keyword only, 1.0 = semantic only
+)
+for result in results:
+    print(f"Combined: {result.score:.2f}")
+    print(f"Keyword: {result.keyword_score}, Semantic: {result.semantic_score}")
+
+# Find episodes similar to a specific episode
+similar = memory.find_similar_episodes(episode_id, limit=5)
+for result in similar:
+    print(f"Similar episode (score {result.score:.2f}): {result.episode.id}")
+
+# Check semantic search configuration
+status = memory.get_semantic_search_status()
+if status["enabled"]:
+    print(f"Model: {status['model']}")
+    print(f"Indexed: {status['indexedEpisodes']} episodes")
+```
+
+For more information, see the [Semantic Search documentation](https://docs.qilbeedb.com/agent-memory/semantic-search/).
 
 ### Context Manager
 
@@ -228,17 +302,25 @@ Graph relationship.
 
 ### AgentMemory
 
-Bi-temporal agent memory.
+Bi-temporal agent memory with automatic RocksDB persistence.
+
+All episodes are automatically persisted to disk with write-ahead logging (WAL),
+ensuring durability across server restarts.
 
 **Methods:**
-- `store_episode(episode: Episode) -> str` - Store episode
-- `get_episode(episode_id: str) -> Episode` - Get episode
+- `store_episode(episode: Episode) -> str` - Store episode (persisted to disk)
+- `get_episode(episode_id: str) -> Episode` - Get episode by ID
 - `get_recent_episodes(limit: int) -> List[Episode]` - Get recent episodes
 - `search_episodes(query: str, limit: int) -> List[Episode]` - Search episodes
+- `semantic_search(query: str, limit: int, min_score: float) -> List[SemanticSearchResult]` - Search by meaning
+- `hybrid_search(query: str, limit: int, semantic_weight: float) -> List[HybridSearchResult]` - Combined search
+- `find_similar_episodes(episode_id: str, limit: int) -> List[SemanticSearchResult]` - Find similar episodes
+- `get_semantic_search_status() -> Dict` - Get semantic search configuration status
+- `delete_episode(episode_id: str) -> bool` - Delete episode by ID
 - `get_statistics() -> MemoryStatistics` - Get statistics
 - `consolidate() -> int` - Consolidate memory
 - `forget(min_relevance: float) -> int` - Forget low-relevance episodes
-- `clear() -> bool` - Clear all episodes
+- `clear() -> bool` - Clear all episodes for this agent
 
 ### Episode
 
@@ -324,6 +406,47 @@ memory = db.agent_memory(
     episodic_retention_days=30
 )
 ```
+
+## Memory Persistence
+
+QilbeeDB provides enterprise-grade memory persistence using RocksDB as the storage backend. All agent memories are automatically persisted to disk, ensuring durability across server restarts.
+
+### Key Features
+
+- **Automatic Durability**: Episodes are automatically persisted when stored - no explicit save required
+- **Write-Ahead Logging (WAL)**: Ensures crash recovery and transaction safety
+- **LZ4 Compression**: Reduces storage footprint with minimal overhead
+- **Agent Isolation**: Episodes are stored in separate namespaces per agent
+
+### Verifying Persistence
+
+```python
+from qilbeedb import QilbeeDB
+from qilbeedb.memory import Episode
+
+# Store episode
+db = QilbeeDB("http://localhost:7474")
+db.login("admin", "password")
+memory = db.agent_memory("my-agent")
+
+episode = Episode.conversation(
+    "my-agent",
+    "What is QilbeeDB?",
+    "QilbeeDB is a graph database with agent memory..."
+)
+episode_id = memory.store_episode(episode)
+print(f"Stored episode: {episode_id}")
+
+# After server restart, episode is still available
+stats = memory.get_statistics()
+print(f"Total episodes: {stats.total_episodes}")
+
+# Retrieve the persisted episode
+retrieved = memory.get_episode(episode_id)
+print(f"Retrieved: {retrieved.content}")
+```
+
+For more information, see the [Memory Persistence documentation](https://docs.qilbeedb.com/agent-memory/persistence/).
 
 ## Audit Logging (Admin Only)
 

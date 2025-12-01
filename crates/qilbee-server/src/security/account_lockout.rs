@@ -26,7 +26,7 @@ pub struct LockoutConfig {
 impl Default for LockoutConfig {
     fn default() -> Self {
         Self {
-            max_failed_attempts: 5,
+            max_failed_attempts: 5, 
             lockout_duration_minutes: 15,
             attempt_window_minutes: 30,
             track_by_ip: true,

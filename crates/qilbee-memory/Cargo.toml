@@ -6,18 +6,27 @@ authors.workspace = true
 license.workspace = true
 description = "Agent memory system for QilbeeDB"
 
+[features]
+default = []
+openai = ["reqwest"]
+
 [dependencies]
 qilbee-core = { workspace = true }
 qilbee-graph = { workspace = true }
 
 serde = { workspace = true }
 serde_json = { workspace = true }
+bincode = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
+rocksdb = { workspace = true }
+
+# Optional: for OpenAI API calls
+reqwest = { version = "0.11", features = ["json"], optional = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

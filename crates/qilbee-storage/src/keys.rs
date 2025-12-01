@@ -161,6 +161,36 @@ impl KeyBuilder {
         builder.finish()
     }
 
+    /// Create a property index prefix for scanning all nodes with a label+property combination
+    pub fn property_index_prefix(
+        graph_id: GraphId,
+        label: &str,
+        property: &str,
+    ) -> Vec<u8> {
+        let mut builder = Self::new(17 + label.len() + property.len());
+        builder.push_u8(prefix::PROPERTY_INDEX);
+        builder.push_u64(graph_id.as_internal());
+        builder.push_string(label);
+        builder.push_string(property);
+        builder.finish()
+    }
+
+    /// Create a property index prefix for scanning all nodes with a label+property+value
+    pub fn property_index_value_prefix(
+        graph_id: GraphId,
+        label: &str,
+        property: &str,
+        value_hash: u64,
+    ) -> Vec<u8> {
+        let mut builder = Self::new(25 + label.len() + property.len());
+        builder.push_u8(prefix::PROPERTY_INDEX);
+        builder.push_u64(graph_id.as_internal());
+        builder.push_string(label);
+        builder.push_string(property);
+        builder.push_u64(value_hash);
+        builder.finish()
+    }
+
     /// Create a schema key
     pub fn schema(graph_id: GraphId, schema_type: &str, name: &str) -> Vec<u8> {
         let mut builder = Self::new(9 + schema_type.len() + name.len());
