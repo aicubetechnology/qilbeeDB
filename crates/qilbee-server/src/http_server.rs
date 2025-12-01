@@ -9,7 +9,10 @@ use axum::{
 };
 use qilbee_core::{EntityId, Label, NodeId, Property, PropertyValue};
 use qilbee_graph::Database;
-use qilbee_memory::{AgentMemory, Episode, EpisodeContent, EpisodeType};
+use qilbee_memory::{
+    AgentMemory, Episode, EpisodeContent, EpisodeType,
+    LLMConfig, LLMProviderType, LLMService,
+};
 use qilbee_protocol::http::HealthResponse;
 use std::collections::HashMap as StdHashMap;
 use std::sync::Mutex;
@@ -41,6 +44,8 @@ pub struct AppState {
     pub audit_service: Arc<AuditService>,
     pub lockout_service: Arc<AccountLockoutService>,
     pub auth_middleware: AuthMiddleware,
+    /// LLM service for memory consolidation (runtime configurable)
+    pub llm_service: Arc<LLMService>,
 }
 
 /// Implement FromRef to allow extracting AuthMiddleware from AppState in middleware
@@ -87,6 +92,16 @@ pub fn create_router(database: Arc<Database>) -> Router {
         rate_limit_service: rate_limit_service.clone(),
     };
 
+    // Initialize LLM service (starts with mock, can be configured at runtime via API)
+    // To start with OpenAI, set OPENAI_API_KEY environment variable
+    let llm_service = match std::env::var("OPENAI_API_KEY") {
+        Ok(api_key) if !api_key.is_empty() => {
+            let config = LLMConfig::openai_mini(&api_key);
+            Arc::new(LLMService::new(config).unwrap_or_else(|_| LLMService::mock()))
+        }
+        _ => Arc::new(LLMService::mock()),
+    };
+
     let state = AppState {
         database,
         start_time: Instant::now(),
@@ -98,6 +113,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         audit_service,
         lockout_service,
         auth_middleware: auth_middleware.clone(),
+        llm_service,
     };
 
     // Build router with all routes and apply global rate limiting
@@ -127,6 +143,9 @@ pub fn create_router(database: Arc<Database>) -> Router {
         .route("/api/v1/lockouts", get(lockout_list))
         .route("/api/v1/lockouts/:username", get(lockout_status).delete(lockout_unlock))
         .route("/api/v1/lockouts/:username/lock", post(lockout_lock))
+        // LLM configuration (Admin only)
+        .route("/api/v1/llm/status", get(llm_status))
+        .route("/api/v1/llm/config", put(llm_update_config))
         // Graph operations
         .route("/graphs/:name", post(create_graph).delete(delete_graph))
         .route("/graphs/:name/nodes", post(create_node).get(find_nodes))
@@ -860,17 +879,30 @@ async fn store_episode(
     };
 
     // Create episode content from HashMap
+    // Support multiple field names for primary content:
+    // - primary, input, message, user_input, text, observation, action
     let primary_content = request
         .content
         .get("primary")
         .or(request.content.get("input"))
         .or(request.content.get("message"))
+        .or(request.content.get("user_input"))
+        .or(request.content.get("text"))
+        .or(request.content.get("observation"))
+        .or(request.content.get("action"))
         .and_then(|v| v.as_str())
         .unwrap_or("");
 
     let mut content = EpisodeContent::new(primary_content);
 
-    if let Some(secondary) = request.content.get("secondary").or(request.content.get("output")).or(request.content.get("response")) {
+    // Support multiple field names for secondary content:
+    // - secondary, output, response, agent_response, result
+    if let Some(secondary) = request.content.get("secondary")
+        .or(request.content.get("output"))
+        .or(request.content.get("response"))
+        .or(request.content.get("agent_response"))
+        .or(request.content.get("result"))
+    {
         if let Some(s) = secondary.as_str() {
             content = content.with_secondary(s);
         }
@@ -926,14 +958,12 @@ async fn get_episode(
             episode_id: episode_id.clone(),
         })?;
 
-    let mut content_map = HashMap::new();
-    content_map.insert("primary".to_string(), json!(episode.content.primary));
-    if let Some(secondary) = &episode.content.secondary {
-        content_map.insert("secondary".to_string(), json!(secondary));
-    }
+    // Format content based on episode type for intuitive field names
+    let content_map = format_episode_content(&episode);
 
     let response = json!({
         "agentId": episode.agent_id,
+        "episodeId": episode.id.to_string(),
         "episodeType": format!("{:?}", episode.episode_type),
         "content": content_map,
         "eventTime": episode.event_time.as_millis()
@@ -970,8 +1000,9 @@ async fn get_recent_episodes(
                 .map(|ep| {
                     json!({
                         "agentId": ep.agent_id,
+                        "episodeId": ep.id.to_string(),
                         "episodeType": format!("{:?}", ep.episode_type),
-                        "content": ep.content,
+                        "content": format_episode_content(ep),
                         "eventTime": ep.event_time.as_millis()
                     })
                 })
@@ -3511,7 +3542,172 @@ async fn lockout_unlock(
     }
 }
 
+// ==================== LLM Configuration ====================
+
+/// Request body for updating LLM configuration
+#[derive(Debug, Deserialize)]
+struct LLMConfigUpdateRequest {
+    /// Provider type: "openai" or "mock"
+    provider: String,
+    /// API key (required for OpenAI)
+    api_key: Option<String>,
+    /// Model name (optional, defaults based on provider)
+    model: Option<String>,
+    /// Temperature (optional, 0.0-2.0)
+    temperature: Option<f32>,
+    /// Max tokens (optional)
+    max_tokens: Option<u32>,
+}
+
+/// Response for LLM status
+#[derive(Debug, Serialize)]
+struct LLMStatusResponse {
+    configured: bool,
+    provider: String,
+    model: String,
+}
+
+/// Get current LLM configuration status
+async fn llm_status(State(state): State<AppState>) -> impl IntoResponse {
+    let is_configured = state.llm_service.is_configured().await;
+    let model_name = state.llm_service.model_name().await;
+    let config = state.llm_service.get_config().await;
+
+    let provider_name = match config.provider {
+        LLMProviderType::Mock => "mock",
+        LLMProviderType::OpenAI => "openai",
+    };
+
+    (
+        StatusCode::OK,
+        Json(json!({
+            "configured": is_configured,
+            "provider": provider_name,
+            "model": model_name,
+            "temperature": config.temperature,
+            "max_tokens": config.max_tokens
+        })),
+    )
+}
+
+/// Update LLM configuration at runtime
+async fn llm_update_config(
+    State(state): State<AppState>,
+    Json(request): Json<LLMConfigUpdateRequest>,
+) -> impl IntoResponse {
+    // Build new configuration based on provider type
+    let new_config = match request.provider.to_lowercase().as_str() {
+        "openai" => {
+            let api_key = match request.api_key {
+                Some(key) if !key.is_empty() => key,
+                _ => {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        Json(json!({
+                            "error": "API key is required for OpenAI provider"
+                        })),
+                    )
+                }
+            };
+
+            // Use openai_mini as base and customize
+            let mut config = LLMConfig::openai_mini(&api_key);
+
+            // Override model if specified
+            if let Some(ref model) = request.model {
+                config.model = model.clone();
+            }
+
+            if let Some(temp) = request.temperature {
+                config.temperature = temp;
+            }
+            if let Some(max_tokens) = request.max_tokens {
+                config.max_tokens = max_tokens;
+            }
+
+            config
+        }
+        "mock" => LLMConfig::mock(),
+        _ => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "error": format!("Unknown provider type: '{}'. Supported: 'openai', 'mock'", request.provider)
+                })),
+            )
+        }
+    };
+
+    // Update the LLM service configuration
+    match state.llm_service.update_config(new_config).await {
+        Ok(()) => {
+            let model_name = state.llm_service.model_name().await;
+            let is_configured = state.llm_service.is_configured().await;
+
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "success": true,
+                    "message": "LLM configuration updated successfully",
+                    "configured": is_configured,
+                    "provider": request.provider.to_lowercase(),
+                    "model": model_name
+                })),
+            )
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({
+                "error": format!("Failed to update LLM configuration: {}", e)
+            })),
+        ),
+    }
+}
+
 // ==================== Helper Functions ====================
+
+/// Format episode content with intuitive field names based on episode type.
+/// For conversations: user_input, agent_response
+/// For observations: observation
+/// For task execution: action, result
+fn format_episode_content(episode: &Episode) -> Value {
+    let mut content_map = serde_json::Map::new();
+
+    match &episode.episode_type {
+        EpisodeType::Conversation => {
+            content_map.insert("user_input".to_string(), json!(episode.content.primary));
+            if let Some(ref secondary) = episode.content.secondary {
+                content_map.insert("agent_response".to_string(), json!(secondary));
+            }
+        }
+        EpisodeType::Observation => {
+            content_map.insert("observation".to_string(), json!(episode.content.primary));
+            if let Some(ref secondary) = episode.content.secondary {
+                content_map.insert("details".to_string(), json!(secondary));
+            }
+        }
+        EpisodeType::TaskExecution => {
+            content_map.insert("action".to_string(), json!(episode.content.primary));
+            if let Some(ref secondary) = episode.content.secondary {
+                content_map.insert("result".to_string(), json!(secondary));
+            }
+        }
+        _ => {
+            // For custom/other types, use generic primary/secondary
+            content_map.insert("primary".to_string(), json!(episode.content.primary));
+            if let Some(ref secondary) = episode.content.secondary {
+                content_map.insert("secondary".to_string(), json!(secondary));
+            }
+        }
+    }
+
+    // Include context if present
+    if let Some(ref context) = episode.content.context {
+        content_map.insert("context".to_string(), json!(context));
+    }
+
+    Value::Object(content_map)
+}
 
 fn json_to_property_value(value: &Value) -> Option<PropertyValue> {
     match value {

@@ -267,6 +267,21 @@ impl AgentMemory {
         Ok(())
     }
 
+    /// Mark an episode as consolidated
+    pub fn mark_consolidated(&self, id: EpisodeId) -> Result<bool> {
+        let mut episodes = self.episodes.write().map_err(|_| {
+            Error::Internal("Failed to acquire episodes lock".to_string())
+        })?;
+
+        if let Some(episode) = episodes.get_mut(&id) {
+            episode.mark_consolidated();
+            debug!("Marked episode {} as consolidated", id);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
     /// Get all episodes
     pub fn get_all_episodes(&self) -> Result<Vec<Episode>> {
         let episodes = self.episodes.read().map_err(|_| {

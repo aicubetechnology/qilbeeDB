@@ -484,6 +484,7 @@ class AgentMemory:
         """
         response = self.client.session.post(
             urljoin(self.client.base_url, f"/memory/{self.agent_id}/consolidate"),
+            json={},
             timeout=self.client.timeout
         )
 

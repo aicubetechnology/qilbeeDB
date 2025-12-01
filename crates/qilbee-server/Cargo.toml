@@ -6,6 +6,10 @@ authors.workspace = true
 license.workspace = true
 description = "Server implementation for QilbeeDB"
 
+[features]
+default = ["openai"]
+openai = ["qilbee-memory/openai"]
+
 [[bin]]
 name = "qilbeedb"
 path = "src/main.rs"
