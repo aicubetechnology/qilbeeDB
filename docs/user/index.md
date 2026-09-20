@@ -61,3 +61,6 @@ surface.
 
 [Evaluate experience evidence](../research/experience-evaluation.md) explains how
 to freeze observations, preserve incomplete outcomes and compare agent tasks.
+
+Use the [memory change feed](../api/memory-changes.md) to reconcile scoped caches
+and resume from a durable cursor after disconnection.

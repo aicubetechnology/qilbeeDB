@@ -260,10 +260,8 @@ impl RocksDbMemoryStorage {
             committed_at_millis: chrono::Utc::now().timestamp_millis(),
         };
         let mut batch = rocksdb::WriteBatch::default();
-        if existing
-            .as_ref()
-            .is_none_or(|existing| existing.receipt.record_revision != command.record_revision)
-        {
+        let writes_embedding = existing.as_ref().is_none_or(|existing| existing.receipt.record_revision != command.record_revision);
+        if writes_embedding {
             batch.put_cf(
                 embeddings,
                 key,
@@ -284,6 +282,10 @@ impl RocksDbMemoryStorage {
                 receipt: receipt.clone(),
             })?,
         );
+        if writes_embedding {
+            self.append_memory_change(namespace, &mut batch, MemoryChangeKind::EmbeddingAttached,
+                receipt.record_id, receipt.record_revision, author, receipt.committed_at_millis)?;
+        }
         let mut options = rocksdb::WriteOptions::default();
         options.disable_wal(false);
         options.set_sync(true);

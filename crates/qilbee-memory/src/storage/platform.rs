@@ -232,6 +232,12 @@ impl RocksDbMemoryStorage {
                 receipt: receipt.clone(),
             })?,
         );
+        let kind = match &command.operation {
+            MemoryOperation::Create { .. } => MemoryChangeKind::Created,
+            MemoryOperation::Update { .. } => MemoryChangeKind::Updated,
+            MemoryOperation::Delete { .. } => MemoryChangeKind::Deleted,
+        };
+        self.append_memory_change(namespace, &mut batch, kind, record.record_id, record.revision, author, now)?;
         let mut options = rocksdb::WriteOptions::default();
         options.disable_wal(false);
         options.set_sync(true);
@@ -783,3 +789,8 @@ mod hybrid;
 #[cfg(test)]
 mod hybrid_tests;
 pub use hybrid::*;
+
+mod changes;
+pub use changes::*;
+#[cfg(test)]
+mod changes_tests;

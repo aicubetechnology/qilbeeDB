@@ -9,6 +9,7 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/memory/commands", post(command))
         .route("/api/v1/memory/records/:id", get(read))
         .route("/api/v1/memory/query", post(query))
+        .route("/api/v1/memory/changes", post(changes))
         .route(
             "/api/v1/memory/embeddings",
             post(embedding).layer(DefaultBodyLimit::max(
@@ -345,4 +346,34 @@ async fn hybrid_search(
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
         Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":page.ranking.version,"page":page,"timing":{"retrieval_micros":retrieval_micros}})))
     }).await
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ChangesRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+    query: qilbee_memory::storage::platform::MemoryChangesQuery,
+}
+async fn changes(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<ChangesRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let memory = state.memory.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::MemoryRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let page = memory
+                .memory_changes(&scope.storage_namespace, &request.query)
+                .map_err(ApiError::operation)?;
+            Ok(Json(
+                json!({"contract_version":1,"scope":request.scope,"page":page}),
+            ))
+        })
+        .await
 }
