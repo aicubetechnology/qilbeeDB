@@ -30,8 +30,9 @@ It is under active development; production guarantees and benchmark leadership
 have not been established.
 
 **Implementation status:** the Rust library includes a RocksDB episode backend
-and an evidence-driven procedure ledger. The current HTTP memory routes still
-use volatile storage. Cypher support is partial and Bolt is a placeholder. Graph
+and an evidence-driven procedure ledger. HTTP episode routes now use durable
+storage; versioned idempotent APIs and tenant authorization remain in progress.
+Cypher support is partial and Bolt is a placeholder. Graph
 transactions publish entity and index mutations atomically; snapshot isolation
 and conflict detection remain unimplemented.
 See the [code audit and research roadmap](docs/research/agent-memory-evolution.md)
@@ -63,7 +64,7 @@ before planning production use.
 
 ### 🏢 **Production Roadmap**
 - Snapshot isolation, conflict handling and fault-injection recovery validation
-- Persistent HTTP memory, resource ownership and secure server bootstrap
+- Versioned idempotent HTTP memory, resource ownership and secure server bootstrap
 - Verified recovery, observability and reproducible benchmarks
 
 ### Run the learning cycle
@@ -408,7 +409,8 @@ behavior, not production throughput or superiority over other memory systems.
 - [x] Python SDK
 - [x] Security components (JWT, API keys, RBAC)
 - [ ] Secure production bootstrap and resource ownership across API routes
-- [ ] Persistent HTTP memory
+- [x] Persistent HTTP episode storage with abrupt-restart regression coverage
+- [ ] Versioned idempotent memory API and authenticated tenant/sharing scopes
 - [x] Atomic multi-operation graph entity and index commits
 - [ ] Snapshot isolation and transaction conflict detection
 - [x] BM25 lexical ranking and deterministic hybrid retrieval

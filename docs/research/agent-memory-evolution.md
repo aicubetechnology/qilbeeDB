@@ -23,7 +23,7 @@ database for agents, or that the hypotheses below are previously undiscovered.
 
 | Priority | Evidence | Consequence | Status |
 |---|---|---|---|
-| P0 | `http_server.rs`: `AppState.agent_memories` contains `AgentMemory` | HTTP memories disappear on restart | Open |
+| P0 | Baseline HTTP routes use a volatile episode map | HTTP memories disappear on restart | Durable backend connected; process-kill recovery tested; versioned idempotent API pending |
 | P0 | `http_server.rs::create_router`: fixed development JWT secret and administrator | Startup is unsuitable for production | Open |
 | P0 | `/graphs` routes lack `require_auth`; `/memory` authenticates without binding agents to owners | Missing resource/tenant authorization in the inspected paths | Open |
 | P0 | Baseline `transaction.rs::commit` applies operations sequentially | Intermediate failure can leave a partial commit | Atomic entity/index batch implemented; snapshot isolation and conflict detection remain open |
@@ -172,6 +172,12 @@ compatibility notes and a remote repository change. Merge validated features in
 features as HTTP features before integration. Selection policies may improve
 agent behavior; general failure-free autonomy and indefinite self-improvement
 remain research problems.
+
+The maintainer's [delivery acceptance contract](delivery-acceptance.md) now fixes
+P0/P1/P2 priorities. QilbeeDB must operate independently of QMN while absorbing
+validated capabilities through explicit platform contracts. See the initial
+[QMN semantic mapping](qmn-contract-mapping.md); existing promotion mechanisms
+must not be treated as equivalent without policy and evidence compatibility.
 
 ## Validation of this delivery
 

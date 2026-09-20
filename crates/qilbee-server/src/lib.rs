@@ -14,6 +14,10 @@ pub mod config;
 pub mod server;
 pub mod http_server;
 pub mod security;
+mod memory_storage;
+
+#[cfg(test)]
+mod http_server_tests;
 
 pub use config::ServerConfig;
 pub use server::Server;
