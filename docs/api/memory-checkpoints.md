@@ -134,3 +134,11 @@ replication implied by this contract. The local acceptance suite uses ten
 independent consumer subjects, durable reconnects, concurrent checkpoint writes
 and forced process termination; it is a correctness test, not a throughput or
 high-availability qualification.
+
+## Verified progress in version 2
+
+For restore-sensitive consumers, use [verified checkpoints](verified-memory-checkpoints.md)
+with the version 2 feed. Their exact-history cursor and revision-plus-digest
+comparison detect divergent writes even when old sequence or revision numbers
+reappear. Version 1 checkpoints retain the contract above and are not
+silently promoted into verified progress.

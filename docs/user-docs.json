@@ -175,6 +175,13 @@
       "title": "Verified memory change feed",
       "description": "Resume scoped collaboration with history-bound cursors and explicit restore divergence detection.",
       "order": 59
+    },
+    {
+      "source": "docs/api/verified-memory-checkpoints.md",
+      "file": "verified-memory-checkpoints.md",
+      "title": "Verified consumer checkpoints",
+      "description": "Persist history-bound progress with exact checkpoint comparison and explicit migration.",
+      "order": 61
     }
   ]
 }

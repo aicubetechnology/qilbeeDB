@@ -8193,6 +8193,370 @@
           }
         }
       }
+    },
+    "/api/v2/memory/checkpoints": {
+      "post": {
+        "operationId": "commitVerifiedMemoryCheckpoint",
+        "summary": "Save verified consumer progress",
+        "description": "Requires memory_read and memory_checkpoint. Subject-owned, monotonic anchored progress with revision AND checkpoint-digest compare-and-set. Initial revision is zero with null expected_checkpoint_digest. Copy later expectations from a current read. Historical retries return their original receipt. Cursor history is validated before new admission. v1 checkpoints remain independent.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedMemoryCheckpointResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifiedMemoryCheckpointRequest"
+              },
+              "example": {
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "command": {
+                  "contract_version": 2,
+                  "idempotency_key": "initial-checkpoint",
+                  "consumer_id": "cache",
+                  "expected_revision": 0,
+                  "expected_checkpoint_digest": null,
+                  "cursor": {
+                    "version": 2,
+                    "journal_id": "00000000-0000-0000-0000-000000000001",
+                    "generation": "00000000-0000-0000-0000-000000000002",
+                    "sequence": 0,
+                    "prefix_digest": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/memory/checkpoints/read": {
+      "post": {
+        "operationId": "readVerifiedMemoryCheckpoint",
+        "summary": "Read current verified consumer progress",
+        "description": "Requires memory_read and memory_checkpoint. Returns only this credential subject's current v2 checkpoint in the exact scope, validates stored integrity and journal history, or 404. Never imports an unanchored v1 checkpoint.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedMemoryCheckpointReadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifiedMemoryCheckpointReadRequest"
+              },
+              "example": {
+                "contract_version": 2,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "consumer_id": "cache"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14596,6 +14960,200 @@
           "contract_version",
           "scope",
           "baseline"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpoint": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/VerifiedMemoryCursor"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "updated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkpoint_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "consumer_id",
+          "revision",
+          "cursor",
+          "author",
+          "updated_at_millis",
+          "checkpoint_digest"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointCommand": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/VerifiedMemoryCursor"
+          },
+          "expected_checkpoint_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "consumer_id",
+          "expected_revision",
+          "cursor"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "checkpoint",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointRequest": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "command": {
+            "$ref": "#/components/schemas/VerifiedMemoryCheckpointCommand"
+          }
+        },
+        "required": [
+          "scope",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/VerifiedMemoryCheckpointReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCheckpointReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "checkpoint"
         ],
         "additionalProperties": false
       }
