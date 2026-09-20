@@ -45,7 +45,7 @@ async fn start(
     (client, base, api, token, server)
 }
 
-async fn call(
+pub(super) async fn call(
     client: &reqwest::Client,
     base: &str,
     api: &Value,

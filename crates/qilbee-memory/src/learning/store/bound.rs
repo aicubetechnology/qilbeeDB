@@ -163,6 +163,26 @@ impl LearningMemory {
                 ))
             };
         }
+        let receipt = self.prepare_registered_proposal(tenant, namespace, request, actor)?;
+        let mut batch = WriteBatch::default();
+        Self::put_registered_proposal(&mut batch, &receipt)?;
+        self.inner
+            .db
+            .write_opt(batch, &write_options())
+            .map_err(storage_error)?;
+        Ok(receipt)
+    }
+    // The caller holds the shared mutation lock and has checked receipt identity.
+    pub(super) fn prepare_registered_proposal(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        request: RegisteredProposal,
+        actor: &str,
+    ) -> Result<ProposalReceipt> {
+        validate_namespace(tenant, namespace)?;
+        validate_text(&request.id, "procedure ID", 512)?;
+        validate_text(actor, "proposal actor", 512)?;
         let (policy, context) =
             self.contracts(tenant, namespace, &request.policy_id, &request.context_id)?;
         let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
@@ -181,7 +201,7 @@ impl LearningMemory {
             ));
         }
         let record = new_procedure_record(&scope, proposal);
-        let receipt = ProposalReceipt {
+        Ok(ProposalReceipt {
             schema_version: 1,
             tenant: tenant.into(),
             namespace: namespace.into(),
@@ -190,21 +210,21 @@ impl LearningMemory {
             context_digest: context.payload_digest,
             actor: actor.into(),
             record,
-        };
-        let mut batch = WriteBatch::default();
+        })
+    }
+    pub(super) fn put_registered_proposal(
+        batch: &mut WriteBatch,
+        receipt: &ProposalReceipt,
+    ) -> Result<()> {
         batch.put(
-            procedure_key(&scope, &receipt.request.id),
+            procedure_key(&receipt.record.scope, &receipt.request.id),
             encode(&receipt.record)?,
         );
         batch.put(
-            binding_key(tenant, namespace, &receipt.request.id),
-            encode(&receipt)?,
+            binding_key(&receipt.tenant, &receipt.namespace, &receipt.request.id),
+            encode(receipt)?,
         );
-        self.inner
-            .db
-            .write_opt(batch, &write_options())
-            .map_err(storage_error)?;
-        Ok(receipt)
+        Ok(())
     }
     pub fn registered_procedure(
         &self,

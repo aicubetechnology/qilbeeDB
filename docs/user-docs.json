@@ -182,6 +182,13 @@
       "title": "Verified consumer checkpoints",
       "description": "Persist history-bound progress with exact checkpoint comparison and explicit migration.",
       "order": 61
+    },
+    {
+      "source": "docs/api/experience-strategies.md",
+      "file": "experience-strategies.md",
+      "title": "Experience-backed strategy candidates",
+      "description": "Register structured strategies from exact experience observations and qualify them through the existing learning authority.",
+      "order": 97
     }
   ]
 }

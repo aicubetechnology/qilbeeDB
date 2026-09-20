@@ -1,5 +1,10 @@
 # Procedural Learning API
 
+For structured candidates derived from exact experience observations, use the
+[experience strategy API](experience-strategies.md), available in 0.10.0. It
+registers candidates through this authority and contributes no qualification
+trials by itself.
+
 The authenticated `/api/v1/learning` API registers immutable experimental
 contracts, proposes candidates, records observed outcomes and selects qualified
 procedures. The same durable learning ledger owns qualification and monitoring

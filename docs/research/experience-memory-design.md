@@ -3,8 +3,9 @@
 Status: **research-informed design**, reviewed September 20, 2026. This document
 maps the supplied research to implemented foundations, remaining capabilities
 and acceptance evidence. Experience receipts are available in 0.7.0; revision-bound
-derived memories are available in 0.8.0. Structured strategy extraction, discovery
-replay and the complete learning loop remain proposals. This document does not
+derived memories are available in 0.8.0. Structured experience-backed candidates are available in 0.10.0; extraction
+remains external. Discovery replay and mutable-source-aware strategy selection
+remain proposals. This document does not
 reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
 
@@ -57,7 +58,7 @@ as separate experiments.
 
 | Research input | Foundation already available | Remaining engineering work | Evidence required before claiming benefit |
 | --- | --- | --- | --- |
-| ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, exact cohort exports and revision-bound derived records | Define structured strategy candidates with preconditions, counterexamples, extractor identity and exact observation/source bindings; connect admission to the existing learning authority | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
+| ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, exact cohort exports and revision-bound derived records | The 0.10.0 strategy API implements structured candidates, exact immutable observations and the existing qualification path; mutable-memory source eligibility at selection remains future work | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
 | Dream-RSI: exploration over recorded discovery history | Parent-event bindings, bounded ancestry, immutable tool artifacts and exact observation exports | Define a frozen replay manifest and an external evaluator with prefix-limited visibility, versioned policy code and explicit unsupported transitions | Repeated replay must agree on decisions and accounting; a selected policy must face fresh online trials against fixed exploration under the same compute budget |
 | ZenBrain: routing, retention and consolidation | Scoped lexical, vector and hybrid retrieval; validity, review and transitive dependency checks | Evaluate routing and retention policies separately; preserve required counterexamples when consolidating | Ablate one mechanism at a time under equal storage/context budgets; measure old-task retention, retrieval quality and downstream task outcomes separately |
 | AI Meets Brain: memory lifecycle and security | Separate memory, experience, procedure and tool contracts with scoped access | Specify lifecycle transitions and evidence obligations between those contracts | Exercise contradictory, stale, poisoned and revoked evidence; verify that a derived claim cannot silently become an authenticated observation or approved procedure |
@@ -67,9 +68,10 @@ as separate experiments.
 
 The current 0.10.0 work on verified history, audits and recoverable consumer
 errors supplies reliable evidence transport. It does not implement strategy
-learning. The next learning cycle should connect experience to structured
-candidates, frozen task comparisons, admission and selection through the existing
-authority, with reversal to a valid baseline when a candidate becomes ineligible.
+learning. The 0.10.0 [strategy API](../api/experience-strategies.md) connects immutable
+experience observations to structured candidates and the existing qualification,
+selection and suspension authority. The next learning cycle must demonstrate
+task benefit and connect mutable-source eligibility to these decisions.
 Workers remain external and executions remain isolated.
 
 Replay follows that evidence and admission contract. It should not activate
@@ -92,9 +94,10 @@ consumption accounting. It records evidence declarations without independently
 verifying external effects. Explicit artifact bindings now verify locally stored
 tool bytes and pin exact observation identities. Generic
 [derived records](../api/derived-memory.md) also bind exact source revisions and
-check transitive eligibility. The structured strategy, replay, shared-release
-and retention objects below remain proposals, not current endpoints or accepted
-request fields. Each extension needs its own validated feature PR.
+check transitive eligibility. The [strategy API](../api/experience-strategies.md) now binds structured candidates
+to immutable experience observations. Its observations do not count as
+qualification trials. Mutable-memory source bindings for strategy selection,
+replay, shared release and retention remain proposals. Each extension needs its own validated feature PR.
 
 | Extension | Proposed durable contract | Required acceptance evidence |
 | --- | --- | --- |
@@ -154,8 +157,9 @@ isolated agents and equal total compute. Retrieval nDCG cannot substitute for
 any of these outcomes.
 
 Experience receipts, stored tool artifact bindings and revisioned memory-source
-bindings provide the current foundation. The next step is structured strategy
-derivation tied to task evidence and the existing qualification authority. Replay
+bindings provide the current foundation. Structured strategy candidates now bind exact experience evidence to that
+qualification authority. The next step is controlled task evaluation and
+mutable-source eligibility during strategy admission and selection. Replay
 and shared release depend on those contracts. Automatic selection can operate
 within an authorized policy after qualification; unmeasured candidates remain
 candidates, and a valid baseline remains available when evidence is rejected or
