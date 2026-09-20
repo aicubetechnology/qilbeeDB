@@ -2,16 +2,16 @@ use super::*;
 use crate::{MemoryStorageConfig, RocksDbMemoryStorage};
 use tempfile::TempDir;
 
-fn open(path: &std::path::Path) -> RocksDbMemoryStorage {
+pub(super) fn open(path: &std::path::Path) -> RocksDbMemoryStorage {
     RocksDbMemoryStorage::open(MemoryStorageConfig::for_testing(path)).unwrap()
 }
-fn actor() -> RecordAuthor {
+pub(super) fn actor() -> RecordAuthor {
     RecordAuthor {
         credential_id: Uuid::new_v4(),
         subject_id: "writer".into(),
     }
 }
-fn input(text: &str) -> RecordInput {
+pub(super) fn input(text: &str) -> RecordInput {
     RecordInput {
         episode_type: EpisodeType::Observation,
         content: EpisodeContent::new(text),
@@ -21,7 +21,7 @@ fn input(text: &str) -> RecordInput {
         metadata: Default::default(),
     }
 }
-fn create(store: &RocksDbMemoryStorage, scope: &str, id: &str) -> CommandReceipt {
+pub(super) fn create(store: &RocksDbMemoryStorage, scope: &str, id: &str) -> CommandReceipt {
     store
         .apply_memory_command(
             scope,
@@ -34,7 +34,7 @@ fn create(store: &RocksDbMemoryStorage, scope: &str, id: &str) -> CommandReceipt
         )
         .unwrap()
 }
-fn space() -> EmbeddingSpace {
+pub(super) fn space() -> EmbeddingSpace {
     EmbeddingSpace {
         provider: "fixture".into(),
         model: "fixture-model".into(),
@@ -42,7 +42,7 @@ fn space() -> EmbeddingSpace {
         dimensions: 3,
     }
 }
-fn attach(id: Uuid, key: &str, vector: Vec<f32>) -> EmbeddingCommand {
+pub(super) fn attach(id: Uuid, key: &str, vector: Vec<f32>) -> EmbeddingCommand {
     EmbeddingCommand {
         contract_version: 1,
         idempotency_key: key.into(),
@@ -52,7 +52,7 @@ fn attach(id: Uuid, key: &str, vector: Vec<f32>) -> EmbeddingCommand {
         vector,
     }
 }
-fn search() -> SemanticQuery {
+pub(super) fn search() -> SemanticQuery {
     SemanticQuery {
         space: space(),
         vector: vec![1.0, 0.0, 0.0],

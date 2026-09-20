@@ -774,4 +774,8 @@ mod semantic;
 mod semantic_tests;
 pub use semantic::*;
 
+mod lexical;
+#[cfg(test)]
+mod lexical_tests;
 mod snapshot;
+pub use lexical::*;
