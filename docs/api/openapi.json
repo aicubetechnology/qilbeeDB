@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents."
   },
   "servers": [

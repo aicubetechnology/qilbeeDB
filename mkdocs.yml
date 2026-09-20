@@ -80,6 +80,7 @@ nav:
     - Local Docker: user/deployment.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
     - External Embedding Evaluation: research/external-embedding-evaluation.md
+    - SciFact Retrieval Evaluation: research/scifact-evaluation.md
     - Synthetic Retrieval Report: research/retrieval-contract-report.md
   - Getting Started:
     - Installation: getting-started/installation.md

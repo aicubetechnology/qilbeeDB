@@ -53,7 +53,9 @@ def mean_pool(hidden, attention_mask):
 class E5Encoder:
     """Optional reference encoder: no network requests and no database credentials."""
 
-    def __init__(self, model_dir):
+    def __init__(self, model_dir, overlength="reject"):
+        if overlength not in ("reject", "truncate"):
+            raise ValueError("Unknown overlength policy")
         import onnxruntime as ort
         from tokenizers import Tokenizer
 
@@ -69,7 +71,11 @@ class E5Encoder:
             "document_prefix": "passage: ",
             "pooling": "attention-mask mean; float32 L2 normalization",
             "max_tokens": 512,
-            "overlength": "reject; never truncate",
+            "overlength": (
+                "reject; never truncate"
+                if overlength == "reject"
+                else "truncate right to 512 tokens including special tokens"
+            ),
             "execution_provider": "CPUExecutionProvider",
             "intra_op_threads": 2,
             "inter_op_threads": 1,
@@ -89,6 +95,7 @@ class E5Encoder:
         self.tokenizer = Tokenizer.from_file(str(model_dir / "tokenizer.json"))
         self.tokenizer.no_truncation()
         self.tokenizer.no_padding()
+        self.overlength = overlength
         options = ort.SessionOptions()
         options.intra_op_num_threads = 2
         options.inter_op_num_threads = 1
@@ -109,10 +116,17 @@ class E5Encoder:
             raise ValueError("Unknown embedding input role")
         started = time.perf_counter()
         tokens = self.tokenizer.encode(self.provenance[kind + "_prefix"] + text)
-        if len(tokens.ids) > 512:
-            raise ValueError(
-                "Input exceeds 512 tokens; split the source before freezing it"
-            )
+        original_tokens = len(tokens.ids)
+        if original_tokens > 512:
+            if self.overlength == "reject":
+                raise ValueError(
+                    "Input exceeds 512 tokens; split the source before freezing it"
+                )
+            self.tokenizer.enable_truncation(max_length=512, direction="right")
+            try:
+                tokens = self.tokenizer.encode(self.provenance[kind + "_prefix"] + text)
+            finally:
+                self.tokenizer.no_truncation()
         values = {
             "input_ids": tokens.ids,
             "attention_mask": tokens.attention_mask,
@@ -128,6 +142,8 @@ class E5Encoder:
         return vector.tolist(), {
             "elapsed_ms": (time.perf_counter() - started) * 1000,
             "tokens": len(tokens.ids),
+            "original_tokens": original_tokens,
+            "truncated": original_tokens > len(tokens.ids),
         }
 
 
@@ -184,6 +200,9 @@ def main():
     parser.add_argument("--model-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--measurements", type=Path, required=True)
+    parser.add_argument(
+        "--overlength", choices=["reject", "truncate"], default="reject"
+    )
     args = parser.parse_args()
     if (
         args.output.exists()
@@ -195,7 +214,9 @@ def main():
         )
     source = json.loads(args.source.read_text())
     validate_source(source)
-    fixture, measurements = build_fixture(source, E5Encoder(args.model_dir))
+    fixture, measurements = build_fixture(
+        source, E5Encoder(args.model_dir, args.overlength)
+    )
     save(args.output, fixture)
     save(args.measurements, measurements)
     print("Wrote external embedding fixture:", args.output, digest(fixture))

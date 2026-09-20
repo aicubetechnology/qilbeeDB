@@ -417,6 +417,7 @@ def prepare(client, fixture, scope, state_path):
         documents=[d for d in fixture["documents"] if d["id"] in state["documents"]],
     )
     verify_sources(client, existing, state, tag)
+    pending = 0
     for doc in fixture["documents"]:
         alias = doc["id"]
         if alias not in state["documents"]:
@@ -452,9 +453,14 @@ def prepare(client, fixture, scope, state_path):
                 "revision": receipt["revision"],
                 "embedding": embedding,
             }
-            save(state_path, state)
+            pending += 1
+            if pending == 64:
+                save(state_path, state)
+                pending = 0
     if set(state["documents"]) != {d["id"] for d in fixture["documents"]}:
         raise ValueError("Saved corpus document set changed")
+    if pending:
+        save(state_path, state)
     return state, tag
 
 
@@ -910,8 +916,8 @@ def markdown_report(report):
         + report["fixture_kind"]
         + " comparison. Hybrid remains **experimental**.",
         "",
-        "| Method | nDCG@10 | Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Method | nDCG@10 | Recall@10 | Judged Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for mode, summary in report["summary"][display_split].items():
         lines.append(
@@ -921,6 +927,8 @@ def markdown_report(report):
             + number(summary["ndcg_at_10"])
             + " | "
             + number(summary["recall_at_10"])
+            + " | "
+            + number(summary["judged_recall_at_10"])
             + " | "
             + number(summary["answerable_no_useful_result_rate"])
             + " | "

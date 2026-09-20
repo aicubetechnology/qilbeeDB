@@ -1,5 +1,5 @@
 {
-  "release": "0.5.0",
+  "release": "0.6.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -98,6 +98,13 @@
       "title": "External evaluation embeddings",
       "description": "Generate and identify external model embeddings with reproducible preprocessing and separate timing evidence.",
       "order": 125
+    },
+    {
+      "source": "docs/research/scifact-evaluation.md",
+      "file": "scifact-evaluation.md",
+      "title": "SciFact retrieval evaluation",
+      "description": "Compare scoped retrieval with external relevance judgments and development-only ranking selection.",
+      "order": 130
     }
   ]
 }
