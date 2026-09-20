@@ -10,3 +10,4 @@ mod tests;
 
 pub use store::registry::*;
 pub use store::bound::*;
+pub use store::admission::*;

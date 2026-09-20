@@ -120,6 +120,7 @@ nav:
     - Evidence-Driven Learning: agent-memory/learning.md
     - Immutable Learning Contracts: agent-memory/learning-registry.md
     - Registered Procedures: agent-memory/registered-procedures.md
+    - Evaluation Admission: agent-memory/evaluation-admission.md
     - Research and Evolution: research/agent-memory-evolution.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md
