@@ -42,6 +42,47 @@ fn validate_namespace(tenant: &str, namespace: &str) -> Result<()> {
     validate_text(namespace, "authorized namespace", 4096)
 }
 impl LearningMemory {
+    /// Select while holding the learning mutation lock so current binding and state agree.
+    pub fn select_registered(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        policy_id: &str,
+        context_id: &str,
+        max_instruction_bytes: usize,
+    ) -> Result<Option<RegisteredProcedure>> {
+        let _guard = self
+            .inner
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
+        let (policy, context) = self.contracts(tenant, namespace, policy_id, context_id)?;
+        let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
+        self.select(
+            &scope,
+            &context.payload.task,
+            &context.payload.baseline_revision,
+            &context.payload.evaluation_contract,
+            max_instruction_bytes,
+        )?
+        .map(|selected| {
+            let bound = self
+                .registered_procedure(tenant, namespace, &selected.proposal.id)?
+                .ok_or_else(|| {
+                    Error::DataCorruption(
+                        "Selected procedure is missing its immutable binding".into(),
+                    )
+                })?;
+            if bound.record != selected {
+                return Err(Error::DataCorruption(
+                    "Selected procedure differs from its registered contract".into(),
+                ));
+            }
+            Ok(bound)
+        })
+        .transpose()
+    }
+
     /// Derive an exact compatible partition. Namespace must come from authorization.
     pub fn registered_scope(
         &self,
@@ -376,6 +417,46 @@ mod tests {
         db.inner.db.delete(key).unwrap();
         assert!(matches!(
             db.registered_procedure("tenant", "namespace", "candidate"),
+            Err(qilbee_core::Error::DataCorruption(_))
+        ));
+    }
+
+    #[test]
+    fn bound_selection_rejects_a_direct_record_from_a_different_contract() {
+        let dir = TempDir::new().unwrap();
+        let db = LearningMemory::open(dir.path()).unwrap();
+        setup(&db, "tenant");
+        let receipt = db
+            .propose_registered("tenant", "namespace", input(), "proposer")
+            .unwrap();
+        let mut context = db.context("tenant", "context-v1").unwrap().unwrap().payload;
+        context.model_revision = "model-v2".into();
+        db.register_context("tenant", "context-v2", context, "admin")
+            .unwrap();
+        let scope = db
+            .registered_scope("tenant", "namespace", "policy-v1", "context-v2")
+            .unwrap();
+        db.propose(&scope, receipt.record.proposal).unwrap();
+        for n in 0..128 {
+            db.record_evaluation(
+                &scope,
+                "candidate",
+                PairedEvaluation {
+                    case_id: n.to_string(),
+                    phase: EvaluationPhase::Qualification,
+                    evaluator_id: "evaluator".into(),
+                    evaluation_contract: "contract-v1".into(),
+                    evidence_ref: format!("evaluation-{n}"),
+                    baseline_utility: 0.0,
+                    candidate_utility: 1.0,
+                    candidate_cost_units: 1,
+                    candidate_latency_ms: 1,
+                },
+            )
+            .unwrap();
+        }
+        assert!(matches!(
+            db.select_registered("tenant", "namespace", "policy-v1", "context-v2", 4096),
             Err(qilbee_core::Error::DataCorruption(_))
         ));
     }

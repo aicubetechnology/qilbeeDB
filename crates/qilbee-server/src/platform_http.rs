@@ -16,12 +16,14 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 use uuid::Uuid;
 
+mod learning;
 mod memory;
 
 #[derive(Clone)]
 pub(crate) struct PlatformState {
     identity: Arc<IdentityStore>,
     memory: Arc<qilbee_memory::RocksDbMemoryStorage>,
+    learning: Arc<qilbee_memory::learning::LearningMemory>,
 }
 
 impl PlatformState {
@@ -59,11 +61,15 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
         },
     )?);
     let state = PlatformState {
+        learning: Arc::new(qilbee_memory::learning::LearningMemory::open(
+            database.storage().path().join("procedural-learning"),
+        )?),
         memory,
         identity: Arc::new(IdentityStore::new(Arc::new(database.storage().clone()))),
     };
     Ok(Router::new()
         .merge(memory::routes())
+        .merge(learning::routes())
         .route("/health", get(health))
         .route("/openapi.json", get(openapi))
         .route("/api/v1/identity", get(who_am_i))

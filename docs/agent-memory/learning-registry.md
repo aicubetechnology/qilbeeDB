@@ -2,7 +2,7 @@
 
 The Rust `LearningMemory` registry stores administrative policy and exact
 experimental context independently of a procedure proposal. QilbeeDB owns this
-contract and requires no QMN service.
+contract.
 
 ## Policy authority
 
@@ -10,8 +10,7 @@ contract and requires no QMN service.
 algorithm: `fixed_budget_hoeffding_v1`. Its parameters are the validated
 `LearningPolicy`: fixed qualification count, one-sided error budget, minimum
 improvement/utility, resource limits, monitoring failure limit, evaluator subject
-and evaluation contract. This policy is not equivalent to QMN sign tests or
-family-wide error spending. Its error budget applies to one proposal; registering
+and evaluation contract. This policy does not establish family-wide error spending. Its error budget applies to one proposal; registering
 many proposals does not establish a family-wide guarantee.
 
 A revision uses a new identifier. Repeating an identical definition returns the
@@ -62,4 +61,5 @@ records and reopen persistence.
 These blocking Rust interfaces are trusted storage operations. Network adapters
 must derive tenant and actor from a live credential, require `policy_admin` for
 registration, and resolve immutable references before creating a proposal.
-This increment does not itself expose registry HTTP routes or execute code.
+The [procedural HTTP API](../api/procedural-learning.md) enforces these requirements.
+The registry does not execute code.
