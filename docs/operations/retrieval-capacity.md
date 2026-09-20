@@ -120,3 +120,9 @@ model configurations using frozen vectors, the same corpus and judgments, and
 separate development/test queries. Record storage, scan coverage, latency and
 external generation cost as well as relevance. Synthetic large-vector tests establish
 contract behavior, persistence and isolation; they do not establish semantic quality.
+
+For research on explicitly trained representations at multiple granularities, see
+[Matryoshka Representation Learning](https://arxiv.org/abs/2205.13147). Such model
+capabilities belong to the external encoder contract. QilbeeDB does not infer that
+a particular model supports truncation and does not implement a Matryoshka cascade
+or an approximate vector index in this release.

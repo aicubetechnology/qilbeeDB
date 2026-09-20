@@ -158,3 +158,74 @@ The budget is recorded in the plan and report; it cannot be overridden during
 execution of a pinned plan. Check full source and embedding coverage before any
 relevance comparison. Do not reduce vector dimensions or merge independent BM25
 pages to bypass an incomplete scan.
+
+## Compare additional development fusion candidates
+
+If the first development grid is insufficient, declare an expanded search before
+running it and retain the original result. The committed expanded grid has 114 RRF
+combinations: six rank constants and 19 lexical weights. It contains the original
+20 combinations. `compare_development_fusion.py` additionally evaluates 19 convex
+combinations using per-channel min-max normalization over the scoped top-100
+candidates. A constant nonempty score range maps to one; an absent channel
+contributes zero. This is a declared alternative, not a raw addition of BM25 and
+cosine scores. The total expanded search has **133 distinct candidates**.
+
+```bash
+python3 scripts/compare_development_fusion.py \
+  --fixture /secure/path/scifact-fixture.json \
+  --state /secure/path/scifact-state.json \
+  --cache /secure/path/development-candidates.json \
+  --grid benchmarks/retrieval/rrf-expanded-development-grid.json \
+  --report /secure/path/development-fusion-comparison.json
+```
+
+This offline comparison verifies fixture and source-manifest hashes, refuses test
+queries and requires complete development query coverage. It reuses previously
+validated server channel candidates and makes no embedding-provider calls. Its
+normalization refers to those candidate lists, not to the entire corpus or to a
+calibrated probability. Expanding the search increases selection bias; development
+scores must not be presented as held-out gains.
+
+The resulting server profile `weighted_rrf_v2` fixes lexical weight **0.25**, semantic
+weight **0.75** and rank constant **2**. It retains the same tokenization, exact
+cosine, 100-candidate channel cap and UUID tie-break as v1. Both profiles remain
+experimental; v1 keeps its original 0.5/0.5 weights and constant 60.
+
+## Interleave both profiles with shared baselines
+
+For a full multi-profile comparison, the following evaluator freezes the fixture,
+source manifest, profiles, budgets and concurrency. It sends one measured request
+per query and method, with a seeded shuffle across all methods. A single development
+query warms each method before measurement. Lexical and cosine results are shared
+baselines for both hybrid versions. All results come from the server's HTTP API;
+no offline fusion replaces a hybrid response in this comparison.
+
+```bash
+python3 scripts/evaluate_retrieval_profiles.py \
+  --fixture /secure/path/scifact-fixture.json \
+  --state /secure/path/scifact-state.json \
+  --plan /secure/path/interleaved-plan.json --write-plan
+python3 scripts/evaluate_retrieval_profiles.py \
+  --fixture /secure/path/scifact-fixture.json \
+  --state /secure/path/scifact-state.json \
+  --plan /secure/path/interleaved-plan.json \
+  --credential-file /secure/path/evaluator.json \
+  --report /secure/path/interleaved-report.json \
+  --container qilbeedb-local
+```
+
+Defaults are two concurrent HTTP requests and a 128 MiB lexical/hybrid scan budget.
+The server must admit these settings. Specify matching `--concurrency`,
+`--scan-bytes-limit` and `--seed` values at plan creation and execution when using
+other conditions. Use the same frozen manifest; this command does not prepare or
+modify source records. It refuses an existing final report and verifies sources
+before and after measurement.
+
+Every response must have full corpus coverage, the expected scope and profile,
+current source revisions, exact embedding receipts and no duplicate results.
+Failures make the comparison invalid. The report includes all rankings, raw scores,
+contributions, candidate counts, bytes, latency, pairwise wins/losses and exploratory
+paired bootstrap intervals. Container CPU/memory counters cover the combined
+interleaved campaign; they cannot attribute resource use to an individual method.
+There is one observation per query/method, so no repeated-query stability estimate.
+Generation latency and cost remain unmeasured in this run, not zero.
