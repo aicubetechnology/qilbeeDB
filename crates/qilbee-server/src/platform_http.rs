@@ -17,6 +17,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 mod learning;
+mod experiences;
 mod memory;
 mod retrieval_limits;
 mod tools;
@@ -75,6 +76,7 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     Ok(Router::new()
         .merge(memory::routes())
         .merge(learning::routes())
+        .merge(experiences::routes())
         .merge(tools::routes())
         .route(
             "/",

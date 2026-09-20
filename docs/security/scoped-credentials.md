@@ -22,6 +22,9 @@ Capabilities are independent; names do not imply other permissions:
 | `memory_write` | Mutate an explicitly granted memory scope |
 | `procedure_propose` | Propose candidates in a granted scope |
 | `procedure_evaluate` | Submit evaluations in a granted scope |
+| `experience_read` | Read current attempts and immutable observation receipts in a granted scope |
+| `experience_write` | Register attempts with an immutable reporter binding in a granted scope |
+| `experience_report` | Record observations as the bound reporter subject in a granted scope |
 | `policy_admin` | Register and read immutable tenant policy/context contracts |
 | `tool_read` | Read artifacts and development records in a granted scope |
 | `tool_develop` | Register artifacts, request development and request cancellation in a granted scope |
