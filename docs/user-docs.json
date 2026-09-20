@@ -91,6 +91,13 @@
       "title": "Synthetic retrieval report",
       "description": "Inspect the recorded hybrid regressions, uncertainty and limits of the 0.5.0 contract trial.",
       "order": 120
+    },
+    {
+      "source": "docs/research/external-embedding-evaluation.md",
+      "file": "external-embeddings.md",
+      "title": "External evaluation embeddings",
+      "description": "Generate and identify external model embeddings with reproducible preprocessing and separate timing evidence.",
+      "order": 125
     }
   ]
 }
