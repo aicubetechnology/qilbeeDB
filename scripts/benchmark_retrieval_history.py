@@ -9,8 +9,10 @@ import concurrent.futures
 import hashlib
 import json
 import math
+import os
 import statistics
 import subprocess
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -25,11 +27,18 @@ class HistoryBenchmark:
         self.space = dict(provider="synthetic", model="history-coverage", revision="v1", dimensions=1536)
         self.rows, self.slots, self.results = {}, {}, []
         self.resource_container = resource_container
+        self.intent_lock = threading.Lock()
 
     def request(self, route, body=None):
         raw = json.dumps(body, separators=(",", ":")).encode() if body is not None else None
         request = urllib.request.Request(self.url + route, data=raw, headers={
             "Authorization": "Bearer " + self.token, "Content-Type": "application/json"})
+        if route in ["/api/v1/memory/commands", "/api/v1/memory/embeddings"]:
+            # Keep exact commands for reconciliation; never store bearer credentials.
+            intent = json.dumps(dict(route=route, body=body), separators=(",", ":")) + "\n"
+            with self.intent_lock:
+                with open(self.output / "write-intents.jsonl", "a", opener=lambda path,flags: os.open(path,flags,0o600)) as log:
+                    log.write(intent); log.flush(); os.fsync(log.fileno())
         started = time.perf_counter()
         with urllib.request.urlopen(request, timeout=120) as response:
             wire = response.read()
@@ -163,10 +172,18 @@ class HistoryBenchmark:
 
     def run(self, cycles=3, outside_tag=0):
         self.output.mkdir(parents=True, exist_ok=False, mode=0o700)
-        for identifier, row in self.parallel(lambda number:self.create(number, 0), range(self.documents)):
-            self.rows[identifier] = row; self.slots[row["slot"]] = identifier
-        self.parallel(lambda pair:self.embed(*pair, 0), list(self.rows.items()))
-        self.measure("initial")
+        initial = self.request("/api/v1/memory/query", dict(contract_version=1, scope=self.scope,
+            filter=dict(limit=1, scan_limit=1)))[0]["page"]
+        if initial["records"] or initial["scanned_records"] or initial["next_after"]:
+            raise ValueError("The dedicated scope must be empty, including tombstones")
+        previous = 0
+        for target in sorted({min(1024, self.documents), min(2592, self.documents), self.documents}):
+            created = self.parallel(lambda number:self.create(number, 0), range(previous, target))
+            for identifier, row in created:
+                self.rows[identifier] = row; self.slots[row["slot"]] = identifier
+            self.parallel(lambda pair:self.embed(*pair, 0), created)
+            self.measure("initial" if target == self.documents else f"size-{target}")
+            previous = target
         for cycle in range(1, cycles+1):
             current = [(identifier,self.rows[identifier]) for identifier in self.slots.values()]
             def update(pair):

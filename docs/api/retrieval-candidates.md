@@ -91,3 +91,12 @@ global ranking.** Prefer a complete filtered corpus within the agreed budgets.
 Use `scripts/benchmark_retrieval_history.py` only against a dedicated disposable
 scope. Its synthetic 1,536-dimensional vectors measure coverage and read work;
 they do not measure relevance or agent-task improvement.
+
+The benchmark refuses a scope containing records or tombstones and never overwrites
+an output directory. It saves exact write intents before requests, without bearer
+credentials. A failed or uncertain write aborts the run; reconcile the saved
+idempotency keys before attempting further mutations. Do not label an interrupted
+run a completed coverage measurement. Optional `--resource-container` sampling
+requires an isolated `qilbeedb-history-*` container with the server as PID 1.
+
+The [history qualification report](../research/retrieval-history-report.md) includes the three-cycle coverage results, clean-corpus size curve, upgrade comparison and real-vector eight-document regression.
