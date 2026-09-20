@@ -6401,6 +6401,192 @@
           }
         }
       }
+    },
+    "/api/v1/experiences/export": {
+      "post": {
+        "operationId": "exportExperiences",
+        "summary": "Export an exact observation cohort",
+        "description": "Requires experience_read. One immutable event per distinct attempt, all sharing the supplied context digest and accounting unit. All-or-error: mismatched hashes/context/unit return 409, missing events 404, duplicate attempts or invalid bounds 400. Canonical attempt-ID byte order and server-owned method identity make the response repeatable. No live-state substitution, inference, promotion, corpus completeness or independent-evidence claim. Unknown reports keep totals null.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceExportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceExportRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "selection": {
+                  "context_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "accounting_unit": "test-credit-v1",
+                  "events": [
+                    {
+                      "attempt_id": "attempt-v1",
+                      "event_id": "observation-v1",
+                      "event_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11451,6 +11637,233 @@
         "required": [
           "contract_version",
           "lineage"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExportRef": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "event_id",
+          "event_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExportSelection": {
+        "type": "object",
+        "properties": {
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperienceExportRef"
+            },
+            "minItems": 1,
+            "maxItems": 64
+          }
+        },
+        "required": [
+          "context_digest",
+          "accounting_unit",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceAccountingSummary": {
+        "type": "object",
+        "properties": {
+          "known_reports": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "unknown_reports": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "reported_total": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "description": "Exact unsigned decimal sum; a string avoids floating-point rounding and u64 overflow."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_lower_bound": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Exact unsigned decimal sum; a string avoids floating-point rounding and u64 overflow."
+          }
+        },
+        "required": [
+          "known_reports",
+          "unknown_reports",
+          "reported_total",
+          "observed_lower_bound"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExportSummary": {
+        "type": "object",
+        "properties": {
+          "attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "succeeded": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "cancelled": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "cost_units": {
+            "$ref": "#/components/schemas/ExperienceAccountingSummary"
+          },
+          "latency_ms": {
+            "$ref": "#/components/schemas/ExperienceAccountingSummary"
+          }
+        },
+        "required": [
+          "attempts",
+          "succeeded",
+          "failed",
+          "cancelled",
+          "unknown",
+          "cost_units",
+          "latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExport": {
+        "type": "object",
+        "properties": {
+          "method_version": {
+            "type": "string",
+            "const": "qilbee.experience-export.v1"
+          },
+          "coverage": {
+            "type": "string",
+            "const": "explicit_event_set"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {
+              "$ref": "#/components/schemas/ExperienceEvent"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExperienceExportSummary"
+          },
+          "export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "method_version",
+          "coverage",
+          "context_digest",
+          "accounting_unit",
+          "events",
+          "summary",
+          "export_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExportRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/ExperienceExportSelection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "selection"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceExportResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "export": {
+            "$ref": "#/components/schemas/ExperienceExport"
+          }
+        },
+        "required": [
+          "contract_version",
+          "export"
         ],
         "additionalProperties": false
       }

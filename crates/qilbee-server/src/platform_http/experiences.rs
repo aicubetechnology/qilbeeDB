@@ -10,6 +10,7 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/experiences/events", post(observe))
         .route("/api/v1/experiences/events/read", post(event))
         .route("/api/v1/experiences/history", post(history))
+        .route("/api/v1/experiences/export", post(export))
         .route("/api/v1/experiences/lineage", post(lineage))
         .route("/api/v1/experiences/artifacts", post(bind_artifact))
         .route(
@@ -317,6 +318,38 @@ async fn lineage(
                 )
                 .map_err(ApiError::operation)?;
             Ok(Json(json!({"contract_version":1,"lineage":lineage})))
+        })
+        .await
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ExportRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+    selection: ExperienceExportRequest,
+}
+async fn export(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<ExportRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let store = state.learning.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::ExperienceRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let export = store
+                .export_experiences(
+                    &scope.tenant_id,
+                    &scope.storage_namespace,
+                    request.selection,
+                )
+                .map_err(ApiError::operation)?;
+            Ok(Json(json!({"contract_version":1,"export":export})))
         })
         .await
 }

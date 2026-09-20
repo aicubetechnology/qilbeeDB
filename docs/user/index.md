@@ -32,7 +32,7 @@ end-to-end agent task outcomes.
 
 ## Build learning workflows
 
-[Experience receipts](../api/experiences.md), introduced in the unreleased 0.7.0
+[Experience receipts](../api/experiences.md), introduced in the 0.7.0
 contract, preserve execution intent, authenticated observations and unknown resource
 consumption. They do not automatically qualify a procedure.
 
@@ -58,3 +58,6 @@ to the [operator capacity configuration](../operations/retrieval-capacity.md). S
 integrating a new client. The current default router covers the documented
 platform endpoints; legacy graph and memory routes are a separate compatibility
 surface.
+
+[Evaluate experience evidence](../research/experience-evaluation.md) explains how
+to freeze observations, preserve incomplete outcomes and compare agent tasks.

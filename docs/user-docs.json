@@ -133,6 +133,13 @@
       "title": "Experience receipts",
       "description": "Record scoped execution attempts, immutable observations and unknown consumption without automatically qualifying procedures.",
       "order": 95
+    },
+    {
+      "source": "docs/research/experience-evaluation.md",
+      "file": "experience-evaluation.md",
+      "title": "Evaluate experience evidence",
+      "description": "Freeze exact observation cohorts and interpret outcomes, unknown consumption and evaluation limits.",
+      "order": 155
     }
   ]
 }
