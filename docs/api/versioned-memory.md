@@ -264,3 +264,10 @@ The text query above remains a substring/filter endpoint. Use the separate
 [semantic search API](semantic-memory.md) to attach externally generated vectors
 to exact source revisions and retrieve by cosine similarity. It enforces model
 identity and scope and discloses partial scan coverage.
+
+## Review decisions
+
+[Memory review](memory-review.md) adds optional review metadata to records.
+Rejected revisions are unavailable to ordinary reads, queries and retrieval.
+Content updates clear the current review; historical decisions remain durable.
+Every decision advances the revision and requires new revision-bound embeddings.

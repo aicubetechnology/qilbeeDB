@@ -6,6 +6,7 @@ use qilbee_memory::storage::platform::{MemoryCommand, MemoryOperation, MemoryQue
 
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
+        .merge(reviews::routes())
         .route("/api/v1/memory/commands", post(command))
         .route("/api/v1/memory/records/:id", get(read))
         .route("/api/v1/memory/query", post(query))
@@ -377,3 +378,5 @@ async fn changes(
         })
         .await
 }
+
+mod reviews;

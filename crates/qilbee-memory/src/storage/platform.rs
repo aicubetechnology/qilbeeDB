@@ -57,6 +57,8 @@ pub struct MemoryRecord {
     pub modified_at_millis: i64,
     pub author: RecordAuthor,
     pub payload: Option<RecordInput>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub review: Option<MemoryReview>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -168,6 +170,7 @@ impl RocksDbMemoryStorage {
                         modified_at_millis: now,
                         author: author.clone(),
                         payload: Some(record.clone()),
+                        review: None,
                     },
                     "created",
                 )
@@ -181,6 +184,7 @@ impl RocksDbMemoryStorage {
                 let mut current =
                     self.platform_record_for_write(namespace, *record_id, *expected_revision)?;
                 current.payload = Some(record.clone());
+                current.review = None;
                 current.author = author.clone();
                 current.modified_at_millis = now;
                 (current, "updated")
@@ -192,6 +196,7 @@ impl RocksDbMemoryStorage {
                 let mut current =
                     self.platform_record_for_write(namespace, *record_id, *expected_revision)?;
                 current.payload = None;
+                current.review = None;
                 current.author = author.clone();
                 current.modified_at_millis = now;
                 (current, "deleted")
@@ -237,7 +242,15 @@ impl RocksDbMemoryStorage {
             MemoryOperation::Update { .. } => MemoryChangeKind::Updated,
             MemoryOperation::Delete { .. } => MemoryChangeKind::Deleted,
         };
-        self.append_memory_change(namespace, &mut batch, kind, record.record_id, record.revision, author, now)?;
+        self.append_memory_change(
+            namespace,
+            &mut batch,
+            kind,
+            record.record_id,
+            record.revision,
+            author,
+            now,
+        )?;
         let mut options = rocksdb::WriteOptions::default();
         options.disable_wal(false);
         options.set_sync(true);
@@ -412,9 +425,13 @@ fn record_key(kind: u8, namespace: &str, id: Uuid) -> Vec<u8> {
 }
 fn visible(record: &MemoryRecord, now: i64) -> bool {
     record
-        .payload
+        .review
         .as_ref()
-        .is_some_and(|input| input.valid_until_millis.is_none_or(|expiry| now < expiry))
+        .is_none_or(|review| review.disposition != MemoryReviewDisposition::Rejected)
+        && record
+            .payload
+            .as_ref()
+            .is_some_and(|input| input.valid_until_millis.is_none_or(|expiry| now < expiry))
 }
 fn validate_input(input: &RecordInput) -> Result<()> {
     if chrono::DateTime::from_timestamp_millis(input.event_time_millis).is_none()
@@ -794,3 +811,8 @@ mod changes;
 pub use changes::*;
 #[cfg(test)]
 mod changes_tests;
+
+mod review;
+pub use review::*;
+#[cfg(test)]
+mod review_tests;
