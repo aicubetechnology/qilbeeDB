@@ -126,6 +126,7 @@ nav:
       - Memory Changes: api/memory-changes.md
       - Memory Review: api/memory-review.md
       - Derived Memory: api/derived-memory.md
+      - Consumer Checkpoints: api/memory-checkpoints.md
       - Semantic Memory Search: api/semantic-memory.md
       - Lexical Memory Search: api/lexical-memory.md
       - Hybrid Memory Retrieval: api/hybrid-memory.md

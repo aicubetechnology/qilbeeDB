@@ -91,6 +91,7 @@ fn derived_revisions_are_checked_before_every_serving_path_and_statistics() {
         db.query_memory_records(
             "scope",
             &MemoryQuery {
+                scan_limit: 10_000,
                 limit: 100,
                 after: None,
                 text_contains: None,

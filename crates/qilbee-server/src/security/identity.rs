@@ -12,6 +12,7 @@ pub enum Capability {
     MemoryRead,
     MemoryWrite,
     MemoryReview,
+    MemoryCheckpoint,
     ProcedurePropose,
     ProcedureEvaluate,
     ExperienceRead,
