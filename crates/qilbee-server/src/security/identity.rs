@@ -11,6 +11,7 @@ use uuid::Uuid;
 pub enum Capability {
     MemoryRead,
     MemoryWrite,
+    MemoryReview,
     ProcedurePropose,
     ProcedureEvaluate,
     ExperienceRead,

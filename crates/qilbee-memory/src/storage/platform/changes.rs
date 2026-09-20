@@ -9,6 +9,7 @@ pub enum MemoryChangeKind {
     Updated,
     Deleted,
     EmbeddingAttached,
+    Reviewed,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

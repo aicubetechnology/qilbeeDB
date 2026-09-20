@@ -36,7 +36,7 @@ projects, missions, agents or private subjects. `limit` must be 1–256; the sta
 Each entry preserves `schema_version`, `cursor`, `kind`, `record_id`,
 `record_revision`, authenticated `author`, `committed_at_millis` and an opaque
 `change_digest`. Kinds are `created`, `updated`, `deleted` and
-`embedding_attached`. An embedding entry identifies the bound memory revision;
+`embedding_attached`, plus `reviewed` for [review decisions](memory-review.md). An embedding entry identifies the bound memory revision;
 it does not increment that revision. Memory content, vectors and provider secrets
 are never copied to the journal. Refetch an authorized record when needed.
 

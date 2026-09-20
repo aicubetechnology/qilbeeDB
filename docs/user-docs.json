@@ -147,6 +147,13 @@
       "title": "Memory change feed",
       "description": "Consume durable scoped memory changes with bounded pages, immutable fences and restart-safe cursors.",
       "order": 55
+    },
+    {
+      "source": "docs/api/memory-review.md",
+      "file": "memory-review.md",
+      "title": "Memory review and correction",
+      "description": "Record authorized decisions, suppress rejected revisions and preserve review evidence.",
+      "order": 56
     }
   ]
 }

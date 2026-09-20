@@ -64,3 +64,6 @@ to freeze observations, preserve incomplete outcomes and compare agent tasks.
 
 Use the [memory change feed](../api/memory-changes.md) to reconcile scoped caches
 and resume from a durable cursor after disconnection.
+
+Use [memory review](../api/memory-review.md) to record decisions and exclude
+rejected revisions while preserving historical evidence.
