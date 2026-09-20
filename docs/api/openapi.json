@@ -12398,7 +12398,8 @@
           "contribution": {
             "type": "number",
             "minimum": 0,
-            "maximum": 0.00819672131147541
+            "maximum": 0.25,
+            "description": "Weighted reciprocal-rank contribution. This generic ceiling covers all accepted channels and profiles; HybridHitV1 and HybridHitV2 apply exact per-channel ceilings."
           }
         },
         "required": [
@@ -12445,8 +12446,8 @@
           "score": {
             "type": "number",
             "minimum": 0,
-            "maximum": 0.01639344262295082,
-            "description": "Weighted RRF score, neither cosine nor a probability."
+            "maximum": 0.3333333333333333,
+            "description": "Weighted RRF score, neither cosine nor probability. This generic ceiling covers all supported profiles; HybridPage applies the ranking-version-specific ceiling."
           },
           "lexical": {
             "anyOf": [
@@ -12663,6 +12664,11 @@
               "properties": {
                 "rank_constant": {
                   "const": 60
+                },
+                "hits": {
+                  "items": {
+                    "$ref": "#/components/schemas/HybridHitV1"
+                  }
                 }
               }
             }
@@ -12683,6 +12689,11 @@
               "properties": {
                 "rank_constant": {
                   "const": 2
+                },
+                "hits": {
+                  "items": {
+                    "$ref": "#/components/schemas/HybridHitV2"
+                  }
                 }
               }
             }
@@ -15660,6 +15671,120 @@
           "revision"
         ],
         "additionalProperties": false
+      },
+      "HybridHitV1": {
+        "description": "A hit using the immutable weighted_rrf_v1 profile. Ranks are one-based; missing channels contribute zero.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HybridHit"
+          },
+          {
+            "properties": {
+              "score": {
+                "maximum": 0.01639344262295082
+              },
+              "lexical": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/RankContribution"
+                      },
+                      {
+                        "properties": {
+                          "contribution": {
+                            "maximum": 0.00819672131147541
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "semantic": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/RankContribution"
+                      },
+                      {
+                        "properties": {
+                          "contribution": {
+                            "maximum": 0.00819672131147541
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "HybridHitV2": {
+        "description": "A hit using the immutable weighted_rrf_v2 profile. Ranks are one-based; missing channels contribute zero.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HybridHit"
+          },
+          {
+            "properties": {
+              "score": {
+                "maximum": 0.3333333333333333
+              },
+              "lexical": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/RankContribution"
+                      },
+                      {
+                        "properties": {
+                          "contribution": {
+                            "maximum": 0.08333333333333333
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "semantic": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/RankContribution"
+                      },
+                      {
+                        "properties": {
+                          "contribution": {
+                            "maximum": 0.25
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
       }
     }
   }

@@ -173,7 +173,7 @@ validation error. No cursor is returned that silently skips an oversized row.
 | `lexical_matches`, `semantic_matches` | Matches in each enabled channel before candidate truncation |
 | `lexical_candidates`, `semantic_candidates` | Candidates retained by each channel |
 | `candidates_truncated` | At least one channel dropped matches at its candidate limit |
-| `rank_constant` | The implemented RRF constant, 60 |
+| `rank_constant` | The selected immutable RRF constant: 60 for v1, 2 for v2 |
 | `ranking` | Exact immutable server profile and experimental status |
 | `embedding_coverage` | `complete`, `partial`, `missing`, or `empty_corpus`, relative to the visible filtered corpus in this scan |
 | `next_after` | Last scanned source UUID if another row remains; otherwise null |
@@ -269,3 +269,42 @@ experimental; the measured gain does not establish a universal ranking policy.
 request snapshot before candidate eligibility and corpus statistics. Pages report
 additional source reads in `dependency_work`; these are separate from candidate
 scan budgets. Exceeding the documented dependency limits fails the request.
+
+## Score bounds and response validation
+
+Weighted RRF combines reciprocal **ranks**, not raw BM25 and cosine values. With
+one-based ranks, each channel's maximum contribution is its weight divided by
+`rank_constant + 1`. The maximum combined score is the sum of those contributions
+when the same record ranks first in both channels.
+
+| Ranking version | Constant | Lexical maximum | Semantic maximum | Combined maximum |
+| --- | ---: | ---: | ---: | ---: |
+| `weighted_rrf_v1` | 60 | 0.5 / 61 = 0.00819672131147541 | 0.5 / 61 = 0.00819672131147541 | 1 / 61 = 0.01639344262295082 |
+| `weighted_rrf_v2` | 2 | 0.25 / 3 = 0.08333333333333333 | 0.75 / 3 = 0.25 | 1 / 3 = 0.3333333333333333 |
+
+A v2 semantic-only result at score 0.25 is legitimate. A missing channel contributes
+zero; scores remain weighted RRF values, neither cosine nor calibrated probability.
+The HTTP endpoint and `contract_version: 1` are unchanged: `weighted_rrf_v2` names
+the ranking profile, not an API version.
+
+Starting in **0.9.0**, the published OpenAPI contract applies `HybridHitV1` or
+`HybridHitV2` through `HybridPage.ranking.version`, including per-channel contribution
+limits. `HybridResponse` also enforces agreement between the envelope's
+`ranking_version`, the page profile and its constant. The generic `HybridHit` and
+`RankContribution` definitions cover all accepted profiles; clients validating
+whole responses should use the endpoint's response schema to retain the more
+specific version checks.
+
+Earlier contracts in 0.7.0 and 0.8.0 incorrectly applied v1's maximum combined
+score and channel contribution to v2. Valid v2 HTTP 200 responses could therefore
+fail client-side schema validation. This correction changes documentation and
+validation, not ranking weights, computed scores, ordering or the cosine endpoint.
+Fetch `/openapi.json` from the deployed server and refresh cached/generated client
+contracts when upgrading.
+
+The regression suite starts a real loopback HTTP server, downloads its published
+OpenAPI, and validates v1 and v2 responses for both-channel, lexical-only,
+semantic-only and empty results. It also rejects scores or contributions above
+the selected profile's bounds and mismatched ranking identities. These synthetic
+HTTP fixtures establish schema conformance only. Neither they nor a query made
+during corpus import establish retrieval relevance or comparative ranking quality.

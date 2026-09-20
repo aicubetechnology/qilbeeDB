@@ -715,3 +715,5 @@ mod checkpoints;
 mod verified_changes;
 
 mod verified_checkpoints;
+
+mod hybrid_schema;
