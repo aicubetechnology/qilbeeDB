@@ -139,7 +139,7 @@ results do not currently justify publishing another set of weights.
 | `limit` | Final result count, 1–100 |
 | `ranking_version` | Required `weighted_rrf_v1`; selects an immutable server-defined method and parameters |
 | `min_score` | Minimum raw cosine, finite in [-1, 1], default -1; does not filter lexical matches |
-| `scan_limit` | At most 1–10000 source records, default 10000 |
+| `scan_limit` | At most 1–10000 current candidates, default 10000 |
 | `scan_bytes_limit` | 1–268435456 serialized bytes, subject to the operator ceiling (default 67108864); request default 8388608 |
 | `after` | Optional source UUID cursor; a continuation starts a new snapshot |
 | `episode_type`, `tag` | Optional exact filters applied to both channels before scoring |
@@ -167,7 +167,7 @@ validation error. No cursor is returned that silently skips an oversized row.
 
 | Page field | Meaning |
 | --- | --- |
-| `scanned_records`, `scanned_bytes` | Work admitted to this source corpus page |
+| `scanned_records`, `scanned_bytes` | Current candidates and serialized source/binding bytes admitted to this corpus page |
 | `corpus_records` | Visible records passing filters, including those without embeddings |
 | `embedded_records` | Corpus records with a current binding in the selected space |
 | `lexical_matches`, `semantic_matches` | Matches in each enabled channel before candidate truncation |
@@ -308,3 +308,5 @@ semantic-only and empty results. It also rejects scores or contributions above
 the selected profile's bounds and mismatched ranking identities. These synthetic
 HTTP fixtures establish schema conformance only. Neither they nor a query made
 during corpus import establish retrieval relevance or comparative ranking quality.
+
+See [current retrieval candidates](retrieval-candidates.md) for the candidate projection, which applies exact tag/type filters before scan budgets. The ranking profiles and their parameters are unchanged.

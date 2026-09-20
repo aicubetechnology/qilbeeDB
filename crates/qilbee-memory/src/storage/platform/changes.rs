@@ -194,7 +194,13 @@ impl RocksDbMemoryStorage {
             change_key(namespace, state.cursor.sequence),
             encode(&change)?,
         );
-        batch.put_cf(cf, record_prefix(0x20, namespace), encode(&state)?);
+        let state_bytes = encode(&state)?;
+        batch.put_cf(
+            self.cf(super::super::cf::EPISODE_INDEX)?,
+            record_prefix(0x31, namespace),
+            digest(&state_bytes),
+        );
+        batch.put_cf(cf, record_prefix(0x20, namespace), state_bytes);
         Ok(())
     }
     /// Snapshot-fenced events since activation; pre-existing records require initial reconciliation.

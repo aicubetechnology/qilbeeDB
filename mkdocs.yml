@@ -131,6 +131,7 @@ nav:
       - Verified Consumer Checkpoints: api/verified-memory-checkpoints.md
       - Semantic Memory Search: api/semantic-memory.md
       - Lexical Memory Search: api/lexical-memory.md
+      - Current candidates: api/retrieval-candidates.md
       - Hybrid Memory Retrieval: api/hybrid-memory.md
       - Procedural Learning API: api/procedural-learning.md
       - Experience Receipts: api/experiences.md

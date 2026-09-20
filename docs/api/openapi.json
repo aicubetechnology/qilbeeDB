@@ -12786,7 +12786,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "episode_type": {
             "anyOf": [
@@ -12883,7 +12884,8 @@
           },
           "scanned_embeddings": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Selected-space bindings decoded for eligible current candidates, including stale bindings. Excludes deleted/rejected records and other tag/type partitions."
           },
           "matched_records": {
             "type": "integer",
@@ -12891,10 +12893,30 @@
           },
           "exhaustive": {
             "type": "boolean",
-            "description": "True only if started without a cursor and ranked the entire authorized registered model space."
+            "description": "True only for a cursorless complete current-candidate scan; does not assert that all memories have a current embedding."
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
+          },
+          "candidate_selection_version": {
+            "type": "string",
+            "const": "current_records_v1",
+            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
+          },
+          "candidate_index_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current candidate records examined, including candidates without a selected-space binding."
+          },
+          "scanned_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Serialized current records and selected-space bindings examined. This is not response size, physical I/O or process memory."
           }
         },
         "required": [
@@ -12902,7 +12924,11 @@
           "next_after",
           "scanned_embeddings",
           "matched_records",
-          "exhaustive"
+          "exhaustive",
+          "candidate_selection_version",
+          "candidate_index_bytes",
+          "scanned_records",
+          "scanned_bytes"
         ],
         "additionalProperties": false
       },
@@ -12939,7 +12965,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "after": {
             "anyOf": [
@@ -13004,7 +13031,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "after": {
             "anyOf": [
@@ -13237,6 +13265,16 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
+          },
+          "candidate_selection_version": {
+            "type": "string",
+            "const": "current_records_v1",
+            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
+          },
+          "candidate_index_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
           }
         },
         "required": [
@@ -13246,7 +13284,9 @@
           "next_after",
           "exhaustive",
           "hits",
-          "matched_records"
+          "matched_records",
+          "candidate_selection_version",
+          "candidate_index_bytes"
         ],
         "additionalProperties": false
       },
@@ -13332,6 +13372,16 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
+          },
+          "candidate_selection_version": {
+            "type": "string",
+            "const": "current_records_v1",
+            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
+          },
+          "candidate_index_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
           }
         },
         "required": [
@@ -13349,7 +13399,9 @@
           "ranking",
           "embedding_coverage",
           "candidates_truncated",
-          "rank_constant"
+          "rank_constant",
+          "candidate_selection_version",
+          "candidate_index_bytes"
         ],
         "additionalProperties": false,
         "allOf": [
