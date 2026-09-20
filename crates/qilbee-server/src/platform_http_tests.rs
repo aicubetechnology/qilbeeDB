@@ -699,3 +699,5 @@ async fn platform_http_browser_reference_is_public_and_root_redirects_to_it() {
     assert!(!html.contains("https://cdn"));
     assert!(!html.contains("localStorage"));
 }
+
+mod tools;

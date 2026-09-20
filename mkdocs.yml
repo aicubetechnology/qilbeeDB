@@ -108,6 +108,7 @@ nav:
       - Platform HTTP API: api/platform-http.md
       - Versioned Memory API: api/versioned-memory.md
       - Procedural Learning API: api/procedural-learning.md
+      - Learned Tool API: api/learned-tools.md
       - Durable HTTP Memory: api/durable-http-memory.md
   - Agent Memory:
     - Overview: agent-memory/overview.md
