@@ -69,6 +69,7 @@ fn review_rejection_precedes_all_retrieval_and_corpus_statistics() {
         db.query_memory_records(
             "scope",
             &MemoryQuery {
+                scan_limit: 10_000,
                 limit: 10,
                 after: None,
                 text_contains: None,

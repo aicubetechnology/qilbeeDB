@@ -161,6 +161,13 @@
       "title": "Derived memories and source revisions",
       "description": "Bind generated knowledge to exact source revisions and validate dependencies before retrieval.",
       "order": 57
+    },
+    {
+      "source": "docs/api/memory-checkpoints.md",
+      "file": "memory-checkpoints.md",
+      "title": "Durable consumer checkpoints",
+      "description": "Resume scoped change consumption with subject-owned progress, monotonic cursors and revision checks.",
+      "order": 58
     }
   ]
 }

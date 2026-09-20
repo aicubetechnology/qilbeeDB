@@ -81,10 +81,15 @@ pub struct CommandReceipt {
 #[serde(deny_unknown_fields)]
 pub struct MemoryQuery {
     pub limit: usize,
+    #[serde(default = "default_query_scan_limit")]
+    pub scan_limit: usize,
     pub after: Option<Uuid>,
     pub text_contains: Option<String>,
     pub episode_type: Option<EpisodeType>,
     pub tag: Option<String>,
+}
+fn default_query_scan_limit() -> usize {
+    10_000
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryPage {
@@ -303,9 +308,9 @@ impl RocksDbMemoryStorage {
     /// This is not a semantic search, relevance score, or durable change cursor.
     pub fn query_memory_records(&self, namespace: &str, query: &MemoryQuery) -> Result<QueryPage> {
         Self::validate_agent(namespace)?;
-        if !(1..=1000).contains(&query.limit) {
+        if !(1..=1000).contains(&query.limit) || !(1..=10_000).contains(&query.scan_limit) {
             return Err(Error::ValidationError(
-                "Query limit must be in 1..=1000".into(),
+                "Query limit must be in 1..=1000 and scan limit in 1..=10000".into(),
             ));
         }
         let _guard = self
@@ -368,7 +373,7 @@ impl RocksDbMemoryStorage {
                 }
             }
             // Bound work per request without silently losing the remainder.
-            if page.records.len() == query.limit || page.scanned_records == 10_000 {
+            if page.records.len() == query.limit || page.scanned_records == query.scan_limit {
                 page.next_after = Some(id);
                 break;
             }
@@ -540,6 +545,7 @@ mod tests {
     }
     fn query() -> MemoryQuery {
         MemoryQuery {
+            scan_limit: 10_000,
             limit: 100,
             after: None,
             text_contains: None,
@@ -856,3 +862,8 @@ mod eligibility;
 pub use eligibility::*;
 #[cfg(test)]
 mod eligibility_tests;
+
+mod checkpoints;
+pub use checkpoints::*;
+#[cfg(test)]
+mod checkpoint_tests;

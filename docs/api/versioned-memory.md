@@ -222,7 +222,8 @@ are excluded, and record/index versions are checked before using each record.
 
 Results are ordered by UUID bytes. Pass `next_after` as the next request's `after`
 until it is null. A continuation may yield an empty final page. Each request
-returns at most 1,000 records and scans at most 10,000 entries; continuation
+returns at most 1,000 records and scans at most `filter.scan_limit` entries
+(1–10,000, default 10,000); continuation
 exposes remaining work instead of silently truncating the traversal. This is a
 technical work bound, not a stored-memory quota. Pagination is a live traversal:
 concurrent inserts before the cursor are not a snapshot or a durable changes feed.
@@ -278,3 +279,9 @@ The `derive` operation requires both read and write capabilities and creates a
 record bound to exact source revisions. [Derived memories](derived-memory.md)
 validate source eligibility before retrieval and cannot be edited with ordinary
 updates. Query pages include additional dependency-work counters.
+
+`filter.limit` bounds returned records; `filter.scan_limit` bounds examined records,
+including unavailable ones. To reduce dependency-validation work during initial
+consumer reconciliation, use a smaller scan limit. An empty page may still have
+`next_after`; continue until it is null. A single oversized dependency can still
+exceed the separate validation budget and fail explicitly.

@@ -20,6 +20,7 @@ Capabilities are independent; names do not imply other permissions:
 | --- | --- |
 | `memory_read` | Read or query an explicitly granted memory scope |
 | `memory_write` | Mutate an explicitly granted memory scope |
+| `memory_checkpoint` | Save or read subject-owned consumer progress; also requires `memory_read` |
 | `memory_review` | Record decisions and inspect current or historical review metadata in an explicitly granted memory scope |
 | `procedure_propose` | Propose candidates in a granted scope |
 | `procedure_evaluate` | Submit evaluations in a granted scope |

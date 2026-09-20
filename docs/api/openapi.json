@@ -949,7 +949,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -959,7 +959,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -969,7 +969,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -1104,7 +1104,7 @@
       "post": {
         "operationId": "queryMemory",
         "summary": "Query current scoped records with explicit continuation",
-        "description": "Requires memory_read. Case-insensitive substring over primary/secondary/context; exact type/tag filters. UUID ordering, 1,000 results and 10,000 scanned entries per request. Live pagination is not a snapshot or changes feed. No synthetic similarity scores.",
+        "description": "Requires memory_read. Case-insensitive substring over primary/secondary/context; exact type/tag filters. UUID ordering, 1,000 results and 10,000 scanned entries per request. Live pagination is not a snapshot or changes feed. No synthetic similarity scores. Optional filter.scan_limit bounds candidate work independently of returned results; empty pages can still have a next_after cursor.",
         "tags": [
           "Memory"
         ],
@@ -7478,6 +7478,366 @@
           }
         }
       }
+    },
+    "/api/v1/memory/checkpoints": {
+      "post": {
+        "operationId": "commitMemoryCheckpoint",
+        "summary": "Save subject-owned monotonic consumer progress",
+        "description": "Requires memory_read and memory_checkpoint in the exact scope. Subject comes from authentication. expected_revision zero creates missing progress; updates require the current revision. Cursors cannot regress, switch journals or exceed the current journal watermark. Original retry receipts may be older than current state. Checkpoint writes do not produce memory-change events. External effects and consumer leases are not part of this transaction.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable checkpoint receipt or current subject-owned progress.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryCheckpointResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryCheckpointRequest"
+              },
+              "example": {
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "command": {
+                  "contract_version": 1,
+                  "idempotency_key": "context-cache-page-1",
+                  "consumer_id": "context-cache",
+                  "expected_revision": 0,
+                  "cursor": {
+                    "journal_id": "00000000-0000-4000-8000-000000000042",
+                    "sequence": 100
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/checkpoints/read": {
+      "post": {
+        "operationId": "readMemoryCheckpoint",
+        "summary": "Read current progress for this subject and consumer",
+        "description": "Requires memory_read and memory_checkpoint in the exact scope. Subject comes from authentication. expected_revision zero creates missing progress; updates require the current revision. Cursors cannot regress, switch journals or exceed the current journal watermark. Original retry receipts may be older than current state. Checkpoint writes do not produce memory-change events. External effects and consumer leases are not part of this transaction.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable checkpoint receipt or current subject-owned progress.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryCheckpointReadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryCheckpointReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "consumer_id": "context-cache"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7506,7 +7866,8 @@
           "experience_read",
           "experience_write",
           "experience_report",
-          "memory_review"
+          "memory_review",
+          "memory_checkpoint"
         ]
       },
       "Visibility": {
@@ -7522,14 +7883,14 @@
           "project_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "mission_id": {
             "anyOf": [
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -7539,7 +7900,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "visibility": {
             "$ref": "#/components/schemas/Visibility"
@@ -7558,7 +7919,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -7636,7 +7997,7 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "spec": {
             "$ref": "#/components/schemas/CredentialSpec"
@@ -7990,7 +8351,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -8052,7 +8413,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -8256,6 +8617,13 @@
                 "type": "null"
               }
             ]
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 10000,
+            "description": "Maximum examined candidate records, including unavailable records. Reduce this bound to limit per-page dependency validation work."
           }
         },
         "required": [
@@ -10439,19 +10807,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "dimensions": {
             "type": "integer",
@@ -10482,7 +10850,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -10530,7 +10898,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -10818,7 +11186,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -10883,7 +11251,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -11700,7 +12068,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, nonblank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
           },
           "accounting_unit": {
             "type": "string",
@@ -13035,7 +13403,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -13075,7 +13443,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -13474,6 +13842,189 @@
           "contract_version",
           "scope",
           "eligibility"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpoint": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/MemoryChangeCursor"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "updated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkpoint_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "consumer_id",
+          "revision",
+          "cursor",
+          "author",
+          "updated_at_millis",
+          "checkpoint_digest"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointCommand": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/MemoryChangeCursor"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "consumer_id",
+          "expected_revision",
+          "cursor"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/MemoryCheckpoint"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "checkpoint",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointRequest": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "command": {
+            "$ref": "#/components/schemas/MemoryCheckpointCommand"
+          }
+        },
+        "required": [
+          "scope",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/MemoryCheckpointReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryCheckpointReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/MemoryCheckpoint"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "checkpoint"
         ],
         "additionalProperties": false
       }

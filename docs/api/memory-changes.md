@@ -103,3 +103,10 @@ Journal metadata therefore grows with mutations. Operators must retain its data
 with the memory volume. Restoring an older backup may make a client cursor ahead
 of the restored journal; reconcile that recovery explicitly. Configurable
 retention, replication and cross-region ordering are separate capabilities.
+
+## Save consumer progress
+
+[Durable consumer checkpoints](memory-checkpoints.md) store subject-owned cursors
+with monotonic updates and revision checks. They require `memory_checkpoint` in
+addition to `memory_read` and do not generate feed events. Save progress only
+after external effects are durable; retries may redeliver events.

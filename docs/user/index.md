@@ -70,3 +70,6 @@ rejected revisions while preserving historical evidence.
 
 Use [derived memories](../api/derived-memory.md) to keep conclusions dependent on
 exact source revisions and transitive source eligibility, with bounded diagnostics.
+
+Use [consumer checkpoints](../api/memory-checkpoints.md) to persist each subject’s
+feed progress and reconnect safely after a process restart.
