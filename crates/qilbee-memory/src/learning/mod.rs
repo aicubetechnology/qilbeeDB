@@ -17,3 +17,7 @@ mod tool_tests;
 pub use store::tools::*;
 pub use store::executors::*;
 pub use store::development::*;
+pub use store::experience::*;
+
+#[cfg(test)]
+mod experience_tests;

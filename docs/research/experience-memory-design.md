@@ -1,8 +1,9 @@
 # From retrieval to experience-driven memory
 
 Status: **research-informed design**, reviewed September 20, 2026. This document
-maps recent work to testable QilbeeDB extensions. It does not announce new API
-routes, reproduce third-party experiments or establish autonomous improvement.
+maps recent work to testable QilbeeDB extensions. The initial experience receipt contract is now implemented in the unreleased
+0.7.0 API; other extensions below remain proposals. This document does not
+reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
 
 ## What the supplied research contributes
@@ -41,9 +42,12 @@ These are foundations, not an implemented reasoning-memory loop.
 
 ## Proposed contracts and acceptance criteria
 
-The following objects are design proposals. Their names are not current endpoints
-or accepted request fields. Each extension needs its own implementation, tests and
-validated feature PR before it becomes an integration contract.
+The [experience receipt API](../api/experiences.md) implements scoped attempts,
+immutable context and parent-event bindings, authenticated observations and
+consumption accounting. It records evidence declarations without independently
+verifying external effects or resolving artifact bytes. Remaining objects below
+are design proposals, not current endpoints or accepted request fields. Each
+extension needs its own validated feature PR.
 
 | Extension | Proposed durable contract | Required acceptance evidence |
 | --- | --- | --- |
@@ -95,8 +99,8 @@ and fresh online execution. Learning across agents needs a comparison with
 isolated agents and equal total compute. Retrieval nDCG cannot substitute for
 any of these outcomes.
 
-The next bounded implementation should start with experience receipts and their
-evidence lineage, then candidate strategy derivation. Replay and shared release
-depend on those contracts. Automatic selection can operate within an authorized
+Experience receipts now provide the first bounded implementation. The next steps
+are verified artifact/source bindings and candidate strategy derivation. Replay
+and shared release depend on those contracts. Automatic selection can operate within an authorized
 policy after qualification; unmeasured candidates remain candidates, and the
 baseline remains available when evidence is rejected or incomplete.

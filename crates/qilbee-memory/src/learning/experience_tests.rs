@@ -1,0 +1,416 @@
+use super::*;
+use qilbee_core::Error;
+use serde_json::json;
+use std::sync::{Arc, Barrier};
+use tempfile::TempDir;
+
+fn setup() -> (TempDir, LearningMemory) {
+    let dir = TempDir::new().unwrap();
+    let db = LearningMemory::open(dir.path()).unwrap();
+    let context = serde_json::from_value(json!({
+        "task":"task-v1","baseline_revision":"baseline-v1","model_provider":"external",
+        "model_revision":"model-v1","tools":{"run":"artifact-v1"},
+        "environment_revision":"env-v1","evaluation_contract":"verifier-v1",
+        "dataset_revision":"data-v1","harness_revision":"harness-v1",
+        "permissions_revision":"permissions-v1"
+    }))
+    .unwrap();
+    db.register_context("tenant", "context-v1", context, "operator")
+        .unwrap();
+    (dir, db)
+}
+fn actor(subject: &str) -> ExperienceActor {
+    ExperienceActor {
+        subject_id: subject.into(),
+        credential_id: format!("credential-{subject}"),
+    }
+}
+fn input(id: &str) -> ExperienceRequest {
+    serde_json::from_value(json!({"id":id,"context_id":"context-v1",
+        "reporter_subject_id":"observer","accounting_unit":"test-credit-v1",
+        "input":{"reference":"fixture:input","sha256":"a".repeat(64)},"parent":null}))
+    .unwrap()
+}
+fn command(id: &str, revision: u64, digest: &str, outcome: &str) -> ExperienceCommand {
+    serde_json::from_value(json!({"event_id":id,"expected_revision":revision,
+        "context_digest":digest,"outcome":outcome,
+        "evidence":{"reference":"fixture:observation","sha256":"b".repeat(64)},
+        "cost_units":null,"latency_ms":null}))
+    .unwrap()
+}
+fn create(db: &LearningMemory) -> ExperienceReceipt {
+    db.create_experience("tenant", "scope", input("attempt"), actor("writer"))
+        .unwrap()
+}
+
+#[test]
+fn experience_preserves_unknown_accounting_and_original_receipts_after_reopen() {
+    let (dir, db) = setup();
+    let initial = create(&db);
+    assert_eq!(
+        db.experience("tenant", "scope", "attempt")
+            .unwrap()
+            .unwrap()
+            .outcome,
+        None
+    );
+    let pending = command("pending", 1, &initial.context_digest, "unknown");
+    let first = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            pending.clone(),
+            actor("observer"),
+        )
+        .unwrap();
+    let done = command("done", 2, &initial.context_digest, "succeeded");
+    let final_event = db
+        .observe_experience("tenant", "scope", "attempt", done, actor("observer"))
+        .unwrap();
+    assert_eq!(final_event.record.reported_cost_units, None);
+    assert_eq!(final_event.record.observed_cost_units, None);
+    drop(db);
+    let db = LearningMemory::open(dir.path()).unwrap();
+    assert_eq!(initial, create(&db));
+    assert_eq!(
+        first,
+        db.observe_experience("tenant", "scope", "attempt", pending, actor("observer"))
+            .unwrap()
+    );
+    assert_eq!(
+        final_event.record,
+        db.experience("tenant", "scope", "attempt")
+            .unwrap()
+            .unwrap()
+    );
+    assert_eq!(
+        first,
+        db.experience_event("tenant", "scope", "attempt", "pending")
+            .unwrap()
+            .unwrap()
+    );
+}
+
+#[test]
+fn experience_conflicts_do_not_erase_known_consumption_or_write_events() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let mut pending = command("pending", 1, &receipt.context_digest, "unknown");
+    pending.cost_units = Some(9);
+    pending.latency_ms = Some(50);
+    db.observe_experience("tenant", "scope", "attempt", pending, actor("observer"))
+        .unwrap();
+    for (id, cost, latency) in [
+        ("lower-cost", Some(8), None),
+        ("lower-time", None, Some(49)),
+    ] {
+        let mut bad = command(id, 2, &receipt.context_digest, "succeeded");
+        bad.cost_units = cost;
+        bad.latency_ms = latency;
+        assert!(
+            db.observe_experience("tenant", "scope", "attempt", bad, actor("observer"))
+                .is_err()
+        );
+        assert!(
+            db.experience_event("tenant", "scope", "attempt", id)
+                .unwrap()
+                .is_none()
+        );
+    }
+    let done = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("done", 2, &receipt.context_digest, "failed"),
+            actor("observer"),
+        )
+        .unwrap();
+    assert_eq!(
+        (
+            done.record.reported_cost_units,
+            done.record.reported_latency_ms
+        ),
+        (None, None)
+    );
+    assert_eq!(
+        (
+            done.record.observed_cost_units,
+            done.record.observed_latency_ms
+        ),
+        (Some(9), Some(50))
+    );
+    assert_eq!(done.record.revision, 3);
+}
+
+#[test]
+fn experience_requires_bound_subject_context_and_expected_revision() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let good = command("event", 1, &receipt.context_digest, "cancelled");
+    assert!(matches!(
+        db.observe_experience("tenant", "scope", "attempt", good.clone(), actor("other")),
+        Err(Error::Unauthorized(_))
+    ));
+    let mut wrong = good.clone();
+    wrong.context_digest = "c".repeat(64);
+    assert!(
+        db.observe_experience("tenant", "scope", "attempt", wrong, actor("observer"))
+            .is_err()
+    );
+    let mut stale = good.clone();
+    stale.expected_revision = 2;
+    assert!(matches!(
+        db.observe_experience("tenant", "scope", "attempt", stale, actor("observer")),
+        Err(Error::TransactionConflict(_))
+    ));
+    let event = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            good.clone(),
+            actor("observer"),
+        )
+        .unwrap();
+    let mut rotated = actor("observer");
+    rotated.credential_id = "rotated".into();
+    assert_eq!(
+        event,
+        db.observe_experience("tenant", "scope", "attempt", good.clone(), rotated)
+            .unwrap()
+    );
+    let mut changed = good;
+    changed.cost_units = Some(1);
+    assert!(
+        db.observe_experience("tenant", "scope", "attempt", changed, actor("observer"))
+            .is_err()
+    );
+    assert!(
+        db.observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("new", 2, &receipt.context_digest, "succeeded"),
+            actor("observer")
+        )
+        .is_err()
+    );
+    assert_eq!(
+        event.record,
+        db.experience("tenant", "scope", "attempt")
+            .unwrap()
+            .unwrap()
+    );
+}
+
+#[test]
+fn experience_binds_existing_parent_events_without_rewriting_history() {
+    let (_dir, db) = setup();
+    let parent = create(&db);
+    let event = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("pending", 1, &parent.context_digest, "unknown"),
+            actor("observer"),
+        )
+        .unwrap();
+    let mut child = input("child");
+    child.parent = Some(ExperienceParent {
+        attempt_id: "attempt".into(),
+        event_id: "pending".into(),
+    });
+    let receipt = db
+        .create_experience("tenant", "scope", child.clone(), actor("writer"))
+        .unwrap();
+    assert_eq!(
+        receipt.parent_event_digest.as_deref(),
+        Some(event.event_digest.as_str())
+    );
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("done", 2, &parent.context_digest, "failed"),
+        actor("observer"),
+    )
+    .unwrap();
+    assert_eq!(
+        receipt,
+        db.create_experience("tenant", "scope", child.clone(), actor("writer"))
+            .unwrap()
+    );
+    assert!(
+        db.create_experience("tenant", "other-scope", child.clone(), actor("writer"))
+            .is_err()
+    );
+    child.id = "attempt".into();
+    assert!(
+        db.create_experience("tenant", "scope", child, actor("writer"))
+            .is_err()
+    );
+}
+
+#[test]
+fn experience_registration_is_immutable_scoped_and_context_bound() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    assert!(
+        db.experience("foreign", "scope", "attempt")
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        db.experience("tenant", "foreign", "attempt")
+            .unwrap()
+            .is_none()
+    );
+    assert!(
+        db.create_experience("foreign", "scope", input("attempt"), actor("writer"))
+            .is_err()
+    );
+    assert!(
+        db.create_experience("tenant", "scope", input("attempt"), actor("other"))
+            .is_err()
+    );
+    let mut changed = input("attempt");
+    changed.reporter_subject_id = "other".into();
+    assert!(
+        db.create_experience("tenant", "scope", changed, actor("writer"))
+            .is_err()
+    );
+    let mut missing = input("new");
+    missing.context_id = "missing".into();
+    assert!(
+        db.create_experience("tenant", "scope", missing, actor("writer"))
+            .is_err()
+    );
+    assert_eq!(
+        receipt.context_digest,
+        db.context("tenant", "context-v1")
+            .unwrap()
+            .unwrap()
+            .payload_digest
+    );
+}
+
+#[test]
+fn experience_concurrent_retries_have_one_receipt_and_revision() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let barrier = Arc::new(Barrier::new(8));
+    let threads: Vec<_> = (0..8)
+        .map(|_| {
+            let db = db.clone();
+            let b = barrier.clone();
+            let digest = receipt.context_digest.clone();
+            std::thread::spawn(move || {
+                b.wait();
+                db.observe_experience(
+                    "tenant",
+                    "scope",
+                    "attempt",
+                    command("same", 1, &digest, "succeeded"),
+                    actor("observer"),
+                )
+                .unwrap()
+            })
+        })
+        .collect();
+    let values: Vec<_> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert!(values.iter().all(|v| v == &values[0]));
+    assert_eq!(values[0].record.revision, 2);
+}
+
+#[test]
+fn experience_concurrent_competing_reports_have_one_winner() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let barrier = Arc::new(Barrier::new(8));
+    let threads: Vec<_> = (0..8)
+        .map(|i| {
+            let db = db.clone();
+            let b = barrier.clone();
+            let digest = receipt.context_digest.clone();
+            std::thread::spawn(move || {
+                b.wait();
+                db.observe_experience(
+                    "tenant",
+                    "scope",
+                    "attempt",
+                    command(&format!("event-{i}"), 1, &digest, "unknown"),
+                    actor("observer"),
+                )
+            })
+        })
+        .collect();
+    let results: Vec<_> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 1);
+    assert_eq!(
+        results
+            .iter()
+            .filter(|r| matches!(r, Err(Error::TransactionConflict(_))))
+            .count(),
+        7
+    );
+}
+
+#[test]
+fn experience_rejects_invalid_references_and_unknown_json_fields() {
+    let (_dir, db) = setup();
+    for digest in ["".into(), "A".repeat(64), "a".repeat(63), "é".repeat(32)] {
+        let mut bad = input("bad");
+        bad.input.sha256 = digest;
+        assert!(
+            db.create_experience("tenant", "scope", bad, actor("writer"))
+                .is_err()
+        );
+    }
+    let mut extra = serde_json::to_value(input("bad")).unwrap();
+    extra["actor"] = json!("forged");
+    assert!(serde_json::from_value::<ExperienceRequest>(extra).is_err());
+}
+
+#[test]
+fn experience_can_resolve_late_consumption_without_changing_a_terminal_outcome() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let first = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("done", 1, &receipt.context_digest, "succeeded"),
+            actor("observer"),
+        )
+        .unwrap();
+    let mut accounting = command("accounting", 2, &receipt.context_digest, "succeeded");
+    accounting.cost_units = Some(12);
+    accounting.latency_ms = Some(100);
+    let settled = db
+        .observe_experience("tenant", "scope", "attempt", accounting, actor("observer"))
+        .unwrap();
+    assert_eq!(settled.record.reported_cost_units, Some(12));
+    assert_eq!(settled.record.revision, 3);
+    assert_eq!(
+        first,
+        db.experience_event("tenant", "scope", "attempt", "done")
+            .unwrap()
+            .unwrap()
+    );
+    for outcome in ["failed", "cancelled", "unknown"] {
+        assert!(
+            db.observe_experience(
+                "tenant",
+                "scope",
+                "attempt",
+                command(outcome, 3, &receipt.context_digest, outcome),
+                actor("observer")
+            )
+            .is_err()
+        );
+    }
+}

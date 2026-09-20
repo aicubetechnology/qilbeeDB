@@ -32,6 +32,10 @@ end-to-end agent task outcomes.
 
 ## Build learning workflows
 
+[Experience receipts](../api/experiences.md), introduced in the unreleased 0.7.0
+contract, preserve execution intent, authenticated observations and unknown resource
+consumption. They do not automatically qualify a procedure.
+
 [Procedural learning](../api/procedural-learning.md) records proposals, evaluation
 evidence and publication decisions. [Learned tools](../api/learned-tools.md) add
 immutable artifacts, executor profiles and a durable development ledger. Workers

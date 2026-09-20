@@ -1,5 +1,5 @@
 {
-  "release": "0.6.0",
+  "release": "0.7.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -126,6 +126,13 @@
       "title": "Experience-driven memory research",
       "description": "Map reasoning memory, shared evidence and discovery replay research to proposed contracts and acceptance criteria.",
       "order": 150
+    },
+    {
+      "source": "docs/api/experiences.md",
+      "file": "experiences.md",
+      "title": "Experience receipts",
+      "description": "Record scoped execution attempts, immutable observations and unknown consumption without automatically qualifying procedures.",
+      "order": 95
     }
   ]
 }

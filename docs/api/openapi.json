@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.6.0",
-    "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents."
+    "version": "0.7.0",
+    "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
     {
@@ -33,6 +33,10 @@
     {
       "name": "Tools",
       "description": "Immutable artifacts, executor profiles and durable development/repair reports from external workers."
+    },
+    {
+      "name": "Experiences",
+      "description": "Scoped attempt registrations and immutable observations. No execution dispatch or automatic procedure qualification."
     }
   ],
   "paths": {
@@ -4953,6 +4957,733 @@
           }
         }
       }
+    },
+    "/api/v1/experiences": {
+      "post": {
+        "operationId": "createExperience",
+        "summary": "Register an immutable attempt",
+        "description": "Requires experience_write and exact scope. Resolves a tenant-registered context and optional same-scope parent event. A private attempt must name its own subject as reporter. Returns the original receipt on an identical same-subject retry. Does not start execution.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt recorded or read successfully; inspect the outcome and unknown accounting fields.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceReceiptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceCreateRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "request": {
+                  "id": "attempt-v1",
+                  "context_id": "context-v1",
+                  "reporter_subject_id": "observer",
+                  "accounting_unit": "test-credit-v1",
+                  "input": {
+                    "reference": "fixture:input",
+                    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  },
+                  "parent": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiences/read": {
+      "post": {
+        "operationId": "readExperience",
+        "summary": "Read the current attempt state",
+        "description": "Requires experience_read and exact scope. Returns current state; historical retries return original receipts instead.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt recorded or read successfully; inspect the outcome and unknown accounting fields.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "attempt_id": "attempt-v1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiences/events": {
+      "post": {
+        "operationId": "observeExperience",
+        "summary": "Record an authenticated observation",
+        "description": "Requires experience_report, exact scope and the immutable reporter subject. Atomically records an event and state transition. New events check revision; identical same-subject event retries return the original event. Terminal outcomes cannot change, but same-outcome observations may resolve late consumption. Missing or null usage means unknown, never zero. Reports do not promote procedures or prove external effects.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt recorded or read successfully; inspect the outcome and unknown accounting fields.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceObserveRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "attempt_id": "attempt-v1",
+                "command": {
+                  "event_id": "observation-v1",
+                  "expected_revision": 1,
+                  "context_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                  "outcome": "unknown",
+                  "evidence": {
+                    "reference": "fixture:trace",
+                    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                  },
+                  "cost_units": null,
+                  "latency_ms": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiences/events/read": {
+      "post": {
+        "operationId": "readExperienceEvent",
+        "summary": "Read an immutable historical observation",
+        "description": "Requires experience_read and exact scope. Reads the exact event ID, even after later events. No cursor or implicit latest-event behavior.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Receipt recorded or read successfully; inspect the outcome and unknown accounting fields.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceEventReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "attempt_id": "attempt-v1",
+                "event_id": "observation-v1"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4977,7 +5708,10 @@
           "tool_read",
           "tool_develop",
           "tool_report",
-          "tool_admin"
+          "tool_admin",
+          "experience_read",
+          "experience_write",
+          "experience_report"
         ]
       },
       "Visibility": {
@@ -9048,6 +9782,536 @@
           "semantic_weight",
           "rank_constant",
           "experimental"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceActor": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "subject_id",
+          "credential_id"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceEvidence": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "At most 2048 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "reference",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "description": "Caller-declared content address. The server records but does not fetch or validate the external content."
+      },
+      "ExperienceParent": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "attempt_id",
+          "event_id"
+        ],
+        "additionalProperties": false,
+        "description": "An existing immutable event in the same authorized namespace; cannot refer to the new attempt itself."
+      },
+      "ExperienceRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "reporter_subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "input": {
+            "$ref": "#/components/schemas/ExperienceEvidence"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceParent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "context_id",
+          "reporter_subject_id",
+          "accounting_unit",
+          "input"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "request": {
+            "$ref": "#/components/schemas/ExperienceRequest"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "parent_event_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ExperienceActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "context_digest",
+          "parent_event_digest",
+          "actor",
+          "recorded_at_millis",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceOutcome": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "description": "An authenticated reporter assertion, not independently verified execution or qualification evidence."
+      },
+      "ExperienceRecord": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/ExperienceReceipt"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceOutcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "revision",
+          "outcome",
+          "last_event_id",
+          "reported_cost_units",
+          "reported_latency_ms",
+          "observed_cost_units",
+          "observed_latency_ms"
+        ],
+        "additionalProperties": false,
+        "description": "Null outcome means no report. Reported usage is from the latest observation; observed usage retains cumulative lower bounds across unknown reports. A terminal outcome may only receive further observations with the same outcome."
+      },
+      "ExperienceCommand": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551614
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/ExperienceOutcome"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/ExperienceEvidence"
+          },
+          "cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "event_id",
+          "expected_revision",
+          "context_digest",
+          "outcome",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceEvent": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "command": {
+            "$ref": "#/components/schemas/ExperienceCommand"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ExperienceActor"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ExperienceRecord"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "event_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "command",
+          "actor",
+          "record",
+          "recorded_at_millis",
+          "event_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceCreateRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ExperienceRequest"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "attempt_id"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceObserveRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "command": {
+            "$ref": "#/components/schemas/ExperienceCommand"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "attempt_id",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceEventReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "attempt_id",
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceReceiptResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ExperienceReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "experience": {
+            "$ref": "#/components/schemas/ExperienceRecord"
+          }
+        },
+        "required": [
+          "contract_version",
+          "experience"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceEventResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "event": {
+            "$ref": "#/components/schemas/ExperienceEvent"
+          }
+        },
+        "required": [
+          "contract_version",
+          "event"
         ],
         "additionalProperties": false
       }
