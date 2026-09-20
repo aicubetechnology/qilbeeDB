@@ -185,6 +185,9 @@ are **unmeasured**, represented as null with a reason. Frozen-vector reuse is no
 zero-cost model generation. Record separate provider measurements when running
 real-model qualification. No provider credential is sent to QilbeeDB.
 
+See [external embedding evaluation](external-embedding-evaluation.md) for an optional
+local encoder pipeline with pinned artifacts and separate generation measurements.
+
 ## Qualify hybrid retrieval and agent outcomes separately
 
 The bundled evaluation always leaves hybrid experimental. Adoption needs useful
