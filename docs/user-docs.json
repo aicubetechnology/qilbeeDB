@@ -203,6 +203,13 @@
       "title": "Retrieval history qualification",
       "description": "Review coverage, migration, resource measurements and limits after deletion history.",
       "order": 87
+    },
+    {
+      "source": "docs/research/retrieval-regressions.md",
+      "file": "retrieval-regressions.md",
+      "title": "Retrieval evidence and regressions",
+      "description": "Audit SciFact findings, preserve fusion failures and gains, and define reproducible ranking and load acceptance gates.",
+      "order": 88
     }
   ]
 }

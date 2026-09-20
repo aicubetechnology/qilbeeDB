@@ -85,6 +85,7 @@ nav:
     - Local Docker: user/deployment.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
     - Retrieval history qualification: research/retrieval-history-report.md
+    - Retrieval evidence and regressions: research/retrieval-regressions.md
     - External Embedding Evaluation: research/external-embedding-evaluation.md
     - SciFact Retrieval Evaluation: research/scifact-evaluation.md
     - Real-Embedding Results: research/scifact-results.md
