@@ -121,9 +121,12 @@ An invalid cursor encoding is rejected before testing whether its journal exists
 
 Error responses retain the common `contract_version: 1` envelope; successful v2
 responses retain their existing contract version. A failed stored-checkpoint
-integrity or history check is a server-side `500 storage_inconsistency`, not a
-client-history conflict. Preserve that failure for investigation rather than
-replacing stored progress. Malformed requests remain `400` and authorization
+integrity or history check on an ordinary read/commit is a server-side
+`500 storage_inconsistency`, not a client-history conflict. Use the
+[consumer diagnostic](consumer-diagnostics.md) to distinguish intrinsically intact
+progress on an incompatible history from encountered corruption. Only explicit
+recovery with exact comparisons can reconcile the former; integrity failures
+remain errors. Malformed requests remain `400` and authorization
 failures remain `401` or `403`.
 
 In 0.9.0, history mismatches and backward commits used `idempotency_conflict`.
@@ -200,3 +203,14 @@ revision. The response contains `contract_version: 2` and `receipt`, with
 A revision produced by an ordinary commit has no recovery receipt and returns 404.
 History remains scoped to the owner subject, survives restart and enforces current
 credential authorization. Use `/checkpoints/read` to obtain current progress.
+
+### Reconcile an intact checkpoint from incompatible history
+
+The consumer-diagnostics feature in the 0.10.0 preview allows explicit recovery
+of an existing subject-owned checkpoint whose intrinsic digest is valid but whose
+cursor belongs to incompatible restored history. Obtain its exact revision and
+digest from [consumer diagnostics](consumer-diagnostics.md), reconcile external
+effects, and supply a currently valid target cursor with the usual evidence
+reference. Ordinary reads and commits continue to fail closed for incompatible
+stored progress. Recovery retains the original checkpoint in its immutable receipt
+and still rejects stale comparisons, invalid targets and stored corruption.

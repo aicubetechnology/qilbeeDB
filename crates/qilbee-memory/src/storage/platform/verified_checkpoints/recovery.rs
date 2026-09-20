@@ -116,8 +116,9 @@ impl RocksDbMemoryStorage {
             }
             return Ok(stored.receipt);
         }
-        let previous = self
-            .read_verified_memory_checkpoint(namespace, &author.subject_id, &command.consumer_id)?
+        let view = self.memory_snapshot();
+        let previous = view
+            .stored_verified_checkpoint(namespace, &author.subject_id, &command.consumer_id)?
             .ok_or_else(|| {
                 Error::TransactionConflict("No existing verified checkpoint to recover".into())
             })?;
@@ -128,7 +129,6 @@ impl RocksDbMemoryStorage {
                 "Checkpoint revision or digest changed".into(),
             ));
         }
-        let view = self.memory_snapshot();
         let state = view.verified_journal(namespace)?.ok_or_else(inconsistent)?;
         view.verify_memory_cursor(namespace, &state, &command.cursor)?;
         let mut checkpoint = VerifiedMemoryCheckpoint {
