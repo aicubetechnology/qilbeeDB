@@ -239,3 +239,151 @@ fn hybrid_v2_is_explicit_explained_and_leaves_v1_unchanged() {
         original
     );
 }
+
+#[test]
+fn hybrid_v1_swapped_ranks_change_winner_with_reimported_ids() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let mut expected = Vec::new();
+    for (namespace, semantic_first) in [("import-a", true), ("import-b", false)] {
+        let mut ids = [
+            create(&db, namespace, "placeholder-a").record_id,
+            create(&db, namespace, "placeholder-b").record_id,
+        ];
+        ids.sort();
+        let semantic_winner = ids[usize::from(!semantic_first)];
+        for id in ids {
+            let is_semantic_winner = id == semantic_winner;
+            let text = if is_semantic_winner {
+                "ZX17 supporting context words"
+            } else {
+                "ZX17 ZX17"
+            };
+            db.apply_memory_command(
+                namespace,
+                &actor(),
+                &MemoryCommand {
+                    contract_version: 1,
+                    idempotency_key: format!("payload-{id}"),
+                    operation: MemoryOperation::Update {
+                        record_id: id,
+                        expected_revision: 1,
+                        record: input(text),
+                    },
+                },
+            )
+            .unwrap();
+            let vector = if is_semantic_winner {
+                vec![0.75, 0.6614378, 0.0]
+            } else {
+                vec![0.5, 0.8660254, 0.0]
+            };
+            let mut binding = attach(id, &format!("vector-{id}"), vector);
+            binding.record_revision = 2;
+            db.apply_memory_embedding(namespace, &actor(), &binding)
+                .unwrap();
+        }
+        let page = db.search_memory_hybrid(namespace, &query()).unwrap();
+        assert!(page.exhaustive);
+        assert_eq!(page.hits.len(), 2);
+        let winner = page
+            .hits
+            .iter()
+            .find(|h| h.record.record_id == semantic_winner)
+            .unwrap();
+        assert_eq!(winner.semantic.as_ref().unwrap().rank, 1);
+        assert_eq!(winner.lexical.as_ref().unwrap().rank, 2);
+        assert!(winner.semantic.as_ref().unwrap().score > 0.74);
+        assert_eq!(page.hits[0].score, page.hits[1].score);
+        assert_eq!(page.hits[0].record.record_id, ids[0]);
+        assert_eq!(
+            page.hits[0].record.record_id == semantic_winner,
+            semantic_first
+        );
+        // Different IDs can select a different winner without any change in v1's formula.
+        expected.push((namespace, ids[0]));
+        let mut v2 = query();
+        v2.ranking_version = HybridRankingVersion::WeightedRrfV2;
+        assert_eq!(
+            db.search_memory_hybrid(namespace, &v2).unwrap().hits[0]
+                .record
+                .record_id,
+            semantic_winner
+        );
+    }
+    drop(db);
+    let db = open(dir.path());
+    for (namespace, winner) in expected {
+        assert_eq!(
+            db.search_memory_hybrid(namespace, &query()).unwrap().hits[0]
+                .record
+                .record_id,
+            winner
+        );
+    }
+}
+
+#[test]
+fn hybrid_v1_can_drop_the_first_semantic_candidate_without_any_fused_tie() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let target = create(&db, "scope", "external paraphrase");
+    db.apply_memory_embedding(
+        "scope",
+        &actor(),
+        &attach(target.record_id, "target-vector", vec![1.0, 0.0, 0.0]),
+    )
+    .unwrap();
+    for n in 0..12 {
+        let row = db
+            .apply_memory_command(
+                "scope",
+                &actor(),
+                &MemoryCommand {
+                    contract_version: 1,
+                    idempotency_key: format!("distractor-{n}"),
+                    operation: MemoryOperation::Create {
+                        record: input("ZX17"),
+                    },
+                },
+            )
+            .unwrap();
+        db.apply_memory_embedding(
+            "scope",
+            &actor(),
+            &attach(
+                row.record_id,
+                &format!("vector-{n}"),
+                vec![0.9, 0.4358899, 0.0],
+            ),
+        )
+        .unwrap();
+    }
+    let semantic = db
+        .search_memory_semantic("scope", &super::semantic_tests::search())
+        .unwrap();
+    assert_eq!(semantic.hits[0].record.record_id, target.record_id);
+    let page = db.search_memory_hybrid("scope", &query()).unwrap();
+    assert!(page.exhaustive);
+    assert!(!page.candidates_truncated);
+    assert_eq!(page.embedded_records, 13);
+    assert_eq!(page.hits.len(), 10);
+    assert!(
+        page.hits
+            .iter()
+            .all(|h| h.record.record_id != target.record_id)
+    );
+    assert!(
+        page.hits
+            .windows(2)
+            .all(|pair| pair[0].score > pair[1].score)
+    );
+    let mut expanded = query();
+    expanded.limit = 13;
+    let all = db.search_memory_hybrid("scope", &expanded).unwrap();
+    let hit = all.hits.last().unwrap();
+    assert_eq!(hit.record.record_id, target.record_id);
+    assert_eq!(hit.semantic.as_ref().unwrap().rank, 1);
+    assert!(hit.lexical.is_none());
+    assert!(all.hits[..12].iter().all(|h| h.score > hit.score));
+}
