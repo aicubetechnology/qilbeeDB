@@ -62,8 +62,10 @@ impl FromRef<AppState> for AuthMiddleware {
     }
 }
 
-/// Create HTTP server router
-pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
+pub use crate::platform_http::create_router;
+
+/// Create the explicitly opted-in legacy router. This retains legacy security limitations.
+pub fn create_legacy_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     let memory_storage = Arc::new(crate::memory_storage::HttpMemoryStorage::open(
         &database.storage().path().join("agent-memory"),
     )?);

@@ -2,9 +2,9 @@
 
 `qilbee_server::security::identity::IdentityStore` is the platform's persistent
 credential authority. It uses the existing storage engine and has no QMN runtime,
-network, model-provider or service dependency. This feature is a Rust API
-foundation: **the legacy HTTP router does not yet use it**. Its old authentication
-and resource-authorization limitations remain until the secure router is wired in.
+network, model-provider or service dependency. The [platform HTTP API](../api/platform-http.md) uses this authority by default.
+The explicitly opted-in legacy router retains its old authentication and
+resource-authorization limitations.
 
 ## Identity and grants
 
@@ -93,8 +93,8 @@ ordinary metadata writes participate in the same lock.
 This does not add snapshots or conflict detection to every graph operation.
 Credential methods perform blocking storage work and must be offloaded by async
 transport adapters. Trusted Rust embedders and filesystem operators retain raw
-storage authority. Serving these contracts over HTTP, protecting legacy routes,
-and managing policy are subsequent features, not implicit effects of defining
+storage authority. The default HTTP router excludes the legacy routes. Managing policy and
+learning decisions remains separate work, not an implicit effect of defining
 capability names.
 
 ## Validation

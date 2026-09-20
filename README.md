@@ -1,4 +1,8 @@
 
+
+> Rust 0.2.0 changes the default HTTP surface to the authenticated platform API.
+> Provision a tenant locally before use. Legacy routes require explicit opt-in
+> and retain their known limitations. See the [migration and API contract](docs/api/platform-http.md).
 <div align="center">
 
 ![QilbeeDB Logo](https://preview--agent-chronicle-db.lovable.app/assets/qilbee-logo-c3CsNydB.png)
@@ -64,7 +68,7 @@ before planning production use.
 
 ### 🏢 **Production Roadmap**
 - Snapshot isolation, conflict handling and fault-injection recovery validation
-- Versioned idempotent HTTP memory, resource ownership and secure server bootstrap
+- Versioned idempotent HTTP memory, resource ownership and procedural HTTP contracts
 - Verified recovery, observability and reproducible benchmarks
 
 ### Run the learning cycle

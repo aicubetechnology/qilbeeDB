@@ -105,6 +105,7 @@ nav:
       - Bolt Protocol: api/bolt-protocol.md
       - Graph API: api/graph-api.md
       - Memory API: api/memory-api.md
+      - Platform HTTP API: api/platform-http.md
       - Durable HTTP Memory: api/durable-http-memory.md
   - Agent Memory:
     - Overview: agent-memory/overview.md
