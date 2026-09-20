@@ -31,8 +31,9 @@ have not been established.
 
 **Implementation status:** the Rust library includes a RocksDB episode backend
 and an evidence-driven procedure ledger. The current HTTP memory routes still
-use volatile storage. Cypher support is partial, Bolt is a placeholder, and the
-graph transaction layer does not yet provide atomic multi-operation commits.
+use volatile storage. Cypher support is partial and Bolt is a placeholder. Graph
+transactions publish entity and index mutations atomically; snapshot isolation
+and conflict detection remain unimplemented.
 See the [code audit and research roadmap](docs/research/agent-memory-evolution.md)
 before planning production use.
 
@@ -61,7 +62,7 @@ before planning production use.
 - **gRPC Support**: High-performance RPC (planned)
 
 ### 🏢 **Production Roadmap**
-- Atomic graph transactions and conflict handling
+- Snapshot isolation, conflict handling and fault-injection recovery validation
 - Persistent HTTP memory, resource ownership and secure server bootstrap
 - Verified recovery, observability and reproducible benchmarks
 
@@ -347,7 +348,7 @@ We welcome contributions from the community! Please read our [Contributing Guide
 - Development setup
 - Code style guidelines
 - Testing requirements
-- Pull request process
+- [Feature validation and five-PR merge batches](docs/contributing/feature-delivery.md)
 
 ### Quick Contribution Steps
 
@@ -408,7 +409,10 @@ behavior, not production throughput or superiority over other memory systems.
 - [x] Security components (JWT, API keys, RBAC)
 - [ ] Secure production bootstrap and resource ownership across API routes
 - [ ] Persistent HTTP memory
-- [ ] Atomic multi-operation graph transactions
+- [x] Atomic multi-operation graph entity and index commits
+- [ ] Snapshot isolation and transaction conflict detection
+- [x] BM25 lexical ranking and deterministic hybrid retrieval
+- [x] Scoped episode writes and invalidation-aware reads
 - [x] Durable episode integrity and versioned structured payloads
 - [x] Outcome-driven procedure ledger in the Rust library
 - [x] Rate limiting with token bucket algorithm

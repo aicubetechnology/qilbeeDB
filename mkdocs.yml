@@ -144,6 +144,7 @@ nav:
     - Architecture:
       - Overview: architecture/overview.md
       - Storage Engine: architecture/storage.md
+      - Atomic Graph Commits: architecture/atomic-commits.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
       - Bi-Temporal Model: architecture/bi-temporal.md
@@ -151,3 +152,4 @@ nav:
       - Development Setup: contributing/setup.md
       - Code Style: contributing/style.md
       - Testing: contributing/testing.md
+      - Feature Delivery: contributing/feature-delivery.md

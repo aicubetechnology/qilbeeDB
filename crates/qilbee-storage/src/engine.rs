@@ -2,11 +2,15 @@
 
 use crate::keys::KeyBuilder;
 use crate::options::StorageOptions;
-use qilbee_core::{EntityId, Error, GraphId, Node, NodeId, PropertyValue, Relationship, RelationshipId, Result};
-use rocksdb::{ColumnFamily, ColumnFamilyDescriptor, Options, WriteBatch, DB};
+use crate::transaction::TransactionOperation;
+use qilbee_core::{
+    EntityId, Error, GraphId, Node, NodeId, PropertyValue, Relationship, RelationshipId, Result,
+};
+use rocksdb::{ColumnFamily, ColumnFamilyDescriptor, DB, Options, WriteBatch};
+use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
 /// Compute a hash for a property value for indexing
@@ -114,6 +118,7 @@ pub const COLUMN_FAMILIES: &[&str] = &[
 pub struct StorageEngine {
     db: Arc<DB>,
     options: StorageOptions,
+    mutation_lock: Arc<Mutex<()>>,
 }
 
 impl StorageEngine {
@@ -141,8 +146,7 @@ impl StorageEngine {
                 let mut cf_opts = Options::default();
                 if options.enable_bloom_filter {
                     let mut block_opts = rocksdb::BlockBasedOptions::default();
-                    block_opts
-                        .set_bloom_filter(options.bloom_filter_bits_per_key as f64, false);
+                    block_opts.set_bloom_filter(options.bloom_filter_bits_per_key as f64, false);
                     cf_opts.set_block_based_table_factory(&block_opts);
                 }
                 ColumnFamilyDescriptor::new(*name, cf_opts)
@@ -157,6 +161,7 @@ impl StorageEngine {
         Ok(Self {
             db: Arc::new(db),
             options,
+            mutation_lock: Arc::new(Mutex::new(())),
         })
     }
 
@@ -171,47 +176,7 @@ impl StorageEngine {
 
     /// Store a node
     pub fn put_node(&self, graph_id: GraphId, node: &Node) -> Result<()> {
-        let key = KeyBuilder::node(graph_id, node.id);
-        let value = bincode::serialize(node).map_err(|e| Error::Serialization(e.to_string()))?;
-
-        let mut batch = WriteBatch::default();
-
-        // Store node data
-        let cf = self.cf(cf::NODES)?;
-        batch.put_cf(&cf, &key, &value);
-
-        // Update label indices
-        let label_cf = self.cf(cf::LABEL_INDEX)?;
-        for label in &node.labels {
-            let label_key = KeyBuilder::label_index(graph_id, label.name(), node.id);
-            batch.put_cf(&label_cf, &label_key, &[]);
-        }
-
-        // Update property indices for each label+property combination
-        let prop_cf = self.cf(cf::PROPERTY_INDEX)?;
-        for label in &node.labels {
-            for (prop_name, prop_value) in node.properties.iter() {
-                let value_hash = hash_property_value(prop_value);
-                let prop_key = KeyBuilder::property_index(
-                    graph_id,
-                    label.name(),
-                    prop_name,
-                    value_hash,
-                    node.id.as_internal(),
-                );
-                // Store the serialized property value for retrieval
-                let prop_value_bytes = bincode::serialize(prop_value)
-                    .map_err(|e| Error::Serialization(e.to_string()))?;
-                batch.put_cf(&prop_cf, &prop_key, &prop_value_bytes);
-            }
-        }
-
-        self.db
-            .write(batch)
-            .map_err(|e| Error::Storage(e.to_string()))?;
-
-        debug!("Stored node {:?} in graph {:?}", node.id, graph_id);
-        Ok(())
+        self.apply_operations(graph_id, &[TransactionOperation::PutNode(node.clone())])
     }
 
     /// Get a node by ID
@@ -232,48 +197,13 @@ impl StorageEngine {
 
     /// Delete a node
     pub fn delete_node(&self, graph_id: GraphId, node_id: NodeId) -> Result<bool> {
-        // First get the node to remove label and property indices
-        let node = match self.get_node(graph_id, node_id)? {
-            Some(n) => n,
-            None => return Ok(false),
-        };
-
-        let mut batch = WriteBatch::default();
-
-        // Remove node
-        let key = KeyBuilder::node(graph_id, node_id);
-        let cf = self.cf(cf::NODES)?;
-        batch.delete_cf(&cf, &key);
-
-        // Remove label indices
-        let label_cf = self.cf(cf::LABEL_INDEX)?;
-        for label in &node.labels {
-            let label_key = KeyBuilder::label_index(graph_id, label.name(), node_id);
-            batch.delete_cf(&label_cf, &label_key);
-        }
-
-        // Remove property indices
-        let prop_cf = self.cf(cf::PROPERTY_INDEX)?;
-        for label in &node.labels {
-            for (prop_name, prop_value) in node.properties.iter() {
-                let value_hash = hash_property_value(prop_value);
-                let prop_key = KeyBuilder::property_index(
-                    graph_id,
-                    label.name(),
-                    prop_name,
-                    value_hash,
-                    node_id.as_internal(),
-                );
-                batch.delete_cf(&prop_cf, &prop_key);
-            }
-        }
-
-        self.db
-            .write(batch)
-            .map_err(|e| Error::Storage(e.to_string()))?;
-
-        debug!("Deleted node {:?} from graph {:?}", node_id, graph_id);
-        Ok(true)
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        let exists = self.get_node(graph_id, node_id)?.is_some();
+        self.apply_operations_locked(graph_id, &[TransactionOperation::DeleteNode(node_id)])?;
+        Ok(exists)
     }
 
     /// Get all nodes in a graph
@@ -293,8 +223,8 @@ impl StorageEngine {
             }
 
             // Deserialize the node directly from the value
-            let node: Node = bincode::deserialize(&value)
-                .map_err(|e| Error::Deserialization(e.to_string()))?;
+            let node: Node =
+                bincode::deserialize(&value).map_err(|e| Error::Deserialization(e.to_string()))?;
             nodes.push(node);
         }
 
@@ -432,8 +362,10 @@ impl StorageEngine {
             .into_iter()
             .filter(|node| {
                 if let Some(value) = node.properties.get(property) {
-                    let above_min = min_value.map_or(true, |min| compare_property_values(value, min) >= 0);
-                    let below_max = max_value.map_or(true, |max| compare_property_values(value, max) <= 0);
+                    let above_min =
+                        min_value.map_or(true, |min| compare_property_values(value, min) >= 0);
+                    let below_max =
+                        max_value.map_or(true, |max| compare_property_values(value, max) <= 0);
                     above_min && below_max
                 } else {
                     false
@@ -448,41 +380,10 @@ impl StorageEngine {
 
     /// Store a relationship
     pub fn put_relationship(&self, graph_id: GraphId, rel: &Relationship) -> Result<()> {
-        let key = KeyBuilder::relationship(graph_id, rel.id);
-        let value = bincode::serialize(rel).map_err(|e| Error::Serialization(e.to_string()))?;
-
-        let mut batch = WriteBatch::default();
-
-        // Store relationship data
-        let cf = self.cf(cf::RELATIONSHIPS)?;
-        batch.put_cf(&cf, &key, &value);
-
-        // Store adjacency - outgoing
-        let adj_out_cf = self.cf(cf::ADJACENCY_OUT)?;
-        let adj_out_key =
-            KeyBuilder::adjacency_out(graph_id, rel.source, rel.rel_type.name(), rel.id);
-        let target_bytes = rel.target.as_internal().to_be_bytes();
-        batch.put_cf(&adj_out_cf, &adj_out_key, &target_bytes);
-
-        // Store adjacency - incoming
-        let adj_in_cf = self.cf(cf::ADJACENCY_IN)?;
-        let adj_in_key =
-            KeyBuilder::adjacency_in(graph_id, rel.target, rel.rel_type.name(), rel.id);
-        let source_bytes = rel.source.as_internal().to_be_bytes();
-        batch.put_cf(&adj_in_cf, &adj_in_key, &source_bytes);
-
-        self.db
-            .write(batch)
-            .map_err(|e| Error::Storage(e.to_string()))?;
-
-        debug!(
-            "Stored relationship {:?} ({:?})-[:{}]->({:?})",
-            rel.id,
-            rel.source,
-            rel.rel_type.name(),
-            rel.target
-        );
-        Ok(())
+        self.apply_operations(
+            graph_id,
+            &[TransactionOperation::PutRelationship(rel.clone())],
+        )
     }
 
     /// Get a relationship by ID
@@ -506,42 +407,17 @@ impl StorageEngine {
     }
 
     /// Delete a relationship
-    pub fn delete_relationship(
-        &self,
-        graph_id: GraphId,
-        rel_id: RelationshipId,
-    ) -> Result<bool> {
-        // First get the relationship to remove adjacency indices
-        let rel = match self.get_relationship(graph_id, rel_id)? {
-            Some(r) => r,
-            None => return Ok(false),
-        };
-
-        let mut batch = WriteBatch::default();
-
-        // Remove relationship
-        let key = KeyBuilder::relationship(graph_id, rel_id);
-        let cf = self.cf(cf::RELATIONSHIPS)?;
-        batch.delete_cf(&cf, &key);
-
-        // Remove adjacency - outgoing
-        let adj_out_cf = self.cf(cf::ADJACENCY_OUT)?;
-        let adj_out_key =
-            KeyBuilder::adjacency_out(graph_id, rel.source, rel.rel_type.name(), rel.id);
-        batch.delete_cf(&adj_out_cf, &adj_out_key);
-
-        // Remove adjacency - incoming
-        let adj_in_cf = self.cf(cf::ADJACENCY_IN)?;
-        let adj_in_key =
-            KeyBuilder::adjacency_in(graph_id, rel.target, rel.rel_type.name(), rel.id);
-        batch.delete_cf(&adj_in_cf, &adj_in_key);
-
-        self.db
-            .write(batch)
-            .map_err(|e| Error::Storage(e.to_string()))?;
-
-        debug!("Deleted relationship {:?} from graph {:?}", rel_id, graph_id);
-        Ok(true)
+    pub fn delete_relationship(&self, graph_id: GraphId, rel_id: RelationshipId) -> Result<bool> {
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        let exists = self.get_relationship(graph_id, rel_id)?.is_some();
+        self.apply_operations_locked(
+            graph_id,
+            &[TransactionOperation::DeleteRelationship(rel_id)],
+        )?;
+        Ok(exists)
     }
 
     /// Get outgoing relationships from a node
@@ -636,6 +512,156 @@ impl StorageEngine {
 
     // ========== Transaction Operations ==========
 
+    pub(crate) fn apply_operations(
+        &self,
+        graph_id: GraphId,
+        operations: &[TransactionOperation],
+    ) -> Result<()> {
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        self.apply_operations_locked(graph_id, operations)
+    }
+
+    /// Build the complete final write set before publishing any entity or index.
+    /// The caller holds the shared writer lock across reading and committing.
+    fn apply_operations_locked(
+        &self,
+        graph_id: GraphId,
+        operations: &[TransactionOperation],
+    ) -> Result<()> {
+        let mut nodes = HashMap::<NodeId, Option<Node>>::new();
+        let mut relationships = HashMap::<RelationshipId, Option<Relationship>>::new();
+        for operation in operations {
+            match operation {
+                TransactionOperation::PutNode(node) => {
+                    nodes.insert(node.id, Some(node.clone()));
+                }
+                TransactionOperation::DeleteNode(id) => {
+                    nodes.insert(*id, None);
+                }
+                TransactionOperation::PutRelationship(rel) => {
+                    relationships.insert(rel.id, Some(rel.clone()));
+                }
+                TransactionOperation::DeleteRelationship(id) => {
+                    relationships.insert(*id, None);
+                }
+            }
+        }
+
+        let mut batch = WriteBatch::default();
+        for (id, final_node) in nodes {
+            if let Some(previous) = self.get_node(graph_id, id)? {
+                self.stage_node(&mut batch, graph_id, &previous, false)?;
+            }
+            if let Some(node) = final_node {
+                self.stage_node(&mut batch, graph_id, &node, true)?;
+            }
+        }
+        for (id, final_relationship) in relationships {
+            if let Some(previous) = self.get_relationship(graph_id, id)? {
+                self.stage_relationship(&mut batch, graph_id, &previous, false)?;
+            }
+            if let Some(rel) = final_relationship {
+                self.stage_relationship(&mut batch, graph_id, &rel, true)?;
+            }
+        }
+        let mut options = rocksdb::WriteOptions::default();
+        options.disable_wal(!self.options.enable_wal);
+        options.set_sync(self.options.enable_wal && self.options.sync_wal);
+        self.db
+            .write_opt(batch, &options)
+            .map_err(|e| Error::Storage(e.to_string()))
+    }
+
+    fn stage_node(
+        &self,
+        batch: &mut WriteBatch,
+        graph_id: GraphId,
+        node: &Node,
+        put: bool,
+    ) -> Result<()> {
+        let key = KeyBuilder::node(graph_id, node.id);
+        let node_cf = self.cf(cf::NODES)?;
+        if put {
+            batch.put_cf(
+                node_cf,
+                key,
+                bincode::serialize(node).map_err(|e| Error::Serialization(e.to_string()))?,
+            );
+        } else {
+            batch.delete_cf(node_cf, key);
+        }
+        let label_cf = self.cf(cf::LABEL_INDEX)?;
+        let property_cf = self.cf(cf::PROPERTY_INDEX)?;
+        for label in &node.labels {
+            let key = KeyBuilder::label_index(graph_id, label.name(), node.id);
+            if put {
+                batch.put_cf(label_cf, key, []);
+            } else {
+                batch.delete_cf(label_cf, key);
+            }
+            for (name, value) in node.properties.iter() {
+                let key = KeyBuilder::property_index(
+                    graph_id,
+                    label.name(),
+                    name,
+                    hash_property_value(value),
+                    node.id.as_internal(),
+                );
+                if put {
+                    batch.put_cf(
+                        property_cf,
+                        key,
+                        bincode::serialize(value)
+                            .map_err(|e| Error::Serialization(e.to_string()))?,
+                    );
+                } else {
+                    batch.delete_cf(property_cf, key);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn stage_relationship(
+        &self,
+        batch: &mut WriteBatch,
+        graph_id: GraphId,
+        rel: &Relationship,
+        put: bool,
+    ) -> Result<()> {
+        let key = KeyBuilder::relationship(graph_id, rel.id);
+        let relationship_cf = self.cf(cf::RELATIONSHIPS)?;
+        let outgoing_cf = self.cf(cf::ADJACENCY_OUT)?;
+        let incoming_cf = self.cf(cf::ADJACENCY_IN)?;
+        let outgoing = KeyBuilder::adjacency_out(graph_id, rel.source, rel.rel_type.name(), rel.id);
+        let incoming = KeyBuilder::adjacency_in(graph_id, rel.target, rel.rel_type.name(), rel.id);
+        if put {
+            batch.put_cf(
+                relationship_cf,
+                key,
+                bincode::serialize(rel).map_err(|e| Error::Serialization(e.to_string()))?,
+            );
+            batch.put_cf(
+                outgoing_cf,
+                outgoing,
+                rel.target.as_internal().to_be_bytes(),
+            );
+            batch.put_cf(
+                incoming_cf,
+                incoming,
+                rel.source.as_internal().to_be_bytes(),
+            );
+        } else {
+            batch.delete_cf(relationship_cf, key);
+            batch.delete_cf(outgoing_cf, outgoing);
+            batch.delete_cf(incoming_cf, incoming);
+        }
+        Ok(())
+    }
+
     /// Begin a new transaction for a graph
     pub fn begin_transaction(&self, graph_id: GraphId) -> Result<crate::transaction::Transaction> {
         Ok(crate::transaction::Transaction::new(self.clone(), graph_id))
@@ -645,9 +671,7 @@ impl StorageEngine {
 
     /// Flush all in-memory data to disk
     pub fn flush(&self) -> Result<()> {
-        self.db
-            .flush()
-            .map_err(|e| Error::Storage(e.to_string()))?;
+        self.db.flush().map_err(|e| Error::Storage(e.to_string()))?;
         info!("Storage engine flushed");
         Ok(())
     }
@@ -677,6 +701,7 @@ impl Clone for StorageEngine {
         Self {
             db: Arc::clone(&self.db),
             options: self.options.clone(),
+            mutation_lock: Arc::clone(&self.mutation_lock),
         }
     }
 }
@@ -686,6 +711,254 @@ mod tests {
     use super::*;
     use qilbee_core::{EntityId, IdGenerator, Property};
     use tempfile::TempDir;
+
+    #[test]
+    fn atomic_commit_failure_does_not_publish_earlier_operations() {
+        let (engine, _dir) = create_test_engine();
+        let ids = IdGenerator::new();
+        let graph = GraphId::from_name("atomic");
+        let new_node = Node::with_labels(ids.next_node_id(), ["New"]);
+        let corrupt_id = ids.next_node_id();
+        engine
+            .db
+            .put_cf(
+                engine.cf(cf::NODES).unwrap(),
+                KeyBuilder::node(graph, corrupt_id),
+                b"corrupt",
+            )
+            .unwrap();
+        let mut tx = engine.begin_transaction(graph).unwrap();
+        tx.put_node(new_node.clone()).unwrap();
+        tx.delete_node(corrupt_id).unwrap();
+        assert!(tx.commit().is_err());
+        assert!(engine.get_node(graph, new_node.id).unwrap().is_none());
+        assert!(engine.get_nodes_by_label(graph, "New").unwrap().is_empty());
+    }
+
+    #[test]
+    fn atomic_repeated_node_operations_leave_only_final_indexes() {
+        let (engine, _dir) = create_test_engine();
+        let ids = IdGenerator::new();
+        let graph = GraphId::from_name("atomic");
+        let mut original = Node::with_labels(ids.next_node_id(), ["Old"]);
+        original.set_property("name", "before");
+        engine.put_node(graph, &original).unwrap();
+        let middle = Node::with_labels(original.id, ["Middle"]);
+        let mut final_node = Node::with_labels(original.id, ["Final"]);
+        final_node.set_property("name", "after");
+        let mut tx = engine.begin_transaction(graph).unwrap();
+        tx.put_node(middle).unwrap();
+        tx.delete_node(original.id).unwrap();
+        tx.put_node(final_node).unwrap();
+        tx.commit().unwrap();
+        assert!(engine.get_nodes_by_label(graph, "Old").unwrap().is_empty());
+        assert!(
+            engine
+                .get_nodes_by_label(graph, "Middle")
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(engine.get_nodes_by_label(graph, "Final").unwrap().len(), 1);
+        let old_key = KeyBuilder::property_index(
+            graph,
+            "Old",
+            "name",
+            hash_property_value(&PropertyValue::String("before".into())),
+            original.id.as_internal(),
+        );
+        assert!(
+            engine
+                .db
+                .get_cf(engine.cf(cf::PROPERTY_INDEX).unwrap(), old_key)
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn atomic_direct_node_replacement_removes_old_labels_and_properties() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("atomic");
+        let ids = IdGenerator::new();
+        let mut old = Node::with_labels(ids.next_node_id(), ["Old"]);
+        old.set_property("name", "old");
+        engine.put_node(graph, &old).unwrap();
+        engine
+            .put_node(graph, &Node::with_labels(old.id, ["New"]))
+            .unwrap();
+        assert!(engine.get_nodes_by_label(graph, "Old").unwrap().is_empty());
+        assert_eq!(engine.get_nodes_by_label(graph, "New").unwrap().len(), 1);
+        let old_key = KeyBuilder::property_index(
+            graph,
+            "Old",
+            "name",
+            hash_property_value(&PropertyValue::String("old".into())),
+            old.id.as_internal(),
+        );
+        assert!(
+            engine
+                .db
+                .get_cf(engine.cf(cf::PROPERTY_INDEX).unwrap(), old_key)
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn atomic_relationship_replacement_removes_both_old_adjacencies() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("atomic");
+        let ids = IdGenerator::new();
+        let a = ids.next_node_id();
+        let b = ids.next_node_id();
+        let c = ids.next_node_id();
+        let old = Relationship::new(ids.next_relationship_id(), "OLD", a, b);
+        engine.put_relationship(graph, &old).unwrap();
+        let new = Relationship::new(old.id, "NEW", c, a);
+        let mut tx = engine.begin_transaction(graph).unwrap();
+        tx.put_relationship(new).unwrap();
+        tx.commit().unwrap();
+        assert!(
+            engine
+                .get_outgoing_relationships(graph, a)
+                .unwrap()
+                .is_empty()
+        );
+        assert!(
+            engine
+                .get_incoming_relationships(graph, b)
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(
+            engine.get_outgoing_relationships(graph, c).unwrap().len(),
+            1
+        );
+        assert_eq!(
+            engine.get_incoming_relationships(graph, a).unwrap().len(),
+            1
+        );
+    }
+
+    #[test]
+    fn atomic_concurrent_cloned_writers_leave_only_current_label() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("atomic");
+        let id = IdGenerator::new().next_node_id();
+        engine
+            .put_node(graph, &Node::with_labels(id, ["initial"]))
+            .unwrap();
+        let workers: Vec<_> = (0..8)
+            .map(|index| {
+                let engine = engine.clone();
+                std::thread::spawn(move || {
+                    for _ in 0..8 {
+                        engine
+                            .put_node(graph, &Node::with_labels(id, [format!("label-{index}")]))
+                            .unwrap();
+                    }
+                })
+            })
+            .collect();
+        for worker in workers {
+            worker.join().unwrap();
+        }
+        assert!(
+            engine
+                .get_nodes_by_label(graph, "initial")
+                .unwrap()
+                .is_empty()
+        );
+        let indexed: usize = (0..8)
+            .map(|index| {
+                engine
+                    .get_nodes_by_label(graph, &format!("label-{index}"))
+                    .unwrap()
+                    .len()
+            })
+            .sum();
+        assert_eq!(indexed, 1);
+    }
+
+    #[test]
+    fn atomic_snapshots_never_observe_a_partial_two_node_commit() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("atomic");
+        let ids = IdGenerator::new();
+        let a = ids.next_node_id();
+        let b = ids.next_node_id();
+        let node = |id, value: i64| {
+            let mut node = Node::with_labels(id, ["Pair"]);
+            node.set_property("generation", value);
+            node
+        };
+        engine.put_node(graph, &node(a, 0)).unwrap();
+        engine.put_node(graph, &node(b, 0)).unwrap();
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let writer = engine.clone();
+        let start = barrier.clone();
+        let worker = std::thread::spawn(move || {
+            start.wait();
+            for generation in 1..100 {
+                let mut tx = writer.begin_transaction(graph).unwrap();
+                tx.put_node(node(a, generation)).unwrap();
+                tx.put_node(node(b, generation)).unwrap();
+                tx.commit().unwrap();
+            }
+        });
+        barrier.wait();
+        for _ in 0..1024 {
+            let snapshot = engine.db.snapshot();
+            let read = |id| -> Node {
+                let bytes = snapshot
+                    .get_cf(engine.cf(cf::NODES).unwrap(), KeyBuilder::node(graph, id))
+                    .unwrap()
+                    .unwrap();
+                bincode::deserialize(&bytes).unwrap()
+            };
+            assert_eq!(
+                read(a).get_property("generation"),
+                read(b).get_property("generation")
+            );
+        }
+        worker.join().unwrap();
+    }
+
+    #[test]
+    fn atomic_committed_entities_and_indexes_survive_reopen() {
+        let dir = TempDir::new().unwrap();
+        let options = StorageOptions::for_testing(dir.path()).sync_wal(true);
+        let ids = IdGenerator::new();
+        let graph = GraphId::from_name("atomic");
+        let a = Node::with_labels(ids.next_node_id(), ["Source"]);
+        let b = Node::with_labels(ids.next_node_id(), ["Target"]);
+        let rel = Relationship::new(ids.next_relationship_id(), "LINK", a.id, b.id);
+        {
+            let engine = StorageEngine::open(options.clone()).unwrap();
+            let mut tx = engine.begin_transaction(graph).unwrap();
+            tx.put_node(a.clone()).unwrap();
+            tx.put_node(b.clone()).unwrap();
+            tx.put_relationship(rel.clone()).unwrap();
+            tx.commit().unwrap();
+        }
+        let engine = StorageEngine::open(options).unwrap();
+        assert_eq!(
+            engine.get_nodes_by_label(graph, "Source").unwrap()[0].id,
+            a.id
+        );
+        assert_eq!(
+            engine.get_nodes_by_label(graph, "Target").unwrap()[0].id,
+            b.id
+        );
+        assert_eq!(
+            engine.get_outgoing_relationships(graph, a.id).unwrap()[0].id,
+            rel.id
+        );
+        assert_eq!(
+            engine.get_incoming_relationships(graph, b.id).unwrap()[0].id,
+            rel.id
+        );
+    }
 
     fn create_test_engine() -> (StorageEngine, TempDir) {
         let temp_dir = TempDir::new().unwrap();
@@ -799,11 +1072,15 @@ mod tests {
         engine.put_relationship(graph_id, &rel2).unwrap();
 
         // Query outgoing from node1
-        let outgoing = engine.get_outgoing_relationships(graph_id, node1.id).unwrap();
+        let outgoing = engine
+            .get_outgoing_relationships(graph_id, node1.id)
+            .unwrap();
         assert_eq!(outgoing.len(), 2);
 
         // Query incoming to node2
-        let incoming = engine.get_incoming_relationships(graph_id, node2.id).unwrap();
+        let incoming = engine
+            .get_incoming_relationships(graph_id, node2.id)
+            .unwrap();
         assert_eq!(incoming.len(), 1);
         assert_eq!(incoming[0].source, node1.id);
     }
@@ -842,12 +1119,22 @@ mod tests {
 
         // Query by property value
         let alices = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(alices.len(), 2);
 
         let bobs = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Bob".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Bob".to_string()),
+            )
             .unwrap();
         assert_eq!(bobs.len(), 1);
         assert_eq!(bobs[0].id, node2.id);
@@ -866,7 +1153,12 @@ mod tests {
 
         // Verify initial index
         let alices = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(alices.len(), 1);
 
@@ -876,13 +1168,23 @@ mod tests {
 
         // Old value should not be found
         let alices = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(alices.len(), 0);
 
         // New value should be found
         let alicias = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alicia".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alicia".to_string()),
+            )
             .unwrap();
         assert_eq!(alicias.len(), 1);
     }
@@ -900,7 +1202,12 @@ mod tests {
 
         // Verify index
         let alices = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(alices.len(), 1);
 
@@ -909,7 +1216,12 @@ mod tests {
 
         // Index should be empty
         let alices = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(alices.len(), 0);
     }
@@ -1032,13 +1344,23 @@ mod tests {
 
         // Query Person nodes with name
         let person_alice = engine
-            .get_nodes_by_property(graph_id, "Person", "name", &PropertyValue::String("Alice".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Person",
+                "name",
+                &PropertyValue::String("Alice".to_string()),
+            )
             .unwrap();
         assert_eq!(person_alice.len(), 1);
 
         // Query Company nodes with name
         let company_alice = engine
-            .get_nodes_by_property(graph_id, "Company", "name", &PropertyValue::String("Alice Corp".to_string()))
+            .get_nodes_by_property(
+                graph_id,
+                "Company",
+                "name",
+                &PropertyValue::String("Alice Corp".to_string()),
+            )
             .unwrap();
         assert_eq!(company_alice.len(), 1);
     }

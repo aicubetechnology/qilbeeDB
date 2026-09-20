@@ -1,10 +1,13 @@
 # Transactions
 
-*This page is under development. Full documentation coming soon.*
+Rust storage transactions publish node, relationship and index mutations in one
+atomic RocksDB batch. Direct entity writes use the same index maintenance path.
+Transaction reads are cached per entity; snapshot isolation and conflict
+detection are not implemented.
 
-## Overview
-
-Documentation for graph transactions will be available here.
+See the [atomic commit contract](../architecture/atomic-commits.md) for write
+semantics, durability options, tested behavior and known limitations. Separate
+HTTP requests are not automatically grouped into a storage transaction.
 
 ## Next Steps
 

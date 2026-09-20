@@ -34,8 +34,9 @@ pub enum TransactionOperation {
 
 /// A transaction for atomic graph operations
 ///
-/// Provides ACID semantics for a sequence of graph operations.
-/// Changes are only visible after commit.
+/// Commits entity and index mutations in one atomic RocksDB batch.
+/// Reads are cached per entity; snapshot isolation and conflict detection are
+/// not provided. Concurrent transactions may overwrite each other's changes.
 pub struct Transaction {
     /// Transaction ID
     id: u64,
@@ -203,23 +204,8 @@ impl Transaction {
     pub fn commit(mut self) -> Result<()> {
         self.check_active()?;
 
-        // Apply all operations
-        for op in self.operations.drain(..) {
-            match op {
-                TransactionOperation::PutNode(node) => {
-                    self.engine.put_node(self.graph_id, &node)?;
-                }
-                TransactionOperation::DeleteNode(node_id) => {
-                    self.engine.delete_node(self.graph_id, node_id)?;
-                }
-                TransactionOperation::PutRelationship(rel) => {
-                    self.engine.put_relationship(self.graph_id, &rel)?;
-                }
-                TransactionOperation::DeleteRelationship(rel_id) => {
-                    self.engine.delete_relationship(self.graph_id, rel_id)?;
-                }
-            }
-        }
+        self.engine
+            .apply_operations(self.graph_id, &self.operations)?;
 
         self.state = TransactionState::Committed;
         Ok(())
