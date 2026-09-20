@@ -166,6 +166,26 @@ impl LearningMemory {
             .mutation_lock
             .lock()
             .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
+        let (result, batch) = self.prepare_evaluation(scope, id, evaluation)?;
+        if let Some(batch) = batch {
+            self.inner
+                .db
+                .write_opt(batch, &write_options())
+                .map_err(storage_error)?;
+        }
+        Ok(result)
+    }
+
+    // Caller holds mutation_lock; admission adds its receipt to this same batch.
+    fn prepare_evaluation(
+        &self,
+        scope: &LearningScope,
+        id: &str,
+        evaluation: PairedEvaluation,
+    ) -> Result<(EvaluationResult, Option<WriteBatch>)> {
+        scope.validate()?;
+        validate_text(id, "procedure ID", 512)?;
+        evaluation.validate()?;
         let key = evaluation_key(scope, id, &evaluation.case_id);
         if let Some(bytes) = self.inner.db.get(&key).map_err(storage_error)? {
             let receipt: EvaluationReceipt = decode(&bytes)?;
@@ -174,10 +194,13 @@ impl LearningMemory {
                     "Case ID already has different evidence".into(),
                 ));
             }
-            return Ok(EvaluationResult {
-                receipt,
-                duplicate: true,
-            });
+            return Ok((
+                EvaluationResult {
+                    receipt,
+                    duplicate: true,
+                },
+                None,
+            ));
         }
 
         let mut record = self
@@ -234,14 +257,13 @@ impl LearningMemory {
         batch.put(procedure_key(scope, id), encode(&record)?);
         batch.put(key, encode(&receipt)?);
         batch.put(source_key, receipt.evaluation.case_id.as_bytes());
-        self.inner
-            .db
-            .write_opt(batch, &write_options())
-            .map_err(storage_error)?;
-        Ok(EvaluationResult {
-            receipt,
-            duplicate: false,
-        })
+        Ok((
+            EvaluationResult {
+                receipt,
+                duplicate: false,
+            },
+            Some(batch),
+        ))
     }
 
     pub fn evaluation(
@@ -407,3 +429,4 @@ fn new_procedure_record(scope: &LearningScope, proposal: ProcedureProposal) -> P
         created_at_millis: chrono::Utc::now().timestamp_millis(),
     }
 }
+pub mod admission;
