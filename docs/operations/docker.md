@@ -1,92 +1,172 @@
 # Docker
 
-Run QilbeeDB in Docker containers.
+Run the standalone QilbeeDB platform in the local Docker engine for integration
+testing. The repository supplies a multi-stage `Dockerfile`, `compose.yaml`, and
+an optional `compose.qmn.yaml` network attachment. No QMN services are required by
+the default deployment.
 
-## Quick Start
-
-```bash
-docker run -d \
-  --name qilbeedb \
-  -p 7474:7474 \
-  -p 7687:7687 \
-  -v qilbeedb-data:/data \
-  qilbeedb/qilbeedb:latest
-```
-
-## Docker Compose
-
-Create `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-
-services:
-  qilbeedb:
-    image: qilbeedb/qilbeedb:latest
-    ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
-    volumes:
-      - ./data:/data
-      - ./config.toml:/etc/qilbeedb/config.toml
-    environment:
-      - QILBEE_LOG_LEVEL=info
-    restart: unless-stopped
-```
-
-Start:
-```bash
-docker-compose up -d
-```
-
-## Environment Variables
+## Build from source
 
 ```bash
-QILBEE_LOG_LEVEL=info        # Logging level
-QILBEE_HTTP_PORT=7474        # HTTP port
-QILBEE_BOLT_PORT=7687        # Bolt port
-QILBEE_DATA_PATH=/data       # Data directory
-```
-
-## Volume Mounts
-
-```bash
-# Data persistence
--v qilbeedb-data:/data
-
-# Configuration
--v ./config.toml:/etc/qilbeedb/config.toml
-
-# Logs
--v ./logs:/var/log/qilbeedb
-```
-
-## Build from Source
-
-```bash
-# Clone repository
 git clone https://github.com/aicubetechnology/qilbeeDB.git
-cd qilbeedb
-
-# Build Docker image
-docker build -t qilbeedb:local .
-
-# Run
-docker run -d -p 7474:7474 -p 7687:7687 qilbeedb:local
+cd qilbeeDB
+QILBEE_REVISION="$(git rev-parse HEAD)" docker compose build
 ```
 
-## Health Check
+The image uses digest-pinned Rust 1.93.1 and Debian Bookworm bases, the committed
+Cargo lockfile, and a release build with thin LTO. Build concurrency is two jobs
+to fit local development machines. Dependency/target caches belong to BuildKit;
+the build context excludes local data, credentials, Git state and host targets.
+The runtime includes the server, required native libraries, CA certificates,
+curl for health checks, and the license. It runs as UID/GID 10001.
+
+The resulting default image is `qilbeedb:local`. This builds locally; it does not
+publish an image to a registry. Use an explicit image tag and Git revision when
+recording a validated deployment.
+
+## One-time local provisioning
+
+Provision before starting the service, using the same named volume:
 
 ```bash
-# Check if container is running
-docker ps | grep qilbeedb
-
-# Check health endpoint
-curl http://localhost:7474/health
+umask 077
+mkdir -p "$HOME/.config/qilbeedb/local"
+chmod 700 "$HOME/.config/qilbeedb/local"
+(set -C; docker compose run --rm --no-deps qilbeedb \
+  bootstrap-tenant /data qilbee-qmn-local platform-operator \
+  > "$HOME/.config/qilbeedb/local/admin.json")
+chmod 600 "$HOME/.config/qilbeedb/local/admin.json"
 ```
 
-## Next Steps
+The JSON file contains the one-time operator secret. Keep it outside Git and do
+not paste it into logs or documentation. Bootstrap creates the tenant once; it
+will not reset an existing tenant. The subshell uses `set -C` to refuse
+overwriting an existing credential file. Do not rerun the command over an existing
+credential file, because shell redirection would truncate that file before the
+command fails. For an existing installation, use its saved credential and volume.
 
-- Configure [Deployment](deployment.md)
-- Set up [Monitoring](monitoring.md)
-- Configure [Backups](backup.md)
+The local operator command needs exclusive access to the volume's RocksDB files.
+Stop the service before using that command. Routine key issuance, rotation and
+revocation use the authenticated HTTP API while the service is running.
+
+## Start the standalone service
+
+```bash
+docker compose up -d
+docker compose ps
+curl --fail http://localhost:7474/health
+curl --fail http://localhost:7474/openapi.json
+```
+
+Compose publishes HTTP on **127.0.0.1:7474** by default. The root filesystem is
+read-only, `/data` uses the persistent named volume, `/tmp` is temporary, Linux
+capabilities are dropped, and privilege escalation is disabled. The server has
+no learned-code executor in this container.
+
+The health check reports process availability. Successful scoped writes and
+reads are separate integration checks. Only HTTP is exposed; this deployment
+does not advertise an implemented Bolt listener.
+
+## Optional Qilbee/QMN network
+
+The local QMN installation uses an existing Docker network. Attach QilbeeDB as
+an additional service without recreating QMN containers:
+
+```bash
+QMN_DOCKER_NETWORK=qilbee-mycelial-network_qmn-network \
+  docker compose -f compose.yaml -f compose.qmn.yaml up -d
+```
+
+Clients on that network can use:
+
+```text
+http://qilbeedb-local:7474
+```
+
+They still need QilbeeDB platform credentials and explicit resource grants.
+Attaching a network does not migrate QMN data, change QMN's decision authority,
+or configure its applications automatically. Other applications can use the same
+API. The standalone Compose file has no dependency on this external network.
+
+## Configure the Compose deployment
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `QILBEE_IMAGE` | `qilbeedb:local` | Local image tag to build/run |
+| `QILBEE_REVISION` | `unknown` | OCI image revision label during build |
+| `QILBEE_HTTP_PORT` | `7474` | Host loopback port mapped to container port 7474 |
+| `RUST_LOG` | `info` | Server tracing filter |
+| `QMN_DOCKER_NETWORK` | `qilbee-mycelial-network_qmn-network` | Optional external network used only with the QMN override |
+
+These are actual Compose controls. The server does not currently read the older
+illustrative `QILBEE_DATA_PATH`, `QILBEE_BOLT_PORT` or mounted `config.toml` examples.
+Inside this image, the command explicitly selects `/data`.
+
+## Validate the API
+
+1. Read `/health` and import `/openapi.json` into your API client.
+2. Use the operator key to issue a restricted integration credential with
+   `memory_read` and `memory_write`, plus exact project/mission/agent grants.
+3. Create a memory with a unique idempotency key; retry it and compare receipts.
+4. Read, conditionally update, query and delete through the
+   [versioned memory contract](../api/versioned-memory.md).
+5. Verify that another tenant and a read-only credential cannot mutate it.
+6. Restart the container and verify a retained test record and its original
+   receipt. Remove the test record through an authorized delete command.
+
+The [HTTP reference](../api/http-api.md) and [platform administration
+reference](../api/platform-http.md) contain authentication, payloads, response
+shapes, error codes and migration details. Existing legacy SDKs require an adapter
+before they can use the versioned platform routes.
+
+## Persistence, update and rollback
+
+```bash
+# Restart the same instance; the named volume is retained.
+docker compose restart
+
+# Inspect the image revision actually serving requests.
+docker inspect qilbeedb-local \
+  --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}'
+
+# Stop the service while retaining its data.
+docker compose down
+```
+
+Do not use `down --volumes` or delete the named volume when preserving memory and
+credential state. This release does not include a validated backup/restore tool.
+Take an appropriate offline volume backup before testing storage-format changes.
+
+To update, build a new explicit image tag and recreate only the QilbeeDB service
+with that tag. Keep the prior image for rollback. A prior binary must understand
+the stored schema versions before it can safely serve the volume; unsupported
+versions fail closed. Do not prune unrelated images, containers or volumes.
+
+## Scope of the local deployment
+
+The local stack validates durable identity and scoped memory. Procedural HTTP,
+learned-tool lifecycle services and isolated remote executors remain subsequent
+features under the [accepted architecture](../architecture/learned-tools.md).
+This development deployment does not establish distributed availability,
+hardware power-loss behavior or comparative performance leadership.
+
+## Recorded local acceptance
+
+The 0.2.0 platform increment was validated on Docker Desktop Linux ARM64 with
+the following results:
+
+- Standalone startup and scoped API operation without the QMN network attached.
+- Authentication, restricted capabilities, tenant/private-subject isolation,
+  create/read/update/query/delete, stale revisions and idempotency conflicts.
+- Five acknowledged records and their original receipts survived `SIGKILL` and
+  container restart on the persistent volume. Retrying a deleted create did
+  not resurrect its record.
+- Live response bodies validated against the served OpenAPI 3.1 schemas.
+- The optional QMN network attachment served the health endpoint to a separate
+  client container. Existing QMN containers were not reconfigured.
+- The full Rust workspace passed 355 tests; two subprocess fixtures are marked
+  ignored for direct discovery and invoked by their parent recovery tests.
+
+The local smoke suite does not establish power-loss durability, distributed
+availability, execution isolation for future learned tools, or compatibility
+with unmodified QMN applications. The PR records the tested revision.

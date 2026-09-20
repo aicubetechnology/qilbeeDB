@@ -1,0 +1,10 @@
+# Optional integration network. The standalone compose.yaml does not require QMN.
+services:
+  qilbeedb:
+    networks:
+      - default
+      - qmn-integration
+networks:
+  qmn-integration:
+    external: true
+    name: ${QMN_DOCKER_NETWORK:-qilbee-mycelial-network_qmn-network}

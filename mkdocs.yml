@@ -153,6 +153,7 @@ nav:
       - Atomic Graph Commits: architecture/atomic-commits.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
+      - Learned Tool Services: architecture/learned-tools.md
       - Bi-Temporal Model: architecture/bi-temporal.md
     - Contributing:
       - Development Setup: contributing/setup.md

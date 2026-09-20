@@ -1,5 +1,10 @@
 # Memory API
 
+For the current authenticated HTTP contract, use the
+[Versioned Memory API](versioned-memory.md) and [OpenAPI](openapi.json).
+The SDK examples below describe the legacy client surface; they have not been
+migrated to the platform routes and do not establish tenant isolation.
+
 API for agent memory operations.
 
 ## Agent Memory

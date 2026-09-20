@@ -145,3 +145,14 @@ The [durable HTTP foundation](../api/durable-http-memory.md) and
 validated increments. The [platform HTTP API](../api/platform-http.md) adopts durable credentials and
 disables legacy routes by default. These checkpoints do not mark the full P0
 contracts as complete.
+
+## Deployment and learned-tool placement
+
+Validated releases must be deployed to the local Docker engine for Qilbee/QMN
+integration testing, using a persistent volume and documented API contracts.
+The QMN network is optional; standalone startup cannot require QMN.
+
+QilbeeDB owns learned-tool development, repair, versioning, evaluation,
+publication and gateway services. Executors remain isolated on servers, and
+user devices use a lightweight client. The [service boundary and acceptance
+contract](../architecture/learned-tools.md) defines the pending work.

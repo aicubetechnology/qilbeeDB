@@ -3,7 +3,7 @@
 Rust **0.2.0** makes the authenticated platform router the default. There is no
 built-in administrator password, shared JWT signing secret, anonymous graph
 route, or HTTP tenant-bootstrap endpoint in this router. Every operation except
-`GET /health` requires a durable platform bearer credential.
+`GET /health` and `GET /openapi.json` requires a durable platform bearer credential.
 
 This is an intentional compatibility change from the 0.1 legacy HTTP surface.
 The platform exposes identity, credential administration and
@@ -44,6 +44,7 @@ credentials, as well as errors, send `Cache-Control: no-store`.
 | Method and path | Permission and response |
 | --- | --- |
 | `GET /health` | Public status and server version |
+| `GET /openapi.json` | Public OpenAPI 3.1 contract for implemented endpoints |
 | `GET /api/v1/identity` | Current credential metadata, without secret/verifier |
 | `POST /api/v1/credentials` | `credential_admin`; create inside the caller's tenant |
 | `GET /api/v1/credentials/{id}` | `credential_admin`; inspect a credential in the same tenant |

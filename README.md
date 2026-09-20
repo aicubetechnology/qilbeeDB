@@ -34,8 +34,9 @@ It is under active development; production guarantees and benchmark leadership
 have not been established.
 
 **Implementation status:** the Rust library includes a RocksDB episode backend
-and an evidence-driven procedure ledger. HTTP episode routes now use durable
-storage; versioned idempotent APIs and tenant authorization remain in progress.
+and an evidence-driven procedure ledger. The default HTTP platform now provides
+durable tenant credentials, exact resource grants, versioned memory commands,
+idempotent receipts and conditional revisions. Procedural HTTP remains pending.
 Cypher support is partial and Bolt is a placeholder. Graph
 transactions publish entity and index mutations atomically; snapshot isolation
 and conflict detection remain unimplemented.
@@ -63,12 +64,13 @@ before planning production use.
 
 ### 🔌 **Multiple Protocols**
 - **Bolt Protocol**: Placeholder; Neo4j compatibility is not yet available
-- **HTTP REST API**: RESTful JSON interface
+- **HTTP REST API**: Versioned identity and scoped memory with an [OpenAPI contract](docs/api/openapi.json)
+- **Local Docker**: Persistent standalone deployment with [optional QMN network access](docs/operations/docker.md)
 - **gRPC Support**: High-performance RPC (planned)
 
 ### 🏢 **Production Roadmap**
 - Snapshot isolation, conflict handling and fault-injection recovery validation
-- Versioned idempotent HTTP memory, resource ownership and procedural HTTP contracts
+- Procedural HTTP contracts, provenance propagation and shared change feeds
 - Verified recovery, observability and reproducible benchmarks
 
 ### Run the learning cycle

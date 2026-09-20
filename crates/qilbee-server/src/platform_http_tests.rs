@@ -635,3 +635,29 @@ async fn platform_http_memory_rejects_unrecognized_content_instead_of_dropping_i
         StatusCode::BAD_REQUEST
     );
 }
+
+#[tokio::test]
+async fn platform_http_openapi_describes_the_available_contracts() {
+    let dir = TempDir::new().unwrap();
+    let (router, _) = app(dir.path());
+    let (status, spec) = request(&router, "GET", "/openapi.json", "", Value::Null).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(spec["openapi"], "3.1.0");
+    assert_eq!(spec["info"]["version"], env!("CARGO_PKG_VERSION"));
+    for path in [
+        "/api/v1/identity",
+        "/api/v1/credentials",
+        "/api/v1/credentials/{id}/rotate",
+        "/api/v1/memory/commands",
+        "/api/v1/memory/records/{id}",
+        "/api/v1/memory/query",
+    ] {
+        assert!(spec["paths"].get(path).is_some(), "Missing route: {path}");
+    }
+    assert_eq!(
+        spec["components"]["securitySchemes"]["platformCredential"]["scheme"],
+        "bearer"
+    );
+    assert!(spec["paths"].get("/graphs").is_none());
+    assert!(spec["paths"].get("/api/v1/tools/invoke").is_none());
+}

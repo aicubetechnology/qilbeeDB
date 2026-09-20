@@ -1,0 +1,2129 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "QilbeeDB Platform API",
+    "version": "0.2.0",
+    "description": "Standalone durable identity and scoped memory. QMN is an optional client, not a runtime dependency. Procedural evaluation and learned-tool execution endpoints are not implemented by this contract."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:7474",
+      "description": "Local Docker or development server"
+    }
+  ],
+  "security": [
+    {
+      "platformCredential": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Platform"
+    },
+    {
+      "name": "Identity"
+    },
+    {
+      "name": "Memory"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Read process health",
+        "description": "",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "openapi",
+        "summary": "Download this API contract",
+        "tags": [
+          "Platform"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1 document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/identity": {
+      "get": {
+        "operationId": "whoAmI",
+        "summary": "Inspect the current durable credential",
+        "description": "",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/credentials": {
+      "post": {
+        "operationId": "issueCredential",
+        "summary": "Issue a credential in the authenticated tenant",
+        "description": "Requires credential_admin. Secret delivery is one-time and not idempotent.",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedCredential"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/credentials/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "inspectCredential",
+        "summary": "Inspect sanitized credential history",
+        "description": "Requires credential_admin in the same tenant.",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/credentials/{id}/rotate": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "rotateCredential",
+        "summary": "Rotate a credential at an expected revision",
+        "description": "Requires credential_admin in the same tenant. Rotation never revives a revoked credential.",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedCredential"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/credentials/{id}/revoke": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "revokeCredential",
+        "summary": "Revoke a credential at an expected revision",
+        "description": "Requires credential_admin in the same tenant. Rotation never revives a revoked credential.",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/commands": {
+      "post": {
+        "operationId": "applyMemoryCommand",
+        "summary": "Atomically create, update or delete a scoped record",
+        "description": "Requires memory_write and an exact grant. Same key and normalized command return the original receipt, including after deletion. Changed commands conflict. No implicit retention quota.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryCommand"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/records/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        {
+          "name": "contract_version",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "const": 1
+          }
+        },
+        {
+          "name": "project_id",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        {
+          "name": "mission_id",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        {
+          "name": "visibility",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Visibility"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "readMemoryRecord",
+        "summary": "Read a current unexpired record in the authorized scope",
+        "description": "Requires memory_read and an exact grant. Omit mission_id for missionless memory. Tenant and private subject come from the credential.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/query": {
+      "post": {
+        "operationId": "queryMemory",
+        "summary": "Query current scoped records with explicit continuation",
+        "description": "Requires memory_read. Case-insensitive substring over primary/secondary/context; exact type/tag filters. UUID ordering, 1,000 results and 10,000 scanned entries per request. Live pagination is not a snapshot or changes feed. No synthetic similarity scores.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequest"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "platformCredential": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "qdb1 opaque credential",
+        "description": "Provision through the trusted local bootstrap command and authenticated credential API."
+      }
+    },
+    "schemas": {
+      "Capability": {
+        "type": "string",
+        "enum": [
+          "memory_read",
+          "memory_write",
+          "procedure_propose",
+          "procedure_evaluate",
+          "policy_admin",
+          "credential_admin"
+        ]
+      },
+      "Visibility": {
+        "type": "string",
+        "enum": [
+          "private",
+          "shared"
+        ]
+      },
+      "Scope": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/Visibility"
+          }
+        },
+        "required": [
+          "project_id",
+          "agent_id",
+          "visibility"
+        ],
+        "additionalProperties": false
+      },
+      "CredentialSpec": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Capability"
+            },
+            "minItems": 1
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          },
+          "expires_at_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "subject_id",
+          "capabilities",
+          "grants"
+        ],
+        "additionalProperties": false
+      },
+      "CredentialEvent": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "bootstrapped",
+              "issued",
+              "rotated",
+              "revoked"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "revision",
+          "action",
+          "actor_id",
+          "at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "Credential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "spec": {
+            "$ref": "#/components/schemas/CredentialSpec"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "revoked_at_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CredentialEvent"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "spec",
+          "revision",
+          "revoked_at_millis",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "CredentialResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "credential": {
+            "$ref": "#/components/schemas/Credential"
+          }
+        },
+        "required": [
+          "contract_version",
+          "credential"
+        ],
+        "additionalProperties": false
+      },
+      "IssuedCredential": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "credential": {
+            "$ref": "#/components/schemas/Credential"
+          },
+          "secret": {
+            "type": "string",
+            "pattern": "^qdb1_[0-9a-f]{32}_[A-Za-z0-9_-]{43}$",
+            "description": "Returned once. Store securely; never log."
+          }
+        },
+        "required": [
+          "contract_version",
+          "credential",
+          "secret"
+        ],
+        "additionalProperties": false
+      },
+      "IssueRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "spec": {
+            "$ref": "#/components/schemas/CredentialSpec"
+          }
+        },
+        "required": [
+          "contract_version",
+          "spec"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "contract_version": 1,
+            "spec": {
+              "subject_id": "research-agent-user",
+              "capabilities": [
+                "memory_read",
+                "memory_write",
+                "procedure_propose"
+              ],
+              "grants": [
+                {
+                  "project_id": "research",
+                  "mission_id": "mission-42",
+                  "agent_id": "researcher",
+                  "visibility": "shared"
+                }
+              ],
+              "expires_at_millis": null
+            }
+          }
+        ]
+      },
+      "RevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "EpisodeType": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "Conversation",
+              "TaskExecution",
+              "Observation",
+              "Decision",
+              "Error"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "Custom": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "Custom"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "EpisodeContent": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "data": {},
+          "embedding": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": -3.4028234663852886e+38,
+                  "maximum": 3.4028234663852886e+38
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "primary"
+        ],
+        "additionalProperties": false
+      },
+      "RecordInput": {
+        "type": "object",
+        "properties": {
+          "episode_type": {
+            "$ref": "#/components/schemas/EpisodeType"
+          },
+          "content": {
+            "$ref": "#/components/schemas/EpisodeContent"
+          },
+          "event_time_millis": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix milliseconds in the supported calendar range."
+          },
+          "valid_until_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "episode_type",
+          "content",
+          "event_time_millis"
+        ],
+        "additionalProperties": false
+      },
+      "CreateOperation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "create"
+          },
+          "record": {
+            "$ref": "#/components/schemas/RecordInput"
+          }
+        },
+        "required": [
+          "type",
+          "record"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateOperation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "update"
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "record": {
+            "$ref": "#/components/schemas/RecordInput"
+          }
+        },
+        "required": [
+          "type",
+          "record_id",
+          "expected_revision",
+          "record"
+        ],
+        "additionalProperties": false
+      },
+      "DeleteOperation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "const": "delete"
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "type",
+          "record_id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryOperation": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreateOperation"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateOperation"
+          },
+          {
+            "$ref": "#/components/schemas/DeleteOperation"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "create": "#/components/schemas/CreateOperation",
+            "update": "#/components/schemas/UpdateOperation",
+            "delete": "#/components/schemas/DeleteOperation"
+          }
+        }
+      },
+      "MemoryCommand": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/MemoryOperation"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "scope",
+          "operation"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "contract_version": 1,
+            "idempotency_key": "session-42-observation-1",
+            "scope": {
+              "project_id": "research",
+              "mission_id": "mission-42",
+              "agent_id": "researcher",
+              "visibility": "shared"
+            },
+            "operation": {
+              "type": "create",
+              "record": {
+                "episode_type": "Observation",
+                "event_time_millis": 1700000000000,
+                "content": {
+                  "primary": "The tool returned three matching documents.",
+                  "data": {
+                    "document_ids": [
+                      "paper-a",
+                      "paper-b",
+                      "paper-c"
+                    ]
+                  }
+                },
+                "tags": [
+                  "literature"
+                ],
+                "metadata": {
+                  "source_request_id": "tool-call-17"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Author": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        "required": [
+          "credential_id",
+          "subject_id"
+        ],
+        "additionalProperties": false
+      },
+      "Receipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string"
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "deleted"
+            ]
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "record_id",
+          "revision",
+          "action",
+          "committed_at_millis",
+          "author"
+        ],
+        "additionalProperties": false
+      },
+      "ReceiptResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/Receipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRecord": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modified_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/RecordInput"
+          }
+        },
+        "required": [
+          "schema_version",
+          "record_id",
+          "revision",
+          "created_at_millis",
+          "modified_at_millis",
+          "author",
+          "payload"
+        ],
+        "additionalProperties": false
+      },
+      "RecordResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "record"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryFilter": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "QueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "filter": {
+            "$ref": "#/components/schemas/MemoryFilter"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "filter"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "contract_version": 1,
+            "scope": {
+              "project_id": "research",
+              "mission_id": "mission-42",
+              "agent_id": "researcher",
+              "visibility": "shared"
+            },
+            "filter": {
+              "limit": 20,
+              "text_contains": "documents"
+            }
+          }
+        ]
+      },
+      "QueryPage": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRecord"
+            }
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "records",
+          "next_after",
+          "scanned_records"
+        ],
+        "additionalProperties": false
+      },
+      "QueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/QueryPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "unauthorized",
+                  "forbidden",
+                  "not_found",
+                  "method_not_allowed",
+                  "invalid_request",
+                  "unsupported_contract_version",
+                  "revision_conflict",
+                  "record_not_found",
+                  "idempotency_conflict",
+                  "storage_inconsistency",
+                  "internal_error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "contract_version",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "status": {
+            "type": "string",
+            "const": "healthy"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract_version",
+          "status",
+          "version"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}
