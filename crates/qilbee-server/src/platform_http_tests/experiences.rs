@@ -383,3 +383,106 @@ async fn experience_http_isolates_tenants_private_subjects_and_all_resource_fiel
         );
     }
 }
+
+#[tokio::test]
+async fn experience_history_http_checks_authority_on_each_continuation() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    configure(&router, &admin.secret).await;
+    let client = issue(
+        &identity,
+        &admin.secret,
+        "observer",
+        &["experience_write", "experience_read", "experience_report"],
+    );
+    let receipt = request(
+        &router,
+        "POST",
+        "/api/v1/experiences",
+        &client.secret,
+        create_body(),
+    )
+    .await
+    .1;
+    let report = report_body(receipt["receipt"]["context_digest"].as_str().unwrap());
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/events",
+            &client.secret,
+            report
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    let mut body = read_body();
+    body["query"] = json!({"limit":1,"cursor":null});
+    let page = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/history",
+        &client.secret,
+        body.clone(),
+    )
+    .await;
+    assert_eq!(page.0, StatusCode::OK);
+    assert_eq!(page.1["page"]["events"].as_array().unwrap().len(), 1);
+    body["query"]["cursor"] = page.1["page"]["next_cursor"].clone();
+    let denied = issue(&identity, &admin.secret, "observer", &["memory_read"]);
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/history",
+            &denied.secret,
+            body.clone()
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let mut private = body.clone();
+    private["scope"]["visibility"] = "private".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/history",
+            &client.secret,
+            private
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/history",
+            &client.secret,
+            body.clone()
+        )
+        .await
+        .1["page"]["complete"],
+        true
+    );
+    identity
+        .revoke(&admin.secret, client.credential.id, 1)
+        .unwrap();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/history",
+            &client.secret,
+            body
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+}

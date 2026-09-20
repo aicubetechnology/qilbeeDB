@@ -21,3 +21,5 @@ pub use store::experience::*;
 
 #[cfg(test)]
 mod experience_tests;
+
+pub use store::experience_history::*;

@@ -949,7 +949,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -959,7 +959,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -969,7 +969,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -5684,6 +5684,186 @@
           }
         }
       }
+    },
+    "/api/v1/experiences/history": {
+      "post": {
+        "operationId": "readExperienceHistory",
+        "summary": "Read bounded experience history",
+        "description": "Requires experience_read. Preserve the cursor unchanged. Scans at most limit events in ID UTF-8 byte-length/byte order; filters out revisions after the first-page fence. Empty pages can have continuation. complete means the fenced history has been traversed; a full final page may require one empty continuation. This is a logical revision snapshot, not a retained RocksDB snapshot.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceHistoryRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "attempt_id": "attempt-v1",
+                "query": {
+                  "limit": 32,
+                  "cursor": null
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5727,14 +5907,14 @@
           "project_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "mission_id": {
             "anyOf": [
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -5744,7 +5924,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "visibility": {
             "$ref": "#/components/schemas/Visibility"
@@ -5763,7 +5943,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -5841,7 +6021,7 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "spec": {
             "$ref": "#/components/schemas/CredentialSpec"
@@ -6191,7 +6371,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -6253,7 +6433,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -8616,19 +8796,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "dimensions": {
             "type": "integer",
@@ -8659,7 +8839,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -8707,7 +8887,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -8992,7 +9172,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -9057,7 +9237,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -9868,7 +10048,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
+            "description": "1–256 UTF-8 bytes, nonblank and without control characters."
           },
           "accounting_unit": {
             "type": "string",
@@ -10312,6 +10492,157 @@
         "required": [
           "contract_version",
           "event"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceHistoryCursor": {
+        "type": "object",
+        "properties": {
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "through_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after_event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "receipt_digest",
+          "through_event_id",
+          "after_event_id"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceHistoryQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceHistoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceHistoryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1,
+            "type": "integer"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "query": {
+            "$ref": "#/components/schemas/ExperienceHistoryQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "attempt_id",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceHistoryPage": {
+        "type": "object",
+        "properties": {
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "through_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperienceEvent"
+            },
+            "maxItems": 64
+          },
+          "scanned_events": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceHistoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "receipt_digest",
+          "through_revision",
+          "events",
+          "scanned_events",
+          "next_cursor",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1,
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/ExperienceHistoryPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "page"
         ],
         "additionalProperties": false
       }
