@@ -2,6 +2,8 @@
 """Compare frozen scoped retrieval fixtures over HTTP without generating embeddings."""
 
 import argparse
+from contextlib import contextmanager
+import fcntl
 import hashlib
 import json
 import math
@@ -9,6 +11,7 @@ import os
 from pathlib import Path
 import random
 import statistics
+import stat
 import struct
 import subprocess
 import tempfile
@@ -16,6 +19,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 
 MODES = ("lexical", "semantic", "hybrid")
 VERSIONS = {
@@ -50,9 +54,66 @@ def save(path, value):
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+@contextmanager
+def state_lock(path):
+    """Hold a cooperating-writer lock through the entire evaluation (POSIX)."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise ValueError("Evaluation state must not be a symlink")
+    lock_path = path.with_name("." + path.name + ".lock")
+    fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            raise ValueError("Evaluation lock must be a regular file")
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise ValueError("Evaluation state is already in use") from None
+        yield
+    finally:
+        # Keep the lock inode: unlinking lets another writer lock a different inode.
+        os.close(fd)
+
+
+def validate_state(state, fixture):
+    documents = state.get("documents")
+    aliases = {d["id"] for d in fixture["documents"]}
+    if not isinstance(documents, dict) or not set(documents) <= aliases:
+        raise ValueError("Saved corpus document set changed")
+    ids = set()
+    for entry in documents.values():
+        try:
+            record_id = str(uuid.UUID(entry["record_id"]))
+            revision = entry["revision"]
+            embedding = entry["embedding"]
+            valid = (
+                record_id == entry["record_id"]
+                and record_id not in ids
+                and type(revision) is int
+                and revision > 0
+                and embedding["record_id"] == record_id
+                and embedding["record_revision"] == revision
+                and embedding["space"] == fixture["space"]
+                and embedding["contract_version"] == 1
+                and isinstance(embedding["vector_digest"], str)
+                and len(embedding["vector_digest"]) == 64
+            )
+        except (KeyError, TypeError, ValueError, AttributeError):
+            valid = False
+        if not valid:
+            raise ValueError("Invalid saved source or embedding identity")
+        ids.add(record_id)
 
 
 def validate_fixture(fixture):
@@ -286,6 +347,13 @@ def prepare(client, fixture, scope, state_path):
     else:
         state = dict(expected, documents={})
         save(state_path, state)
+    validate_state(state, fixture)
+    # Check existing partial work before issuing any further create/attach commands.
+    existing = dict(
+        fixture,
+        documents=[d for d in fixture["documents"] if d["id"] in state["documents"]],
+    )
+    verify_sources(client, existing, state, tag)
     for doc in fixture["documents"]:
         alias = doc["id"]
         if alias not in state["documents"]:
@@ -421,6 +489,15 @@ def summarize(rows):
 
 
 def evaluate(client, fixture, scope, state_path, repetitions, seed, container=None):
+    with state_lock(state_path):
+        return evaluate_locked(
+            client, fixture, scope, state_path, repetitions, seed, container
+        )
+
+
+def evaluate_locked(
+    client, fixture, scope, state_path, repetitions, seed, container=None
+):
     validate_fixture(fixture)
     state, tag = prepare(client, fixture, scope, state_path)
     verify_sources(client, fixture, state, tag)
