@@ -2,13 +2,17 @@
 
 Rust **0.2.0** makes the authenticated platform router the default. There is no
 built-in administrator password, shared JWT signing secret, anonymous graph
-route, or HTTP tenant-bootstrap endpoint in this router. Every operation except
-`GET /health` and `GET /openapi.json` requires a durable platform bearer credential.
+route, or HTTP tenant-bootstrap endpoint in this router. The API reference (`/`, `/docs`, `/docs/reference.js`), `/health` and
+`/openapi.json` are public. All other operations require a durable platform bearer
+credential.
 
 This is an intentional compatibility change from the 0.1 legacy HTTP surface.
-The platform exposes identity, credential administration and
-[versioned scoped memory](versioned-memory.md). Procedural HTTP operations remain
-pending; legacy memory routes are not silently mapped into tenant namespaces.
+Version 0.4.0 exposes identity, credential administration,
+[versioned scoped memory](versioned-memory.md),
+[semantic vector retrieval](semantic-memory.md),
+[procedural learning](procedural-learning.md) and
+[learned-tool development](learned-tools.md). Legacy memory routes are not
+silently mapped into tenant namespaces.
 
 ## Provision a tenant locally
 

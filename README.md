@@ -1,6 +1,6 @@
 
 
-> Rust 0.3.0 adds authenticated procedural learning and a browser API reference.
+> Rust 0.4.0 adds model-bound semantic retrieval and durable learned-tool development.
 > Provision a tenant locally before use. Legacy routes require explicit opt-in
 > and retain their known limitations. See the [migration and API contract](docs/api/platform-http.md).
 <div align="center">
@@ -38,6 +38,11 @@ and an evidence-driven procedure ledger. The default HTTP platform now provides
 durable tenant credentials, exact resource grants, versioned memory commands,
 idempotent receipts, conditional revisions and procedural learning with immutable
 contracts, explicit evaluation outcomes and exact-baseline selection.
+[Semantic retrieval](docs/api/semantic-memory.md) ranks externally generated
+embeddings by cosine similarity with exact model/revision binding and explicit
+scan coverage. The [learned-tool API](docs/api/learned-tools.md) stores immutable
+source revisions, executor profiles and development/repair receipts. External
+workers generate and test tools; tool release and invocation gates remain pending.
 Cypher support is partial and Bolt is a placeholder. Graph
 transactions publish entity and index mutations atomically; snapshot isolation
 and conflict detection remain unimplemented.

@@ -759,3 +759,8 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod semantic_tests;
+mod semantic;
+pub use semantic::*;

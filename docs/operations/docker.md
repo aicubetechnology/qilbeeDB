@@ -151,8 +151,9 @@ versions fail closed. Do not prune unrelated images, containers or volumes.
 
 ## Scope of the local deployment
 
-The local stack supports durable identity, scoped memory and procedural
-learning. Learned-tool lifecycle services and isolated remote executors remain
+The local stack supports durable identity, scoped memory, model-bound semantic
+retrieval, procedural learning and learned-tool development receipts. Generation
+workers, isolated invocation transport and tool publication gates remain
 subsequent features under the [accepted architecture](../architecture/learned-tools.md).
 This development deployment does not establish distributed availability,
 hardware power-loss behavior or comparative performance leadership.
