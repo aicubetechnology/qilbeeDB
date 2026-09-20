@@ -34,6 +34,27 @@ leave exhaustive recall unavailable, and describe nDCG as qrel-based. An abstrac
 can be relevant because it supports or contradicts a claim; the retrieval metric
 does not judge whether an agent interpreted that evidence correctly.
 
+## Keep model configurations separate
+
+The E5 example below is an optional, separate 384-dimensional experiment. It does
+not replace a deployment using OpenAI `text-embedding-3-small` with 1536 dimensions,
+or a separately declared 3072-dimensional model space. Reuse frozen embeddings
+from the selected provider when available; do not regenerate them just to rerun
+retrieval. A captured vector-set digest identifies the frozen representation, not
+an immutable provider model revision.
+
+Give each campaign a dedicated authorized mission and private subject. Tag filters
+restrict the ranking corpus, but source scan budgets also count nonmatching and
+deleted records in that namespace. Do not share an evaluation namespace between
+large campaigns. Preserve a separate state manifest and unique run identity when
+recreating a cleaned campaign; do not reuse terminal cleanup receipts.
+
+A 50-query development subset selected by identifier and the full 807-query E5
+development set are different protocols. Record their selection before inspecting
+rankings and keep their results separate. Both may preserve all 300 official test
+queries; never pool their means or infer a dimensionality effect across different
+models and development sets.
+
 ## Freeze the external representation
 
 Download the archive from:
@@ -124,3 +145,16 @@ cost is not imputed as zero: local hardware and energy costs remain unmeasured.
 Use an otherwise idle trial server; one serial warm client is not a concurrent
 load test or a service-level guarantee. Better retrieval still requires a separate
 fixed-model agent-task study before claiming better autonomous behavior.
+
+## Complete scans with larger external vectors
+
+For the full SciFact corpus with 1536-dimensional frozen vectors, the 0.5.0
+64 MiB ceiling can stop the hybrid source scan before all 5183 documents are
+examined. Configure an adequate operator scan ceiling and pin the same explicit
+request budget in the trial plan. See [retrieval capacity](../operations/retrieval-capacity.md).
+For example, add `--scan-bytes-limit 134217728` when writing a plan or collecting
+development candidates, after the server has been configured to allow it.
+The budget is recorded in the plan and report; it cannot be overridden during
+execution of a pinned plan. Check full source and embedding coverage before any
+relevance comparison. Do not reduce vector dimensions or merge independent BM25
+pages to bypass an incomplete scan.

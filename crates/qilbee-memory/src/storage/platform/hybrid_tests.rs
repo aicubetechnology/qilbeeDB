@@ -183,3 +183,59 @@ fn hybrid_server_profile_caps_candidates_and_exposes_missing_bindings() {
     assert_eq!(page.ranking.semantic_weight, 0.5);
     assert_eq!(page.embedding_coverage, EmbeddingCoverage::Missing);
 }
+
+#[test]
+fn hybrid_v2_is_explicit_explained_and_leaves_v1_unchanged() {
+    assert_eq!(
+        serde_json::to_value(HybridRankingVersion::WeightedRrfV1.profile()).unwrap(),
+        serde_json::json!({"version":"weighted_rrf_v1","method":"weighted_rrf","lexical_version":"bm25_v1","semantic_version":"cosine_exact_v1","candidate_limit":100,"lexical_weight":0.5,"semantic_weight":0.5,"rank_constant":60,"experimental":true})
+    );
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    for (i, text) in ["ZX17 recovery", "ZX17", "retry budget"]
+        .into_iter()
+        .enumerate()
+    {
+        let receipt = create(&db, "scope", text);
+        db.apply_memory_embedding(
+            "scope",
+            &actor(),
+            &attach(
+                receipt.record_id,
+                &format!("v2-binding-{i}"),
+                vec![i as f32, 1.0, 0.0],
+            ),
+        )
+        .unwrap();
+    }
+    let original =
+        serde_json::to_value(db.search_memory_hybrid("scope", &query()).unwrap()).unwrap();
+    let mut request = query();
+    request.ranking_version = HybridRankingVersion::WeightedRrfV2;
+    let result = db.search_memory_hybrid("scope", &request).unwrap();
+    assert_eq!(result.ranking.version, HybridRankingVersion::WeightedRrfV2);
+    assert!(result.ranking.experimental);
+    assert_ne!(
+        serde_json::to_value(&result.ranking).unwrap(),
+        serde_json::to_value(HybridRankingVersion::WeightedRrfV1.profile()).unwrap()
+    );
+    assert_eq!(result.rank_constant, result.ranking.rank_constant);
+    for hit in result.hits {
+        let mut sum = 0.0;
+        for (contribution, weight) in [
+            (&hit.lexical, result.ranking.lexical_weight),
+            (&hit.semantic, result.ranking.semantic_weight),
+        ] {
+            if let Some(value) = contribution {
+                let expected = weight / (result.ranking.rank_constant + value.rank) as f64;
+                assert!((value.contribution - expected).abs() < 1e-12);
+                sum += expected;
+            }
+        }
+        assert!((hit.score - sum).abs() < 1e-12);
+    }
+    assert_eq!(
+        serde_json::to_value(db.search_memory_hybrid("scope", &query()).unwrap()).unwrap(),
+        original
+    );
+}

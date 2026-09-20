@@ -320,21 +320,23 @@ async fn ranking_catalog_requires_live_read_authority_and_matches_execution() {
         catalog["component_versions"],
         json!({"lexical":"bm25_v1","semantic":"cosine_exact_v1"})
     );
-    assert_eq!(catalog["hybrid_profiles"].as_array().unwrap().len(), 1);
-    let (_, result) = request(
-        &router,
-        "POST",
-        "/api/v1/memory/search/hybrid",
-        &reader,
-        hybrid(),
-    )
-    .await;
-    assert_eq!(catalog["hybrid_profiles"][0], result["page"]["ranking"]);
-    assert_eq!(
-        result["ranking_version"],
-        catalog["hybrid_profiles"][0]["version"]
-    );
-    assert_eq!(catalog["hybrid_profiles"][0]["experimental"], true);
+    assert_eq!(catalog["hybrid_profiles"].as_array().unwrap().len(), 2);
+    for profile in catalog["hybrid_profiles"].as_array().unwrap() {
+        let mut query = hybrid();
+        query["query"]["ranking_version"] = profile["version"].clone();
+        let (status, result) = request(
+            &router,
+            "POST",
+            "/api/v1/memory/search/hybrid",
+            &reader,
+            query,
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(*profile, result["page"]["ranking"]);
+        assert_eq!(result["ranking_version"], profile["version"]);
+        assert_eq!(profile["experimental"], true);
+    }
     let principal = identity.authenticate(&reader).unwrap();
     identity
         .revoke(&admin.secret, principal.id, principal.revision)

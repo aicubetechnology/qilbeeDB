@@ -60,12 +60,15 @@ It does not search metadata or perform substring matching.
 
 Each channel sorts its matches by descending raw score, then ascending UUID, and
 keeps up to 100 candidates. The server-owned `weighted_rrf_v1` profile fixes
-both weights at 0.5 and the rank constant at 60. Weighted reciprocal rank fusion
-then assigns:
+both weights at 0.5 and the rank constant at 60. The separately versioned
+`weighted_rrf_v2` uses lexical weight 0.25, semantic weight 0.75 and rank constant 2.
+Both remain experimental and use the same 100-candidate cap. A request must name
+its version explicitly; publishing v2 does not change v1 or select a new default.
+Weighted reciprocal rank fusion assigns:
 
 ```text
-lexical contribution = (1 - semantic_weight) / (60 + lexical_rank)
-semantic contribution = semantic_weight / (60 + semantic_rank)
+lexical contribution = lexical_weight / (rank_constant + lexical_rank)
+semantic contribution = semantic_weight / (rank_constant + semantic_rank)
 fused score = lexical contribution + semantic contribution
 ```
 
@@ -105,6 +108,11 @@ registered embedding spaces or tenant configuration.
     "lexical_version": "bm25_v1", "semantic_version": "cosine_exact_v1",
     "candidate_limit": 100, "lexical_weight": 0.5, "semantic_weight": 0.5,
     "rank_constant": 60, "experimental": true
+  }, {
+    "version": "weighted_rrf_v2", "method": "weighted_rrf",
+    "lexical_version": "bm25_v1", "semantic_version": "cosine_exact_v1",
+    "candidate_limit": 100, "lexical_weight": 0.25, "semantic_weight": 0.75,
+    "rank_constant": 2, "experimental": true
   }]
 }
 ```

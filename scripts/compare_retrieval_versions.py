@@ -19,6 +19,11 @@ def compare(before, after):
         if before[key] != after[key]:
             raise ValueError("Reports do not share the same frozen corpus and scope")
     for report in [before, after]:
+        keys = [
+            (r["query_id"], r["mode"]) for r in report["rows"] if r["split"] == "test"
+        ]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Duplicate query/method rows cannot be paired")
         if not report["valid_comparison"] or report["conditions"][
             "selected_split"
         ] not in ("all", "test"):

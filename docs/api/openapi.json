@@ -4229,7 +4229,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4409,7 +4409,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4666,7 +4666,7 @@
       "post": {
         "operationId": "searchMemoryHybrid",
         "summary": "Rank memory with experimental versioned hybrid fusion",
-        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
+        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1 or weighted_rrf_v2; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4780,7 +4780,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -8355,9 +8355,10 @@
           "ranking_version": {
             "type": "string",
             "enum": [
-              "weighted_rrf_v1"
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
             ],
-            "description": "Immutable server-owned profile: weights 0.5/0.5, rank constant 60, at most 100 candidates per channel. Experimental; clients cannot override its parameters."
+            "description": "Explicit immutable server profile: weighted_rrf_v1 uses weights 0.5/0.5 and rank constant 60; weighted_rrf_v2 uses 0.25/0.75 and rank constant 2. Both are experimental with 100 candidates per channel. No caller-owned weights."
           }
         },
         "required": [
@@ -8395,57 +8396,14 @@
         "additionalProperties": false
       },
       "HybridRankingProfile": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string",
-            "const": "weighted_rrf_v1"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HybridRankingProfileV1"
           },
-          "method": {
-            "type": "string",
-            "const": "weighted_rrf"
-          },
-          "lexical_version": {
-            "type": "string",
-            "const": "bm25_v1"
-          },
-          "semantic_version": {
-            "type": "string",
-            "const": "cosine_exact_v1"
-          },
-          "candidate_limit": {
-            "type": "integer",
-            "const": 100
-          },
-          "lexical_weight": {
-            "type": "number",
-            "const": 0.5
-          },
-          "semantic_weight": {
-            "type": "number",
-            "const": 0.5
-          },
-          "rank_constant": {
-            "type": "integer",
-            "const": 60
-          },
-          "experimental": {
-            "type": "boolean",
-            "const": true
+          {
+            "$ref": "#/components/schemas/HybridRankingProfileV2"
           }
-        },
-        "required": [
-          "version",
-          "method",
-          "lexical_version",
-          "semantic_version",
-          "candidate_limit",
-          "lexical_weight",
-          "semantic_weight",
-          "rank_constant",
-          "experimental"
-        ],
-        "additionalProperties": false
+        ]
       },
       "LexicalHit": {
         "type": "object",
@@ -8645,7 +8603,10 @@
           },
           "rank_constant": {
             "type": "integer",
-            "const": 60
+            "enum": [
+              60,
+              2
+            ]
           }
         },
         "required": [
@@ -8665,7 +8626,49 @@
           "candidates_truncated",
           "rank_constant"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "weighted_rrf_v1"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "rank_constant": {
+                  "const": 60
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "weighted_rrf_v2"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "rank_constant": {
+                  "const": 2
+                }
+              }
+            }
+          }
+        ]
       },
       "LexicalRequest": {
         "type": "object",
@@ -8770,7 +8773,10 @@
           },
           "ranking_version": {
             "type": "string",
-            "const": "weighted_rrf_v1"
+            "enum": [
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
+            ]
           },
           "page": {
             "$ref": "#/components/schemas/HybridPage"
@@ -8787,7 +8793,57 @@
           "page",
           "timing"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ranking_version": {
+                  "const": "weighted_rrf_v1"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "page": {
+                  "properties": {
+                    "ranking": {
+                      "properties": {
+                        "version": {
+                          "const": "weighted_rrf_v1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking_version": {
+                  "const": "weighted_rrf_v2"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "page": {
+                  "properties": {
+                    "ranking": {
+                      "properties": {
+                        "version": {
+                          "const": "weighted_rrf_v2"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "RetrievalTiming": {
         "type": "object",
@@ -8888,6 +8944,112 @@
             "const": 2097152
           }
         }
+      },
+      "HybridRankingProfileV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "weighted_rrf_v1"
+          },
+          "method": {
+            "type": "string",
+            "const": "weighted_rrf"
+          },
+          "lexical_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "semantic_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "const": 100
+          },
+          "lexical_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "semantic_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 60
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "lexical_version",
+          "semantic_version",
+          "candidate_limit",
+          "lexical_weight",
+          "semantic_weight",
+          "rank_constant",
+          "experimental"
+        ],
+        "additionalProperties": false
+      },
+      "HybridRankingProfileV2": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "weighted_rrf_v2"
+          },
+          "method": {
+            "type": "string",
+            "const": "weighted_rrf"
+          },
+          "lexical_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "semantic_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "const": 100
+          },
+          "lexical_weight": {
+            "type": "number",
+            "const": 0.25
+          },
+          "semantic_weight": {
+            "type": "number",
+            "const": 0.75
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 2
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "lexical_version",
+          "semantic_version",
+          "candidate_limit",
+          "lexical_weight",
+          "semantic_weight",
+          "rank_constant",
+          "experimental"
+        ],
+        "additionalProperties": false
       }
     }
   }

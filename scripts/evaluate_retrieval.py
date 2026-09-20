@@ -42,6 +42,14 @@ PROFILES = {
     },
 }
 
+PROFILES["weighted_rrf_v2"] = dict(
+    PROFILES["weighted_rrf_v1"],
+    version="weighted_rrf_v2",
+    lexical_weight=0.25,
+    semantic_weight=0.75,
+    rank_constant=2,
+)
+
 
 def trial_plan(
     fixture,
