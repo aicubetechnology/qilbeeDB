@@ -8,6 +8,10 @@ pub use types::*;
 #[cfg(test)]
 mod tests;
 
-pub use store::registry::*;
-pub use store::bound::*;
 pub use store::admission::*;
+pub use store::bound::*;
+pub use store::registry::*;
+
+#[cfg(test)]
+mod tool_tests;
+pub use store::tools::*;
