@@ -3,7 +3,7 @@
   "info": {
     "title": "QilbeeDB Platform API",
     "version": "0.2.0",
-    "description": "Durable identity, scoped memory, versioned commands and authenticated access for AI agents."
+    "description": "Durable identity, scoped memory and evidence-driven procedural learning for AI agents, with versioned commands and authenticated access."
   },
   "servers": [
     {
@@ -25,6 +25,10 @@
     },
     {
       "name": "Memory"
+    },
+    {
+      "name": "Learning",
+      "description": "Administrative contracts, immutable candidates, evaluation admission and compatible selection."
     }
   ],
   "paths": {
@@ -1217,6 +1221,1502 @@
           }
         }
       }
+    },
+    "/api/v1/learning/policies": {
+      "post": {
+        "operationId": "registerLearningPolicy",
+        "summary": "Register an immutable administrative policy",
+        "description": "Requires policy_admin. Identical retries preserve the original entry. Changed definitions conflict.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningPolicyRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/policies/{id}": {
+      "get": {
+        "operationId": "getLearningPolicy",
+        "summary": "Read an administrative policy",
+        "description": "Requires policy_admin within the authenticated tenant.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/learning/contexts": {
+      "post": {
+        "operationId": "registerLearningContext",
+        "summary": "Register an exact evaluation context",
+        "description": "Requires policy_admin. Context versions are immutable.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningContextRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/contexts/{id}": {
+      "get": {
+        "operationId": "getLearningContext",
+        "summary": "Read an evaluation context",
+        "description": "Requires policy_admin within the authenticated tenant.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/learning/proposals": {
+      "post": {
+        "operationId": "proposeProcedure",
+        "summary": "Register a candidate bound to policy and context",
+        "description": "Requires procedure_propose and an exact scope grant. Returns the original candidate receipt on identical replay.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningProposalRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/procedures/read": {
+      "post": {
+        "operationId": "readProcedure",
+        "summary": "Read the current procedure and original receipt",
+        "description": "Requires memory_read and an exact scope grant.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcedureResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningReadRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/evaluations": {
+      "post": {
+        "operationId": "admitEvaluation",
+        "summary": "Submit a paired evaluation or explicit uncertain outcome",
+        "description": "Requires procedure_evaluate, an exact grant and the policy evaluator subject. HTTP 200 confirms durable admission; inspect outcome to distinguish accepted evidence from rejection or uncertainty.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdmissionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningEvaluationRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/evaluations/read": {
+      "post": {
+        "operationId": "readEvaluationAdmission",
+        "summary": "Read the original admission receipt",
+        "description": "Requires memory_read and an exact scope grant.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdmissionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningReceiptRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/select": {
+      "post": {
+        "operationId": "selectProcedure",
+        "summary": "Select a qualified compatible procedure or exact baseline",
+        "description": "Requires memory_read and an exact scope grant. Budget counts UTF-8 instruction bytes, not tokens. Context and policy identities must match qualification exactly.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningSelectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningSelectRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2123,6 +3623,1101 @@
           "version"
         ],
         "additionalProperties": false
+      },
+      "LearningPolicy": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "qualification_trials": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 1000000
+          },
+          "confidence_delta": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 0.5
+          },
+          "min_improvement": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "min_candidate_utility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "max_cost_units": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "max_latency_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "max_failure_streak": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "evaluator_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evaluation_contract": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "qualification_trials",
+          "confidence_delta",
+          "min_improvement",
+          "min_candidate_utility",
+          "max_cost_units",
+          "max_latency_ms",
+          "max_failure_streak",
+          "evaluator_id",
+          "evaluation_contract"
+        ]
+      },
+      "PolicyDefinition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "fixed_budget_hoeffding_v1"
+            ]
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/LearningPolicy"
+          }
+        },
+        "required": [
+          "algorithm",
+          "parameters"
+        ]
+      },
+      "EvaluationContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evaluation_contract": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dataset_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "harness_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "permissions_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tools": {
+            "type": "object",
+            "maxProperties": 128,
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "task",
+          "baseline_revision",
+          "model_provider",
+          "model_revision",
+          "environment_revision",
+          "evaluation_contract",
+          "dataset_revision",
+          "harness_revision",
+          "permissions_revision",
+          "tools"
+        ]
+      },
+      "PolicyEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "$ref": "#/components/schemas/PolicyDefinition"
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "registered_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "id",
+          "payload",
+          "payload_digest",
+          "registered_by",
+          "recorded_at_millis"
+        ]
+      },
+      "ContextEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "$ref": "#/components/schemas/EvaluationContext"
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "registered_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "id",
+          "payload",
+          "payload_digest",
+          "registered_by",
+          "recorded_at_millis"
+        ]
+      },
+      "LearningScope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "agent": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "tenant",
+          "agent",
+          "environment"
+        ]
+      },
+      "ProcedureState": {
+        "type": "string",
+        "enum": [
+          "Candidate",
+          "Active",
+          "Rejected",
+          "Suspended"
+        ]
+      },
+      "EvaluationPhase": {
+        "type": "string",
+        "enum": [
+          "Qualification",
+          "Monitoring"
+        ]
+      },
+      "ProcedureProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "policy": {
+            "$ref": "#/components/schemas/LearningPolicy"
+          }
+        },
+        "required": [
+          "id",
+          "task",
+          "baseline_revision",
+          "instructions",
+          "source_refs",
+          "policy"
+        ]
+      },
+      "LearningDecision": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/ProcedureState"
+          },
+          "to": {
+            "$ref": "#/components/schemas/ProcedureState"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "triggering_case": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "reason",
+          "triggering_case",
+          "recorded_at_millis"
+        ]
+      },
+      "ProcedureRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/LearningScope"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/ProcedureProposal"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProcedureState"
+          },
+          "qualification_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mean_improvement": {
+            "type": "number"
+          },
+          "mean_candidate_utility": {
+            "type": "number"
+          },
+          "budget_violations": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lower_improvement_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monitoring_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "failure_streak": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningDecision"
+            }
+          },
+          "created_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "proposal",
+          "state",
+          "qualification_count",
+          "mean_improvement",
+          "mean_candidate_utility",
+          "budget_violations",
+          "lower_improvement_bound",
+          "monitoring_count",
+          "failure_streak",
+          "decisions",
+          "created_at_millis"
+        ]
+      },
+      "RegisteredProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "instructions",
+          "source_refs"
+        ]
+      },
+      "ProposalReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "$ref": "#/components/schemas/RegisteredProposal"
+          },
+          "policy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProcedureRecord"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "policy_digest",
+          "context_digest",
+          "actor",
+          "record"
+        ]
+      },
+      "RegisteredProcedure": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/ProposalReceipt"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ProcedureRecord"
+          }
+        },
+        "required": [
+          "receipt",
+          "record"
+        ]
+      },
+      "PairedEvaluation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phase": {
+            "$ref": "#/components/schemas/EvaluationPhase"
+          },
+          "evaluator_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evaluation_contract": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_utility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "candidate_utility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "candidate_cost_units": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "candidate_latency_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "case_id",
+          "phase",
+          "evaluator_id",
+          "evaluation_contract",
+          "evidence_ref",
+          "baseline_utility",
+          "candidate_utility",
+          "candidate_cost_units",
+          "candidate_latency_ms"
+        ]
+      },
+      "EvaluationReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evaluation": {
+            "$ref": "#/components/schemas/PairedEvaluation"
+          },
+          "state_after": {
+            "$ref": "#/components/schemas/ProcedureState"
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "evaluation",
+          "state_after",
+          "recorded_at_millis"
+        ]
+      },
+      "EvaluationActor": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credential_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "subject_id",
+          "credential_id"
+        ]
+      },
+      "EvaluationSubmission": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phase": {
+            "$ref": "#/components/schemas/EvaluationPhase"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "rejected",
+              "incomplete",
+              "cancelled",
+              "pending_or_unknown"
+            ]
+          },
+          "baseline_utility": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_utility": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "case_id",
+          "phase",
+          "policy_id",
+          "context_id",
+          "baseline_revision",
+          "evidence_ref",
+          "status"
+        ]
+      },
+      "AdmissionReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "actor": {
+            "$ref": "#/components/schemas/EvaluationActor"
+          },
+          "submission": {
+            "$ref": "#/components/schemas/EvaluationSubmission"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected",
+              "incomplete",
+              "cancelled",
+              "pending_or_unknown",
+              "unknown_consumption"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state_after": {
+            "$ref": "#/components/schemas/ProcedureState"
+          },
+          "evaluation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvaluationReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "procedure_id",
+          "actor",
+          "submission",
+          "outcome",
+          "reason",
+          "state_after",
+          "evaluation",
+          "recorded_at_millis"
+        ]
+      },
+      "LearningPolicyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "$ref": "#/components/schemas/PolicyDefinition"
+          }
+        },
+        "required": [
+          "contract_version",
+          "id",
+          "definition"
+        ]
+      },
+      "LearningContextRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context": {
+            "$ref": "#/components/schemas/EvaluationContext"
+          }
+        },
+        "required": [
+          "contract_version",
+          "id",
+          "context"
+        ]
+      },
+      "LearningProposalRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/RegisteredProposal"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "proposal"
+        ]
+      },
+      "LearningReadRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "procedure_id"
+        ]
+      },
+      "LearningEvaluationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "submission": {
+            "$ref": "#/components/schemas/EvaluationSubmission"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "procedure_id",
+          "submission"
+        ]
+      },
+      "LearningReceiptRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "case_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "procedure_id",
+          "case_id"
+        ]
+      },
+      "LearningSelectRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "max_instruction_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65536
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "max_instruction_bytes"
+        ]
+      },
+      "PolicyEntryResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "entry": {
+            "$ref": "#/components/schemas/PolicyEntry"
+          }
+        },
+        "required": [
+          "contract_version",
+          "entry"
+        ]
+      },
+      "ContextEntryResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "entry": {
+            "$ref": "#/components/schemas/ContextEntry"
+          }
+        },
+        "required": [
+          "contract_version",
+          "entry"
+        ]
+      },
+      "ProposalResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ProposalReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ]
+      },
+      "ProcedureResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/RegisteredProcedure"
+          }
+        },
+        "required": [
+          "contract_version",
+          "procedure"
+        ]
+      },
+      "AdmissionResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/AdmissionReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ]
+      },
+      "LearningSelectionResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "selection": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "procedure"
+                  },
+                  "procedure": {
+                    "$ref": "#/components/schemas/RegisteredProcedure"
+                  }
+                },
+                "required": [
+                  "type",
+                  "procedure"
+                ]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "baseline"
+                  },
+                  "baseline_revision": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "const": "no_qualified_compatible_procedure"
+                  }
+                },
+                "required": [
+                  "type",
+                  "baseline_revision",
+                  "reason"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "policy_id",
+          "context_id",
+          "selection"
+        ]
       }
     }
   }

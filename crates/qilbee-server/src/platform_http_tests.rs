@@ -661,3 +661,5 @@ async fn platform_http_openapi_describes_the_available_contracts() {
     assert!(spec["paths"].get("/graphs").is_none());
     assert!(spec["paths"].get("/api/v1/tools/invoke").is_none());
 }
+
+mod learning;

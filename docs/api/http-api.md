@@ -1,7 +1,7 @@
 # HTTP REST API
 
 QilbeeDB Rust 0.2.0 exposes the authenticated platform API for durable identity
-and scoped, versioned memory.
+and scoped, versioned memory, plus evidence-driven procedural learning.
 
 ## Base URL
 
@@ -22,6 +22,7 @@ The documentation uses the same field names, enum values and error envelopes.
 | --- | --- |
 | Tenant provisioning, authentication and credential lifecycle | [Platform HTTP API](platform-http.md) |
 | Create, conditional update, read, query and delete | [Versioned Memory API](versioned-memory.md) |
+| Administrative learning contracts, proposals, outcomes and selection | [Procedural Learning API](procedural-learning.md) |
 | Identity, scope, capability and secret-storage semantics | [Durable Scoped Credentials](../security/scoped-credentials.md) |
 | Legacy endpoint persistence and limits | [Legacy Durable HTTP Memory](durable-http-memory.md) |
 
@@ -79,7 +80,7 @@ an explicitly opted-in legacy router with documented limitations. They are not
 silently exposed by the default server or mapped into tenant scopes. Current
 legacy SDK examples must not be assumed compatible with `/api/v1/memory`.
 
-Procedural evaluation/publication, shared changes feeds, indexed hybrid retrieval
+Shared changes feeds, indexed hybrid retrieval
 and learned-tool services have acceptance criteria but no implemented endpoints
 in this version. See the [delivery contract](../research/delivery-acceptance.md)
 and [learned-tool architecture](../architecture/learned-tools.md).

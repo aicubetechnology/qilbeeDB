@@ -43,4 +43,5 @@ does not claim to have resolved or independently verified arbitrary external
 references. Held-out evaluation and authenticated evaluator admission follow
 in the procedural API integration.
 
-This increment adds the storage contract, not an HTTP endpoint or an executor.
+The [procedural HTTP API](../api/procedural-learning.md) exposes this storage
+contract with authenticated scope and capability checks. No executor is added.
