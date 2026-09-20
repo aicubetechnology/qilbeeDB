@@ -142,3 +142,99 @@ fn tool_artifact_concurrent_retries_have_one_original_record() {
     let records: Vec<_> = threads.into_iter().map(|t| t.join().unwrap()).collect();
     assert!(records.iter().all(|record| record == &records[0]));
 }
+
+fn executor(id: &str) -> ToolExecutorProfile {
+    ToolExecutorProfile {
+        id: id.into(),
+        subject_id: "developer".into(),
+        runtime_image_digest: format!("sha256:{}", "a".repeat(64)),
+        environment_revision: "sandbox-v1".into(),
+        permissions_revision: "network-denied-v1".into(),
+        max_cost_units: 100,
+        max_latency_ms: 60000,
+    }
+}
+#[test]
+fn tool_executor_profile_is_administrative_immutable_and_durable() {
+    let dir = TempDir::new().unwrap();
+    let store = LearningMemory::open(dir.path()).unwrap();
+    let first = store
+        .register_tool_executor("tenant", executor("worker-v1"), actor())
+        .unwrap();
+    assert_eq!(
+        first,
+        store
+            .register_tool_executor("tenant", executor("worker-v1"), actor())
+            .unwrap()
+    );
+    let mut changed = executor("worker-v1");
+    changed.subject_id = "impostor".into();
+    assert!(
+        store
+            .register_tool_executor("tenant", changed, actor())
+            .is_err()
+    );
+    assert!(store.tool_executor("other", "worker-v1").unwrap().is_none());
+    drop(store);
+    let store = LearningMemory::open(dir.path()).unwrap();
+    assert_eq!(
+        store.tool_executor("tenant", "worker-v1").unwrap(),
+        Some(first)
+    );
+}
+#[test]
+fn tool_executor_profile_rejects_unbounded_runtime_authority() {
+    let dir = TempDir::new().unwrap();
+    let store = LearningMemory::open(dir.path()).unwrap();
+    for field in [
+        "runtime_image_digest",
+        "subject_id",
+        "permissions_revision",
+        "environment_revision",
+    ] {
+        let mut bad = serde_json::to_value(executor("worker-v1")).unwrap();
+        bad[field] = "".into();
+        let bad = serde_json::from_value(bad).unwrap();
+        assert!(
+            store
+                .register_tool_executor("tenant", bad, actor())
+                .is_err()
+        );
+    }
+    let mut bad = executor("worker-v1");
+    bad.max_cost_units = 0;
+    assert!(
+        store
+            .register_tool_executor("tenant", bad, actor())
+            .is_err()
+    );
+    let mut bad = executor("worker-v1");
+    bad.max_latency_ms = 0;
+    assert!(
+        store
+            .register_tool_executor("tenant", bad, actor())
+            .is_err()
+    );
+}
+#[test]
+fn tool_executor_profile_concurrent_registration_preserves_one_actor() {
+    let dir = TempDir::new().unwrap();
+    let store = LearningMemory::open(dir.path()).unwrap();
+    let barrier = std::sync::Arc::new(std::sync::Barrier::new(8));
+    let threads: Vec<_> = (0..8)
+        .map(|i| {
+            let store = store.clone();
+            let barrier = barrier.clone();
+            std::thread::spawn(move || {
+                barrier.wait();
+                let mut actor = actor();
+                actor.credential_id = format!("key-{i}");
+                store
+                    .register_tool_executor("tenant", executor("worker-v1"), actor)
+                    .unwrap()
+            })
+        })
+        .collect();
+    let records: Vec<_> = threads.into_iter().map(|t| t.join().unwrap()).collect();
+    assert!(records.iter().all(|record| record == &records[0]));
+}
