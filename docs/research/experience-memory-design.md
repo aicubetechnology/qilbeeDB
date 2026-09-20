@@ -1,8 +1,10 @@
 # From retrieval to experience-driven memory
 
 Status: **research-informed design**, reviewed September 20, 2026. This document
-maps recent work to testable QilbeeDB extensions. The initial experience receipt contract is implemented in the
-0.7.0 API; other extensions below remain proposals. This document does not
+maps the supplied research to implemented foundations, remaining capabilities
+and acceptance evidence. Experience receipts are available in 0.7.0; revision-bound
+derived memories are available in 0.8.0. Structured strategy extraction, discovery
+replay and the complete learning loop remain proposals. This document does not
 reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
 
@@ -16,14 +18,20 @@ The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
 | [Dream-RSI, v1](https://arxiv.org/html/2609.14858v1) | Replays recorded discovery trees to select exploration policies while holding the underlying agent and evaluator fixed | Record replayable attempts and their cost; evaluate policy versions on historical branches before new online trials |
 | [Perplexity Brain announcement](https://www.perplexity.ai/en-GB/changelog/brain-faster-computer-models-website-publishing) | Product description of a private context graph, source links and overnight refresh | Evaluate source-linked consolidation and explicit user control; product-reported improvements are not independently reproduced evidence |
 
-The supplied arXiv and alphaXiv links for `2512.23343` identify the same work,
-not two independent confirmations. The supplied Perplexity blog could not be
-retrieved; the table uses its accessible official announcement instead. The
+The supplied arXiv and [alphaXiv](https://www.alphaxiv.org/abs/2512.23343) links
+identify the same work, not two independent confirmations. The supplied
+[Perplexity blog](https://www.perplexity.ai/hub/blog/self-improving-memory-for-agents)
+could not be retrieved on this review; the table uses its accessible official
+announcement instead. The
 supplied [SSRN paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6617061),
 *Agent Brain: A Biologically Inspired Memory System for Autonomous AI Agents,
 with Head-to-Head Evaluation on LongMemEval*, was identified through indexed
 metadata, but its full text returned HTTP 403. Its methods and results have not
-been assessed here. A search-results page is discovery material, not evidence.
+been assessed here; another retrieval attempt on this review was unsuccessful.
+The supplied [ExplainX article](https://explainx.ai/blog/google-deepmind-dream-rsi-recursive-self-improvement-2026)
+is secondary coverage of Dream-RSI. Engineering decisions use the primary paper
+linked above rather than treating that coverage as an independent experiment.
+A search-results page is discovery material, not evidence.
 
 ## Platform boundary
 
@@ -40,19 +48,57 @@ and selection under immutable policy/context definitions. The
 development outcomes. It does not yet dispatch or sandbox executable programs.
 These are foundations, not an implemented reasoning-memory loop.
 
+## Implementation map
+
+The engineering hypotheses below are QilbeeDB proposals inferred from the
+research. A paper's reported improvement is not an acceptance result for this
+platform. Keep the existing retrieval comparison and the agent-task comparison
+as separate experiments.
+
+| Research input | Foundation already available | Remaining engineering work | Evidence required before claiming benefit |
+| --- | --- | --- | --- |
+| ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, exact cohort exports and revision-bound derived records | Define structured strategy candidates with preconditions, counterexamples, extractor identity and exact observation/source bindings; connect admission to the existing learning authority | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
+| Dream-RSI: exploration over recorded discovery history | Parent-event bindings, bounded ancestry, immutable tool artifacts and exact observation exports | Define a frozen replay manifest and an external evaluator with prefix-limited visibility, versioned policy code and explicit unsupported transitions | Repeated replay must agree on decisions and accounting; a selected policy must face fresh online trials against fixed exploration under the same compute budget |
+| ZenBrain: routing, retention and consolidation | Scoped lexical, vector and hybrid retrieval; validity, review and transitive dependency checks | Evaluate routing and retention policies separately; preserve required counterexamples when consolidating | Ablate one mechanism at a time under equal storage/context budgets; measure old-task retention, retrieval quality and downstream task outcomes separately |
+| AI Meets Brain: memory lifecycle and security | Separate memory, experience, procedure and tool contracts with scoped access | Specify lifecycle transitions and evidence obligations between those contracts | Exercise contradictory, stale, poisoned and revoked evidence; verify that a derived claim cannot silently become an authenticated observation or approved procedure |
+| Perplexity Brain: source-linked, refreshed private context | Source revisions, transitive invalidation, change feeds and consumer checkpoints | Build a resumable external consolidation consumer; define audience and origin tracking for later shared releases | Restart and retry without duplicate effects; source changes suppress stale conclusions; copied evidence does not count as independent corroboration |
+
+### Delivery order
+
+The current 0.10.0 work on verified history, audits and recoverable consumer
+errors supplies reliable evidence transport. It does not implement strategy
+learning. The next learning cycle should connect experience to structured
+candidates, frozen task comparisons, admission and selection through the existing
+authority, with reversal to a valid baseline when a candidate becomes ineligible.
+Workers remain external and executions remain isolated.
+
+Replay follows that evidence and admission contract. It should not activate
+policies solely because they score well on development history. Routing,
+consolidation and retention then enter as separate ablations so that their
+contribution can be measured rather than hidden in a simultaneous redesign.
+
+Each research-driven feature PR should record the source and version, the
+engineering hypothesis, the existing contract it extends, its observable failure
+cases, and its validation evidence. Distinguish contract tests from quality
+experiments. A quality report must identify the frozen baseline, candidate,
+evaluation population, resource budget, uncertainty and regressions. Update this
+map and the exported user guides as those capabilities become available.
+
 ## Proposed contracts and acceptance criteria
 
 The [experience receipt API](../api/experiences.md) implements scoped attempts,
 immutable context and parent-event bindings, authenticated observations and
 consumption accounting. It records evidence declarations without independently
 verifying external effects. Explicit artifact bindings now verify locally stored
-tool bytes and pin exact observation identities. Remaining objects below
-are design proposals, not current endpoints or accepted request fields. Each
-extension needs its own validated feature PR.
+tool bytes and pin exact observation identities. Generic
+[derived records](../api/derived-memory.md) also bind exact source revisions and
+check transitive eligibility. The structured strategy, replay, shared-release
+and retention objects below remain proposals, not current endpoints or accepted
+request fields. Each extension needs its own validated feature PR.
 
 | Extension | Proposed durable contract | Required acceptance evidence |
 | --- | --- | --- |
-| Experience receipt | Attempt ID, parent attempt, exact context and artifact digests, observed outcome, verifier identity/version, resource consumption and idempotency key | Retried reports do not duplicate attempts; unknown completion or consumption remains unknown; scope and crash recovery preserve receipts |
+| Experience receipt (implemented foundation) | Attempt ID, parent attempt, exact context and artifact digests, authenticated reporter and declared evidence, resource consumption and idempotency key | Retried reports do not duplicate attempts; unknown completion or consumption remains unknown; scope and crash recovery preserve receipts |
 | Derived strategy | Source record IDs and revisions, extractor identity, success/failure classification, preconditions, counterexamples and candidate revision | A summary cannot silently become a verified observation; source edits, revocation and expiry invalidate affected serving decisions |
 | Discovery replay | Immutable attempt graph, recorded transitions, visibility at each step, frozen utility/cost formula and exact replay-engine version | Replay cannot inspect future scores or invent unobserved transitions; repeated runs yield the same decisions and accounting |
 | Shared knowledge release | Immutable candidate, evidence lineage, explicit audience, policy/context identity and a publication decision owned by the existing learning authority | Cross-tenant and cross-subject access fails before retrieval; copies of one source are not counted as independent corroboration; suspension reaches subsequent selections |
@@ -73,12 +119,19 @@ Disagreement should preserve the conflicting claims, their applicable times and
 their environment versions. Agreement, frequent retrieval and model confidence
 must remain separate from demonstrated task utility.
 
-Source invalidation must reach derived strategies as well as direct search hits.
-An admission check should validate the current dependency set before serving a
-derived release. Tests should race revocation with consolidation and ensure the
-documented authorization boundary holds. This propagation is proposed work;
-the present source-bound vector invalidation does not implement a general
-derivation graph or complete knowledge erasure.
+Generic derived memories already enforce transitive source eligibility before
+direct reads and lexical, vector and hybrid retrieval, including lexical corpus
+statistics. Source edits, deletion, expiry and review revisions make dependent
+records ineligible on subsequent request snapshots. The
+[derived-memory contract](../api/derived-memory.md) documents graph and work
+bounds, snapshot semantics and the absence of descendant change events.
+
+The remaining work is to apply source eligibility to structured strategy admission
+and selection under the existing learning authority. Tests should race source
+changes and credential revocation with consolidation and selection, preserving
+the documented authorization and snapshot boundaries. Dependency metadata does
+not discover undeclared copies, erase external caches or retain historical source
+payloads. A shared release must not promise those properties implicitly.
 
 ## Evaluation before automatic publication
 
@@ -100,11 +153,13 @@ and fresh online execution. Learning across agents needs a comparison with
 isolated agents and equal total compute. Retrieval nDCG cannot substitute for
 any of these outcomes.
 
-Experience receipts now provide the first bounded implementation. Stored tool artifact bindings are also implemented. The next steps
-are revisioned memory-source bindings and candidate strategy derivation. Replay
-and shared release depend on those contracts. Automatic selection can operate within an authorized
-policy after qualification; unmeasured candidates remain candidates, and the
-baseline remains available when evidence is rejected or incomplete.
+Experience receipts, stored tool artifact bindings and revisioned memory-source
+bindings provide the current foundation. The next step is structured strategy
+derivation tied to task evidence and the existing qualification authority. Replay
+and shared release depend on those contracts. Automatic selection can operate
+within an authorized policy after qualification; unmeasured candidates remain
+candidates, and a valid baseline remains available when evidence is rejected or
+incomplete.
 
 Bounded history, pinned ancestry and exact observation exports are also
 implemented. These preserve evidence for a future replay evaluator; they do not
