@@ -1,0 +1,6888 @@
+{
+  "schema_version": 1,
+  "server_health": {
+    "contract_version": 1,
+    "status": "healthy",
+    "version": "0.5.0"
+  },
+  "fixture_sha256": "11e3dc8560d7f980226dc21be7aa32bbeb99d58fcc75514d0fbfea16a0c7eace",
+  "fixture_kind": "synthetic_contract",
+  "provenance": "Hand-authored fictional retrieval contract smoke corpus. Every source is explicitly graded for each query; not a representative workload or independently adjudicated benchmark. Development/test categories each have one query. No profile was tuned using these judgments.",
+  "embedding_provenance": "Hand-authored four-dimensional vectors for deterministic protocol/ranking evaluation. Not language model embeddings; semantic relevance claims are not supported.",
+  "model_space": {
+    "provider": "synthetic-fixture",
+    "model": "retrieval-contract",
+    "revision": "v1",
+    "dimensions": 4
+  },
+  "manifest_sha256": "1fb804e3b2980a2c14e99c46634511f68c1ef4e1be9d9a305cc9700b249fefef",
+  "scope_sha256": "91574b2d5682459365903327f6c1036d768bb11711be14f93273fb453d0129c5",
+  "source_revisions": {
+    "customer": {
+      "record_id": "a3bec40c-daf4-459e-aca2-31f29c355a18",
+      "revision": 1,
+      "vector_digest": "81bb5e08a5d12308ad54e054f8618ce84e5422261c8f46ae2dd89c3a33acbf93"
+    },
+    "invoice": {
+      "record_id": "040ec609-822d-4854-a899-f1c0a3b4a260",
+      "revision": 1,
+      "vector_digest": "d11e8a87dcc332b284aaf904cc275301e724c361b514c674e2a70d70fcd04495"
+    },
+    "error": {
+      "record_id": "59f29bce-c733-4fbf-b603-7d3a2964cc5a",
+      "revision": 1,
+      "vector_digest": "0d9f4cd01c3a68a4aa75e250dd725e8cf0ce78000fd9bc76da4b4537f50d65b1"
+    },
+    "error-alt": {
+      "record_id": "ac84e71d-eb41-495e-b64e-352c4b5f8a3f",
+      "revision": 1,
+      "vector_digest": "e7438e38e01cdcaa731c78386dc900fd5793903f47211a5246f043dd3fa29fbd"
+    },
+    "file": {
+      "record_id": "f582c8d6-2aad-4730-a7f6-61cfef9339f4",
+      "revision": 1,
+      "vector_digest": "1073f580a8c32b1d0895b2f0860de71e0d1ccdeab7c4689eda2cc5c3f83d6698"
+    },
+    "class": {
+      "record_id": "382a864c-aa92-4f12-a1f8-4967e7777a18",
+      "revision": 1,
+      "vector_digest": "e8fad1afe62e62717137e6aee73df082ad723684b8071944d9839f8f5b0256e4"
+    },
+    "paraphrase": {
+      "record_id": "d74c8ed1-03cc-4b1e-beb2-f386f2397800",
+      "revision": 1,
+      "vector_digest": "1a089efdb8965114ebda89ba4abcfbe5f7c6e53dcd46c581733d61b4f358ad8f"
+    },
+    "paraphrase-alt": {
+      "record_id": "602f4616-6303-42c5-bcd1-384c10c382fb",
+      "revision": 1,
+      "vector_digest": "c30cdd4c4d28b2d66f2189ae80db9382972d8044ca2f1d6d467f16c9379745a6"
+    },
+    "bank-money": {
+      "record_id": "bbe0e495-124d-4c09-ba98-14a565bb8d45",
+      "revision": 1,
+      "vector_digest": "12bf612bf6e015e3ef54b6e8ce9d2d3fba7da6e11816e1dc66fab75c3b2d63da"
+    },
+    "bank-river": {
+      "record_id": "d33a9bc0-818f-4a16-b32e-ea400f283f0e",
+      "revision": 1,
+      "vector_digest": "e06ce3833817bbf72f9434c34ddfb061c3dc48c01fd13039b47ebb44b6a84034"
+    },
+    "pt": {
+      "record_id": "7d6d3051-3ec2-4e7b-afbf-c17170b16327",
+      "revision": 1,
+      "vector_digest": "9665eae4dd26eecd72613b54a230f73ade66f9e8333712a04547cdbccfa51e5a"
+    },
+    "pt-alt": {
+      "record_id": "b231a572-9fd7-4706-adf5-8f91a5df98d4",
+      "revision": 1,
+      "vector_digest": "20835b84e47ac865d3636dcac6f9d96be4191b90250797a354ab05f26988ea9d"
+    },
+    "near-old": {
+      "record_id": "b696ab38-e9bd-4cac-a342-da564500c1e3",
+      "revision": 1,
+      "vector_digest": "254e922fa696ec0cf1c1dc14c6c3f072be3e562d0640f1a6ee0fbce0e5da21be"
+    },
+    "near-new": {
+      "record_id": "8022f412-a2af-4204-b7ac-72886c242105",
+      "revision": 1,
+      "vector_digest": "482825e5531e44d045021118f5dcb7f7ad27f0124b3c2ea3832e94373acf73aa"
+    },
+    "noise-target": {
+      "record_id": "1e9418e9-afa8-4a90-b28d-39081a4ed2ca",
+      "revision": 1,
+      "vector_digest": "d9fca7cb94913a503d086a9e7a8d5cdb41eaf78a4561db9f7ff66260810f7713"
+    },
+    "noise-other": {
+      "record_id": "a857764f-f417-418c-b895-f1e8173452bf",
+      "revision": 1,
+      "vector_digest": "b7889b9c3e357d6ba4e0599e3d65023e6344acdd42209f850866ff2b8ffd87a8"
+    },
+    "noise-0": {
+      "record_id": "7bdad235-0ec4-43f5-8b5a-d939216bbd31",
+      "revision": 1,
+      "vector_digest": "f5757e5f943fa6c81f64f16a6a435b225f049284c9a8237d98b2bee33acc76d9"
+    },
+    "noise-1": {
+      "record_id": "3c6f8e3a-ea67-4168-ac66-a6aeeedda29d",
+      "revision": 1,
+      "vector_digest": "e6e946a058def1d1cba714e03e5231e0a076869b546834db2a7aad5fd430589b"
+    },
+    "noise-2": {
+      "record_id": "4a5dd3dd-4f5a-4dad-b5fa-9f6eb1fd6c40",
+      "revision": 1,
+      "vector_digest": "e4208538672f1485ef84dcd8f4257b5f5ed4e2fd38f540ee7ce9b423af13ba7c"
+    },
+    "noise-3": {
+      "record_id": "2524d0ba-f885-43a4-a97f-893cfc7b9552",
+      "revision": 1,
+      "vector_digest": "a8be443e37746db10a616db06313aac97d48c49f3cf3dc12706abc19b908c7ee"
+    },
+    "noise-4": {
+      "record_id": "5a5c6375-2e99-4bd4-b10c-93c381d58be6",
+      "revision": 1,
+      "vector_digest": "f0f072a643bdbb4e0f0ed730c27fd96b79a9e16f2bdf2ec677928d9a44931097"
+    },
+    "noise-5": {
+      "record_id": "f033b73c-30d2-46a7-b0c3-901d3cdfc33c",
+      "revision": 1,
+      "vector_digest": "62cf45c0568cbc1ca794e59e735098f3eb31180e5846c3b71726d2dc6468fbb8"
+    },
+    "noise-6": {
+      "record_id": "5fb891d2-9496-442d-89c5-e46959d151b1",
+      "revision": 1,
+      "vector_digest": "ed8011f248fc7f7f8b79eeed850f686d7ea5b7c6b920b55fedba19783204da2c"
+    },
+    "noise-7": {
+      "record_id": "84139d44-7fc7-42a3-b38a-25cc054c7819",
+      "revision": 1,
+      "vector_digest": "2cdddf532a5b2229b67ace504879bff12bf2b4ad656e849eb76dcf0f47ac49f7"
+    },
+    "noise-8": {
+      "record_id": "40286ecf-c1c5-4104-819b-1bc67a94b5f5",
+      "revision": 1,
+      "vector_digest": "dd995ecd07e9273cec0f95bbd1262842cc3f326e66f3e639093b3e4ac4749a7e"
+    },
+    "noise-9": {
+      "record_id": "6de3b273-a2bc-4ddd-948b-7790497414d2",
+      "revision": 1,
+      "vector_digest": "5ec049ab4c77d6a1afafcce49a93ae7de4a98396584f6bdf3debabb7d2059386"
+    },
+    "noise-10": {
+      "record_id": "8b19ad29-8b70-49b4-9699-fa6c3fe9dd73",
+      "revision": 1,
+      "vector_digest": "178aee6e166b455e3eb6b6f9684dbe51c17da12a265a97606d43319dfac0092b"
+    },
+    "noise-11": {
+      "record_id": "039e2353-e77b-4196-9d5e-fb13f99f3e3d",
+      "revision": 1,
+      "vector_digest": "cf5789f7c648f01d09d222143fe7caa198855e8a370c3549ac778d443a701b2e"
+    },
+    "noise-12": {
+      "record_id": "4fff5a19-dda7-4bc8-874c-adb18ec3fd0e",
+      "revision": 1,
+      "vector_digest": "f4d3d67c92e072ff3a84324bbec21131701c9b54e8e00176a0c0a0263e0b6327"
+    },
+    "noise-13": {
+      "record_id": "b44f8cd6-5825-4386-8eb5-0889e6e47915",
+      "revision": 1,
+      "vector_digest": "b86bd34cfe2d2626c4d6af40fd773e4a6f8b19b8a15405e06748b0f4ea39a14a"
+    },
+    "noise-14": {
+      "record_id": "13d2e6f7-8c23-4823-b5c0-382441b71076",
+      "revision": 1,
+      "vector_digest": "722b167313767e95f99ded1991b3cd87f08f915640eb20ecbdb11d106b3f86de"
+    },
+    "noise-15": {
+      "record_id": "9ac41d4e-d395-4efc-8dd6-eea8cb7dd760",
+      "revision": 1,
+      "vector_digest": "e9b0207c1b41e2a87c5327b1469b7fa6b83bb50e2e06a6e2d736800e4fa42931"
+    },
+    "noise-16": {
+      "record_id": "7e7fd2c2-1c75-4fd2-8f6d-7cb5afe08cce",
+      "revision": 1,
+      "vector_digest": "ca1918cbe772268e4d5e678d455e15af2038ae0e841be9fa61a6cb9b1bde3667"
+    },
+    "noise-17": {
+      "record_id": "3b031324-41d0-4635-b5bf-d24b78071015",
+      "revision": 1,
+      "vector_digest": "6bd2e9c54c56964f4dc47f60011ed831be4398ce7da0bf4fb3cdbe34be6ec635"
+    },
+    "noise-18": {
+      "record_id": "20e7fc88-a030-4961-88ee-49abc514d257",
+      "revision": 1,
+      "vector_digest": "cd6e25842ba26945f896186977961476a7c9ca5380644124e4ad11536bdf8e46"
+    },
+    "noise-19": {
+      "record_id": "e9c545b7-cc43-4d23-bb7f-f7caafdc0486",
+      "revision": 1,
+      "vector_digest": "a9334278b24e1b93654a63a4d3c307171f41c47bdd7a31367ea549939bf17608"
+    },
+    "noise-20": {
+      "record_id": "0c481c6c-92a7-4202-ae3c-083a1d262ec7",
+      "revision": 1,
+      "vector_digest": "9e72132fd454f79e124f97b99fb146c28377d45bc3c621645a6dd0d496a4c343"
+    },
+    "noise-21": {
+      "record_id": "899e41e7-ea63-4bd4-8712-47e7e69eb3bc",
+      "revision": 1,
+      "vector_digest": "d173538f4ba048aefa3cc385d1b7e43f8bd7c0eba69809a181cc3602dc42fca0"
+    },
+    "noise-22": {
+      "record_id": "d96ac728-aeb4-4844-98e5-279508a70cae",
+      "revision": 1,
+      "vector_digest": "32ee97f6278e05a25e98d074b655961c8f419e1979a59b6aab132eaab8fae405"
+    },
+    "noise-23": {
+      "record_id": "a81216bd-ef39-41d0-9845-6abd01837f64",
+      "revision": 1,
+      "vector_digest": "1da6829398e4bfeec154382ca59cace0ddbf6490e86bdfca1c506d76ddcd788a"
+    }
+  },
+  "conditions": {
+    "k": 10,
+    "scan_records": 10000,
+    "lexical_hybrid_scan_bytes": 67108864,
+    "limits_kind": "experimental trial budgets within implementation ceilings; not tenant policy",
+    "client_concurrency": 1,
+    "repetitions": 3,
+    "seed": 20260920,
+    "order": "seeded shuffle each pass",
+    "cache": "one warmup pass; RocksDB/OS caches not flushed; no retrieval-result cache",
+    "corpus_immutable_before_and_after": true,
+    "ranking_parameters": "immutable server profiles; no tuning on test queries"
+  },
+  "metrics_definition": {
+    "relevance_grades": "0 irrelevant, 1 marginal, 2 useful, 3 directly resolves the information need",
+    "ndcg": "DCG@10 = sum((2^grade-1)/log2(rank+1)); divide by ideal DCG from judgments; null if no relevant judged source",
+    "recall": "grade > 0; exhaustive recall only when every corpus record is explicitly judged; otherwise report judged recall separately",
+    "unjudged": "treated as gain zero for judged nDCG; expose coverage",
+    "no_answer": "unanswerable queries excluded from nDCG/recall averages and reported through returned/empty rates"
+  },
+  "valid_comparison": true,
+  "violations": {
+    "scope_or_corpus": 0,
+    "stale_revision": 0,
+    "duplicate_results": 0,
+    "partial_scan": 0,
+    "partial_embedding_coverage": 0,
+    "unstable_ranking": 0
+  },
+  "failures": [],
+  "summary": {
+    "development": {
+      "lexical": {
+        "queries": 9,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": 0,
+        "empty_result_rate": 0.1111111111111111,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.412,
+          "p95": 0.4808
+        },
+        "http_ms": {
+          "p50": 1.797834,
+          "p95": 4.2718376
+        },
+        "mean_response_bytes": 3952.3333333333335
+      },
+      "semantic": {
+        "queries": 9,
+        "ndcg_at_10": 0.8185311457855519,
+        "recall_at_10": 0.8125,
+        "judged_recall_at_10": 0.8125,
+        "answerable_no_useful_result_rate": 0.125,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.554,
+          "p95": 0.6409
+        },
+        "http_ms": {
+          "p50": 2.0895,
+          "p95": 2.8663498999999995
+        },
+        "mean_response_bytes": 13474.888888888889
+      },
+      "hybrid": {
+        "queries": 9,
+        "ndcg_at_10": 0.871719711719854,
+        "recall_at_10": 0.875,
+        "judged_recall_at_10": 0.875,
+        "answerable_no_useful_result_rate": 0.125,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.827,
+          "p95": 0.8812
+        },
+        "http_ms": {
+          "p50": 2.719125,
+          "p95": 5.481158
+        },
+        "mean_response_bytes": 15281.666666666666
+      }
+    },
+    "test": {
+      "lexical": {
+        "queries": 9,
+        "ndcg_at_10": 0.9637262176746082,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": 0,
+        "empty_result_rate": 0.1111111111111111,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.432,
+          "p95": 0.5012
+        },
+        "http_ms": {
+          "p50": 2.028292,
+          "p95": 4.843633799999998
+        },
+        "mean_response_bytes": 2945
+      },
+      "semantic": {
+        "queries": 9,
+        "ndcg_at_10": 0.8185311457855519,
+        "recall_at_10": 0.8125,
+        "judged_recall_at_10": 0.8125,
+        "answerable_no_useful_result_rate": 0.125,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.529,
+          "p95": 0.8021999999999999
+        },
+        "http_ms": {
+          "p50": 2.004875,
+          "p95": 4.2278082
+        },
+        "mean_response_bytes": 13477.555555555555
+      },
+      "hybrid": {
+        "queries": 9,
+        "ndcg_at_10": 0.871719711719854,
+        "recall_at_10": 0.875,
+        "judged_recall_at_10": 0.875,
+        "answerable_no_useful_result_rate": 0.125,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.836,
+          "p95": 0.9470999999999999
+        },
+        "http_ms": {
+          "p50": 2.448375,
+          "p95": 4.598042099999999
+        },
+        "mean_response_bytes": 15228.148148148148
+      }
+    }
+  },
+  "test_categories": {
+    "ambiguous_terms": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.424,
+          "p95": 0.4411
+        },
+        "http_ms": {
+          "p50": 1.959709,
+          "p95": 5.188008999999999
+        },
+        "mean_response_bytes": 2633
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.509,
+          "p95": 0.527
+        },
+        "http_ms": {
+          "p50": 1.874958,
+          "p95": 3.1762464
+        },
+        "mean_response_bytes": 13358
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.895,
+          "p95": 0.9121000000000001
+        },
+        "http_ms": {
+          "p50": 2.860584,
+          "p95": 3.3091584000000003
+        },
+        "mean_response_bytes": 15054
+      }
+    },
+    "error_codes": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.439,
+          "p95": 0.4912
+        },
+        "http_ms": {
+          "p50": 2.29475,
+          "p95": 2.4594869
+        },
+        "mean_response_bytes": 8224
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "answerable_no_useful_result_rate": 1,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.543,
+          "p95": 0.5744999999999999
+        },
+        "http_ms": {
+          "p50": 1.813458,
+          "p95": 3.7141086
+        },
+        "mean_response_bytes": 13507
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "answerable_no_useful_result_rate": 1,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.764,
+          "p95": 0.8404999999999999
+        },
+        "http_ms": {
+          "p50": 2.358125,
+          "p95": 4.733712799999999
+        },
+        "mean_response_bytes": 15801
+      }
+    },
+    "exact_identifiers": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.404,
+          "p95": 0.404
+        },
+        "http_ms": {
+          "p50": 1.530084,
+          "p95": 2.5357206
+        },
+        "mean_response_bytes": 1871
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 0.6309297535714575,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.529,
+          "p95": 0.7846
+        },
+        "http_ms": {
+          "p50": 2.643583,
+          "p95": 3.6004332999999997
+        },
+        "mean_response_bytes": 13521
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.846,
+          "p95": 0.9459
+        },
+        "http_ms": {
+          "p50": 2.296542,
+          "p95": 2.5729914
+        },
+        "mean_response_bytes": 15152
+      }
+    },
+    "file_and_class_names": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.416,
+          "p95": 0.4484
+        },
+        "http_ms": {
+          "p50": 1.62925,
+          "p95": 2.6748627999999997
+        },
+        "mean_response_bytes": 1122
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.601,
+          "p95": 0.7594
+        },
+        "http_ms": {
+          "p50": 3.086167,
+          "p95": 6.802942
+        },
+        "mean_response_bytes": 13546
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.841,
+          "p95": 0.9157000000000001
+        },
+        "http_ms": {
+          "p50": 2.585125,
+          "p95": 2.6081497
+        },
+        "mean_response_bytes": 15139
+      }
+    },
+    "near_duplicates": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.432,
+          "p95": 0.47519999999999996
+        },
+        "http_ms": {
+          "p50": 2.076459,
+          "p95": 2.168934
+        },
+        "mean_response_bytes": 8146
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 0.9173194127129571,
+        "recall_at_10": 0.5,
+        "judged_recall_at_10": 0.5,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.51,
+          "p95": 0.8150999999999999
+        },
+        "http_ms": {
+          "p50": 1.742125,
+          "p95": 3.0698878
+        },
+        "mean_response_bytes": 13564
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 0.9737576937588317,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.799,
+          "p95": 0.8854
+        },
+        "http_ms": {
+          "p50": 2.531792,
+          "p95": 3.1035161
+        },
+        "mean_response_bytes": 15733
+      }
+    },
+    "noise": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.475,
+          "p95": 0.5002
+        },
+        "http_ms": {
+          "p50": 2.151333,
+          "p95": 2.4626205
+        },
+        "mean_response_bytes": 1112
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.544,
+          "p95": 0.5449
+        },
+        "http_ms": {
+          "p50": 2.890334,
+          "p95": 3.2196962
+        },
+        "mean_response_bytes": 13480
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.769,
+          "p95": 0.8428
+        },
+        "http_ms": {
+          "p50": 2.193167,
+          "p95": 2.4006539
+        },
+        "mean_response_bytes": 15072
+      }
+    },
+    "paraphrases": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 0.7098097413968655,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.479,
+          "p95": 0.4817
+        },
+        "http_ms": {
+          "p50": 2.152333,
+          "p95": 3.0980457999999995
+        },
+        "mean_response_bytes": 1908
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.518,
+          "p95": 0.5648
+        },
+        "http_ms": {
+          "p50": 1.99625,
+          "p95": 3.0394247
+        },
+        "mean_response_bytes": 13520
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.806,
+          "p95": 0.8213
+        },
+        "http_ms": {
+          "p50": 2.140708,
+          "p95": 2.3393082999999995
+        },
+        "mean_response_bytes": 15181
+      }
+    },
+    "portuguese": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.396,
+          "p95": 0.47969999999999996
+        },
+        "http_ms": {
+          "p50": 1.533125,
+          "p95": 1.7683256
+        },
+        "mean_response_bytes": 1131
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.523,
+          "p95": 0.5554
+        },
+        "http_ms": {
+          "p50": 3.646625,
+          "p95": 4.2863747000000005
+        },
+        "mean_response_bytes": 13393
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "answerable_no_useful_result_rate": 0,
+        "unanswerable_return_rate": null,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.75,
+          "p95": 0.8769
+        },
+        "http_ms": {
+          "p50": 3.546375,
+          "p95": 3.6536631
+        },
+        "mean_response_bytes": 14986
+      }
+    },
+    "unanswerable": {
+      "lexical": {
+        "queries": 1,
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "answerable_no_useful_result_rate": null,
+        "unanswerable_return_rate": 0,
+        "empty_result_rate": 1,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.451,
+          "p95": 0.532
+        },
+        "http_ms": {
+          "p50": 3.053166,
+          "p95": 6.5975171999999995
+        },
+        "mean_response_bytes": 358
+      },
+      "semantic": {
+        "queries": 1,
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "answerable_no_useful_result_rate": null,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.6,
+          "p95": 0.6909
+        },
+        "http_ms": {
+          "p50": 2.004875,
+          "p95": 2.4409619
+        },
+        "mean_response_bytes": 13409
+      },
+      "hybrid": {
+        "queries": 1,
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "answerable_no_useful_result_rate": null,
+        "unanswerable_return_rate": 1,
+        "empty_result_rate": 0,
+        "all_judgments_complete": true,
+        "retrieval_ms": {
+          "p50": 0.884,
+          "p95": 1.1449999999999998
+        },
+        "http_ms": {
+          "p50": 2.981834,
+          "p95": 5.8565456
+        },
+        "mean_response_bytes": 14935.333333333334
+      }
+    }
+  },
+  "paired_test_ndcg_delta": {
+    "lexical": {
+      "mean": -0.09200650595475422,
+      "low": -0.37828028828014604,
+      "high": 0.10554105869602941,
+      "queries": 8,
+      "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+    },
+    "semantic": {
+      "mean": 0.05318856593430213,
+      "low": 0.0,
+      "high": 0.14545612754143775,
+      "queries": 8,
+      "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+    }
+  },
+  "hybrid_losses": [
+    {
+      "query_id": "test-error_codes",
+      "category": "error_codes",
+      "baseline": "lexical",
+      "ndcg_delta": -1.0,
+      "hybrid": [
+        "noise-1",
+        "noise-3",
+        "noise-2",
+        "noise-11",
+        "noise-0",
+        "noise-4",
+        "noise-8",
+        "noise-14",
+        "noise-6",
+        "noise-20"
+      ],
+      "baseline_ranking": [
+        "error-alt",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17",
+        "noise-1",
+        "noise-8",
+        "noise-2"
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "category": "near_duplicates",
+      "baseline": "lexical",
+      "ndcg_delta": -0.0262423062411683,
+      "hybrid": [
+        "near-new",
+        "noise-11",
+        "noise-14",
+        "near-old",
+        "noise-12",
+        "file",
+        "noise-18",
+        "noise-17",
+        "noise-20",
+        "noise-8"
+      ],
+      "baseline_ranking": [
+        "near-new",
+        "near-old",
+        "error",
+        "file",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "paraphrase",
+        "paraphrase-alt"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.7098097413968655,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 2
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.479,
+          "http_ms": 2.152333,
+          "response_bytes": 1908
+        },
+        {
+          "retrieval_ms": 0.411,
+          "http_ms": 1.6225,
+          "response_bytes": 1908
+        },
+        {
+          "retrieval_ms": 0.482,
+          "http_ms": 3.203125,
+          "response_bytes": 1908
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 6.669714299272008
+        },
+        {
+          "score": 3.2052642552200976
+        }
+      ]
+    },
+    {
+      "query_id": "development-error_codes",
+      "split": "development",
+      "category": "error_codes",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "error",
+        "near-new",
+        "near-old",
+        "file",
+        "error-alt",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 29
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.407,
+          "http_ms": 1.595,
+          "response_bytes": 8132
+        },
+        {
+          "retrieval_ms": 0.414,
+          "http_ms": 1.455375,
+          "response_bytes": 8132
+        },
+        {
+          "retrieval_ms": 0.405,
+          "http_ms": 1.969917,
+          "response_bytes": 8132
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 6.60060953488432
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 0.4584938842930818
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ]
+    },
+    {
+      "query_id": "development-error_codes",
+      "split": "development",
+      "category": "error_codes",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "customer",
+        "noise-0",
+        "noise-1",
+        "noise-2",
+        "noise-3",
+        "invoice",
+        "noise-4",
+        "noise-5",
+        "noise-6",
+        "noise-7"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.543,
+          "http_ms": 1.754625,
+          "response_bytes": 13508
+        },
+        {
+          "retrieval_ms": 0.703,
+          "http_ms": 2.055625,
+          "response_bytes": 13508
+        },
+        {
+          "retrieval_ms": 0.534,
+          "http_ms": 2.60375,
+          "response_bytes": 13508
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.998752338840731
+        },
+        {
+          "score": 0.9950371900631851
+        },
+        {
+          "score": 0.9889363520035758
+        },
+        {
+          "score": 0.9805806751289282
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.9578262820785333
+        },
+        {
+          "score": 0.9438583581201752
+        },
+        {
+          "score": 0.9284766889769309
+        }
+      ]
+    },
+    {
+      "query_id": "development-error_codes",
+      "split": "development",
+      "category": "error_codes",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "near-old",
+        "noise-1",
+        "noise-3",
+        "noise-2",
+        "near-new",
+        "noise-0",
+        "noise-11",
+        "noise-4",
+        "noise-8",
+        "noise-6"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 29,
+        "semantic_matches": 40,
+        "lexical_candidates": 29,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.79,
+          "http_ms": 5.644208,
+          "response_bytes": 15777
+        },
+        {
+          "retrieval_ms": 0.858,
+          "http_ms": 2.719125,
+          "response_bytes": 15777
+        },
+        {
+          "retrieval_ms": 0.743,
+          "http_ms": 3.903792,
+          "response_bytes": 15777
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.3212106925648444
+          },
+          "score": 0.014978761457634698,
+          "semantic": {
+            "contribution": 0.007042253521126761,
+            "rank": 11,
+            "score": 0.919145021921706
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01488095238095238,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9950371900631851
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014835164835164835,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9805806751289282
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014569256756756757,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9889363520035758
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 2.3212106925648444
+          },
+          "score": 0.014558022622538752,
+          "semantic": {
+            "contribution": 0.006493506493506494,
+            "rank": 17,
+            "score": 0.8320503006960566
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006329113924050633,
+            "rank": 19,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01439363005308289,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.998752338840731
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014242424242424244,
+          "semantic": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.8574929166930334
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014041633935585232,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.9701425001453319
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013793759512937594,
+          "semantic": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.9119215092432379
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006493506493506494,
+            "rank": 17,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013739883305100696,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.9438583581201752
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "noise-1",
+        "noise-3",
+        "noise-2",
+        "noise-11",
+        "noise-0",
+        "noise-4",
+        "noise-8",
+        "noise-14",
+        "noise-6",
+        "noise-20"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 26,
+        "semantic_matches": 40,
+        "lexical_candidates": 26,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.849,
+          "http_ms": 2.358125,
+          "response_bytes": 15801
+        },
+        {
+          "retrieval_ms": 0.762,
+          "http_ms": 2.094666,
+          "response_bytes": 15801
+        },
+        {
+          "retrieval_ms": 0.764,
+          "http_ms": 4.997667,
+          "response_bytes": 15801
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015549662487945998,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015388257575757576,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9952285249843317
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.4228596445811843
+          },
+          "score": 0.0152073732718894,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9987888763881838
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014731182795698926,
+          "semantic": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.9044315856619701
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014515455304928988,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9987646995612478
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01431200163565733,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.989461064347734
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014190821256038648,
+          "semantic": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.9482286273675272
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014141613924050632,
+          "semantic": {
+            "contribution": 0.006329113924050633,
+            "rank": 19,
+            "score": 0.8557319843439719
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014003133568350961,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.972045264308431
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013750461424880029,
+          "semantic": {
+            "contribution": 0.005813953488372093,
+            "rank": 26,
+            "score": 0.7582869779415902
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "invoice",
+        "noise-other"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 2
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.389,
+          "http_ms": 1.530084,
+          "response_bytes": 1871
+        },
+        {
+          "retrieval_ms": 0.404,
+          "http_ms": 1.516916,
+          "response_bytes": 1871
+        },
+        {
+          "retrieval_ms": 0.404,
+          "http_ms": 2.647458,
+          "response_bytes": 1871
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 13.339428598544016
+        },
+        {
+          "score": 3.978237950208867
+        }
+      ]
+    },
+    {
+      "query_id": "development-unanswerable",
+      "split": "development",
+      "category": "unanswerable",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": null,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": true,
+        "returned_on_unanswerable": false
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 0
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.435,
+          "http_ms": 2.696375,
+          "response_bytes": 358
+        },
+        {
+          "retrieval_ms": 0.448,
+          "http_ms": 2.356792,
+          "response_bytes": 358
+        },
+        {
+          "retrieval_ms": 0.389,
+          "http_ms": 2.567708,
+          "response_bytes": 358
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": []
+    },
+    {
+      "query_id": "development-exact_identifiers",
+      "split": "development",
+      "category": "exact_identifiers",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "customer",
+        "noise-0",
+        "noise-1",
+        "noise-2",
+        "noise-3",
+        "invoice",
+        "noise-4",
+        "noise-5",
+        "noise-6",
+        "noise-7"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.532,
+          "http_ms": 1.822625,
+          "response_bytes": 13508
+        },
+        {
+          "retrieval_ms": 0.484,
+          "http_ms": 1.736708,
+          "response_bytes": 13508
+        },
+        {
+          "retrieval_ms": 0.515,
+          "http_ms": 1.761625,
+          "response_bytes": 13508
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.998752338840731
+        },
+        {
+          "score": 0.9950371900631851
+        },
+        {
+          "score": 0.9889363520035758
+        },
+        {
+          "score": 0.9805806751289282
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.9578262820785333
+        },
+        {
+          "score": 0.9438583581201752
+        },
+        {
+          "score": 0.9284766889769309
+        }
+      ]
+    },
+    {
+      "query_id": "development-file_and_class_names",
+      "split": "development",
+      "category": "file_and_class_names",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "file",
+        "error",
+        "near-new",
+        "near-old"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 4
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.377,
+          "http_ms": 1.369125,
+          "response_bytes": 3416
+        },
+        {
+          "retrieval_ms": 0.395,
+          "http_ms": 1.508708,
+          "response_bytes": 3416
+        },
+        {
+          "retrieval_ms": 0.414,
+          "http_ms": 1.540458,
+          "response_bytes": 3416
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 12.747323073308868
+        },
+        {
+          "score": 2.9724856350830384
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 2.3212106925648444
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file",
+        "noise-18",
+        "noise-17",
+        "noise-16"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.51,
+          "http_ms": 1.664708,
+          "response_bytes": 13546
+        },
+        {
+          "retrieval_ms": 0.777,
+          "http_ms": 7.215917,
+          "response_bytes": 13546
+        },
+        {
+          "retrieval_ms": 0.601,
+          "http_ms": 3.086167,
+          "response_bytes": 13546
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9943091547806046
+        },
+        {
+          "score": 0.9918522059846859
+        },
+        {
+          "score": 0.988799086585953
+        },
+        {
+          "score": 0.985071032246631
+        },
+        {
+          "score": 0.9805806734429523
+        },
+        {
+          "score": 0.9805806734429523
+        },
+        {
+          "score": 0.9752315166678784
+        },
+        {
+          "score": 0.9689177045302438
+        },
+        {
+          "score": 0.9615239482943834
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "near-new",
+        "near-old",
+        "error",
+        "file",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 28
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.432,
+          "http_ms": 2.076459,
+          "response_bytes": 8146
+        },
+        {
+          "retrieval_ms": 0.427,
+          "http_ms": 2.179209,
+          "response_bytes": 8146
+        },
+        {
+          "retrieval_ms": 0.48,
+          "http_ms": 2.028292,
+          "response_bytes": 8146
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 8.840307400580121
+        },
+        {
+          "score": 5.364936606998779
+        },
+        {
+          "score": 5.356792896041959
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "noise-1",
+        "noise-2",
+        "noise-0",
+        "noise-3",
+        "customer",
+        "invoice",
+        "noise-4",
+        "noise-5",
+        "noise-6",
+        "noise-7"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.0,
+        "recall_at_10": 0.0,
+        "judged_recall_at_10": 0.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.543,
+          "http_ms": 3.925292,
+          "response_bytes": 13507
+        },
+        {
+          "retrieval_ms": 0.5,
+          "http_ms": 1.616292,
+          "response_bytes": 13507
+        },
+        {
+          "retrieval_ms": 0.578,
+          "http_ms": 1.813458,
+          "response_bytes": 13507
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9987888763881838
+        },
+        {
+          "score": 0.9987646995612478
+        },
+        {
+          "score": 0.9952285249843317
+        },
+        {
+          "score": 0.9950371900631851
+        },
+        {
+          "score": 0.9894610643477341
+        },
+        {
+          "score": 0.989461064347734
+        },
+        {
+          "score": 0.9816649570189423
+        },
+        {
+          "score": 0.972045264308431
+        },
+        {
+          "score": 0.9608235901656638
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "error",
+        "error-alt",
+        "bank-river",
+        "paraphrase",
+        "paraphrase-alt",
+        "bank-money",
+        "pt",
+        "pt-alt",
+        "class",
+        "noise-target"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 0,
+        "semantic_matches": 40,
+        "lexical_candidates": 0,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.884,
+          "http_ms": 2.49,
+          "response_bytes": 14935
+        },
+        {
+          "retrieval_ms": 0.792,
+          "http_ms": 6.175958,
+          "response_bytes": 14935
+        },
+        {
+          "retrieval_ms": 1.174,
+          "http_ms": 2.981834,
+          "response_bytes": 14936
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": null,
+          "score": 0.00819672131147541,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.7925939122204334
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.7140055350190567
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.33968312451989163
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": -0.22645541072251354
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": -0.2625820765886868
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": -0.33968312451989163
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": -0.4529108214450271
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": -0.521773295579281
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": -0.6280742836622916
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": -0.6428785744116595
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-portuguese",
+      "split": "development",
+      "category": "portuguese",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "pt",
+        "class",
+        "paraphrase-alt",
+        "bank-money",
+        "pt-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14",
+        "noise-target"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 4,
+        "semantic_matches": 40,
+        "lexical_candidates": 4,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.824,
+          "http_ms": 2.317833,
+          "response_bytes": 15113
+        },
+        {
+          "retrieval_ms": 0.809,
+          "http_ms": 2.458916,
+          "response_bytes": 15113
+        },
+        {
+          "retrieval_ms": 0.815,
+          "http_ms": 2.821167,
+          "response_bytes": 15113
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 8.897075502919137
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.423316734759779
+          },
+          "score": 0.015079365079365078,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 2.1408057164587686
+          },
+          "score": 0.014141613924050632,
+          "semantic": {
+            "contribution": 0.006329113924050633,
+            "rank": 19,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.0549020574975403
+          },
+          "score": 0.013383665065202471,
+          "semantic": {
+            "contribution": 0.005319148936170213,
+            "rank": 34,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9701425001453319
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "pt-alt",
+        "pt",
+        "bank-money",
+        "noise-target",
+        "noise-other",
+        "paraphrase-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.523,
+          "http_ms": 1.805125,
+          "response_bytes": 13393
+        },
+        {
+          "retrieval_ms": 0.491,
+          "http_ms": 4.357458,
+          "response_bytes": 13393
+        },
+        {
+          "retrieval_ms": 0.559,
+          "http_ms": 3.646625,
+          "response_bytes": 13393
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 0.9999999999999999
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.24253562503633297
+        },
+        {
+          "score": 0.19672236668118556
+        },
+        {
+          "score": 0.19672236668118556
+        },
+        {
+          "score": 0.02678358029538815
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "query_id": "development-paraphrases",
+      "split": "development",
+      "category": "paraphrases",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "paraphrase",
+        "paraphrase-alt",
+        "file",
+        "noise-target",
+        "near-new",
+        "near-old",
+        "error",
+        "error-alt",
+        "bank-river",
+        "class"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 9,
+        "semantic_matches": 40,
+        "lexical_candidates": 9,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.811,
+          "http_ms": 4.338708,
+          "response_bytes": 15470
+        },
+        {
+          "retrieval_ms": 0.886,
+          "http_ms": 3.686292,
+          "response_bytes": 15470
+        },
+        {
+          "retrieval_ms": 0.827,
+          "http_ms": 2.275666,
+          "response_bytes": 15470
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 11.075844830340158
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 2.710319220793983
+          },
+          "score": 0.016129032258064516,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9938837341719244
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 1.653065190448893
+          },
+          "score": 0.014492753623188406,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.7071067811865475
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.303292398433683
+          },
+          "score": 0.014265621860558568,
+          "semantic": {
+            "contribution": 0.006329113924050633,
+            "rank": 19,
+            "score": 0.48666427738711004
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 1.653065190448893
+          },
+          "score": 0.014154704944178628,
+          "semantic": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.5547001866879098
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 1.653065190448893
+          },
+          "score": 0.013377037562012757,
+          "semantic": {
+            "contribution": 0.006024096385542169,
+            "rank": 23,
+            "score": 0.393919317470655
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 2.116874848200741
+          },
+          "score": 0.013075657894736841,
+          "semantic": {
+            "contribution": 0.005263157894736842,
+            "rank": 35,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 1.653065190448893
+          },
+          "score": 0.013018242122719735,
+          "semantic": {
+            "contribution": 0.005555555555555556,
+            "rank": 30,
+            "score": 0.24253562503633297
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 1.8922546874591832
+          },
+          "score": 0.012692307692307694,
+          "semantic": {
+            "contribution": 0.005,
+            "rank": 40,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.8320503006960566
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-paraphrases",
+      "split": "development",
+      "category": "paraphrases",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "paraphrase",
+        "paraphrase-alt",
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.594,
+          "http_ms": 1.922666,
+          "response_bytes": 13522
+        },
+        {
+          "retrieval_ms": 0.582,
+          "http_ms": 2.9225,
+          "response_bytes": 13522
+        },
+        {
+          "retrieval_ms": 0.564,
+          "http_ms": 2.118292,
+          "response_bytes": 13522
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9938837341719244
+        },
+        {
+          "score": 0.8320503006960566
+        },
+        {
+          "score": 0.7682212921081832
+        },
+        {
+          "score": 0.7546055154274357
+        },
+        {
+          "score": 0.7399400806528527
+        },
+        {
+          "score": 0.7241379153934258
+        },
+        {
+          "score": 0.7071067811865475
+        },
+        {
+          "score": 0.7071067811865475
+        },
+        {
+          "score": 0.6887494573718984
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "pt-alt",
+        "pt",
+        "bank-money",
+        "noise-target",
+        "noise-other",
+        "paraphrase-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 1,
+        "semantic_matches": 40,
+        "lexical_candidates": 1,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.75,
+          "http_ms": 2.250333,
+          "response_bytes": 14986
+        },
+        {
+          "retrieval_ms": 0.748,
+          "http_ms": 3.546375,
+          "response_bytes": 14986
+        },
+        {
+          "retrieval_ms": 0.891,
+          "http_ms": 3.665584,
+          "response_bytes": 14986
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 16.67428574818002
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.9999999999999999
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9701425001453319
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.24253562503633297
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.19672236668118556
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.19672236668118556
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.02678358029538815
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-unanswerable",
+      "split": "development",
+      "category": "unanswerable",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "bank-river",
+        "error",
+        "error-alt",
+        "customer",
+        "noise-0",
+        "noise-1",
+        "bank-money",
+        "noise-2",
+        "noise-3",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 0,
+        "semantic_matches": 40,
+        "lexical_candidates": 0,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.757,
+          "http_ms": 8.787292,
+          "response_bytes": 14957
+        },
+        {
+          "retrieval_ms": 0.817,
+          "http_ms": 2.067333,
+          "response_bytes": 14957
+        },
+        {
+          "retrieval_ms": 0.86,
+          "http_ms": 2.45575,
+          "response_bytes": 14957
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": null,
+          "score": 0.00819672131147541,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.31108551539735263
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.2073903384476404
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": -0.2073903384476404
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": -0.24855790331036218
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": -0.28890554069127833
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": -0.31108551539735263
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": -0.32815335648218025
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": -0.36605332698664284
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": -0.4023963628951608
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-near_duplicates",
+      "split": "development",
+      "category": "near_duplicates",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "near-old",
+        "noise-11",
+        "noise-8",
+        "near-new",
+        "noise-9",
+        "noise-6",
+        "noise-7",
+        "noise-14",
+        "noise-3",
+        "noise-4"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.9737576937588317,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 28,
+        "semantic_matches": 40,
+        "lexical_candidates": 28,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.961,
+          "http_ms": 3.498334,
+          "response_bytes": 15747
+        },
+        {
+          "retrieval_ms": 0.75,
+          "http_ms": 2.605167,
+          "response_bytes": 15747
+        },
+        {
+          "retrieval_ms": 0.785,
+          "http_ms": 2.032833,
+          "response_bytes": 15747
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 8.840307400580121
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015045248868778281,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.9908301684526853
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015008960573476702,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.999838685650531
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 5.364936606998779
+          },
+          "score": 0.015008960573476702,
+          "semantic": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.9832820108141853
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006493506493506494,
+            "rank": 17,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014306006493506494,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9982743743819286
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014271255060728745,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9976741231261145
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00625,
+            "rank": 20,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014186507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9997026902671862
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014129353233830846,
+          "semantic": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.9716676080197578
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014003133568350961,
+          "semantic": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.9785497813428937
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01380952380952381,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.9872411174398907
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-unanswerable",
+      "split": "development",
+      "category": "unanswerable",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "bank-river",
+        "error",
+        "error-alt",
+        "customer",
+        "noise-0",
+        "noise-1",
+        "bank-money",
+        "noise-2",
+        "noise-3",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.554,
+          "http_ms": 2.392875,
+          "response_bytes": 13431
+        },
+        {
+          "retrieval_ms": 0.576,
+          "http_ms": 2.735333,
+          "response_bytes": 13431
+        },
+        {
+          "retrieval_ms": 0.589,
+          "http_ms": 1.883708,
+          "response_bytes": 13431
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 0.31108551539735263
+        },
+        {
+          "score": 0.2073903384476404
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": -0.2073903384476404
+        },
+        {
+          "score": -0.24855790331036218
+        },
+        {
+          "score": -0.28890554069127833
+        },
+        {
+          "score": -0.31108551539735263
+        },
+        {
+          "score": -0.32815335648218025
+        },
+        {
+          "score": -0.36605332698664284
+        },
+        {
+          "score": -0.4023963628951608
+        }
+      ]
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "bank-river",
+        "class",
+        "bank-money",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 3,
+        "semantic_matches": 40,
+        "lexical_candidates": 3,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.895,
+          "http_ms": 3.359,
+          "response_bytes": 15054
+        },
+        {
+          "retrieval_ms": 0.841,
+          "http_ms": 2.860584,
+          "response_bytes": 15054
+        },
+        {
+          "retrieval_ms": 0.914,
+          "http_ms": 2.361083,
+          "response_bytes": 15054
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 10.70610431179393
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.067985980136297
+          },
+          "score": 0.015417457305502846,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.8199008604487257
+          },
+          "score": 0.012936507936507937,
+          "semantic": {
+            "contribution": 0.005,
+            "rank": 40,
+            "score": -1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "error",
+        "error-alt",
+        "bank-river",
+        "paraphrase",
+        "paraphrase-alt",
+        "bank-money",
+        "pt",
+        "pt-alt",
+        "class",
+        "noise-target"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.6,
+          "http_ms": 1.916583,
+          "response_bytes": 13409
+        },
+        {
+          "retrieval_ms": 0.564,
+          "http_ms": 2.004875,
+          "response_bytes": 13409
+        },
+        {
+          "retrieval_ms": 0.701,
+          "http_ms": 2.489416,
+          "response_bytes": 13409
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 0.7925939122204334
+        },
+        {
+          "score": 0.7140055350190567
+        },
+        {
+          "score": 0.33968312451989163
+        },
+        {
+          "score": -0.22645541072251354
+        },
+        {
+          "score": -0.2625820765886868
+        },
+        {
+          "score": -0.33968312451989163
+        },
+        {
+          "score": -0.4529108214450271
+        },
+        {
+          "score": -0.521773295579281
+        },
+        {
+          "score": -0.6280742836622916
+        },
+        {
+          "score": -0.6428785744116595
+        }
+      ]
+    },
+    {
+      "query_id": "development-near_duplicates",
+      "split": "development",
+      "category": "near_duplicates",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "near-old",
+        "near-new",
+        "error",
+        "file",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 28
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.406,
+          "http_ms": 1.797834,
+          "response_bytes": 8146
+        },
+        {
+          "retrieval_ms": 0.395,
+          "http_ms": 1.563875,
+          "response_bytes": 8146
+        },
+        {
+          "retrieval_ms": 0.491,
+          "http_ms": 1.915584,
+          "response_bytes": 8146
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 8.840307400580121
+        },
+        {
+          "score": 5.364936606998779
+        },
+        {
+          "score": 5.356792896041959
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "near-new",
+        "noise-11",
+        "noise-14",
+        "near-old",
+        "noise-12",
+        "file",
+        "noise-18",
+        "noise-17",
+        "noise-20",
+        "noise-8"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.9737576937588317,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 28,
+        "semantic_matches": 40,
+        "lexical_candidates": 28,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.789,
+          "http_ms": 3.167041,
+          "response_bytes": 15733
+        },
+        {
+          "retrieval_ms": 0.799,
+          "http_ms": 2.531792,
+          "response_bytes": 15733
+        },
+        {
+          "retrieval_ms": 0.895,
+          "http_ms": 2.448375,
+          "response_bytes": 15733
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 8.840307400580121
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015504807692307693,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9988681391035035
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.4228596445811843
+          },
+          "score": 0.015154994259471873,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9984603525695911
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 5.364936606998779
+          },
+          "score": 0.014913831197525408,
+          "semantic": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.9832820108141853
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014821272885789015,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9999324026827697
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 2.3212106925648444
+          },
+          "score": 0.014479166666666668,
+          "semantic": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.9805806734429523
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014297385620915032,
+          "semantic": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.9852854529029331
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014285714285714285,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.989532981310027
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01406926406926407,
+          "semantic": {
+            "contribution": 0.006493506493506494,
+            "rank": 17,
+            "score": 0.9755072441048676
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013986697965571206,
+          "semantic": {
+            "contribution": 0.007042253521126761,
+            "rank": 11,
+            "score": 0.986393924086794
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-ambiguous_terms",
+      "split": "development",
+      "category": "ambiguous_terms",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "bank-money",
+        "bank-river",
+        "noise-target",
+        "noise-other",
+        "pt-alt",
+        "paraphrase-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 2,
+        "semantic_matches": 40,
+        "lexical_candidates": 2,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.869,
+          "http_ms": 2.373291,
+          "response_bytes": 14981
+        },
+        {
+          "retrieval_ms": 0.792,
+          "http_ms": 3.36075,
+          "response_bytes": 14981
+        },
+        {
+          "retrieval_ms": 0.792,
+          "http_ms": 1.976833,
+          "response_bytes": 14981
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 9.489615159720733
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.3639331807925315
+          },
+          "score": 0.013064516129032259,
+          "semantic": {
+            "contribution": 0.005,
+            "rank": 40,
+            "score": -1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.8111070967480165
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.8111070967480165
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.24253562503633297
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.1104315305900972
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "paraphrase-alt",
+        "paraphrase",
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 2,
+        "semantic_matches": 40,
+        "lexical_candidates": 2,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.823,
+          "http_ms": 2.129958,
+          "response_bytes": 15181
+        },
+        {
+          "retrieval_ms": 0.785,
+          "http_ms": 2.361375,
+          "response_bytes": 15181
+        },
+        {
+          "retrieval_ms": 0.806,
+          "http_ms": 2.140708,
+          "response_bytes": 15181
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.2052642552200976
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 6.669714299272008
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9938837341719244
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.8269612598746693
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.7635226464708619
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.7499901474997496
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.735414410422732
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.7197088954066911
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.7027819281439757
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.7027819281439757
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.684536882601669
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "error-alt",
+        "noise-11",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "noise-17",
+        "noise-1",
+        "noise-8",
+        "noise-2"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 26
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.425,
+          "http_ms": 1.704292,
+          "response_bytes": 8224
+        },
+        {
+          "retrieval_ms": 0.497,
+          "http_ms": 2.477791,
+          "response_bytes": 8224
+        },
+        {
+          "retrieval_ms": 0.439,
+          "http_ms": 2.29475,
+          "response_bytes": 8224
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 7.409235471455764
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "noise-other",
+        "noise-target",
+        "bank-money",
+        "near-new",
+        "noise-12",
+        "noise-13",
+        "noise-11",
+        "noise-14",
+        "noise-10",
+        "noise-15"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.544,
+          "http_ms": 3.256292,
+          "response_bytes": 13480
+        },
+        {
+          "retrieval_ms": 0.545,
+          "http_ms": 1.889875,
+          "response_bytes": 13480
+        },
+        {
+          "retrieval_ms": 0.525,
+          "http_ms": 2.890334,
+          "response_bytes": 13480
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9736842063985703
+        },
+        {
+          "score": 0.8111070967480165
+        },
+        {
+          "score": 0.584897664215719
+        },
+        {
+          "score": 0.5848581267027637
+        },
+        {
+          "score": 0.5847466643829661
+        },
+        {
+          "score": 0.584235641421141
+        },
+        {
+          "score": 0.5839971280299571
+        },
+        {
+          "score": 0.5827780720148568
+        },
+        {
+          "score": 0.5826987920834444
+        }
+      ]
+    },
+    {
+      "query_id": "development-ambiguous_terms",
+      "split": "development",
+      "category": "ambiguous_terms",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "bank-money",
+        "noise-target",
+        "noise-other",
+        "pt-alt",
+        "paraphrase-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.581,
+          "http_ms": 2.213792,
+          "response_bytes": 13377
+        },
+        {
+          "retrieval_ms": 0.548,
+          "http_ms": 1.869792,
+          "response_bytes": 13377
+        },
+        {
+          "retrieval_ms": 0.539,
+          "http_ms": 2.168583,
+          "response_bytes": 13377
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.8111070967480165
+        },
+        {
+          "score": 0.8111070967480165
+        },
+        {
+          "score": 0.24253562503633297
+        },
+        {
+          "score": 0.1104315305900972
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "paraphrase-alt",
+        "paraphrase",
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.505,
+          "http_ms": 1.638667,
+          "response_bytes": 13520
+        },
+        {
+          "retrieval_ms": 0.57,
+          "http_ms": 3.155333,
+          "response_bytes": 13520
+        },
+        {
+          "retrieval_ms": 0.518,
+          "http_ms": 1.99625,
+          "response_bytes": 13520
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9938837341719244
+        },
+        {
+          "score": 0.8269612598746693
+        },
+        {
+          "score": 0.7635226464708619
+        },
+        {
+          "score": 0.7499901474997496
+        },
+        {
+          "score": 0.735414410422732
+        },
+        {
+          "score": 0.7197088954066911
+        },
+        {
+          "score": 0.7027819281439757
+        },
+        {
+          "score": 0.7027819281439757
+        },
+        {
+          "score": 0.684536882601669
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "near-new",
+        "noise-12",
+        "noise-13",
+        "noise-11",
+        "noise-14",
+        "noise-10",
+        "noise-15",
+        "noise-16",
+        "noise-9",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.9173194127129571,
+        "recall_at_10": 0.5,
+        "judged_recall_at_10": 0.5,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.51,
+          "http_ms": 1.742125,
+          "response_bytes": 13564
+        },
+        {
+          "retrieval_ms": 0.504,
+          "http_ms": 1.596042,
+          "response_bytes": 13564
+        },
+        {
+          "retrieval_ms": 0.849,
+          "http_ms": 3.217417,
+          "response_bytes": 13564
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9999324026827697
+        },
+        {
+          "score": 0.9997418354662856
+        },
+        {
+          "score": 0.9988681391035035
+        },
+        {
+          "score": 0.9984603525695911
+        },
+        {
+          "score": 0.9963761315345577
+        },
+        {
+          "score": 0.9962405865729983
+        },
+        {
+          "score": 0.9932225363802684
+        },
+        {
+          "score": 0.9922778781354071
+        },
+        {
+          "score": 0.989532981310027
+        }
+      ]
+    },
+    {
+      "query_id": "development-file_and_class_names",
+      "split": "development",
+      "category": "file_and_class_names",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "noise-19",
+        "file",
+        "noise-20",
+        "noise-18",
+        "noise-21",
+        "noise-17",
+        "noise-22",
+        "noise-16",
+        "noise-23",
+        "noise-15"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.6309297535714575,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.557,
+          "http_ms": 2.3785,
+          "response_bytes": 13585
+        },
+        {
+          "retrieval_ms": 0.661,
+          "http_ms": 2.652584,
+          "response_bytes": 13585
+        },
+        {
+          "retrieval_ms": 0.5,
+          "http_ms": 1.939416,
+          "response_bytes": 13585
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 0.9999999999999998
+        },
+        {
+          "score": 0.9999999999999998
+        },
+        {
+          "score": 0.9997026911960446
+        },
+        {
+          "score": 0.9996714307488691
+        },
+        {
+          "score": 0.9988681372112965
+        },
+        {
+          "score": 0.998617828640189
+        },
+        {
+          "score": 0.9975751015506886
+        },
+        {
+          "score": 0.9967290492332825
+        },
+        {
+          "score": 0.9958932046984081
+        },
+        {
+          "score": 0.9938837354763299
+        }
+      ]
+    },
+    {
+      "query_id": "development-paraphrases",
+      "split": "development",
+      "category": "paraphrases",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "paraphrase",
+        "paraphrase-alt",
+        "noise-target",
+        "error",
+        "bank-river",
+        "near-new",
+        "error-alt",
+        "near-old",
+        "file"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 9
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.457,
+          "http_ms": 2.475708,
+          "response_bytes": 7238
+        },
+        {
+          "retrieval_ms": 0.412,
+          "http_ms": 4.746917,
+          "response_bytes": 7238
+        },
+        {
+          "retrieval_ms": 0.437,
+          "http_ms": 1.594958,
+          "response_bytes": 7238
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 11.075844830340158
+        },
+        {
+          "score": 2.710319220793983
+        },
+        {
+          "score": 2.303292398433683
+        },
+        {
+          "score": 2.116874848200741
+        },
+        {
+          "score": 1.8922546874591832
+        },
+        {
+          "score": 1.653065190448893
+        },
+        {
+          "score": 1.653065190448893
+        },
+        {
+          "score": 1.653065190448893
+        },
+        {
+          "score": 1.653065190448893
+        }
+      ]
+    },
+    {
+      "query_id": "development-ambiguous_terms",
+      "split": "development",
+      "category": "ambiguous_terms",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "bank-money",
+        "bank-river"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 2
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.367,
+          "http_ms": 1.50075,
+          "response_bytes": 1868
+        },
+        {
+          "retrieval_ms": 0.385,
+          "http_ms": 3.991167,
+          "response_bytes": 1868
+        },
+        {
+          "retrieval_ms": 0.418,
+          "http_ms": 1.551834,
+          "response_bytes": 1868
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 9.489615159720733
+        },
+        {
+          "score": 3.3639331807925315
+        }
+      ]
+    },
+    {
+      "query_id": "development-near_duplicates",
+      "split": "development",
+      "category": "near_duplicates",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "near-old",
+        "noise-8",
+        "noise-7",
+        "noise-9",
+        "noise-6",
+        "noise-10",
+        "noise-5",
+        "noise-11",
+        "invoice",
+        "noise-4"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.9173194127129571,
+        "recall_at_10": 0.5,
+        "judged_recall_at_10": 0.5,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.577,
+          "http_ms": 2.0895,
+          "response_bytes": 13524
+        },
+        {
+          "retrieval_ms": 0.574,
+          "http_ms": 2.192875,
+          "response_bytes": 13524
+        },
+        {
+          "retrieval_ms": 0.565,
+          "http_ms": 2.543833,
+          "response_bytes": 13524
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.999838685650531
+        },
+        {
+          "score": 0.9997026902671862
+        },
+        {
+          "score": 0.9982743743819286
+        },
+        {
+          "score": 0.9976741231261145
+        },
+        {
+          "score": 0.9952065946802512
+        },
+        {
+          "score": 0.9935731461236502
+        },
+        {
+          "score": 0.9908301684526853
+        },
+        {
+          "score": 0.9872411174398907
+        },
+        {
+          "score": 0.9872411174398907
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": null,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": true,
+        "returned_on_unanswerable": false
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 0
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.451,
+          "http_ms": 6.991334,
+          "response_bytes": 358
+        },
+        {
+          "retrieval_ms": 0.443,
+          "http_ms": 1.907,
+          "response_bytes": 358
+        },
+        {
+          "retrieval_ms": 0.541,
+          "http_ms": 3.053166,
+          "response_bytes": 358
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": []
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "bank-river",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14",
+        "noise-18",
+        "noise-3",
+        "class",
+        "noise-17",
+        "noise-1"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.529,
+          "http_ms": 3.320834,
+          "response_bytes": 13358
+        },
+        {
+          "retrieval_ms": 0.509,
+          "http_ms": 1.874958,
+          "response_bytes": 13358
+        },
+        {
+          "retrieval_ms": 0.489,
+          "http_ms": 1.642833,
+          "response_bytes": 13358
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "bank-river",
+        "class",
+        "bank-money"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 3
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.424,
+          "http_ms": 5.546709,
+          "response_bytes": 2633
+        },
+        {
+          "retrieval_ms": 0.414,
+          "http_ms": 1.959709,
+          "response_bytes": 2633
+        },
+        {
+          "retrieval_ms": 0.443,
+          "http_ms": 1.927042,
+          "response_bytes": 2633
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 10.70610431179393
+        },
+        {
+          "score": 3.067985980136297
+        },
+        {
+          "score": 2.8199008604487257
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "noise-other",
+        "noise-target",
+        "bank-money",
+        "near-new",
+        "noise-12",
+        "noise-13",
+        "noise-11",
+        "noise-14",
+        "noise-10",
+        "noise-15"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 1,
+        "semantic_matches": 40,
+        "lexical_candidates": 1,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.851,
+          "http_ms": 2.423708,
+          "response_bytes": 15072
+        },
+        {
+          "retrieval_ms": 0.723,
+          "http_ms": 2.193167,
+          "response_bytes": 15072
+        },
+        {
+          "retrieval_ms": 0.769,
+          "http_ms": 2.148209,
+          "response_bytes": 15072
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 11.9347138506266
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9736842063985703
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.8111070967480165
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.584897664215719
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.5848581267027637
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.5847466643829661
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.584235641421141
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.5839971280299571
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.5827780720148568
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.5826987920834444
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-portuguese",
+      "split": "development",
+      "category": "portuguese",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "pt",
+        "bank-money",
+        "class",
+        "paraphrase-alt"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 4
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.425,
+          "http_ms": 4.392125,
+          "response_bytes": 3435
+        },
+        {
+          "retrieval_ms": 0.383,
+          "http_ms": 1.479333,
+          "response_bytes": 3435
+        },
+        {
+          "retrieval_ms": 0.409,
+          "http_ms": 1.995625,
+          "response_bytes": 3435
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 8.897075502919137
+        },
+        {
+          "score": 3.0549020574975403
+        },
+        {
+          "score": 2.423316734759779
+        },
+        {
+          "score": 2.1408057164587686
+        }
+      ]
+    },
+    {
+      "query_id": "development-exact_identifiers",
+      "split": "development",
+      "category": "exact_identifiers",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "customer",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 2
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.449,
+          "http_ms": 2.145833,
+          "response_bytes": 1864
+        },
+        {
+          "retrieval_ms": 0.43,
+          "http_ms": 1.515625,
+          "response_bytes": 1864
+        },
+        {
+          "retrieval_ms": 0.51,
+          "http_ms": 1.9895,
+          "response_bytes": 1864
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 16.460450623781078
+        },
+        {
+          "score": 8.459702581346177
+        }
+      ]
+    },
+    {
+      "query_id": "development-portuguese",
+      "split": "development",
+      "category": "portuguese",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "pt",
+        "pt-alt",
+        "noise-11",
+        "invoice",
+        "noise-20",
+        "noise-14",
+        "noise-target",
+        "noise-18",
+        "noise-3",
+        "class"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.544,
+          "http_ms": 2.189,
+          "response_bytes": 13357
+        },
+        {
+          "retrieval_ms": 0.494,
+          "http_ms": 1.706875,
+          "response_bytes": 13357
+        },
+        {
+          "retrieval_ms": 0.498,
+          "http_ms": 1.756791,
+          "response_bytes": 13357
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9701425001453319
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        },
+        {
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "noise-4",
+        "invoice",
+        "noise-5",
+        "noise-3",
+        "noise-6",
+        "noise-2",
+        "noise-7",
+        "noise-1",
+        "near-old",
+        "noise-8"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.6309297535714575,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.529,
+          "http_ms": 2.643583,
+          "response_bytes": 13521
+        },
+        {
+          "retrieval_ms": 0.527,
+          "http_ms": 1.713834,
+          "response_bytes": 13521
+        },
+        {
+          "retrieval_ms": 0.813,
+          "http_ms": 3.70675,
+          "response_bytes": 13521
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9999999999999999
+        },
+        {
+          "score": 0.9989200855699345
+        },
+        {
+          "score": 0.9988681378607406
+        },
+        {
+          "score": 0.9957988528566648
+        },
+        {
+          "score": 0.9953870308851348
+        },
+        {
+          "score": 0.9908301673500425
+        },
+        {
+          "score": 0.9894610643477341
+        },
+        {
+          "score": 0.9872411174398907
+        },
+        {
+          "score": 0.9842218642297194
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "noise-other"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 1
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.475,
+          "http_ms": 2.497208,
+          "response_bytes": 1112
+        },
+        {
+          "retrieval_ms": 0.422,
+          "http_ms": 2.151333,
+          "response_bytes": 1112
+        },
+        {
+          "retrieval_ms": 0.503,
+          "http_ms": 1.886625,
+          "response_bytes": 1112
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 11.9347138506266
+        }
+      ]
+    },
+    {
+      "query_id": "development-noise",
+      "split": "development",
+      "category": "noise",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "noise-target",
+        "noise-other",
+        "bank-money",
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 1,
+        "semantic_matches": 40,
+        "lexical_candidates": 1,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.866,
+          "http_ms": 2.024208,
+          "response_bytes": 15055
+        },
+        {
+          "retrieval_ms": 0.841,
+          "http_ms": 3.606916,
+          "response_bytes": 15055
+        },
+        {
+          "retrieval_ms": 0.864,
+          "http_ms": 2.506792,
+          "response_bytes": 15055
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 14.51298536674437
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9736842063985703
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.8111070967480165
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.584897664215719
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.5815691021394814
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.5801320385276509
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.5783462761227603
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.5761657458476217
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.5735393454718595
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.5735393454718595
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "development-exact_identifiers",
+      "split": "development",
+      "category": "exact_identifiers",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "customer",
+        "invoice",
+        "noise-0",
+        "noise-1",
+        "noise-2",
+        "noise-3",
+        "noise-4",
+        "noise-5",
+        "noise-6",
+        "noise-7"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 2,
+        "semantic_matches": 40,
+        "lexical_candidates": 2,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.816,
+          "http_ms": 2.559541,
+          "response_bytes": 15170
+        },
+        {
+          "retrieval_ms": 0.841,
+          "http_ms": 5.100708,
+          "response_bytes": 15170
+        },
+        {
+          "retrieval_ms": 0.87,
+          "http_ms": 2.732834,
+          "response_bytes": 15170
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 16.460450623781078
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 8.459702581346177
+          },
+          "score": 0.015640273704789834,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.9701425001453319
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.998752338840731
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9950371900631851
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9889363520035758
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9805806751289282
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.9701425001453319
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.9578262820785333
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.9438583581201752
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.9284766889769309
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file",
+        "noise-18",
+        "noise-17",
+        "noise-16"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 1,
+        "semantic_matches": 40,
+        "lexical_candidates": 1,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.823,
+          "http_ms": 1.97975,
+          "response_bytes": 15139
+        },
+        {
+          "retrieval_ms": 0.841,
+          "http_ms": 2.585125,
+          "response_bytes": 15139
+        },
+        {
+          "retrieval_ms": 0.924,
+          "http_ms": 2.610708,
+          "response_bytes": 15139
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 7.256492683372185
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9943091547806046
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9918522059846859
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.988799086585953
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.985071032246631
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.9805806734429523
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.9805806734429523
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.9752315166678784
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.9689177045302438
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.9615239482943834
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "pt-alt"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 1
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.396,
+          "http_ms": 1.25,
+          "response_bytes": 1131
+        },
+        {
+          "retrieval_ms": 0.489,
+          "http_ms": 1.794459,
+          "response_bytes": 1131
+        },
+        {
+          "retrieval_ms": 0.396,
+          "http_ms": 1.533125,
+          "response_bytes": 1131
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 16.67428574818002
+        }
+      ]
+    },
+    {
+      "query_id": "development-noise",
+      "split": "development",
+      "category": "noise",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "noise-target"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 1
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.39,
+          "http_ms": 1.442084,
+          "response_bytes": 1114
+        },
+        {
+          "retrieval_ms": 0.441,
+          "http_ms": 3.265417,
+          "response_bytes": 1114
+        },
+        {
+          "retrieval_ms": 0.395,
+          "http_ms": 1.568167,
+          "response_bytes": 1114
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 14.51298536674437
+        }
+      ]
+    },
+    {
+      "query_id": "development-file_and_class_names",
+      "split": "development",
+      "category": "file_and_class_names",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "file",
+        "near-new",
+        "near-old",
+        "error",
+        "noise-19",
+        "noise-20",
+        "noise-18",
+        "noise-21",
+        "noise-17",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 4,
+        "semantic_matches": 40,
+        "lexical_candidates": 4,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.828,
+          "http_ms": 4.113166,
+          "response_bytes": 15265
+        },
+        {
+          "retrieval_ms": 0.857,
+          "http_ms": 2.339625,
+          "response_bytes": 15265
+        },
+        {
+          "retrieval_ms": 0.859,
+          "http_ms": 3.35825,
+          "response_bytes": 15265
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 12.747323073308868
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9999999999999998
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.3212106925648444
+          },
+          "score": 0.014693264693264693,
+          "semantic": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.9805806734429523
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 2.3212106925648444
+          },
+          "score": 0.0140625,
+          "semantic": {
+            "contribution": 0.00625,
+            "rank": 20,
+            "score": 0.9284766985185727
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 2.9724856350830384
+          },
+          "score": 0.013064516129032259,
+          "semantic": {
+            "contribution": 0.005,
+            "rank": 40,
+            "score": -0.7071067811865475
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.00819672131147541,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.9999999999999998
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9997026911960446
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9996714307488691
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9988681372112965
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.998617828640189
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.9975751015506886
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "mode": "hybrid",
+      "ranking_version": "weighted_rrf_v1",
+      "ranked": [
+        "invoice",
+        "noise-other",
+        "noise-4",
+        "noise-5",
+        "noise-3",
+        "noise-6",
+        "noise-2",
+        "noise-7",
+        "noise-1",
+        "near-old"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 61404,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "lexical_matches": 2,
+        "semantic_matches": 40,
+        "lexical_candidates": 2,
+        "semantic_candidates": 40,
+        "candidates_truncated": false
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.836,
+          "http_ms": 2.199,
+          "response_bytes": 15152
+        },
+        {
+          "retrieval_ms": 0.957,
+          "http_ms": 2.603708,
+          "response_bytes": 15152
+        },
+        {
+          "retrieval_ms": 0.846,
+          "http_ms": 2.296542,
+          "response_bytes": 15152
+        }
+      ],
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "score_evidence": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 13.339428598544016
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.9999999999999999
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.978237950208867
+          },
+          "score": 0.013559021623537754,
+          "semantic": {
+            "contribution": 0.005494505494505495,
+            "rank": 31,
+            "score": 0.5508226466407832
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.00819672131147541,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 1.0
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.9989200855699345
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.9988681378607406
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.9957988528566648
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.9953870308851348
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.9908301673500425
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.9894610643477341
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.9872411174398907
+          }
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "mode": "lexical",
+      "ranking_version": "bm25_v1",
+      "ranked": [
+        "class"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_records": 40,
+        "scanned_bytes": 29589,
+        "corpus_records": 40,
+        "matched_records": 1
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.395,
+          "http_ms": 1.261916,
+          "response_bytes": 1122
+        },
+        {
+          "retrieval_ms": 0.452,
+          "http_ms": 1.62925,
+          "response_bytes": 1122
+        },
+        {
+          "retrieval_ms": 0.416,
+          "http_ms": 2.791042,
+          "response_bytes": 1122
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 7.256492683372185
+        }
+      ]
+    },
+    {
+      "query_id": "development-noise",
+      "split": "development",
+      "category": "noise",
+      "mode": "semantic",
+      "ranking_version": "cosine_exact_v1",
+      "ranked": [
+        "noise-target",
+        "noise-other",
+        "bank-money",
+        "class",
+        "noise-23",
+        "noise-22",
+        "noise-21",
+        "noise-20",
+        "noise-19",
+        "file"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "scanned_embeddings": 40,
+        "matched_records": 40
+      },
+      "samples": [
+        {
+          "retrieval_ms": 0.525,
+          "http_ms": 1.713958,
+          "response_bytes": 13462
+        },
+        {
+          "retrieval_ms": 0.524,
+          "http_ms": 1.643083,
+          "response_bytes": 13462
+        },
+        {
+          "retrieval_ms": 0.575,
+          "http_ms": 2.943167,
+          "response_bytes": 13462
+        }
+      ],
+      "ranking_profile": null,
+      "score_evidence": [
+        {
+          "score": 1.0
+        },
+        {
+          "score": 0.9736842063985703
+        },
+        {
+          "score": 0.8111070967480165
+        },
+        {
+          "score": 0.584897664215719
+        },
+        {
+          "score": 0.5815691021394814
+        },
+        {
+          "score": 0.5801320385276509
+        },
+        {
+          "score": 0.5783462761227603
+        },
+        {
+          "score": 0.5761657458476217
+        },
+        {
+          "score": 0.5735393454718595
+        },
+        {
+          "score": 0.5735393454718595
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "per_method_separate_warm_pass": {
+      "lexical": {
+        "queries": 18,
+        "elapsed_seconds_including_telemetry": 0.24457883299328387,
+        "before": {
+          "available": true,
+          "cpu_usage_usec": 407020,
+          "memory_current_bytes": 8896512,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "after": {
+          "available": true,
+          "cpu_usage_usec": 446083,
+          "memory_current_bytes": 8941568,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "cpu_usage_usec_delta": 39063
+      },
+      "semantic": {
+        "queries": 18,
+        "elapsed_seconds_including_telemetry": 0.22464270913042128,
+        "before": {
+          "available": true,
+          "cpu_usage_usec": 478403,
+          "memory_current_bytes": 8630272,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "after": {
+          "available": true,
+          "cpu_usage_usec": 519368,
+          "memory_current_bytes": 9011200,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "cpu_usage_usec_delta": 40965
+      },
+      "hybrid": {
+        "queries": 18,
+        "elapsed_seconds_including_telemetry": 0.25335895805619657,
+        "before": {
+          "available": true,
+          "cpu_usage_usec": 542304,
+          "memory_current_bytes": 8867840,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "after": {
+          "available": true,
+          "cpu_usage_usec": 588006,
+          "memory_current_bytes": 8925184,
+          "memory_peak_since_container_start_bytes": 11894784
+        },
+        "cpu_usage_usec_delta": 45702
+      }
+    },
+    "before": {
+      "available": true,
+      "cpu_usage_usec": 177234,
+      "memory_current_bytes": 8548352,
+      "memory_peak_since_container_start_bytes": 11894784
+    },
+    "after": {
+      "available": true,
+      "cpu_usage_usec": 375194,
+      "memory_current_bytes": 8380416,
+      "memory_peak_since_container_start_bytes": 11894784
+    },
+    "cpu_usage_usec_delta": 197960,
+    "scope": "entire container including telemetry commands and any concurrent clients; memory peak is since container start, not isolated trial peak"
+  },
+  "embedding_measurements": {
+    "generation_latency_ms": null,
+    "generation_cost": null,
+    "end_to_end_with_generation_ms": null,
+    "reason": "Frozen externally supplied vectors are reused. No model invocation occurs in this trial; do not interpret missing generation measurements as zero."
+  },
+  "agent_task_evaluation": {
+    "status": "not_run",
+    "reason": "A fixed model, prompt, tools, task suite and acceptance outcomes are required separately."
+  },
+  "qualification": {
+    "hybrid_admitted": false,
+    "status": "experimental",
+    "reason": "Synthetic contract evidence cannot qualify language relevance. Review held-out gains, uncertainty, exact-query regressions and separate agent-task outcomes before adoption."
+  },
+  "deployment": {
+    "validated_source_revision": "88fdf11d45c41222d98f80b475394e38c6d6009e",
+    "image_id": "sha256:e3cd37176fbf486e00d30f9b7ca75e0818222f3bb5f22f649b6f87da254a7508",
+    "architecture": "arm64",
+    "os": "linux",
+    "environment": "Disposable local Docker acceptance volume, removed after validation",
+    "process_restart": "Same frozen source IDs, revisions and rankings verified before and after SIGKILL"
+  },
+  "report_context": "Synthetic contract trial only. Not language-model relevance qualification; hybrid is not admitted."
+}

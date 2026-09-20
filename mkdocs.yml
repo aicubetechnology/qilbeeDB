@@ -79,6 +79,7 @@ nav:
     - Memory Quickstart: user/quickstart.md
     - Local Docker: user/deployment.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
+    - Synthetic Retrieval Report: research/retrieval-contract-report.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md

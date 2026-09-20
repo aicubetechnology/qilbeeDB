@@ -5,6 +5,9 @@ revisions, query set and externally generated vectors. This workflow records
 reproducible evidence. It does not promote an experimental ranking method or
 establish improved agent reasoning from a retrieval score alone.
 
+The [0.5.0 synthetic contract report](retrieval-contract-report.md) preserves a
+negative result: hybrid was not admitted after an exact error-code regression.
+
 ## What the bundled fixture establishes
 
 `benchmarks/retrieval/contract-fixture.json` contains 40 fictional memories,
