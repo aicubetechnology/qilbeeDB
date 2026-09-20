@@ -24,6 +24,7 @@ pub mod embeddings;
 pub mod episode;
 pub mod learning;
 pub mod llm;
+pub mod retrieval;
 pub mod storage;
 pub mod types;
 pub mod vector_index;
@@ -43,6 +44,7 @@ pub use embeddings::{
     SimilarityMetric, SimilarityResult,
 };
 pub use episode::{Episode, EpisodeContent, EpisodeType};
+pub use retrieval::KeywordSearchResult;
 pub use llm::{
     create_provider as create_llm_provider, ChatMessage, LLMConfig, LLMError, LLMProvider,
     LLMProviderType, LLMResponse, LLMResult, LLMService, LLMStatus, MessageRole, MockLLMProvider,

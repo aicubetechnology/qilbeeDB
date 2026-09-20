@@ -110,6 +110,7 @@ nav:
     - Episodes: agent-memory/episodes.md
     - Memory Types: agent-memory/memory-types.md
     - Semantic Search: agent-memory/semantic-search.md
+    - Lexical and Hybrid Retrieval: agent-memory/lexical-retrieval.md
     - Persistence: agent-memory/persistence.md
     - Storage Integrity: agent-memory/storage-integrity.md
     - Evidence-Driven Learning: agent-memory/learning.md
