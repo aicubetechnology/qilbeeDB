@@ -1,6 +1,6 @@
 # HTTP REST API
 
-QilbeeDB Rust 0.2.0 exposes the authenticated platform API for durable identity
+QilbeeDB Rust 0.3.0 exposes the authenticated platform API for durable identity
 and scoped, versioned memory, plus evidence-driven procedural learning.
 
 ## Base URL
@@ -13,6 +13,10 @@ For a container on the configured integration network, use
 `http://qilbeedb-local:7474`. See [Docker deployment](../operations/docker.md).
 
 ## API contract
+
+Open the browser reference at [`/docs`](http://localhost:7474/docs), or the server
+root URL, which redirects there. The page supports endpoint/schema search and
+loads only the public contract from the same server.
 
 Download the machine-readable [OpenAPI 3.1 specification](openapi.json), or request
 `GET /openapi.json` from a running server. It lists implemented endpoints only.
@@ -51,7 +55,7 @@ curl --fail 'http://localhost:7474/health'
 Response:
 
 ```json
-{"contract_version":1,"status":"healthy","version":"0.2.0"}
+{"contract_version":1,"status":"healthy","version":"0.3.0"}
 ```
 
 This is process health. It does not replace an authenticated write/read probe.

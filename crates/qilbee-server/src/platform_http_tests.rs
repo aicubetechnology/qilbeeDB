@@ -663,3 +663,39 @@ async fn platform_http_openapi_describes_the_available_contracts() {
 }
 
 mod learning;
+
+#[tokio::test]
+async fn platform_http_browser_reference_is_public_and_root_redirects_to_it() {
+    let dir = TempDir::new().unwrap();
+    let (router, _) = app(dir.path());
+    let root = router
+        .clone()
+        .call(Request::builder().uri("/").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+    assert_eq!(root.status(), StatusCode::TEMPORARY_REDIRECT);
+    assert_eq!(root.headers()["location"], "/docs");
+    let response = router
+        .clone()
+        .call(Request::builder().uri("/docs").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert!(
+        response.headers()["content-type"]
+            .to_str()
+            .unwrap()
+            .starts_with("text/html")
+    );
+    let html = String::from_utf8(
+        to_bytes(response.into_body(), 1024 * 1024)
+            .await
+            .unwrap()
+            .to_vec(),
+    )
+    .unwrap();
+    assert!(html.contains("QilbeeDB API Reference"));
+    assert!(html.contains("/openapi.json"));
+    assert!(!html.contains("https://cdn"));
+    assert!(!html.contains("localStorage"));
+}

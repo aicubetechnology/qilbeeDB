@@ -158,7 +158,7 @@ numbers.
 |---|---|---|
 | F1 | Episode integrity, legacy reads, JSON, concurrent mutations and reopen tests | Implemented and tested in the persistent backend |
 | F2 | Immutable proposals, idempotent paired outcomes, promotion, monitoring and suspension with atomic persistence | Implemented in the Rust library; offline demonstration |
-| F3 | Secure bootstrap, resource ownership, persistent HTTP memory and separate evaluator authorization | Identity and scoped memory HTTP implemented; procedural evaluator/policy integration remains pending |
+| F3 | Secure bootstrap, resource ownership, persistent HTTP memory and separate evaluator authorization | Identity, scoped memory and procedural evaluator/policy HTTP implemented; external evidence verification and policy retirement remain pending |
 | F4 | Atomic transactions with consistent indexes, documented conflicts and fault-injection recovery tests | Atomic entity/index writes implemented; isolation, canonical map-property indexes and fault injection remain open |
 | F5 | Resolvable provenance, bitemporal revisions and transitive invalidation/deletion | Planned |
 | F6 | Persisted/versioned embeddings, rebuildable index, ranked text search, deterministic hybrid retrieval and tokenizer budgets | BM25 and deterministic rank fusion implemented; remaining work planned |

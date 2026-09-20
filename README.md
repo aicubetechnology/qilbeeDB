@@ -1,6 +1,6 @@
 
 
-> Rust 0.2.0 changes the default HTTP surface to the authenticated platform API.
+> Rust 0.3.0 adds authenticated procedural learning and a browser API reference.
 > Provision a tenant locally before use. Legacy routes require explicit opt-in
 > and retain their known limitations. See the [migration and API contract](docs/api/platform-http.md).
 <div align="center">
@@ -36,7 +36,8 @@ have not been established.
 **Implementation status:** the Rust library includes a RocksDB episode backend
 and an evidence-driven procedure ledger. The default HTTP platform now provides
 durable tenant credentials, exact resource grants, versioned memory commands,
-idempotent receipts and conditional revisions. Procedural HTTP remains pending.
+idempotent receipts, conditional revisions and procedural learning with immutable
+contracts, explicit evaluation outcomes and exact-baseline selection.
 Cypher support is partial and Bolt is a placeholder. Graph
 transactions publish entity and index mutations atomically; snapshot isolation
 and conflict detection remain unimplemented.
@@ -70,7 +71,7 @@ before planning production use.
 
 ### 🏢 **Production Roadmap**
 - Snapshot isolation, conflict handling and fault-injection recovery validation
-- Procedural HTTP contracts, provenance propagation and shared change feeds
+- Learned-tool services, provenance propagation and shared change feeds
 - Verified recovery, observability and reproducible benchmarks
 
 ### Run the learning cycle

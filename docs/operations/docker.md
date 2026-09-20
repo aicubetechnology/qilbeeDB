@@ -56,6 +56,7 @@ docker compose up -d
 docker compose ps
 curl --fail http://localhost:7474/health
 curl --fail http://localhost:7474/openapi.json
+# Browser reference: http://localhost:7474/docs
 ```
 
 Compose publishes HTTP on **127.0.0.1:7474** by default. The root filesystem is
@@ -150,9 +151,9 @@ versions fail closed. Do not prune unrelated images, containers or volumes.
 
 ## Scope of the local deployment
 
-The local stack validates durable identity and scoped memory. Procedural HTTP,
-learned-tool lifecycle services and isolated remote executors remain subsequent
-features under the [accepted architecture](../architecture/learned-tools.md).
+The local stack supports durable identity, scoped memory and procedural
+learning. Learned-tool lifecycle services and isolated remote executors remain
+subsequent features under the [accepted architecture](../architecture/learned-tools.md).
 This development deployment does not establish distributed availability,
 hardware power-loss behavior or comparative performance leadership.
 
@@ -176,3 +177,22 @@ the following results:
 The local smoke suite does not establish power-loss durability, distributed
 availability, execution isolation for future learned tools, or compatibility
 with unmodified QMN applications. The PR records the tested revision.
+
+## Procedural release acceptance (0.3.0)
+
+The expanded release passed 373 Rust workspace tests and four local Docker
+acceptance tests. The procedural Docker cycle validated all request/response
+bodies against the served schemas, administrative denial, eight simultaneous
+retries counting as one case, 32 accepted paired cases, explicit unknown
+accounting, model-version fallback and private-subject denial. After SIGKILL,
+the active procedure, original proposal and all 32 evaluation receipts were
+recovered. Subsequent negative monitoring suspended the procedure and selected
+the exact baseline. Temporary evaluator credentials were revoked.
+
+The browser reference at `/docs` loaded version 0.3.0 with 22 operations; endpoint
+filtering and layout were checked in a browser. The page loads its script and
+OpenAPI document from the same server and does not collect credentials.
+
+These are synthetic contract and process-recovery tests. They do not execute a
+model, verify external evidence truth or demonstrate improvement on an agent
+benchmark. The earlier memory/isolation/crash tests also passed on this image.

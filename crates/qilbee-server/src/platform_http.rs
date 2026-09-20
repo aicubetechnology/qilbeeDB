@@ -70,6 +70,12 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     Ok(Router::new()
         .merge(memory::routes())
         .merge(learning::routes())
+        .route(
+            "/",
+            get(|| async { axum::response::Redirect::temporary("/docs") }),
+        )
+        .route("/docs", get(reference))
+        .route("/docs/reference.js", get(reference_script))
         .route("/health", get(health))
         .route("/openapi.json", get(openapi))
         .route("/api/v1/identity", get(who_am_i))
@@ -348,4 +354,23 @@ impl IntoResponse for ApiError {
         )
             .into_response()
     }
+}
+
+async fn reference() -> impl IntoResponse {
+    (
+        [(
+            "content-security-policy",
+            "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'",
+        )],
+        axum::response::Html(include_str!("../../../docs/api/reference.html")),
+    )
+}
+async fn reference_script() -> impl IntoResponse {
+    (
+        [(
+            header::CONTENT_TYPE,
+            "application/javascript; charset=utf-8",
+        )],
+        include_str!("../../../docs/api/reference.js"),
+    )
 }
