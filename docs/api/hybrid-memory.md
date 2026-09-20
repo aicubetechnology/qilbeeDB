@@ -60,12 +60,15 @@ It does not search metadata or perform substring matching.
 
 Each channel sorts its matches by descending raw score, then ascending UUID, and
 keeps up to 100 candidates. The server-owned `weighted_rrf_v1` profile fixes
-both weights at 0.5 and the rank constant at 60. Weighted reciprocal rank fusion
-then assigns:
+both weights at 0.5 and the rank constant at 60. The separately versioned
+`weighted_rrf_v2` uses lexical weight 0.25, semantic weight 0.75 and rank constant 2.
+Both remain experimental and use the same 100-candidate cap. A request must name
+its version explicitly; publishing v2 does not change v1 or select a new default.
+Weighted reciprocal rank fusion assigns:
 
 ```text
-lexical contribution = (1 - semantic_weight) / (60 + lexical_rank)
-semantic contribution = semantic_weight / (60 + semantic_rank)
+lexical contribution = lexical_weight / (rank_constant + lexical_rank)
+semantic contribution = semantic_weight / (rank_constant + semantic_rank)
 fused score = lexical contribution + semantic contribution
 ```
 
@@ -92,11 +95,24 @@ registered embedding spaces or tenant configuration.
 {
   "contract_version": 1,
   "component_versions": {"lexical": "bm25_v1", "semantic": "cosine_exact_v1"},
+  "execution_limits": {
+    "scope": "server_instance",
+    "max_embedding_dimensions": 32768,
+    "max_scan_bytes": 67108864,
+    "default_scan_bytes": 8388608,
+    "max_concurrent_retrievals": 2,
+    "vector_request_body_bytes": 2097152
+  },
   "hybrid_profiles": [{
     "version": "weighted_rrf_v1", "method": "weighted_rrf",
     "lexical_version": "bm25_v1", "semantic_version": "cosine_exact_v1",
     "candidate_limit": 100, "lexical_weight": 0.5, "semantic_weight": 0.5,
     "rank_constant": 60, "experimental": true
+  }, {
+    "version": "weighted_rrf_v2", "method": "weighted_rrf",
+    "lexical_version": "bm25_v1", "semantic_version": "cosine_exact_v1",
+    "candidate_limit": 100, "lexical_weight": 0.25, "semantic_weight": 0.75,
+    "rank_constant": 2, "experimental": true
   }]
 }
 ```
@@ -124,7 +140,7 @@ results do not currently justify publishing another set of weights.
 | `ranking_version` | Required `weighted_rrf_v1`; selects an immutable server-defined method and parameters |
 | `min_score` | Minimum raw cosine, finite in [-1, 1], default -1; does not filter lexical matches |
 | `scan_limit` | At most 1–10000 source records, default 10000 |
-| `scan_bytes_limit` | 1–67108864 serialized bytes, default 8388608 |
+| `scan_bytes_limit` | 1–268435456 serialized bytes, subject to the operator ceiling (default 67108864); request default 8388608 |
 | `after` | Optional source UUID cursor; a continuation starts a new snapshot |
 | `episode_type`, `tag` | Optional exact filters applied to both channels before scoring |
 
@@ -208,7 +224,9 @@ candidate caps, unsupported contract versions and invalid budgets also return
 400. Missing credentials return 401; revoked or expired credentials return 401;
 missing capability or scope returns 403; oversized bodies return 413; encountered
 storage corruption or unsupported stored versions return 500. The JSON body
-limit is 65536 bytes, including the text, vector, scope and formatting.
+limit is 2097152 bytes (2 MiB), including text, vector, scope and formatting.
+Dimensions range from 1 through 32768, subject to the operator ceiling; 3072 is
+supported without changing cosine or fusion semantics.
 See the [platform error envelope](platform-http.md).
 
 The tenant is derived from the authenticated credential. Project, agent, mission
@@ -231,3 +249,16 @@ the retrieval method. It excludes authentication, blocking-pool queueing, JSON
 serialization, transport and external embedding generation. Measure the client
 round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
 for frozen corpora, graded relevance, category regressions and timing limits.
+
+## Execution capacity
+
+The ranking catalog exposes the current server dimension, scan-byte and concurrent
+retrieval limits. These are operator settings, separate from the immutable ranking
+profile and from tenant authorization. A byte budget above the configured ceiling
+returns 400 (`retrieval_scan_limit`); exhausted retrieval slots return 503
+(`retrieval_busy`). Use bounded backoff and inspect coverage on each successful
+response. See [configure retrieval capacity](../operations/retrieval-capacity.md).
+
+See the [0.6.0 real-embedding report](../research/scifact-results.md) for the
+300-query SciFact comparison, uncertainty and losses. Both profiles remain
+experimental; the measured gain does not establish a universal ranking policy.

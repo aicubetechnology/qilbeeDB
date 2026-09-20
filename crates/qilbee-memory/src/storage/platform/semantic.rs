@@ -1,6 +1,9 @@
 //! Durable, revision-bound embeddings and bounded exact cosine retrieval.
 use super::*;
 
+/// Native contract ceiling; HTTP deployments may configure a lower limit.
+pub const MAX_EMBEDDING_DIMENSIONS: usize = 32_768;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct EmbeddingSpace {
@@ -18,9 +21,9 @@ impl EmbeddingSpace {
                 ));
             }
         }
-        if !(1..=4096).contains(&self.dimensions) {
+        if !(1..=MAX_EMBEDDING_DIMENSIONS).contains(&self.dimensions) {
             return Err(Error::ValidationError(
-                "Embedding dimensions must be in 1..=4096".into(),
+                "Embedding dimensions must be in 1..=32768".into(),
             ));
         }
         Ok(())

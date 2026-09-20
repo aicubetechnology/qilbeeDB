@@ -11,6 +11,7 @@ fn default_min_score() -> f64 {
 #[serde(rename_all = "snake_case")]
 pub enum HybridRankingVersion {
     WeightedRrfV1,
+    WeightedRrfV2,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -27,10 +28,17 @@ pub struct HybridRankingProfile {
 }
 impl HybridRankingVersion {
     /// Profiles supported by this server build; parameters remain immutable.
-    pub const ALL: [Self; 1] = [Self::WeightedRrfV1];
+    pub const ALL: [Self; 2] = [Self::WeightedRrfV1, Self::WeightedRrfV2];
 
     pub fn profile(self) -> HybridRankingProfile {
         match self {
+            Self::WeightedRrfV2 => HybridRankingProfile {
+                version: self,
+                lexical_weight: 0.25,
+                semantic_weight: 0.75,
+                rank_constant: 2,
+                ..Self::WeightedRrfV1.profile()
+            },
             Self::WeightedRrfV1 => HybridRankingProfile {
                 version: self,
                 method: "weighted_rrf".into(),
@@ -174,7 +182,7 @@ impl MemorySnapshot<'_> {
                 let contribution = RankContribution {
                     rank,
                     score,
-                    contribution: weight / (RANK_CONSTANT + rank) as f64,
+                    contribution: weight / (profile.rank_constant + rank) as f64,
                 };
                 let channels = fused.entry(id).or_default();
                 if is_semantic {
@@ -217,6 +225,7 @@ impl MemorySnapshot<'_> {
             EmbeddingCoverage::Partial
         };
         Ok(HybridPage {
+            rank_constant: profile.rank_constant,
             ranking: profile,
             embedding_coverage,
             hits,
@@ -231,7 +240,6 @@ impl MemorySnapshot<'_> {
             semantic_candidates,
             candidates_truncated: lexical_matches > lexical_candidates
                 || semantic_matches > semantic_candidates,
-            rank_constant: RANK_CONSTANT,
             exhaustive: page.exhaustive,
         })
     }

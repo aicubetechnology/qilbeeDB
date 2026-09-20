@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents."
   },
   "servers": [
@@ -4115,7 +4115,7 @@
       "post": {
         "operationId": "attachMemoryEmbedding",
         "summary": "Attach a model-bound vector to an exact memory revision",
-        "description": "Requires memory_write and exact scope. Embedding plus original receipt commits atomically. Source changes invalidate eligibility. Vectors are generated externally; anonymous legacy embeddings are not assigned a model.",
+        "description": "Requires memory_write and exact scope. Embedding plus original receipt commits atomically. Source changes invalidate eligibility. Vectors are generated externally; anonymous legacy embeddings are not assigned a model. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4229,7 +4229,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4281,7 +4281,7 @@
       "post": {
         "operationId": "searchMemorySemantic",
         "summary": "Rank memory by cosine similarity",
-        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client. Reads a single request-local storage snapshot without holding the memory writer lock. Score remains cosine, preserving the 0.4.0 contract.",
+        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client. Reads a single request-local storage snapshot without holding the memory writer lock. Score remains cosine, preserving the 0.4.0 contract. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4409,7 +4409,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4436,6 +4436,16 @@
                 }
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4609,6 +4619,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4646,7 +4666,7 @@
       "post": {
         "operationId": "searchMemoryHybrid",
         "summary": "Rank memory with experimental versioned hybrid fusion",
-        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed.",
+        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1 or weighted_rrf_v2; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4760,7 +4780,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds 65,536 bytes",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4787,6 +4807,16 @@
                 }
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7869,7 +7899,8 @@
           "dimensions": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 4096
+            "maximum": 32768,
+            "description": "Exact external vector dimensionality. The operator may configure a lower ceiling; discover execution_limits in the ranking catalog."
           }
         },
         "required": [
@@ -7916,7 +7947,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           }
         },
@@ -8011,7 +8042,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           },
           "limit": {
@@ -8232,9 +8263,9 @@
           "scan_bytes_limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 67108864,
+            "maximum": 268435456,
             "default": 8388608,
-            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap. The operator ceiling defaults to 67108864 and may be configured up to 268435456; discover the active ceiling in the ranking catalog. Request default remains 8388608."
           }
         },
         "required": [
@@ -8297,9 +8328,9 @@
           "scan_bytes_limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 67108864,
+            "maximum": 268435456,
             "default": 8388608,
-            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap. The operator ceiling defaults to 67108864 and may be configured up to 268435456; discover the active ceiling in the ranking catalog. Request default remains 8388608."
           },
           "space": {
             "$ref": "#/components/schemas/EmbeddingSpace"
@@ -8312,7 +8343,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           },
           "min_score": {
@@ -8324,9 +8355,10 @@
           "ranking_version": {
             "type": "string",
             "enum": [
-              "weighted_rrf_v1"
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
             ],
-            "description": "Immutable server-owned profile: weights 0.5/0.5, rank constant 60, at most 100 candidates per channel. Experimental; clients cannot override its parameters."
+            "description": "Explicit immutable server profile: weighted_rrf_v1 uses weights 0.5/0.5 and rank constant 60; weighted_rrf_v2 uses 0.25/0.75 and rank constant 2. Both are experimental with 100 candidates per channel. No caller-owned weights."
           }
         },
         "required": [
@@ -8364,57 +8396,14 @@
         "additionalProperties": false
       },
       "HybridRankingProfile": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string",
-            "const": "weighted_rrf_v1"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HybridRankingProfileV1"
           },
-          "method": {
-            "type": "string",
-            "const": "weighted_rrf"
-          },
-          "lexical_version": {
-            "type": "string",
-            "const": "bm25_v1"
-          },
-          "semantic_version": {
-            "type": "string",
-            "const": "cosine_exact_v1"
-          },
-          "candidate_limit": {
-            "type": "integer",
-            "const": 100
-          },
-          "lexical_weight": {
-            "type": "number",
-            "const": 0.5
-          },
-          "semantic_weight": {
-            "type": "number",
-            "const": 0.5
-          },
-          "rank_constant": {
-            "type": "integer",
-            "const": 60
-          },
-          "experimental": {
-            "type": "boolean",
-            "const": true
+          {
+            "$ref": "#/components/schemas/HybridRankingProfileV2"
           }
-        },
-        "required": [
-          "version",
-          "method",
-          "lexical_version",
-          "semantic_version",
-          "candidate_limit",
-          "lexical_weight",
-          "semantic_weight",
-          "rank_constant",
-          "experimental"
-        ],
-        "additionalProperties": false
+        ]
       },
       "LexicalHit": {
         "type": "object",
@@ -8614,7 +8603,10 @@
           },
           "rank_constant": {
             "type": "integer",
-            "const": 60
+            "enum": [
+              60,
+              2
+            ]
           }
         },
         "required": [
@@ -8634,7 +8626,49 @@
           "candidates_truncated",
           "rank_constant"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "weighted_rrf_v1"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "rank_constant": {
+                  "const": 60
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "weighted_rrf_v2"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "rank_constant": {
+                  "const": 2
+                }
+              }
+            }
+          }
+        ]
       },
       "LexicalRequest": {
         "type": "object",
@@ -8739,7 +8773,10 @@
           },
           "ranking_version": {
             "type": "string",
-            "const": "weighted_rrf_v1"
+            "enum": [
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
+            ]
           },
           "page": {
             "$ref": "#/components/schemas/HybridPage"
@@ -8756,7 +8793,57 @@
           "page",
           "timing"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ranking_version": {
+                  "const": "weighted_rrf_v1"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "page": {
+                  "properties": {
+                    "ranking": {
+                      "properties": {
+                        "version": {
+                          "const": "weighted_rrf_v1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking_version": {
+                  "const": "weighted_rrf_v2"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "page": {
+                  "properties": {
+                    "ranking": {
+                      "properties": {
+                        "version": {
+                          "const": "weighted_rrf_v2"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "RetrievalTiming": {
         "type": "object",
@@ -8804,12 +8891,163 @@
             },
             "minItems": 1,
             "uniqueItems": true
+          },
+          "execution_limits": {
+            "$ref": "#/components/schemas/RetrievalExecutionLimits"
           }
         },
         "required": [
           "contract_version",
           "component_versions",
-          "hybrid_profiles"
+          "hybrid_profiles",
+          "execution_limits"
+        ],
+        "additionalProperties": false
+      },
+      "RetrievalExecutionLimits": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scope",
+          "max_embedding_dimensions",
+          "max_scan_bytes",
+          "default_scan_bytes",
+          "max_concurrent_retrievals",
+          "vector_request_body_bytes"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "server_instance"
+          },
+          "max_embedding_dimensions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32768
+          },
+          "max_scan_bytes": {
+            "type": "integer",
+            "minimum": 8388608,
+            "maximum": 268435456
+          },
+          "default_scan_bytes": {
+            "type": "integer",
+            "const": 8388608
+          },
+          "max_concurrent_retrievals": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "vector_request_body_bytes": {
+            "type": "integer",
+            "const": 2097152
+          }
+        }
+      },
+      "HybridRankingProfileV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "weighted_rrf_v1"
+          },
+          "method": {
+            "type": "string",
+            "const": "weighted_rrf"
+          },
+          "lexical_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "semantic_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "const": 100
+          },
+          "lexical_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "semantic_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 60
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "lexical_version",
+          "semantic_version",
+          "candidate_limit",
+          "lexical_weight",
+          "semantic_weight",
+          "rank_constant",
+          "experimental"
+        ],
+        "additionalProperties": false
+      },
+      "HybridRankingProfileV2": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "weighted_rrf_v2"
+          },
+          "method": {
+            "type": "string",
+            "const": "weighted_rrf"
+          },
+          "lexical_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "semantic_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "const": 100
+          },
+          "lexical_weight": {
+            "type": "number",
+            "const": 0.25
+          },
+          "semantic_weight": {
+            "type": "number",
+            "const": 0.75
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 2
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "lexical_version",
+          "semantic_version",
+          "candidate_limit",
+          "lexical_weight",
+          "semantic_weight",
+          "rank_constant",
+          "experimental"
         ],
         "additionalProperties": false
       }

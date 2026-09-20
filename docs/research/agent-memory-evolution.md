@@ -32,7 +32,7 @@ database for agents, or that the hypotheses below are previously undiscovered.
 | P0 | Bincode over `serde_json::Value` | Stored structured payloads could not be read back | New versioned format; legacy records without JSON remain readable |
 | P1 | `consolidation.rs`: LLM extraction and incomplete `BuildGraph` | Synthesis can become a fact without verification; provenance graph is missing | Open |
 | P1 | `agent.rs`: volatile vector index; rebuilding regenerates embeddings | Restart behavior, cost and model changes need an explicit contract | Open |
-| P1 | Baseline hybrid retrieval uses unordered ties and unranked substring matches | Retrieval can vary without a change in evidence | BM25 and deterministic rank fusion implemented; external evaluation pending |
+| P1 | Baseline hybrid retrieval uses unordered ties and unranked substring matches | Retrieval can vary without a change in evidence | BM25 and deterministic rank fusion implemented; see the 0.6.0 SciFact report for external retrieval evidence |
 | P1 | Baseline manager writes can evict data before rejecting foreign episodes; reads return invalidated episodes | Scope errors can remove valid memories and invalidated content remains served | Manager validation, update capacity and ordinary reads corrected |
 | P1 | `PersistentAgentMemory::store_episode` does not use `auto_embed` | Configuration suggests behavior the method does not provide | Open |
 | P1 | `types.rs::Relevance::decay` reapplies elapsed time since access to an already decayed score | Maintenance frequency changes forgetting behavior | Open |
@@ -207,3 +207,10 @@ Details: [storage integrity](../agent-memory/storage-integrity.md),
 [retrieval](../agent-memory/lexical-retrieval.md),
 [episode lifecycle](../agent-memory/episode-lifecycle.md) and
 [atomic graph commits](../architecture/atomic-commits.md).
+
+## Subsequent retrieval and memory research
+
+The [0.6.0 SciFact report](scifact-results.md) adds external retrieval judgments;
+it does not qualify agent-task improvement. The [experience-memory design](experience-memory-design.md)
+reviews the supplied ReasoningBank, ZenBrain and Dream-RSI work and proposes
+contracts for experience lineage, replay and shared publication.

@@ -42,6 +42,14 @@ PROFILES = {
     },
 }
 
+PROFILES["weighted_rrf_v2"] = dict(
+    PROFILES["weighted_rrf_v1"],
+    version="weighted_rrf_v2",
+    lexical_weight=0.25,
+    semantic_weight=0.75,
+    rank_constant=2,
+)
+
 
 def trial_plan(
     fixture,
@@ -49,7 +57,10 @@ def trial_plan(
     ranking_version="weighted_rrf_v1",
     repetitions=3,
     seed=20260920,
+    scan_bytes_limit=67108864,
 ):
+    if type(scan_bytes_limit) is not int or not 1 <= scan_bytes_limit <= 268435456:
+        raise ValueError("Scan byte budget must be in 1..268435456")
     if ranking_version not in PROFILES:
         raise ValueError("Unknown server-owned ranking version")
     return {
@@ -61,7 +72,7 @@ def trial_plan(
         "seed": seed,
         "k": 10,
         "scan_limit": 10000,
-        "scan_bytes_limit": 67108864,
+        "scan_bytes_limit": scan_bytes_limit,
         "min_score": -1.0,
         "client_concurrency": 1,
         "warmup_passes": 1,
@@ -76,6 +87,7 @@ def validate_plan(plan, fixture):
             plan["hybrid_profile"]["version"],
             plan["repetitions"],
             plan["seed"],
+            plan["scan_bytes_limit"],
         )
         valid = (
             plan == expected
@@ -188,7 +200,7 @@ def validate_fixture(fixture):
     if not fixture.get("provenance") or not fixture.get("embedding_provenance"):
         raise ValueError("Corpus and embedding provenance are required")
     dimensions = fixture["space"]["dimensions"]
-    if type(dimensions) is not int or not 1 <= dimensions <= 4096:
+    if type(dimensions) is not int or not 1 <= dimensions <= 32768:
         raise ValueError("Unsupported vector dimensionality")
     for field in ("provider", "model", "revision"):
         if (
@@ -417,6 +429,7 @@ def prepare(client, fixture, scope, state_path):
         documents=[d for d in fixture["documents"] if d["id"] in state["documents"]],
     )
     verify_sources(client, existing, state, tag)
+    pending = 0
     for doc in fixture["documents"]:
         alias = doc["id"]
         if alias not in state["documents"]:
@@ -452,9 +465,14 @@ def prepare(client, fixture, scope, state_path):
                 "revision": receipt["revision"],
                 "embedding": embedding,
             }
-            save(state_path, state)
+            pending += 1
+            if pending == 64:
+                save(state_path, state)
+                pending = 0
     if set(state["documents"]) != {d["id"] for d in fixture["documents"]}:
         raise ValueError("Saved corpus document set changed")
+    if pending:
+        save(state_path, state)
     return state, tag
 
 
@@ -503,10 +521,18 @@ def container_resources(container):
         return {"available": False, "reason": "Container cgroup v2 metrics unavailable"}
 
 
-def query_request(mode, query, fixture, scope, tag, ranking_version="weighted_rrf_v1"):
+def query_request(
+    mode,
+    query,
+    fixture,
+    scope,
+    tag,
+    ranking_version="weighted_rrf_v1",
+    scan_bytes_limit=67108864,
+):
     fields = {"limit": 10, "scan_limit": 10000, "tag": tag}
     if mode != "semantic":
-        fields.update(text=query["text"], scan_bytes_limit=67108864)
+        fields.update(text=query["text"], scan_bytes_limit=scan_bytes_limit)
     if mode != "lexical":
         fields.update(space=fixture["space"], vector=query["vector"], min_score=-1.0)
     if mode == "hybrid":
@@ -603,7 +629,13 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
         rng.shuffle(jobs)
         for query, mode in jobs:
             path, body = query_request(
-                mode, query, fixture, scope, tag, ranking_version
+                mode,
+                query,
+                fixture,
+                scope,
+                tag,
+                ranking_version,
+                plan["scan_bytes_limit"],
             )
             try:
                 result, elapsed, size = client.call("POST", path, body)
@@ -722,7 +754,13 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
             try:
                 for query in queries:
                     path, body = query_request(
-                        mode, query, fixture, scope, tag, ranking_version
+                        mode,
+                        query,
+                        fixture,
+                        scope,
+                        tag,
+                        ranking_version,
+                        plan["scan_bytes_limit"],
                     )
                     result, _, _ = client.call("POST", path, body)
                     if result["page"]["exhaustive"] is not True:
@@ -834,7 +872,7 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
             "selected_split": plan["split"],
             "k": 10,
             "scan_records": 10000,
-            "lexical_hybrid_scan_bytes": 67108864,
+            "lexical_hybrid_scan_bytes": plan["scan_bytes_limit"],
             "limits_kind": "experimental trial budgets within implementation ceilings; not tenant policy",
             "client_concurrency": 1,
             "repetitions": repetitions,
@@ -847,7 +885,13 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
             "ranking_parameters": "immutable server profiles; no tuning on test queries",
         },
         "metrics_definition": {
-            "relevance_grades": "0 irrelevant, 1 marginal, 2 useful, 3 directly resolves the information need",
+            "relevance_grades": (
+                fixture["provenance"].get(
+                    "judgments", "See fixture judgment provenance"
+                )
+                if isinstance(fixture["provenance"], dict)
+                else "0 irrelevant, 1 marginal, 2 useful, 3 directly resolves the information need"
+            ),
             "ndcg": "DCG@10 = sum((2^grade-1)/log2(rank+1)); divide by ideal DCG from judgments; null if no relevant judged source",
             "recall": "grade > 0; exhaustive recall only when every corpus record is explicitly judged; otherwise report judged recall separately",
             "unjudged": "treated as gain zero for judged nDCG; expose coverage",
@@ -910,8 +954,8 @@ def markdown_report(report):
         + report["fixture_kind"]
         + " comparison. Hybrid remains **experimental**.",
         "",
-        "| Method | nDCG@10 | Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
-        "| --- | --- | --- | --- | --- | --- | --- |",
+        "| Method | nDCG@10 | Recall@10 | Judged Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for mode, summary in report["summary"][display_split].items():
         lines.append(
@@ -921,6 +965,8 @@ def markdown_report(report):
             + number(summary["ndcg_at_10"])
             + " | "
             + number(summary["recall_at_10"])
+            + " | "
+            + number(summary["judged_recall_at_10"])
             + " | "
             + number(summary["answerable_no_useful_result_rate"])
             + " | "
@@ -972,7 +1018,11 @@ def markdown_report(report):
         "- One client, one warmup pass, frozen externally supplied vectors. Server retrieval time excludes authentication, queueing, serialization and transport; HTTP time includes the request/response round trip.",
         "- Full generation-to-retrieval time and embedding cost are unmeasured. No provider was invoked.",
         "- Container resource counters and all candidate/response measurements are recorded in JSON; unavailable measurements are null, not zero.",
-        "- The synthetic smoke corpus is not a representative language benchmark. Small category samples and bootstrap intervals do not establish production gains.",
+        (
+            "- The synthetic smoke corpus is not a representative language benchmark. Small category samples and bootstrap intervals do not establish production gains."
+            if report["fixture_kind"] == "synthetic_contract"
+            else "- External qrels cover known judgments, not exhaustive relevance. Judged recall is not exhaustive recall. A domain benchmark does not establish production or agent-task gains."
+        ),
         "- No agent-task comparison was run. Better retrieval alone does not demonstrate better reasoning or autonomous improvement.",
         "",
     ]
@@ -991,6 +1041,7 @@ def main():
     parser.add_argument("--seed", type=int)
     parser.add_argument("--split", choices=["all", "development", "test"])
     parser.add_argument("--ranking-version", choices=sorted(PROFILES))
+    parser.add_argument("--scan-bytes-limit", type=int)
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--write-plan", type=Path)
     group.add_argument("--plan", type=Path)
@@ -1000,7 +1051,13 @@ def main():
     validate_fixture(fixture)
     if args.plan and any(
         v is not None
-        for v in (args.split, args.ranking_version, args.repetitions, args.seed)
+        for v in (
+            args.split,
+            args.ranking_version,
+            args.repetitions,
+            args.seed,
+            args.scan_bytes_limit,
+        )
     ):
         parser.error("A pinned --plan cannot be overridden with trial parameters")
     plan = (
@@ -1012,6 +1069,7 @@ def main():
             args.ranking_version or "weighted_rrf_v1",
             args.repetitions if args.repetitions is not None else 3,
             args.seed if args.seed is not None else 20260920,
+            args.scan_bytes_limit if args.scan_bytes_limit is not None else 67108864,
         )
     )
     validate_plan(plan, fixture)

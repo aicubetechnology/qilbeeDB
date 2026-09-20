@@ -75,7 +75,7 @@ statistics. Source corruption fails the request instead of dropping a candidate.
 | `text` | 1–4096 UTF-8 bytes with 1–64 distinct lowercase alphanumeric terms |
 | `limit` | 1–100 results |
 | `scan_limit` | 1–10000 source records, default 10000 |
-| `scan_bytes_limit` | 1–67108864 bytes, default 8388608 |
+| `scan_bytes_limit` | 1–268435456 bytes, subject to the operator ceiling (default 67108864); request default 8388608 |
 | `after` | Optional exclusive source UUID cursor |
 | `episode_type`, `tag` | Optional exact filters, applied before statistics |
 
@@ -97,3 +97,12 @@ the retrieval method. It excludes authentication, blocking-pool queueing, JSON
 serialization, transport and external embedding generation. Measure the client
 round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
 for frozen corpora, graded relevance, category regressions and timing limits.
+
+## Execution capacity
+
+The ranking catalog exposes the current server dimension, scan-byte and concurrent
+retrieval limits. These are operator settings, separate from the immutable ranking
+profile and from tenant authorization. A byte budget above the configured ceiling
+returns 400 (`retrieval_scan_limit`); exhausted retrieval slots return 503
+(`retrieval_busy`). Use bounded backoff and inspect coverage on each successful
+response. See [configure retrieval capacity](../operations/retrieval-capacity.md).

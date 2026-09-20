@@ -1,5 +1,5 @@
 {
-  "release": "0.5.0",
+  "release": "0.6.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -98,6 +98,34 @@
       "title": "External evaluation embeddings",
       "description": "Generate and identify external model embeddings with reproducible preprocessing and separate timing evidence.",
       "order": 125
+    },
+    {
+      "source": "docs/research/scifact-evaluation.md",
+      "file": "scifact-evaluation.md",
+      "title": "SciFact retrieval evaluation",
+      "description": "Compare scoped retrieval with external relevance judgments and development-only ranking selection.",
+      "order": 130
+    },
+    {
+      "source": "docs/operations/retrieval-capacity.md",
+      "file": "retrieval-capacity.md",
+      "title": "Retrieval capacity and large vectors",
+      "description": "Configure dimensionality, scan budgets and concurrent retrieval admission with observable coverage.",
+      "order": 135
+    },
+    {
+      "source": "docs/research/scifact-results.md",
+      "file": "scifact-results.md",
+      "title": "Real-embedding retrieval results",
+      "description": "Inspect the 300-query SciFact comparison, uncertainty, regressions and capacity evidence for release 0.6.0.",
+      "order": 140
+    },
+    {
+      "source": "docs/research/experience-memory-design.md",
+      "file": "experience-memory-design.md",
+      "title": "Experience-driven memory research",
+      "description": "Map reasoning memory, shared evidence and discovery replay research to proposed contracts and acceptance criteria.",
+      "order": 150
     }
   ]
 }

@@ -26,8 +26,10 @@ should use its HTTPS URL.
 curl --fail --silent --show-error http://localhost:7474/health
 ```
 
-Check the returned server version. These lexical and hybrid endpoints are part
-of the 0.5.0 release; 0.4.0 supports the separate semantic endpoint.
+Check the returned server version. Lexical and hybrid retrieval are available
+from 0.5.0; 0.4.0 supports the separate semantic endpoint. Version
+0.6.0 adds profile discovery, `weighted_rrf_v2`, configurable retrieval capacity
+and external vectors through 32768 dimensions, including 3072.
 
 ## 2. Create a memory
 
@@ -87,8 +89,9 @@ different spaces are comparable merely because their lengths match.
 
 Follow [semantic search](../api/semantic-memory.md) for the attachment and cosine
 contracts. Then evaluate [hybrid search](../api/hybrid-memory.md) with explicit
-text, vector and `weighted_rrf_v1`. The hybrid profile is experimental; compare
-it on held-out queries before selecting it for your application.
+text, vector and an explicit `weighted_rrf_v1` or `weighted_rrf_v2` version. Both
+profiles are experimental; compare them on held-out queries before selecting one
+for your application.
 
 ## Update or delete safely
 

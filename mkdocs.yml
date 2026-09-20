@@ -7,6 +7,11 @@ repo_name: aicubetechnology/qilbeeDB
 repo_url: https://github.com/aicubetechnology/qilbeeDB
 edit_uri: edit/main/docs/
 
+# The Markdown homepage owns index.html in the generated site.
+exclude_docs: |
+  /README.md
+  /index.html
+
 theme:
   name: material
   palette:
@@ -80,6 +85,9 @@ nav:
     - Local Docker: user/deployment.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
     - External Embedding Evaluation: research/external-embedding-evaluation.md
+    - SciFact Retrieval Evaluation: research/scifact-evaluation.md
+    - Real-Embedding Results: research/scifact-results.md
+    - Experience-Driven Memory: research/experience-memory-design.md
     - Synthetic Retrieval Report: research/retrieval-contract-report.md
   - Getting Started:
     - Installation: getting-started/installation.md
@@ -154,6 +162,7 @@ nav:
   - Operations:
     - Deployment: operations/deployment.md
     - Docker: operations/docker.md
+    - Retrieval capacity: operations/retrieval-capacity.md
     - Monitoring: operations/monitoring.md
     - Backup & Recovery: operations/backup.md
     - Performance Tuning: operations/performance.md

@@ -125,19 +125,24 @@ to registered bindings in the selected space, not memories without embeddings.
 ## Validation and errors
 
 Model identity fields support 1–256 UTF-8 bytes without control characters.
-Dimensions are 1–4096; both document and query vectors must match exactly,
+Dimensions are 1–32768, subject to the server's configured ceiling; both document and query vectors must match exactly,
 contain only finite float32 values and have nonzero norm. Empty, zero, NaN,
 infinite or dimension-mismatched vectors are rejected. Normalization is handled
 by cosine computation; callers need not pre-normalize. `limit` is 1–100,
 `scan_limit` is 1–10000 (default 10000) and `min_score` is finite in [-1, 1]
-(default -1). All requests reject unknown fields and share the 65536-byte HTTP
-body limit, which includes JSON formatting and every field.
+(default -1). Vector attachment and search requests reject unknown fields and have a 2097152-byte
+(2 MiB) HTTP body limit, including JSON formatting and every field. Other platform
+routes retain their 65536-byte limit. See [retrieval capacity](../operations/retrieval-capacity.md)
+for operator configuration, concurrent admission and support for 1536, 3072, 8192
+and 32768 dimensions. Vectors are never resized or assigned a model implicitly.
 
 Use the existing [platform error envelope](platform-http.md). Invalid vectors,
 limits or fields return 400; missing/invalid credentials 401; missing capability
 or scope 403; absent/expired/deleted attachment source 404; source revision
 conflicts or immutable-vector/request-key changes 409; oversized requests 413;
-and inconsistent stored identities, records, indexes or vector digests 500.
+inconsistent stored identities, records, indexes or vector digests 500; and a busy
+retrieval admission gate 503 (`retrieval_busy`). Invalid operator dimension limits
+return 400 (`embedding_dimension_limit`).
 A read-only credential cannot attach embeddings. Credential rotation and
 revocation retain the existing live authorization behavior.
 

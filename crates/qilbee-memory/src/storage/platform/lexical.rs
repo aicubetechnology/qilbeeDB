@@ -2,6 +2,9 @@
 use super::snapshot::MemorySnapshot;
 use super::*;
 
+/// Absolute serialized scan ceiling; HTTP deployments enforce their own lower ceiling.
+pub const MAX_RETRIEVAL_SCAN_BYTES: usize = 268_435_456;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LexicalQuery {
@@ -34,7 +37,7 @@ impl LexicalQuery {
             || terms.len() > 64
             || !(1..=100).contains(&self.limit)
             || !(1..=10_000).contains(&self.scan_limit)
-            || !(1..=67_108_864).contains(&self.scan_bytes_limit)
+            || !(1..=MAX_RETRIEVAL_SCAN_BYTES).contains(&self.scan_bytes_limit)
         {
             return Err(Error::ValidationError(
                 "Invalid lexical text, result limit or scan budget".into(),

@@ -22,7 +22,7 @@ separate process. No hosted inference service or paid provider is called.
 | Dimensions | 384 |
 | Document / query prefixes | `passage: ` / `query: `, including the trailing space |
 | Pooling | Attention-mask mean over token embeddings, then float32 L2 normalization |
-| Input length | At most 512 tokens including prefix and special tokens; longer input is rejected |
+| Input length | At most 512 tokens including prefix and special tokens; default rejects longer input; explicit `--overlength truncate` records right truncation |
 | Runtime | CPU provider, two intra-operation threads, one inter-operation thread, full graph optimization |
 | Database model-space revision | Repository commit plus a SHA-256 of artifacts, preprocessing and runtime identity |
 
@@ -34,7 +34,7 @@ reproducibility boundary; independently generated floating-point vectors can var
 
 ## Prepare a fixture
 
-Create an isolated Python environment and install the optional dependencies from
+Use Python 3.12 or later. Create an isolated environment and install the optional dependencies from
 `benchmarks/retrieval/embedding-requirements.txt`. They are not installed in the
 server image or imported by the standard-library retrieval evaluator.
 
@@ -65,6 +65,13 @@ membership. Generation preserves those fields and validates every output vector.
 It does not inspect relevance grades to generate embeddings. For longer sources,
 define and freeze a chunking policy and its judgments before running this example;
 it will not silently truncate text and retain misleading labels.
+
+For a fixed document-level benchmark, `--overlength truncate` explicitly selects
+right truncation to 512 tokens, including special tokens. Full source text remains
+in the corpus for lexical retrieval; only the embedding input is shortened. The
+policy changes the model-space revision. Generation evidence records original and
+retained token counts and a truncation flag for every input. Report truncated-source
+counts and this lexical/dense representation difference with any relevance result.
 
 The bundled `benchmarks/retrieval/e5-memory-fixture.json` freezes actual vectors
 from this pipeline. It derives from the already exposed synthetic contract corpus.

@@ -85,6 +85,12 @@ file stays in place to avoid races between different lock inodes. Do not remove 
 lock file while evaluators are running. These are cooperating-process locks, not
 distributed coordination for network filesystems or different state paths.
 
+Preparation checkpoints at most every 64 newly completed source/binding pairs and
+at successful completion, avoiding quadratic per-record serialization on larger
+corpora. A crash can leave up to 64 durable server receipts absent from the local
+checkpoint. Retry with identical keys recovers those IDs and bindings without
+duplicating records; an interrupted create/attach pair is completed the same way.
+
 Each state replacement writes a mode-0600 temporary file, syncs its contents,
 atomically replaces the state and syncs the containing directory. A directory-sync
 failure is reported as failure even if the replacement is visible; retry with the
