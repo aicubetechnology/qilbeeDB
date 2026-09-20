@@ -340,6 +340,16 @@ impl ApiError {
                 "idempotency_conflict",
                 "The idempotency key was already used for a different command",
             ),
+            Error::JournalHistoryConflict(_) => Self::new(
+                StatusCode::CONFLICT,
+                "journal_history_conflict",
+                "The cursor does not match the current scoped journal history; reconcile consumer state",
+            ),
+            Error::CheckpointRegression(_) => Self::new(
+                StatusCode::CONFLICT,
+                "checkpoint_regression",
+                "Ordinary checkpoint progress cannot move backward; explicit reconciliation is required",
+            ),
             Error::DataCorruption(_) => Self::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "storage_inconsistency",

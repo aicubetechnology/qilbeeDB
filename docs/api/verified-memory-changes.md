@@ -94,6 +94,35 @@ current access independently.
 | 409 | Reconcile: foreign generation/scope, position before the baseline, position ahead of the journal, or divergent prefix |
 | 500 | Investigate missing/corrupt stored events or anchors; no partial page is returned |
 
+Starting in **0.10.0**, a well-formed cursor that does not match the current
+verified history returns `409` with `error.code: "journal_history_conflict"`.
+This applies to both the feed and the audit endpoint, including a cursor supplied
+to a scope with no active verified journal. Verify the selected scope, inspect the
+current baseline and reconcile consumer state. Retrying the same cursor or changing
+an idempotency key cannot make it valid. The response does not disclose another
+scope's existence, journal identifier or digest, and the code alone does not prove
+that a restore occurred. Malformed cursor encodings still return `400`;
+inconsistent stored events or anchors return `500` (`storage_inconsistency`).
+
+The common error envelope retains `contract_version: 1`, including on API v2:
+
+```json
+{
+  "contract_version": 1,
+  "error": {
+    "code": "journal_history_conflict",
+    "message": "The cursor does not match the current scoped journal history; reconcile consumer state"
+  }
+}
+```
+
+In 0.9.0 these client-history mismatches used the generic `idempotency_conflict`
+code. HTTP status and rejection behavior are unchanged, but clients matching exact
+error codes must refresh the OpenAPI and support the new category. Version-one
+feed error behavior is unchanged. Use structured codes rather than matching human
+message text. See [checkpoint error handling](verified-memory-checkpoints.md#choose-a-recovery-action)
+for the distinctions between history, progress and retry conflicts.
+
 Pages validate their cursors, current tip and the consecutive links they traverse.
 They do not perform a full-volume integrity audit. Digests are not server signatures,
 source-truth attestations, consensus or a defense against an administrator rewriting

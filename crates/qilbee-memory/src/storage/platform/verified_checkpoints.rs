@@ -162,9 +162,10 @@ impl RocksDbMemoryStorage {
                 "Checkpoint revision changed".into(),
             ));
         }
+        command.cursor.validate()?;
         let view = self.memory_snapshot();
         let state = view.verified_journal(namespace)?.ok_or_else(|| {
-            Error::ConstraintViolation("The scope has no verified change journal".into())
+            Error::JournalHistoryConflict("The scope has no verified change journal".into())
         })?;
         view.verify_memory_cursor(namespace, &state, &command.cursor)?;
         if let Some(previous) = current {
@@ -172,7 +173,7 @@ impl RocksDbMemoryStorage {
                 || previous.cursor.generation != command.cursor.generation
                 || previous.cursor.sequence > command.cursor.sequence
             {
-                return Err(Error::ConstraintViolation(
+                return Err(Error::CheckpointRegression(
                     "Checkpoint cursor cannot move backward or switch journals".into(),
                 ));
             }
