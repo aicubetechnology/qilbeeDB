@@ -88,7 +88,7 @@ impl Server {
             info!("HTTP API enabled on port {}", self.config.http_port);
 
             // Start HTTP server
-            let router = http_server::create_router(Arc::clone(&self.database));
+            let router = http_server::create_router(Arc::clone(&self.database))?;
             let addr = format!("0.0.0.0:{}", self.config.http_port);
             let listener = tokio::net::TcpListener::bind(&addr)
                 .await

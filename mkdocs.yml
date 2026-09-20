@@ -105,6 +105,7 @@ nav:
       - Bolt Protocol: api/bolt-protocol.md
       - Graph API: api/graph-api.md
       - Memory API: api/memory-api.md
+      - Durable HTTP Memory: api/durable-http-memory.md
   - Agent Memory:
     - Overview: agent-memory/overview.md
     - Episodes: agent-memory/episodes.md
@@ -116,6 +117,8 @@ nav:
     - Storage Integrity: agent-memory/storage-integrity.md
     - Evidence-Driven Learning: agent-memory/learning.md
     - Research and Evolution: research/agent-memory-evolution.md
+    - Delivery Acceptance: research/delivery-acceptance.md
+    - QMN Contract Mapping: research/qmn-contract-mapping.md
     - Consolidation: agent-memory/consolidation.md
     - Forgetting: agent-memory/forgetting.md
     - Statistics: agent-memory/statistics.md

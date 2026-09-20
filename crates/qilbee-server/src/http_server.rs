@@ -10,12 +10,10 @@ use axum::{
 use qilbee_core::{EntityId, Label, NodeId, Property, PropertyValue};
 use qilbee_graph::Database;
 use qilbee_memory::{
-    AgentMemory, Episode, EpisodeContent, EpisodeType,
+    PersistentAgentMemory, MemoryConfig, MemoryStorage, Episode, EpisodeContent, EpisodeType,
     LLMConfig, LLMProviderType, LLMService,
 };
 use qilbee_protocol::http::HealthResponse;
-use std::collections::HashMap as StdHashMap;
-use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
@@ -36,7 +34,7 @@ use crate::security::{
 pub struct AppState {
     pub database: Arc<Database>,
     pub start_time: Instant,
-    pub agent_memories: Arc<Mutex<StdHashMap<String, Arc<AgentMemory>>>>,
+    pub memory_storage: Arc<dyn MemoryStorage>,
     pub auth_service: Arc<AuthService>,
     pub token_service: Arc<TokenService>,
     pub user_service: Arc<UserService>,
@@ -48,6 +46,15 @@ pub struct AppState {
     pub llm_service: Arc<LLMService>,
 }
 
+impl AppState {
+    fn agent_memory(&self, agent_id: &str) -> PersistentAgentMemory {
+        let mut config = MemoryConfig::new(agent_id);
+        // Business retention limits are policy-controlled, not an implicit API quota.
+        config.max_episodes = usize::MAX;
+        PersistentAgentMemory::with_storage(config, self.memory_storage.clone())
+    }
+}
+
 /// Implement FromRef to allow extracting AuthMiddleware from AppState in middleware
 impl FromRef<AppState> for AuthMiddleware {
     fn from_ref(state: &AppState) -> Self {
@@ -56,7 +63,10 @@ impl FromRef<AppState> for AuthMiddleware {
 }
 
 /// Create HTTP server router
-pub fn create_router(database: Arc<Database>) -> Router {
+pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
+    let memory_storage = Arc::new(crate::memory_storage::HttpMemoryStorage::open(
+        &database.storage().path().join("agent-memory"),
+    )?);
     // Initialize security services
     let user_service = Arc::new(UserService::new());
     let token_service = Arc::new(TokenService::new("qilbee_jwt_secret_change_in_production".to_string()));
@@ -105,7 +115,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
     let state = AppState {
         database,
         start_time: Instant::now(),
-        agent_memories: Arc::new(Mutex::new(StdHashMap::new())),
+        memory_storage,
         auth_service,
         token_service: token_service_clone,
         user_service: user_service.clone(),
@@ -117,7 +127,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
     };
 
     // Build router with all routes and apply global rate limiting
-    Router::new()
+    Ok(Router::new()
         // Health check (rate limiting skipped in global middleware)
         .route("/health", get(health_check))
         // Auth endpoints
@@ -167,7 +177,7 @@ pub fn create_router(database: Arc<Database>) -> Router {
         // HTTPS redirect middleware (disabled by default, enable with HTTPS_ENFORCE=true)
         // When enabled, redirects HTTP requests to HTTPS (respects X-Forwarded-Proto for proxies)
         .layer(axum::middleware::from_fn(https_redirect_middleware))
-        .with_state(state)
+        .with_state(state))
 }
 
 /// Create memory routes with authentication middleware applied
@@ -861,14 +871,18 @@ async fn store_episode(
     Path(agent_id): Path<String>,
     Json(request): Json<StoreEpisodeRequest>,
 ) -> impl IntoResponse {
-    // Get or create agent memory
-    let memory = {
-        let mut memories = state.agent_memories.lock().unwrap();
-        memories
-            .entry(agent_id.clone())
-            .or_insert_with(|| Arc::new(AgentMemory::for_agent(&agent_id)))
-            .clone()
+    if request.agent_id != agent_id || agent_id.is_empty() || agent_id.len() > u16::MAX as usize {
+        return (StatusCode::BAD_REQUEST, Json(json!({"error": "Payload agentId must match a valid path agent ID"})));
+    }
+    let event_time = match request.event_time {
+        Some(value) => match chrono::DateTime::from_timestamp_millis(value) {
+            Some(value) => qilbee_core::EventTime::from_datetime(value),
+            None => return (StatusCode::BAD_REQUEST, Json(json!({"error": "eventTime is outside the supported range"}))),
+        },
+        None => qilbee_core::EventTime::now(),
     };
+    // Storage namespaces are loaded on demand from the shared durable backend.
+    let memory = state.agent_memory(&agent_id);
 
     // Parse episode type
     let episode_type = match request.episode_type.as_str() {
@@ -909,11 +923,15 @@ async fn store_episode(
     }
 
     // Create episode
-    let episode = Episode::new(&agent_id, episode_type, content);
+    content.context = request.content.get("context").and_then(Value::as_str).map(str::to_owned);
+    content.data = request.content.get("data").cloned();
+    let mut episode = Episode::new(&agent_id, episode_type, content);
+    episode.event_time = event_time;
+    if let Some(metadata) = request.metadata { episode.metadata = json_map_to_property(&metadata); }
     let episode_id = episode.id.to_string();
 
     // Store episode
-    match memory.store_episode(episode) {
+    match memory.store_episode(episode).await {
         Ok(_) => (StatusCode::CREATED, Json(json!({"episodeId": episode_id}))),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -932,30 +950,15 @@ async fn get_episode(
     Path((agent_id, episode_id)): Path<(String, String)>,
 ) -> Result<impl IntoResponse, MemoryOperationError> {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        memories.get(&agent_id).cloned().ok_or_else(|| {
-            MemoryOperationError::AgentNotFound {
-                agent_id: agent_id.clone(),
-            }
-        })?
-    };
+    let memory = state.agent_memory(&agent_id);
 
-    // Parse episode ID - just compare as string for now
-    // TODO: Implement proper UUID parsing for EpisodeId
-    // For now, get recent episodes and find by string comparison
-    let episodes = memory.get_recent_episodes(100).map_err(|e| {
-        MemoryOperationError::StorageError {
-            message: e.to_string(),
-        }
+    let id = uuid::Uuid::parse_str(&episode_id).map_err(|_| MemoryOperationError::ValidationError {
+        field: "episode_id".into(), message: "Expected a UUID".into(),
     })?;
-
-    let episode = episodes
-        .iter()
-        .find(|ep| ep.id.to_string() == episode_id)
+    let episode = memory.get_episode(qilbee_memory::episode::EpisodeId::from_uuid(id)).await
+        .map_err(|error| MemoryOperationError::StorageError { message: error.to_string() })?
         .ok_or_else(|| MemoryOperationError::EpisodeNotFound {
-            agent_id: agent_id.clone(),
-            episode_id: episode_id.clone(),
+            agent_id: agent_id.clone(), episode_id: episode_id.clone(),
         })?;
 
     // Format content based on episode type for intuitive field names
@@ -966,7 +969,8 @@ async fn get_episode(
         "episodeId": episode.id.to_string(),
         "episodeType": format!("{:?}", episode.episode_type),
         "content": content_map,
-        "eventTime": episode.event_time.as_millis()
+        "eventTime": episode.event_time.as_millis(),
+        "metadata": property_to_json_map(&episode.metadata)
     });
     Ok((StatusCode::OK, Json(response)))
 }
@@ -981,19 +985,10 @@ async fn get_recent_episodes(
     Path(agent_id): Path<String>,
 ) -> impl IntoResponse {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                // Return empty list if agent doesn't exist yet
-                return (StatusCode::OK, Json(json!({"episodes": []})));
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get recent episodes
-    match memory.get_recent_episodes(10) {
+    match memory.get_recent_episodes(10).await {
         Ok(episodes) => {
             let episode_list: Vec<_> = episodes
                 .iter()
@@ -1038,18 +1033,10 @@ async fn search_episodes(
     Json(request): Json<SearchEpisodesRequest>,
 ) -> impl IntoResponse {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                return (StatusCode::OK, Json(json!({"episodes": []})));
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Search episodes using keyword search
-    match memory.search_episodes(&request.query) {
+    match memory.search_episodes(&request.query).await {
         Ok(episodes) => {
             let episode_list: Vec<_> = episodes
                 .iter()
@@ -1120,26 +1107,11 @@ async fn semantic_search(
     Json(request): Json<SemanticSearchRequest>,
 ) -> impl IntoResponse {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                return (
-                    StatusCode::NOT_IMPLEMENTED,
-                    Json(json!({
-                        "error": "Semantic search is not enabled for this agent",
-                        "error_code": "SEMANTIC_SEARCH_NOT_ENABLED"
-                    })),
-                );
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
-    // For now, semantic search falls back to keyword search since we're using AgentMemory (not PersistentAgentMemory)
-    // In production, PersistentAgentMemory with semantic search enabled would be used
-    // Return a message indicating semantic search is not available for in-memory agents
-    match memory.search_episodes(&request.query) {
+    // Legacy fallback: this route still performs keyword search.
+    // Durable storage alone does not enable semantic retrieval.
+    match memory.search_episodes(&request.query).await {
         Ok(episodes) => {
             let results: Vec<_> = episodes
                 .iter()
@@ -1208,27 +1180,13 @@ async fn hybrid_search(
     }
 
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    Json(json!({
-                        "error": "Agent memory not found",
-                        "error_code": "AGENT_NOT_FOUND"
-                    })),
-                );
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
-    // For in-memory agents, hybrid search falls back to keyword search
+    // This legacy hybrid route still falls back to keyword search
     // The keyword_weight and semantic_weight are recorded but not used
     let keyword_weight = 1.0 - request.semantic_weight;
 
-    match memory.search_episodes(&request.query) {
+    match memory.search_episodes(&request.query).await {
         Ok(episodes) => {
             let results: Vec<_> = episodes
                 .iter()
@@ -1281,24 +1239,10 @@ async fn find_similar_episodes(
     AxumQuery(query): AxumQuery<FindSimilarQuery>,
 ) -> impl IntoResponse {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    Json(json!({
-                        "error": "Agent memory not found",
-                        "error_code": "AGENT_NOT_FOUND"
-                    })),
-                );
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get the source episode first
-    let episodes = match memory.get_recent_episodes(100) {
+    let episodes = match memory.get_recent_episodes(100).await {
         Ok(eps) => eps,
         Err(e) => {
             return (
@@ -1332,7 +1276,7 @@ async fn find_similar_episodes(
         source_episode.content.secondary.as_deref().unwrap_or("")
     );
 
-    match memory.search_episodes(&search_query) {
+    match memory.search_episodes(&search_query).await {
         Ok(similar_episodes) => {
             let results: Vec<_> = similar_episodes
                 .iter()
@@ -1379,13 +1323,9 @@ async fn get_semantic_search_status(
     Path(agent_id): Path<String>,
 ) -> impl IntoResponse {
     // Check if agent memory exists
-    let memory_exists = {
-        let memories = state.agent_memories.lock().unwrap();
-        memories.contains_key(&agent_id)
-    };
+    let memory_exists = state.agent_memory(&agent_id).episode_count().await.unwrap_or(0) > 0;
 
-    // For in-memory agents (AgentMemory), semantic search is not available
-    // Only PersistentAgentMemory supports semantic search
+    // This HTTP backend does not yet configure a semantic index.
     (
         StatusCode::OK,
         Json(json!({
@@ -1409,28 +1349,10 @@ async fn get_memory_statistics(
     Path(agent_id): Path<String>,
 ) -> impl IntoResponse {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        match memories.get(&agent_id) {
-            Some(m) => m.clone(),
-            None => {
-                // Return empty stats if agent doesn't exist yet
-                return (
-                    StatusCode::OK,
-                    Json(json!({
-                        "totalEpisodes": 0,
-                        "episodesByType": {},
-                        "oldestEpisode": null,
-                        "newestEpisode": null,
-                        "avgRelevance": 0.0
-                    })),
-                );
-            }
-        }
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get statistics
-    match memory.get_statistics() {
+    match memory.get_statistics().await {
         Ok(stats) => (
             StatusCode::OK,
             Json(json!({
@@ -1465,21 +1387,14 @@ async fn consolidate_memory(
     })?;
 
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        memories.get(&agent_id).cloned().ok_or_else(|| {
-            MemoryOperationError::AgentNotFound {
-                agent_id: agent_id.clone(),
-            }
-        })?
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get episode count before consolidation
-    let episodes_before = memory.episode_count().unwrap_or(0);
+    let episodes_before = memory.episode_count().await.unwrap_or(0);
 
     // Apply decay (consolidation operation)
     // Note: Currently using default apply_decay; future enhancement could use request.min_relevance and request.decay_factor
-    memory.apply_decay().map_err(|e| {
+    memory.apply_decay().await.map_err(|e| {
         // Log audit event for failure
         state.audit_service.log_memory_event(
             AuditEventType::MemoryConsolidated,
@@ -1497,7 +1412,7 @@ async fn consolidate_memory(
     })?;
 
     // Get episode count after consolidation
-    let episodes_after = memory.episode_count().unwrap_or(0);
+    let episodes_after = memory.episode_count().await.unwrap_or(0);
 
     // Log audit event
     state.audit_service.log_memory_event(
@@ -1541,21 +1456,14 @@ async fn forget_memory(
     })?;
 
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        memories.get(&agent_id).cloned().ok_or_else(|| {
-            MemoryOperationError::AgentNotFound {
-                agent_id: agent_id.clone(),
-            }
-        })?
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get episode count before forget
-    let episodes_before = memory.episode_count().unwrap_or(0);
+    let episodes_before = memory.episode_count().await.unwrap_or(0);
 
     // Forget low-relevance episodes
     // Note: Currently using default forget; future enhancement could use request.min_relevance and request.max_age_seconds
-    let count = memory.forget().map_err(|e| {
+    let count = memory.forget().await.map_err(|e| {
         // Log audit event for failure
         state.audit_service.log_memory_event(
             AuditEventType::MemoryForgotten,
@@ -1573,7 +1481,7 @@ async fn forget_memory(
     })?;
 
     // Get episode count after forget
-    let episodes_after = memory.episode_count().unwrap_or(0);
+    let episodes_after = memory.episode_count().await.unwrap_or(0);
 
     // Log audit event
     state.audit_service.log_memory_event(
@@ -1613,18 +1521,13 @@ async fn clear_memory(
     Path(agent_id): Path<String>,
 ) -> Result<impl IntoResponse, MemoryOperationError> {
     // Get agent memory
-    let memory = {
-        let memories = state.agent_memories.lock().unwrap();
-        memories.get(&agent_id).cloned().ok_or_else(|| {
-            MemoryOperationError::AgentNotFound { agent_id: agent_id.clone() }
-        })?
-    };
+    let memory = state.agent_memory(&agent_id);
 
     // Get episode count before clear
-    let episodes_before = memory.episode_count().unwrap_or(0);
+    let episodes_before = memory.episode_count().await.unwrap_or(0);
 
     // Clear all episodes
-    memory.clear().map_err(|e| {
+    memory.clear().await.map_err(|e| {
         // Log audit event for failure
         state.audit_service.log_memory_event(
             AuditEventType::MemoryCleared,
@@ -3706,6 +3609,9 @@ fn format_episode_content(episode: &Episode) -> Value {
         content_map.insert("context".to_string(), json!(context));
     }
 
+    if let Some(ref data) = episode.content.data {
+        content_map.insert("data".to_string(), data.clone());
+    }
     Value::Object(content_map)
 }
 

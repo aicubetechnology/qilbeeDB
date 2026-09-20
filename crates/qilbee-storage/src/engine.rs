@@ -122,6 +122,11 @@ pub struct StorageEngine {
 }
 
 impl StorageEngine {
+    /// Directory containing this engine's durable state.
+    pub fn path(&self) -> &std::path::Path {
+        &self.options.path
+    }
+
     /// Open or create a new storage engine
     pub fn open(options: StorageOptions) -> Result<Self> {
         info!("Opening storage engine at {:?}", options.path);
