@@ -258,3 +258,7 @@ profile and from tenant authorization. A byte budget above the configured ceilin
 returns 400 (`retrieval_scan_limit`); exhausted retrieval slots return 503
 (`retrieval_busy`). Use bounded backoff and inspect coverage on each successful
 response. See [configure retrieval capacity](../operations/retrieval-capacity.md).
+
+See the [0.6.0 real-embedding report](../research/scifact-results.md) for the
+300-query SciFact comparison, uncertainty and losses. Both profiles remain
+experimental; the measured gain does not establish a universal ranking policy.

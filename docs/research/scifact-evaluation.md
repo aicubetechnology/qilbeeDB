@@ -229,3 +229,27 @@ paired bootstrap intervals. Container CPU/memory counters cover the combined
 interleaved campaign; they cannot attribute resource use to an individual method.
 There is one observation per query/method, so no repeated-query stability estimate.
 Generation latency and cost remain unmeasured in this run, not zero.
+
+## Research informing subsequent experiments
+
+The current release implements fixed, versioned fusion. Recent research motivates
+additional hypotheses; the following mechanisms are **not implemented or validated
+by this release**:
+
+| Research | Finding or proposed mechanism | QilbeeDB experiment to design |
+| --- | --- | --- |
+| [Know When to Fuse, COLING 2025](https://aclanthology.org/2025.coling-main.290/) | Fusion gains depend on domain adaptation and weight selection; the best individual retriever remains a necessary baseline | Reserve multilingual and domain-shift test sets; include losses against the stronger individual channel |
+| [QuDAR, ACL 2026](https://aclanthology.org/2026.acl-long.1791/) | Uses query-dependent margins and LLM relevance signals to adapt retrieval and expansion weights | Compare a separately versioned adaptive rule against frozen static profiles, with scope-local features, explicit cost and independent test data |
+| [LLM-Independent Adaptive RAG, EMNLP 2025](https://aclanthology.org/2025.emnlp-main.439/) | Studies external features for deciding when to retrieve without LLM-based uncertainty estimation | Evaluate retrieval necessity and evidence sufficiency independently; returning a nearest neighbor is not proof of useful evidence |
+
+These are research directions, not a roadmap commitment or evidence that QilbeeDB
+reproduces the papers' reported gains. Query expansion, learned rerankers and model
+calls would require explicit external execution contracts; no provider credentials
+or model inference are introduced into the database by the present experiments.
+
+## Recorded 0.6.0 results
+
+The [complete real-vector report](scifact-results.md) covers all 300 SciFact test
+queries, individual regressions, uncertainty, measured capacity and the separate
+40-source diagnostic. The [experience-memory design](experience-memory-design.md)
+explains the additional evidence needed to evaluate downstream agent learning.

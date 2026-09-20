@@ -112,6 +112,20 @@
       "title": "Retrieval capacity and large vectors",
       "description": "Configure dimensionality, scan budgets and concurrent retrieval admission with observable coverage.",
       "order": 135
+    },
+    {
+      "source": "docs/research/scifact-results.md",
+      "file": "scifact-results.md",
+      "title": "Real-embedding retrieval results",
+      "description": "Inspect the 300-query SciFact comparison, uncertainty, regressions and capacity evidence for release 0.6.0.",
+      "order": 140
+    },
+    {
+      "source": "docs/research/experience-memory-design.md",
+      "file": "experience-memory-design.md",
+      "title": "Experience-driven memory research",
+      "description": "Map reasoning memory, shared evidence and discovery replay research to proposed contracts and acceptance criteria.",
+      "order": 150
     }
   ]
 }

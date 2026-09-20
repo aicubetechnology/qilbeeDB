@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "fixture_sha256": "0a5a95b79bf9d820ea9899510b7013732dc98617957cd23e4ee294d566fe912b",
+  "manifest_sha256": "1181d3c08a2d58fabd29699106d51149685fac4c80dadb9a38c7becc5acc08eb",
+  "source_image": "sha256:cd75477bc1945baec468b74c5deb3e3aea004fb2ce455c9abed237307c4fcf8b",
+  "source_revision": "8026d61357943b480f20750186fd297db493df57",
+  "model_space": {
+    "dimensions": 1536,
+    "model": "text-embedding-3-small",
+    "provider": "openai",
+    "revision": "captured-d5d8446f347b0d94fe631ba7"
+  },
+  "query_id": "development-0",
+  "split": "development",
+  "corpus_records": 5183,
+  "no_provider_calls": true,
+  "methods": {
+    "lexical": {
+      "corpus_records": 5183,
+      "exhaustive": true,
+      "matched_records": 1334,
+      "next_after": null,
+      "scanned_bytes": 11223933,
+      "scanned_records": 5183,
+      "http_ms": 353.477834,
+      "response_bytes": 20502,
+      "retrieval_micros": 305767
+    },
+    "semantic": {
+      "exhaustive": true,
+      "matched_records": 5183,
+      "next_after": null,
+      "scanned_embeddings": 5183,
+      "http_ms": 1921.751584,
+      "response_bytes": 25990,
+      "retrieval_micros": 1898175
+    },
+    "hybrid": {
+      "candidates_truncated": true,
+      "corpus_records": 5183,
+      "embedded_records": 5183,
+      "embedding_coverage": "complete",
+      "exhaustive": true,
+      "lexical_candidates": 100,
+      "lexical_matches": 1334,
+      "next_after": null,
+      "rank_constant": 60,
+      "scanned_bytes": 115105204,
+      "scanned_records": 5183,
+      "semantic_candidates": 100,
+      "semantic_matches": 5183,
+      "http_ms": 2394.245417,
+      "response_bytes": 30165,
+      "retrieval_micros": 2382187
+    },
+    "64_mib_diagnostic": {
+      "candidates_truncated": true,
+      "corpus_records": 3022,
+      "embedded_records": 3022,
+      "embedding_coverage": "complete",
+      "exhaustive": false,
+      "lexical_candidates": 100,
+      "lexical_matches": 799,
+      "rank_constant": 60,
+      "scanned_bytes": 67092363,
+      "scanned_records": 3022,
+      "semantic_candidates": 100,
+      "semantic_matches": 3022,
+      "next_after_present": true
+    }
+  },
+  "concurrent_statuses": [
+    503,
+    503,
+    503,
+    503,
+    200,
+    200,
+    503,
+    503
+  ],
+  "permit_released": true,
+  "interpretation": "Functional coverage preflight, not a relevance or representative latency result. All full-budget methods used one complete scoped snapshot per request. Lower-budget page scores were not merged."
+}

@@ -1,0 +1,5395 @@
+{
+  "schema_version": 1,
+  "trial_plan": {
+    "schema_version": 1,
+    "fixture_sha256": "fe9a1f434427596e7f3412c96e8800760179fc3ed6e0bbbf56b769cc864f330b",
+    "manifest_sha256": "56dae902aea5fd3e5d3c2d0ec24b96ac102ff8a814ce3d173cf1a25a123bab2c",
+    "split": "test",
+    "k": 10,
+    "scan_limit": 10000,
+    "scan_bytes_limit": 134217728,
+    "client_concurrency": 2,
+    "seed": 20260920,
+    "repetitions": 1,
+    "warmup": "first development query, once per method, excluded from measurements",
+    "profiles": {
+      "weighted_rrf_v1": {
+        "version": "weighted_rrf_v1",
+        "method": "weighted_rrf",
+        "lexical_version": "bm25_v1",
+        "semantic_version": "cosine_exact_v1",
+        "candidate_limit": 100,
+        "lexical_weight": 0.5,
+        "semantic_weight": 0.5,
+        "rank_constant": 60,
+        "experimental": true
+      },
+      "weighted_rrf_v2": {
+        "version": "weighted_rrf_v2",
+        "method": "weighted_rrf",
+        "lexical_version": "bm25_v1",
+        "semantic_version": "cosine_exact_v1",
+        "candidate_limit": 100,
+        "lexical_weight": 0.25,
+        "semantic_weight": 0.75,
+        "rank_constant": 2,
+        "experimental": true
+      }
+    },
+    "order": "one seeded shuffle of all query/method jobs; shared lexical and semantic baselines",
+    "cache": "RocksDB/OS caches not flushed; no server retrieval-result cache"
+  },
+  "trial_plan_sha256": "22146a4799415bf3142e9ebb50e76e4549214cf336f245f55bccd2bd8b0c042e",
+  "server_health": {
+    "contract_version": 1,
+    "status": "healthy",
+    "version": "0.6.0"
+  },
+  "execution_limits": {
+    "default_scan_bytes": 8388608,
+    "max_concurrent_retrievals": 2,
+    "max_embedding_dimensions": 32768,
+    "max_scan_bytes": 134217728,
+    "scope": "server_instance",
+    "vector_request_body_bytes": 2097152
+  },
+  "model_space": {
+    "dimensions": 1536,
+    "model": "text-embedding-3-small",
+    "provider": "openai",
+    "revision": "captured-90a64e8a23e2562183ce1d14"
+  },
+  "source_revision_count": 40,
+  "valid_comparison": true,
+  "failures": [],
+  "summary": {
+    "lexical": {
+      "queries": 9,
+      "ndcg_at_10": 0.9637262176746082,
+      "recall_at_10": 1.0,
+      "judged_recall_at_10": 1.0,
+      "answerable_no_useful_result_rate": 0,
+      "unanswerable_return_rate": 0,
+      "empty_result_rate": 0.1111111111111111,
+      "all_judgments_complete": true,
+      "retrieval_ms": {
+        "p50": 0.624,
+        "p95": 0.8071999999999999
+      },
+      "http_ms": {
+        "p50": 3.760875,
+        "p95": 5.1694338
+      },
+      "mean_response_bytes": 2952.6666666666665
+    },
+    "semantic": {
+      "queries": 9,
+      "ndcg_at_10": 1.0,
+      "recall_at_10": 1.0,
+      "judged_recall_at_10": 1.0,
+      "answerable_no_useful_result_rate": 0,
+      "unanswerable_return_rate": 1,
+      "empty_result_rate": 0,
+      "all_judgments_complete": true,
+      "retrieval_ms": {
+        "p50": 7.263,
+        "p95": 8.7958
+      },
+      "http_ms": {
+        "p50": 13.870458,
+        "p95": 20.9501914
+      },
+      "mean_response_bytes": 13756
+    },
+    "weighted_rrf_v1": {
+      "queries": 9,
+      "ndcg_at_10": 1.0,
+      "recall_at_10": 1.0,
+      "judged_recall_at_10": 1.0,
+      "answerable_no_useful_result_rate": 0,
+      "unanswerable_return_rate": 1,
+      "empty_result_rate": 0,
+      "all_judgments_complete": true,
+      "retrieval_ms": {
+        "p50": 7.887,
+        "p95": 16.581199999999995
+      },
+      "http_ms": {
+        "p50": 13.383459,
+        "p95": 34.3992748
+      },
+      "mean_response_bytes": 15518.333333333334
+    },
+    "weighted_rrf_v2": {
+      "queries": 9,
+      "ndcg_at_10": 1.0,
+      "recall_at_10": 1.0,
+      "judged_recall_at_10": 1.0,
+      "answerable_no_useful_result_rate": 0,
+      "unanswerable_return_rate": 1,
+      "empty_result_rate": 0,
+      "all_judgments_complete": true,
+      "retrieval_ms": {
+        "p50": 7.672,
+        "p95": 10.179
+      },
+      "http_ms": {
+        "p50": 12.33775,
+        "p95": 14.2672248
+      },
+      "mean_response_bytes": 15323.222222222223
+    }
+  },
+  "paired": {
+    "weighted_rrf_v1_minus_lexical": {
+      "interval": {
+        "mean": 0.036273782325391815,
+        "low": 0.0,
+        "high": 0.10882134697617545,
+        "queries": 8,
+        "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+      },
+      "wins": 1,
+      "losses": 0,
+      "ties": 7,
+      "changes": [
+        {
+          "query_id": "test-exact_identifiers",
+          "delta": 0.0,
+          "candidate": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ],
+          "baseline": [
+            "invoice",
+            "noise-other"
+          ]
+        },
+        {
+          "query_id": "test-error_codes",
+          "delta": 0.0,
+          "candidate": [
+            "error-alt",
+            "noise-18",
+            "error",
+            "noise-10",
+            "noise-23",
+            "noise-22",
+            "noise-16",
+            "noise-17",
+            "noise-15",
+            "noise-11"
+          ],
+          "baseline": [
+            "error-alt",
+            "noise-10",
+            "noise-4",
+            "noise-23",
+            "noise-1",
+            "noise-11",
+            "noise-17",
+            "noise-5",
+            "noise-22",
+            "noise-16"
+          ]
+        },
+        {
+          "query_id": "test-file_and_class_names",
+          "delta": 0.0,
+          "candidate": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ],
+          "baseline": [
+            "class"
+          ]
+        },
+        {
+          "query_id": "test-paraphrases",
+          "delta": 0.2901902586031345,
+          "candidate": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ],
+          "baseline": [
+            "paraphrase",
+            "paraphrase-alt"
+          ]
+        },
+        {
+          "query_id": "test-ambiguous_terms",
+          "delta": 0.0,
+          "candidate": [
+            "bank-river",
+            "class",
+            "bank-money",
+            "error",
+            "error-alt",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ],
+          "baseline": [
+            "bank-river",
+            "class",
+            "bank-money"
+          ]
+        },
+        {
+          "query_id": "test-portuguese",
+          "delta": 0.0,
+          "candidate": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ],
+          "baseline": [
+            "pt-alt"
+          ]
+        },
+        {
+          "query_id": "test-near_duplicates",
+          "delta": 0.0,
+          "candidate": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-11",
+            "noise-10",
+            "noise-14",
+            "noise-16",
+            "noise-23",
+            "noise-5",
+            "noise-4"
+          ],
+          "baseline": [
+            "near-new",
+            "near-old",
+            "error",
+            "file",
+            "noise-10",
+            "noise-4",
+            "noise-23",
+            "noise-1",
+            "noise-11",
+            "noise-17"
+          ]
+        },
+        {
+          "query_id": "test-noise",
+          "delta": 0.0,
+          "candidate": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ],
+          "baseline": [
+            "noise-other"
+          ]
+        }
+      ]
+    },
+    "weighted_rrf_v1_minus_semantic": {
+      "interval": {
+        "mean": 0.0,
+        "low": 0.0,
+        "high": 0.0,
+        "queries": 8,
+        "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+      },
+      "wins": 0,
+      "losses": 0,
+      "ties": 8,
+      "changes": [
+        {
+          "query_id": "test-exact_identifiers",
+          "delta": 0.0,
+          "candidate": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ],
+          "baseline": [
+            "invoice",
+            "customer",
+            "noise-other",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ]
+        },
+        {
+          "query_id": "test-error_codes",
+          "delta": 0.0,
+          "candidate": [
+            "error-alt",
+            "noise-18",
+            "error",
+            "noise-10",
+            "noise-23",
+            "noise-22",
+            "noise-16",
+            "noise-17",
+            "noise-15",
+            "noise-11"
+          ],
+          "baseline": [
+            "error-alt",
+            "error",
+            "noise-18",
+            "near-old",
+            "noise-20",
+            "noise-19",
+            "noise-21",
+            "noise-15",
+            "noise-12",
+            "noise-16"
+          ]
+        },
+        {
+          "query_id": "test-file_and_class_names",
+          "delta": 0.0,
+          "candidate": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ],
+          "baseline": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ]
+        },
+        {
+          "query_id": "test-paraphrases",
+          "delta": 0.0,
+          "candidate": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ],
+          "baseline": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ]
+        },
+        {
+          "query_id": "test-ambiguous_terms",
+          "delta": 0.0,
+          "candidate": [
+            "bank-river",
+            "class",
+            "bank-money",
+            "error",
+            "error-alt",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ],
+          "baseline": [
+            "bank-river",
+            "error",
+            "error-alt",
+            "noise-other",
+            "near-new",
+            "class",
+            "bank-money",
+            "file",
+            "near-old",
+            "invoice"
+          ]
+        },
+        {
+          "query_id": "test-portuguese",
+          "delta": 0.0,
+          "candidate": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ],
+          "baseline": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ]
+        },
+        {
+          "query_id": "test-near_duplicates",
+          "delta": 0.0,
+          "candidate": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-11",
+            "noise-10",
+            "noise-14",
+            "noise-16",
+            "noise-23",
+            "noise-5",
+            "noise-4"
+          ],
+          "baseline": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-14",
+            "noise-11",
+            "noise-13",
+            "noise-15",
+            "noise-16",
+            "noise-12",
+            "noise-10"
+          ]
+        },
+        {
+          "query_id": "test-noise",
+          "delta": 0.0,
+          "candidate": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ],
+          "baseline": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ]
+        }
+      ]
+    },
+    "weighted_rrf_v2_minus_lexical": {
+      "interval": {
+        "mean": 0.036273782325391815,
+        "low": 0.0,
+        "high": 0.10882134697617545,
+        "queries": 8,
+        "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+      },
+      "wins": 1,
+      "losses": 0,
+      "ties": 7,
+      "changes": [
+        {
+          "query_id": "test-exact_identifiers",
+          "delta": 0.0,
+          "candidate": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ],
+          "baseline": [
+            "invoice",
+            "noise-other"
+          ]
+        },
+        {
+          "query_id": "test-error_codes",
+          "delta": 0.0,
+          "candidate": [
+            "error-alt",
+            "error",
+            "noise-18",
+            "near-old",
+            "noise-20",
+            "noise-10",
+            "noise-19",
+            "noise-21",
+            "noise-23",
+            "noise-15"
+          ],
+          "baseline": [
+            "error-alt",
+            "noise-10",
+            "noise-4",
+            "noise-23",
+            "noise-1",
+            "noise-11",
+            "noise-17",
+            "noise-5",
+            "noise-22",
+            "noise-16"
+          ]
+        },
+        {
+          "query_id": "test-file_and_class_names",
+          "delta": 0.0,
+          "candidate": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ],
+          "baseline": [
+            "class"
+          ]
+        },
+        {
+          "query_id": "test-paraphrases",
+          "delta": 0.2901902586031345,
+          "candidate": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ],
+          "baseline": [
+            "paraphrase",
+            "paraphrase-alt"
+          ]
+        },
+        {
+          "query_id": "test-ambiguous_terms",
+          "delta": 0.0,
+          "candidate": [
+            "bank-river",
+            "error",
+            "class",
+            "error-alt",
+            "bank-money",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ],
+          "baseline": [
+            "bank-river",
+            "class",
+            "bank-money"
+          ]
+        },
+        {
+          "query_id": "test-portuguese",
+          "delta": 0.0,
+          "candidate": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ],
+          "baseline": [
+            "pt-alt"
+          ]
+        },
+        {
+          "query_id": "test-near_duplicates",
+          "delta": 0.0,
+          "candidate": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-14",
+            "noise-11",
+            "noise-13",
+            "noise-10",
+            "noise-15",
+            "noise-16",
+            "noise-12"
+          ],
+          "baseline": [
+            "near-new",
+            "near-old",
+            "error",
+            "file",
+            "noise-10",
+            "noise-4",
+            "noise-23",
+            "noise-1",
+            "noise-11",
+            "noise-17"
+          ]
+        },
+        {
+          "query_id": "test-noise",
+          "delta": 0.0,
+          "candidate": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ],
+          "baseline": [
+            "noise-other"
+          ]
+        }
+      ]
+    },
+    "weighted_rrf_v2_minus_semantic": {
+      "interval": {
+        "mean": 0.0,
+        "low": 0.0,
+        "high": 0.0,
+        "queries": 8,
+        "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+      },
+      "wins": 0,
+      "losses": 0,
+      "ties": 8,
+      "changes": [
+        {
+          "query_id": "test-exact_identifiers",
+          "delta": 0.0,
+          "candidate": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ],
+          "baseline": [
+            "invoice",
+            "customer",
+            "noise-other",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ]
+        },
+        {
+          "query_id": "test-error_codes",
+          "delta": 0.0,
+          "candidate": [
+            "error-alt",
+            "error",
+            "noise-18",
+            "near-old",
+            "noise-20",
+            "noise-10",
+            "noise-19",
+            "noise-21",
+            "noise-23",
+            "noise-15"
+          ],
+          "baseline": [
+            "error-alt",
+            "error",
+            "noise-18",
+            "near-old",
+            "noise-20",
+            "noise-19",
+            "noise-21",
+            "noise-15",
+            "noise-12",
+            "noise-16"
+          ]
+        },
+        {
+          "query_id": "test-file_and_class_names",
+          "delta": 0.0,
+          "candidate": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ],
+          "baseline": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ]
+        },
+        {
+          "query_id": "test-paraphrases",
+          "delta": 0.0,
+          "candidate": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ],
+          "baseline": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ]
+        },
+        {
+          "query_id": "test-ambiguous_terms",
+          "delta": 0.0,
+          "candidate": [
+            "bank-river",
+            "error",
+            "class",
+            "error-alt",
+            "bank-money",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ],
+          "baseline": [
+            "bank-river",
+            "error",
+            "error-alt",
+            "noise-other",
+            "near-new",
+            "class",
+            "bank-money",
+            "file",
+            "near-old",
+            "invoice"
+          ]
+        },
+        {
+          "query_id": "test-portuguese",
+          "delta": 0.0,
+          "candidate": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ],
+          "baseline": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ]
+        },
+        {
+          "query_id": "test-near_duplicates",
+          "delta": 0.0,
+          "candidate": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-14",
+            "noise-11",
+            "noise-13",
+            "noise-10",
+            "noise-15",
+            "noise-16",
+            "noise-12"
+          ],
+          "baseline": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-14",
+            "noise-11",
+            "noise-13",
+            "noise-15",
+            "noise-16",
+            "noise-12",
+            "noise-10"
+          ]
+        },
+        {
+          "query_id": "test-noise",
+          "delta": 0.0,
+          "candidate": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ],
+          "baseline": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ]
+        }
+      ]
+    },
+    "weighted_rrf_v2_minus_weighted_rrf_v1": {
+      "interval": {
+        "mean": 0.0,
+        "low": 0.0,
+        "high": 0.0,
+        "queries": 8,
+        "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+      },
+      "wins": 0,
+      "losses": 0,
+      "ties": 8,
+      "changes": [
+        {
+          "query_id": "test-exact_identifiers",
+          "delta": 0.0,
+          "candidate": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ],
+          "baseline": [
+            "invoice",
+            "noise-other",
+            "customer",
+            "error",
+            "error-alt",
+            "noise-21",
+            "noise-20",
+            "noise-9",
+            "noise-23",
+            "noise-22"
+          ]
+        },
+        {
+          "query_id": "test-error_codes",
+          "delta": 0.0,
+          "candidate": [
+            "error-alt",
+            "error",
+            "noise-18",
+            "near-old",
+            "noise-20",
+            "noise-10",
+            "noise-19",
+            "noise-21",
+            "noise-23",
+            "noise-15"
+          ],
+          "baseline": [
+            "error-alt",
+            "noise-18",
+            "error",
+            "noise-10",
+            "noise-23",
+            "noise-22",
+            "noise-16",
+            "noise-17",
+            "noise-15",
+            "noise-11"
+          ]
+        },
+        {
+          "query_id": "test-file_and_class_names",
+          "delta": 0.0,
+          "candidate": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ],
+          "baseline": [
+            "class",
+            "paraphrase",
+            "noise-target",
+            "error",
+            "near-old",
+            "near-new",
+            "paraphrase-alt",
+            "noise-11",
+            "noise-13",
+            "noise-18"
+          ]
+        },
+        {
+          "query_id": "test-paraphrases",
+          "delta": 0.0,
+          "candidate": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ],
+          "baseline": [
+            "paraphrase-alt",
+            "paraphrase",
+            "class",
+            "error",
+            "error-alt",
+            "pt",
+            "near-old",
+            "noise-18",
+            "noise-14",
+            "near-new"
+          ]
+        },
+        {
+          "query_id": "test-ambiguous_terms",
+          "delta": 0.0,
+          "candidate": [
+            "bank-river",
+            "error",
+            "class",
+            "error-alt",
+            "bank-money",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ],
+          "baseline": [
+            "bank-river",
+            "class",
+            "bank-money",
+            "error",
+            "error-alt",
+            "noise-other",
+            "near-new",
+            "file",
+            "near-old",
+            "invoice"
+          ]
+        },
+        {
+          "query_id": "test-portuguese",
+          "delta": 0.0,
+          "candidate": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ],
+          "baseline": [
+            "pt-alt",
+            "pt",
+            "noise-other",
+            "noise-20",
+            "noise-19",
+            "noise-22",
+            "noise-23",
+            "noise-15",
+            "noise-21",
+            "noise-17"
+          ]
+        },
+        {
+          "query_id": "test-near_duplicates",
+          "delta": 0.0,
+          "candidate": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-14",
+            "noise-11",
+            "noise-13",
+            "noise-10",
+            "noise-15",
+            "noise-16",
+            "noise-12"
+          ],
+          "baseline": [
+            "near-new",
+            "near-old",
+            "error",
+            "noise-11",
+            "noise-10",
+            "noise-14",
+            "noise-16",
+            "noise-23",
+            "noise-5",
+            "noise-4"
+          ]
+        },
+        {
+          "query_id": "test-noise",
+          "delta": 0.0,
+          "candidate": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ],
+          "baseline": [
+            "noise-other",
+            "noise-20",
+            "noise-15",
+            "noise-16",
+            "noise-23",
+            "noise-21",
+            "noise-12",
+            "noise-13",
+            "noise-5",
+            "noise-22"
+          ]
+        }
+      ]
+    }
+  },
+  "rows": [
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "method": "lexical",
+      "ranked": [
+        "bank-river",
+        "class",
+        "bank-money"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 3,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 10.70610431179393
+        },
+        {
+          "score": 3.067985980136297
+        },
+        {
+          "score": 2.8199008604487257
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.495,
+          "http_ms": 2.657667,
+          "response_bytes": 2641
+        }
+      ]
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "method": "semantic",
+      "ranked": [
+        "bank-river",
+        "error",
+        "error-alt",
+        "noise-other",
+        "near-new",
+        "class",
+        "bank-money",
+        "file",
+        "near-old",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.7097934214375268
+        },
+        {
+          "score": 0.17116184011515412
+        },
+        {
+          "score": 0.14453958094997216
+        },
+        {
+          "score": 0.13805967733387647
+        },
+        {
+          "score": 0.134110235144311
+        },
+        {
+          "score": 0.12479938823009414
+        },
+        {
+          "score": 0.1178638738614911
+        },
+        {
+          "score": 0.11507619696731589
+        },
+        {
+          "score": 0.1069366876890552
+        },
+        {
+          "score": 0.10462223577214323
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.176,
+          "http_ms": 14.267541,
+          "response_bytes": 13612
+        }
+      ]
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "bank-river",
+        "class",
+        "bank-money",
+        "error",
+        "error-alt",
+        "noise-other",
+        "near-new",
+        "file",
+        "near-old",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 3,
+        "lexical_matches": 3,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 10.70610431179393
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.7097934214375268
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.067985980136297
+          },
+          "score": 0.015640273704789834,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.12479938823009414
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 2.8199008604487257
+          },
+          "score": 0.015399194503672116,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.1178638738614911
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.17116184011515412
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.14453958094997216
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.13805967733387647
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.134110235144311
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.11507619696731589
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.1069366876890552
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.10462223577214323
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.388,
+          "http_ms": 13.383459,
+          "response_bytes": 15344
+        }
+      ]
+    },
+    {
+      "query_id": "test-ambiguous_terms",
+      "split": "test",
+      "category": "ambiguous_terms",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "bank-river",
+        "error",
+        "class",
+        "error-alt",
+        "bank-money",
+        "noise-other",
+        "near-new",
+        "file",
+        "near-old",
+        "invoice"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 3,
+        "lexical_matches": 3,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 10.70610431179393
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.7097934214375268
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.17116184011515412
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0625,
+            "rank": 2,
+            "score": 3.067985980136297
+          },
+          "score": 0.15625,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.12479938823009414
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.14453958094997216
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.05,
+            "rank": 3,
+            "score": 2.8199008604487257
+          },
+          "score": 0.13333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.1178638738614911
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.13805967733387647
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.134110235144311
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.11507619696731589
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.1069366876890552
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.10462223577214323
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.612,
+          "http_ms": 11.607292,
+          "response_bytes": 15140
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "method": "lexical",
+      "ranked": [
+        "error-alt",
+        "noise-10",
+        "noise-4",
+        "noise-23",
+        "noise-1",
+        "noise-11",
+        "noise-17",
+        "noise-5",
+        "noise-22",
+        "noise-16"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 26,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 7.409235471455764
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.599,
+          "http_ms": 2.415542,
+          "response_bytes": 8227
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "method": "semantic",
+      "ranked": [
+        "error-alt",
+        "error",
+        "noise-18",
+        "near-old",
+        "noise-20",
+        "noise-19",
+        "noise-21",
+        "noise-15",
+        "noise-12",
+        "noise-16"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.8212633952214645
+        },
+        {
+          "score": 0.5833724576389908
+        },
+        {
+          "score": 0.36555358169790975
+        },
+        {
+          "score": 0.349547005313105
+        },
+        {
+          "score": 0.34931822364404386
+        },
+        {
+          "score": 0.34808917328537387
+        },
+        {
+          "score": 0.3443711826704231
+        },
+        {
+          "score": 0.3377104975003499
+        },
+        {
+          "score": 0.3374679508975154
+        },
+        {
+          "score": 0.3373471935201615
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.309,
+          "http_ms": 21.132375,
+          "response_bytes": 13813
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "error-alt",
+        "noise-18",
+        "error",
+        "noise-10",
+        "noise-23",
+        "noise-22",
+        "noise-16",
+        "noise-17",
+        "noise-15",
+        "noise-11"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 26,
+        "lexical_matches": 26,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 7.409235471455764
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.8212633952214645
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007042253521126761,
+            "rank": 11,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014978761457634698,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.36555358169790975
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014913831197525408,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.5833724576389908
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014821272885789015,
+          "semantic": {
+            "contribution": 0.006756756756756757,
+            "rank": 14,
+            "score": 0.3321130664916687
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.4228596445811843
+          },
+          "score": 0.01466181506849315,
+          "semantic": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.33248585612825443
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014288630332720964,
+          "semantic": {
+            "contribution": 0.007042253521126761,
+            "rank": 11,
+            "score": 0.3360910272380967
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014285714285714285,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.3373471935201615
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014041633935585232,
+          "semantic": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.33003754973278215
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006666666666666667,
+            "rank": 15,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014019607843137254,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.3377104975003499
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013986013986013986,
+          "semantic": {
+            "contribution": 0.00641025641025641,
+            "rank": 18,
+            "score": 0.3273877132214122
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.352,
+          "http_ms": 32.3005,
+          "response_bytes": 16075
+        }
+      ]
+    },
+    {
+      "query_id": "test-error_codes",
+      "split": "test",
+      "category": "error_codes",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "error-alt",
+        "error",
+        "noise-18",
+        "near-old",
+        "noise-20",
+        "noise-10",
+        "noise-19",
+        "noise-21",
+        "noise-23",
+        "noise-15"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 26,
+        "lexical_matches": 26,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 7.409235471455764
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.8212633952214645
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.016666666666666666,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.20416666666666666,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.5833724576389908
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.019230769230769232,
+            "rank": 11,
+            "score": 0.4228596445811843
+          },
+          "score": 0.16923076923076924,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.36555358169790975
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.349547005313105
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.009259259259259259,
+            "rank": 25,
+            "score": 0.4228596445811843
+          },
+          "score": 0.1164021164021164,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.34931822364404386
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0625,
+            "rank": 2,
+            "score": 0.4228596445811843
+          },
+          "score": 0.109375,
+          "semantic": {
+            "contribution": 0.046875,
+            "rank": 14,
+            "score": 0.3321130664916687
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.01,
+            "rank": 23,
+            "score": 0.4228596445811843
+          },
+          "score": 0.10375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.34808917328537387
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.010416666666666666,
+            "rank": 22,
+            "score": 0.4228596445811843
+          },
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.3443711826704231
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.041666666666666664,
+            "rank": 4,
+            "score": 0.4228596445811843
+          },
+          "score": 0.09166666666666667,
+          "semantic": {
+            "contribution": 0.05,
+            "rank": 13,
+            "score": 0.33248585612825443
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.014705882352941176,
+            "rank": 15,
+            "score": 0.4228596445811843
+          },
+          "score": 0.08970588235294118,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.3377104975003499
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.424,
+          "http_ms": 12.079167,
+          "response_bytes": 15784
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "method": "lexical",
+      "ranked": [
+        "invoice",
+        "noise-other"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 2,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 13.339428598544016
+        },
+        {
+          "score": 3.978237950208867
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.624,
+          "http_ms": 2.965958,
+          "response_bytes": 1880
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "method": "semantic",
+      "ranked": [
+        "invoice",
+        "customer",
+        "noise-other",
+        "error",
+        "error-alt",
+        "noise-21",
+        "noise-20",
+        "noise-9",
+        "noise-23",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.7567463197834174
+        },
+        {
+          "score": 0.30604072454868275
+        },
+        {
+          "score": 0.26753605799672425
+        },
+        {
+          "score": 0.2096158882196986
+        },
+        {
+          "score": 0.2060547524032787
+        },
+        {
+          "score": 0.2055622635160621
+        },
+        {
+          "score": 0.19765317609065475
+        },
+        {
+          "score": 0.1975933488486492
+        },
+        {
+          "score": 0.19726403659574057
+        },
+        {
+          "score": 0.19673552411447617
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.263,
+          "http_ms": 15.343041,
+          "response_bytes": 13739
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "invoice",
+        "noise-other",
+        "customer",
+        "error",
+        "error-alt",
+        "noise-21",
+        "noise-20",
+        "noise-9",
+        "noise-23",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 2,
+        "lexical_matches": 2,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 13.339428598544016
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.7567463197834174
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.978237950208867
+          },
+          "score": 0.016001024065540194,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.26753605799672425
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.30604072454868275
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.2096158882196986
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.2060547524032787
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.2055622635160621
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.19765317609065475
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.1975933488486492
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.19726403659574057
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.19673552411447617
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.635,
+          "http_ms": 12.858375,
+          "response_bytes": 15403
+        }
+      ]
+    },
+    {
+      "query_id": "test-exact_identifiers",
+      "split": "test",
+      "category": "exact_identifiers",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "invoice",
+        "noise-other",
+        "customer",
+        "error",
+        "error-alt",
+        "noise-21",
+        "noise-20",
+        "noise-9",
+        "noise-23",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 2,
+        "lexical_matches": 2,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 13.339428598544016
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.7567463197834174
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0625,
+            "rank": 2,
+            "score": 3.978237950208867
+          },
+          "score": 0.2125,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.26753605799672425
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.30604072454868275
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.2096158882196986
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.2060547524032787
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.2055622635160621
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.19765317609065475
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.1975933488486492
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.19726403659574057
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.19673552411447617
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.672,
+          "http_ms": 12.445458,
+          "response_bytes": 15217
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "method": "lexical",
+      "ranked": [
+        "class"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 1,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 7.256492683372185
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.55,
+          "http_ms": 3.760875,
+          "response_bytes": 1132
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "method": "semantic",
+      "ranked": [
+        "class",
+        "paraphrase",
+        "noise-target",
+        "error",
+        "near-old",
+        "near-new",
+        "paraphrase-alt",
+        "noise-11",
+        "noise-13",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.7924220942262585
+        },
+        {
+          "score": 0.3390833085429636
+        },
+        {
+          "score": 0.2906586445847754
+        },
+        {
+          "score": 0.28706388967176455
+        },
+        {
+          "score": 0.2835804250782239
+        },
+        {
+          "score": 0.2787748234871171
+        },
+        {
+          "score": 0.27496030448613235
+        },
+        {
+          "score": 0.26927654472298923
+        },
+        {
+          "score": 0.2684135549501535
+        },
+        {
+          "score": 0.26433070619237714
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.081,
+          "http_ms": 12.319167,
+          "response_bytes": 13722
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "class",
+        "paraphrase",
+        "noise-target",
+        "error",
+        "near-old",
+        "near-new",
+        "paraphrase-alt",
+        "noise-11",
+        "noise-13",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 7.256492683372185
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.7924220942262585
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.3390833085429636
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.2906586445847754
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.28706388967176455
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.2835804250782239
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.2787748234871171
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.27496030448613235
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.26927654472298923
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.2684135549501535
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.26433070619237714
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 21.114,
+          "http_ms": 35.798458,
+          "response_bytes": 15318
+        }
+      ]
+    },
+    {
+      "query_id": "test-file_and_class_names",
+      "split": "test",
+      "category": "file_and_class_names",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "class",
+        "paraphrase",
+        "noise-target",
+        "error",
+        "near-old",
+        "near-new",
+        "paraphrase-alt",
+        "noise-11",
+        "noise-13",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 7.256492683372185
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.7924220942262585
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.3390833085429636
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.2906586445847754
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.28706388967176455
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.2835804250782239
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.2787748234871171
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.27496030448613235
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.26927654472298923
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.2684135549501535
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.26433070619237714
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.51,
+          "http_ms": 12.226583,
+          "response_bytes": 15143
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "method": "lexical",
+      "ranked": [
+        "near-new",
+        "near-old",
+        "error",
+        "file",
+        "noise-10",
+        "noise-4",
+        "noise-23",
+        "noise-1",
+        "noise-11",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 28,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 8.840307400580121
+        },
+        {
+          "score": 5.364936606998779
+        },
+        {
+          "score": 5.356792896041959
+        },
+        {
+          "score": 2.3212106925648444
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        },
+        {
+          "score": 0.4228596445811843
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.842,
+          "http_ms": 4.14775,
+          "response_bytes": 8145
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "method": "semantic",
+      "ranked": [
+        "near-new",
+        "near-old",
+        "error",
+        "noise-14",
+        "noise-11",
+        "noise-13",
+        "noise-15",
+        "noise-16",
+        "noise-12",
+        "noise-10"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.6572925847237021
+        },
+        {
+          "score": 0.6336671166759308
+        },
+        {
+          "score": 0.5250861685784363
+        },
+        {
+          "score": 0.36616468103612493
+        },
+        {
+          "score": 0.3658134210782232
+        },
+        {
+          "score": 0.3650726961419554
+        },
+        {
+          "score": 0.36445708018377804
+        },
+        {
+          "score": 0.3629784073461932
+        },
+        {
+          "score": 0.3623587888596227
+        },
+        {
+          "score": 0.36196549825494256
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 6.824,
+          "http_ms": 9.694875,
+          "response_bytes": 13801
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "near-new",
+        "near-old",
+        "error",
+        "noise-11",
+        "noise-10",
+        "noise-14",
+        "noise-16",
+        "noise-23",
+        "noise-5",
+        "noise-4"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 28,
+        "lexical_matches": 28,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 8.840307400580121
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.6572925847237021
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 5.364936606998779
+          },
+          "score": 0.016129032258064516,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.6336671166759308
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 5.356792896041959
+          },
+          "score": 0.015873015873015872,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.5250861685784363
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014938684503901897,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.3658134210782232
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014835164835164835,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.36196549825494256
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014391447368421052,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.36616468103612493
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00684931506849315,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014202256244963738,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.3629784073461932
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.4228596445811843
+          },
+          "score": 0.014041633935585232,
+          "semantic": {
+            "contribution": 0.006578947368421052,
+            "rank": 16,
+            "score": 0.35571123366934715
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007042253521126761,
+            "rank": 11,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013986697965571206,
+          "semantic": {
+            "contribution": 0.006944444444444444,
+            "rank": 12,
+            "score": 0.3583559066118198
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.4228596445811843
+          },
+          "score": 0.013986013986013986,
+          "semantic": {
+            "contribution": 0.00641025641025641,
+            "rank": 18,
+            "score": 0.3539384525483787
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.887,
+          "http_ms": 12.384333,
+          "response_bytes": 16028
+        }
+      ]
+    },
+    {
+      "query_id": "test-near_duplicates",
+      "split": "test",
+      "category": "near_duplicates",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "near-new",
+        "near-old",
+        "error",
+        "noise-14",
+        "noise-11",
+        "noise-13",
+        "noise-10",
+        "noise-15",
+        "noise-16",
+        "noise-12"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 28,
+        "lexical_matches": 28,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 8.840307400580121
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.6572925847237021
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.0625,
+            "rank": 2,
+            "score": 5.364936606998779
+          },
+          "score": 0.25,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.6336671166759308
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.05,
+            "rank": 3,
+            "score": 5.356792896041959
+          },
+          "score": 0.2,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.5250861685784363
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.013888888888888888,
+            "rank": 16,
+            "score": 0.4228596445811843
+          },
+          "score": 0.1388888888888889,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.36616468103612493
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.022727272727272728,
+            "rank": 9,
+            "score": 0.4228596445811843
+          },
+          "score": 0.12987012987012986,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.3658134210782232
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.008333333333333333,
+            "rank": 28,
+            "score": 0.4228596445811843
+          },
+          "score": 0.10208333333333333,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.3650726961419554
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.03571428571428571,
+            "rank": 5,
+            "score": 0.4228596445811843
+          },
+          "score": 0.09821428571428571,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.36196549825494256
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.013157894736842105,
+            "rank": 17,
+            "score": 0.4228596445811843
+          },
+          "score": 0.09649122807017543,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.36445708018377804
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.016666666666666666,
+            "rank": 13,
+            "score": 0.4228596445811843
+          },
+          "score": 0.09166666666666666,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.3629784073461932
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.01,
+            "rank": 23,
+            "score": 0.4228596445811843
+          },
+          "score": 0.07818181818181817,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.3623587888596227
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.541,
+          "http_ms": 12.783458,
+          "response_bytes": 15850
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "method": "lexical",
+      "ranked": [
+        "noise-other"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 1,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 11.9347138506266
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.703,
+          "http_ms": 4.920834,
+          "response_bytes": 1122
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "method": "semantic",
+      "ranked": [
+        "noise-other",
+        "noise-20",
+        "noise-15",
+        "noise-16",
+        "noise-23",
+        "noise-21",
+        "noise-12",
+        "noise-13",
+        "noise-5",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.5921180541336306
+        },
+        {
+          "score": 0.26170900289251464
+        },
+        {
+          "score": 0.2608212757489295
+        },
+        {
+          "score": 0.25875542281690744
+        },
+        {
+          "score": 0.2580018203956916
+        },
+        {
+          "score": 0.2562746943161828
+        },
+        {
+          "score": 0.25540783403503065
+        },
+        {
+          "score": 0.25528161129984067
+        },
+        {
+          "score": 0.2550674402515978
+        },
+        {
+          "score": 0.254728284655334
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 6.656,
+          "http_ms": 11.210833,
+          "response_bytes": 13840
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "noise-other",
+        "noise-20",
+        "noise-15",
+        "noise-16",
+        "noise-23",
+        "noise-21",
+        "noise-12",
+        "noise-13",
+        "noise-5",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 11.9347138506266
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.5921180541336306
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.26170900289251464
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.2608212757489295
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.25875542281690744
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.2580018203956916
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.2562746943161828
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.25540783403503065
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.25528161129984067
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.2550674402515978
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.254728284655334
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 9.782,
+          "http_ms": 14.436292,
+          "response_bytes": 15434
+        }
+      ]
+    },
+    {
+      "query_id": "test-noise",
+      "split": "test",
+      "category": "noise",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "noise-other",
+        "noise-20",
+        "noise-15",
+        "noise-16",
+        "noise-23",
+        "noise-21",
+        "noise-12",
+        "noise-13",
+        "noise-5",
+        "noise-22"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 11.9347138506266
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.5921180541336306
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.26170900289251464
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.2608212757489295
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.25875542281690744
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.2580018203956916
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.2562746943161828
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.25540783403503065
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.25528161129984067
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.2550674402515978
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.254728284655334
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 10.679,
+          "http_ms": 15.069708,
+          "response_bytes": 15261
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "method": "lexical",
+      "ranked": [
+        "paraphrase",
+        "paraphrase-alt"
+      ],
+      "metrics": {
+        "ndcg_at_10": 0.7098097413968655,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 2,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 6.669714299272008
+        },
+        {
+          "score": 3.2052642552200976
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.546,
+          "http_ms": 2.406,
+          "response_bytes": 1917
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "method": "semantic",
+      "ranked": [
+        "paraphrase-alt",
+        "paraphrase",
+        "class",
+        "error",
+        "error-alt",
+        "pt",
+        "near-old",
+        "noise-18",
+        "noise-14",
+        "near-new"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.49707252780019767
+        },
+        {
+          "score": 0.4579618344353274
+        },
+        {
+          "score": 0.3013940349345914
+        },
+        {
+          "score": 0.26289774928425164
+        },
+        {
+          "score": 0.2515044872626732
+        },
+        {
+          "score": 0.2332655248310796
+        },
+        {
+          "score": 0.22096305164388502
+        },
+        {
+          "score": 0.2139886987524688
+        },
+        {
+          "score": 0.20733920482936077
+        },
+        {
+          "score": 0.2070543519481381
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.686,
+          "http_ms": 20.676916,
+          "response_bytes": 13721
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "paraphrase-alt",
+        "paraphrase",
+        "class",
+        "error",
+        "error-alt",
+        "pt",
+        "near-old",
+        "noise-18",
+        "noise-14",
+        "near-new"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 2,
+        "lexical_matches": 2,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 3.2052642552200976
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.49707252780019767
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 6.669714299272008
+          },
+          "score": 0.01626123744050767,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.4579618344353274
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.3013940349345914
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.26289774928425164
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.2515044872626732
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.2332655248310796
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.22096305164388502
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.2139886987524688
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.20733920482936077
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.2070543519481381
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.019,
+          "http_ms": 10.985625,
+          "response_bytes": 15384
+        }
+      ]
+    },
+    {
+      "query_id": "test-paraphrases",
+      "split": "test",
+      "category": "paraphrases",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "paraphrase-alt",
+        "paraphrase",
+        "class",
+        "error",
+        "error-alt",
+        "pt",
+        "near-old",
+        "noise-18",
+        "noise-14",
+        "near-new"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 2,
+        "lexical_matches": 2,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.0625,
+            "rank": 2,
+            "score": 3.2052642552200976
+          },
+          "score": 0.3125,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.49707252780019767
+          }
+        },
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 6.669714299272008
+          },
+          "score": 0.2708333333333333,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.4579618344353274
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.3013940349345914
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.26289774928425164
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.2515044872626732
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.2332655248310796
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.22096305164388502
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.2139886987524688
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.20733920482936077
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.2070543519481381
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.721,
+          "http_ms": 11.148459,
+          "response_bytes": 15197
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "method": "lexical",
+      "ranked": [
+        "pt-alt"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 1,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 16.67428574818002
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 0.755,
+          "http_ms": 3.767625,
+          "response_bytes": 1141
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "method": "semantic",
+      "ranked": [
+        "pt-alt",
+        "pt",
+        "noise-other",
+        "noise-20",
+        "noise-19",
+        "noise-22",
+        "noise-23",
+        "noise-15",
+        "noise-21",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.8252260177483645
+        },
+        {
+          "score": 0.24439562896381575
+        },
+        {
+          "score": 0.16139799805577285
+        },
+        {
+          "score": 0.13554403382207564
+        },
+        {
+          "score": 0.13419951112871759
+        },
+        {
+          "score": 0.13267164630209385
+        },
+        {
+          "score": 0.1321079493137285
+        },
+        {
+          "score": 0.13103788495974167
+        },
+        {
+          "score": 0.12987239267820536
+        },
+        {
+          "score": 0.1297368731440752
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.056,
+          "http_ms": 11.136667,
+          "response_bytes": 13815
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "pt-alt",
+        "pt",
+        "noise-other",
+        "noise-20",
+        "noise-19",
+        "noise-22",
+        "noise-23",
+        "noise-15",
+        "noise-21",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 16.67428574818002
+          },
+          "score": 0.01639344262295082,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.8252260177483645
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.24439562896381575
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.16139799805577285
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.13554403382207564
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.13419951112871759
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.13267164630209385
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.1321079493137285
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.13103788495974167
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.12987239267820536
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.1297368731440752
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.516,
+          "http_ms": 11.600625,
+          "response_bytes": 15410
+        }
+      ]
+    },
+    {
+      "query_id": "test-portuguese",
+      "split": "test",
+      "category": "portuguese",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "pt-alt",
+        "pt",
+        "noise-other",
+        "noise-20",
+        "noise-19",
+        "noise-22",
+        "noise-23",
+        "noise-15",
+        "noise-21",
+        "noise-17"
+      ],
+      "metrics": {
+        "ndcg_at_10": 1.0,
+        "recall_at_10": 1.0,
+        "judged_recall_at_10": 1.0,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": true,
+        "no_useful_result": false,
+        "empty_result": false,
+        "returned_on_unanswerable": null
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 1,
+        "lexical_matches": 1,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": {
+            "contribution": 0.08333333333333333,
+            "rank": 1,
+            "score": 16.67428574818002
+          },
+          "score": 0.3333333333333333,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.8252260177483645
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.24439562896381575
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.16139799805577285
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.13554403382207564
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.13419951112871759
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.13267164630209385
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.1321079493137285
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.13103788495974167
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.12987239267820536
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.1297368731440752
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 7.838,
+          "http_ms": 12.33775,
+          "response_bytes": 15236
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "method": "lexical",
+      "ranked": [],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": null,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": true,
+        "returned_on_unanswerable": false
+      },
+      "counts": {
+        "corpus_records": 40,
+        "exhaustive": true,
+        "matched_records": 0,
+        "next_after": null,
+        "scanned_bytes": 29549,
+        "scanned_records": 40
+      },
+      "ranking_profile": null,
+      "scores": [],
+      "samples": [
+        {
+          "retrieval_ms": 0.722,
+          "http_ms": 5.335167,
+          "response_bytes": 369
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "method": "semantic",
+      "ranked": [
+        "invoice",
+        "paraphrase",
+        "noise-target",
+        "customer",
+        "class",
+        "noise-11",
+        "noise-12",
+        "noise-14",
+        "noise-15",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "exhaustive": true,
+        "matched_records": 40,
+        "next_after": null,
+        "scanned_embeddings": 40
+      },
+      "ranking_profile": null,
+      "scores": [
+        {
+          "score": 0.20547633632467166
+        },
+        {
+          "score": 0.1852779253899435
+        },
+        {
+          "score": 0.1732947792633724
+        },
+        {
+          "score": 0.16890104219429217
+        },
+        {
+          "score": 0.1618105025690282
+        },
+        {
+          "score": 0.15774208572264958
+        },
+        {
+          "score": 0.1575888209731073
+        },
+        {
+          "score": 0.15526453234779525
+        },
+        {
+          "score": 0.15469352640362724
+        },
+        {
+          "score": 0.15253043896373467
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.869,
+          "http_ms": 13.870458,
+          "response_bytes": 13741
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "method": "weighted_rrf_v1",
+      "ranked": [
+        "invoice",
+        "paraphrase",
+        "noise-target",
+        "customer",
+        "class",
+        "noise-11",
+        "noise-12",
+        "noise-14",
+        "noise-15",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 0,
+        "lexical_matches": 0,
+        "next_after": null,
+        "rank_constant": 60,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.5,
+        "method": "weighted_rrf",
+        "rank_constant": 60,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.5,
+        "version": "weighted_rrf_v1"
+      },
+      "scores": [
+        {
+          "lexical": null,
+          "score": 0.00819672131147541,
+          "semantic": {
+            "contribution": 0.00819672131147541,
+            "rank": 1,
+            "score": 0.20547633632467166
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.008064516129032258,
+          "semantic": {
+            "contribution": 0.008064516129032258,
+            "rank": 2,
+            "score": 0.1852779253899435
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007936507936507936,
+          "semantic": {
+            "contribution": 0.007936507936507936,
+            "rank": 3,
+            "score": 0.1732947792633724
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0078125,
+          "semantic": {
+            "contribution": 0.0078125,
+            "rank": 4,
+            "score": 0.16890104219429217
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007692307692307693,
+          "semantic": {
+            "contribution": 0.007692307692307693,
+            "rank": 5,
+            "score": 0.1618105025690282
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007575757575757576,
+          "semantic": {
+            "contribution": 0.007575757575757576,
+            "rank": 6,
+            "score": 0.15774208572264958
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007462686567164179,
+          "semantic": {
+            "contribution": 0.007462686567164179,
+            "rank": 7,
+            "score": 0.1575888209731073
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007352941176470588,
+          "semantic": {
+            "contribution": 0.007352941176470588,
+            "rank": 8,
+            "score": 0.15526453234779525
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007246376811594203,
+          "semantic": {
+            "contribution": 0.007246376811594203,
+            "rank": 9,
+            "score": 0.15469352640362724
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.007142857142857143,
+          "semantic": {
+            "contribution": 0.007142857142857143,
+            "rank": 10,
+            "score": 0.15253043896373467
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 8.153,
+          "http_ms": 16.805375,
+          "response_bytes": 15269
+        }
+      ]
+    },
+    {
+      "query_id": "test-unanswerable",
+      "split": "test",
+      "category": "unanswerable",
+      "method": "weighted_rrf_v2",
+      "ranked": [
+        "invoice",
+        "paraphrase",
+        "noise-target",
+        "customer",
+        "class",
+        "noise-11",
+        "noise-12",
+        "noise-14",
+        "noise-15",
+        "noise-18"
+      ],
+      "metrics": {
+        "ndcg_at_10": null,
+        "recall_at_10": null,
+        "judged_recall_at_10": null,
+        "judgments_complete": true,
+        "judged_result_fraction": 1.0,
+        "answerable": false,
+        "no_useful_result": true,
+        "empty_result": false,
+        "returned_on_unanswerable": true
+      },
+      "counts": {
+        "candidates_truncated": false,
+        "corpus_records": 40,
+        "embedded_records": 40,
+        "embedding_coverage": "complete",
+        "exhaustive": true,
+        "lexical_candidates": 0,
+        "lexical_matches": 0,
+        "next_after": null,
+        "rank_constant": 2,
+        "scanned_bytes": 831364,
+        "scanned_records": 40,
+        "semantic_candidates": 40,
+        "semantic_matches": 40
+      },
+      "ranking_profile": {
+        "candidate_limit": 100,
+        "experimental": true,
+        "lexical_version": "bm25_v1",
+        "lexical_weight": 0.25,
+        "method": "weighted_rrf",
+        "rank_constant": 2,
+        "semantic_version": "cosine_exact_v1",
+        "semantic_weight": 0.75,
+        "version": "weighted_rrf_v2"
+      },
+      "scores": [
+        {
+          "lexical": null,
+          "score": 0.25,
+          "semantic": {
+            "contribution": 0.25,
+            "rank": 1,
+            "score": 0.20547633632467166
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.1875,
+          "semantic": {
+            "contribution": 0.1875,
+            "rank": 2,
+            "score": 0.1852779253899435
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.15,
+          "semantic": {
+            "contribution": 0.15,
+            "rank": 3,
+            "score": 0.1732947792633724
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.125,
+          "semantic": {
+            "contribution": 0.125,
+            "rank": 4,
+            "score": 0.16890104219429217
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.10714285714285714,
+          "semantic": {
+            "contribution": 0.10714285714285714,
+            "rank": 5,
+            "score": 0.1618105025690282
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.09375,
+          "semantic": {
+            "contribution": 0.09375,
+            "rank": 6,
+            "score": 0.15774208572264958
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.08333333333333333,
+          "semantic": {
+            "contribution": 0.08333333333333333,
+            "rank": 7,
+            "score": 0.1575888209731073
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.075,
+          "semantic": {
+            "contribution": 0.075,
+            "rank": 8,
+            "score": 0.15526453234779525
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.06818181818181818,
+          "semantic": {
+            "contribution": 0.06818181818181818,
+            "rank": 9,
+            "score": 0.15469352640362724
+          }
+        },
+        {
+          "lexical": null,
+          "score": 0.0625,
+          "semantic": {
+            "contribution": 0.0625,
+            "rank": 10,
+            "score": 0.15253043896373467
+          }
+        }
+      ],
+      "samples": [
+        {
+          "retrieval_ms": 9.429,
+          "http_ms": 13.0635,
+          "response_bytes": 15081
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "before": {
+      "available": true,
+      "cpu_usage_usec": 1207795898,
+      "memory_current_bytes": 232300544,
+      "memory_peak_since_container_start_bytes": 234586112
+    },
+    "after": {
+      "available": true,
+      "cpu_usage_usec": 1208121844,
+      "memory_current_bytes": 233091072,
+      "memory_peak_since_container_start_bytes": 234586112
+    },
+    "elapsed_seconds": 0.3799690408632159,
+    "attribution": "Shared interleaved campaign; no per-method CPU attribution"
+  },
+  "limitations": [
+    "One observation per query/method; no repeated-query stability estimate.",
+    "HTTP and engine timing exclude external generation; frozen vectors reused without provider calls.",
+    "Sparse external qrels: judged recall is not exhaustive recall.",
+    "Development-selected profile; exploratory bootstrap without multiplicity correction.",
+    "No abstention, agent-task, multi-domain or production admission claim."
+  ],
+  "qualification": "Previously exposed 40-source diagnostic; no profile was tuned on these results. Separate from the 300-query SciFact holdout."
+}
