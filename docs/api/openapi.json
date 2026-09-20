@@ -4281,7 +4281,7 @@
       "post": {
         "operationId": "searchMemorySemantic",
         "summary": "Rank memory by cosine similarity",
-        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client.",
+        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client. Reads a single request-local storage snapshot without holding the memory writer lock. Score remains cosine, preserving the 0.4.0 contract.",
         "tags": [
           "Memory"
         ],
@@ -4437,6 +4437,389 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SemanticRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/search/lexical": {
+      "post": {
+        "operationId": "searchMemoryLexical",
+        "summary": "Rank memory with BM25",
+        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. No embeddings required. Ranking version: bm25_v1.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LexicalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LexicalRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "mode": "lexical",
+                "query": {
+                  "text": "ZX17 retry failure",
+                  "limit": 10,
+                  "scan_limit": 10000,
+                  "scan_bytes_limit": 8388608,
+                  "after": null,
+                  "episode_type": null,
+                  "tag": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/search/hybrid": {
+      "post": {
+        "operationId": "searchMemoryHybrid",
+        "summary": "Rank memory with experimental versioned hybrid fusion",
+        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HybridResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HybridRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "mode": "hybrid",
+                "query": {
+                  "text": "ZX17 retry failure",
+                  "limit": 10,
+                  "scan_limit": 10000,
+                  "scan_bytes_limit": 8388608,
+                  "after": null,
+                  "episode_type": null,
+                  "tag": null,
+                  "space": {
+                    "provider": "fixture",
+                    "model": "fixture-embedding",
+                    "revision": "v1",
+                    "dimensions": 3
+                  },
+                  "vector": [
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  "ranking_version": "weighted_rrf_v1",
+                  "min_score": 0.0
+                }
               }
             }
           }
@@ -7688,11 +8071,593 @@
           },
           "page": {
             "$ref": "#/components/schemas/SemanticPage"
+          },
+          "mode": {
+            "type": "string",
+            "const": "semantic"
+          },
+          "ranking_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
           }
         },
         "required": [
           "contract_version",
           "scope",
+          "page",
+          "mode",
+          "ranking_version"
+        ],
+        "additionalProperties": false
+      },
+      "LexicalQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 10000
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+          },
+          "scan_bytes_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67108864,
+            "default": 8388608,
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+          }
+        },
+        "required": [
+          "text",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "HybridQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 10000
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+          },
+          "scan_bytes_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67108864,
+            "default": 8388608,
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+          },
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -3.4028234663852886e+38,
+              "maximum": 3.4028234663852886e+38
+            },
+            "minItems": 1,
+            "maxItems": 4096,
+            "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
+          },
+          "min_score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "default": -1
+          },
+          "ranking_version": {
+            "type": "string",
+            "enum": [
+              "weighted_rrf_v1"
+            ],
+            "description": "Immutable server-owned profile: weights 0.5/0.5, rank constant 60, at most 100 candidates per channel. Experimental; clients cannot override its parameters."
+          }
+        },
+        "required": [
+          "text",
+          "space",
+          "vector",
+          "limit",
+          "ranking_version"
+        ],
+        "additionalProperties": false
+      },
+      "RankContribution": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "score": {
+            "type": "number",
+            "description": "Raw BM25 or cosine, according to the channel. Not a probability."
+          },
+          "contribution": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.00819672131147541
+          }
+        },
+        "required": [
+          "rank",
+          "score",
+          "contribution"
+        ],
+        "additionalProperties": false
+      },
+      "HybridRankingProfile": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "weighted_rrf_v1"
+          },
+          "method": {
+            "type": "string",
+            "const": "weighted_rrf"
+          },
+          "lexical_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "semantic_version": {
+            "type": "string",
+            "const": "cosine_exact_v1"
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "const": 100
+          },
+          "lexical_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "semantic_weight": {
+            "type": "number",
+            "const": 0.5
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 60
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "lexical_version",
+          "semantic_version",
+          "candidate_limit",
+          "lexical_weight",
+          "semantic_weight",
+          "rank_constant",
+          "experimental"
+        ],
+        "additionalProperties": false
+      },
+      "LexicalHit": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          },
+          "score": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Raw BM25, not a probability."
+          }
+        },
+        "required": [
+          "record",
+          "score"
+        ],
+        "additionalProperties": false
+      },
+      "HybridHit": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.01639344262295082,
+            "description": "Weighted RRF score, neither cosine nor a probability."
+          },
+          "lexical": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RankContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "semantic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RankContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "embedding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "record",
+          "score",
+          "lexical",
+          "semantic",
+          "embedding"
+        ],
+        "additionalProperties": false
+      },
+      "LexicalPage": {
+        "type": "object",
+        "properties": {
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "scanned_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "corpus_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exhaustive": {
+            "type": "boolean",
+            "description": "True only for a cursorless complete source scan. Independent of candidate truncation and embedding coverage."
+          },
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LexicalHit"
+            },
+            "maxItems": 100
+          },
+          "matched_records": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "scanned_records",
+          "scanned_bytes",
+          "corpus_records",
+          "next_after",
+          "exhaustive",
+          "hits",
+          "matched_records"
+        ],
+        "additionalProperties": false
+      },
+      "HybridPage": {
+        "type": "object",
+        "properties": {
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "scanned_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "corpus_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exhaustive": {
+            "type": "boolean",
+            "description": "True only for a cursorless complete source scan. Independent of candidate truncation and embedding coverage."
+          },
+          "embedded_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lexical_matches": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "semantic_matches": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lexical_candidates": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "semantic_candidates": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HybridHit"
+            },
+            "maxItems": 100
+          },
+          "ranking": {
+            "$ref": "#/components/schemas/HybridRankingProfile"
+          },
+          "embedding_coverage": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial",
+              "missing",
+              "empty_corpus"
+            ],
+            "description": "Current selected-space bindings among the visible scanned corpus. Missing bindings still allow lexical matches; this is not full dense coverage."
+          },
+          "candidates_truncated": {
+            "type": "boolean"
+          },
+          "rank_constant": {
+            "type": "integer",
+            "const": 60
+          }
+        },
+        "required": [
+          "scanned_records",
+          "scanned_bytes",
+          "corpus_records",
+          "next_after",
+          "exhaustive",
+          "embedded_records",
+          "lexical_matches",
+          "semantic_matches",
+          "lexical_candidates",
+          "semantic_candidates",
+          "hits",
+          "ranking",
+          "embedding_coverage",
+          "candidates_truncated",
+          "rank_constant"
+        ],
+        "additionalProperties": false
+      },
+      "LexicalRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "mode": {
+            "type": "string",
+            "const": "lexical"
+          },
+          "query": {
+            "$ref": "#/components/schemas/LexicalQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "mode",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "LexicalResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "mode": {
+            "type": "string",
+            "const": "lexical"
+          },
+          "ranking_version": {
+            "type": "string",
+            "const": "bm25_v1"
+          },
+          "page": {
+            "$ref": "#/components/schemas/LexicalPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "mode",
+          "ranking_version",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "HybridRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "mode": {
+            "type": "string",
+            "const": "hybrid"
+          },
+          "query": {
+            "$ref": "#/components/schemas/HybridQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "mode",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "HybridResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "mode": {
+            "type": "string",
+            "const": "hybrid"
+          },
+          "ranking_version": {
+            "type": "string",
+            "const": "weighted_rrf_v1"
+          },
+          "page": {
+            "$ref": "#/components/schemas/HybridPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "mode",
+          "ranking_version",
           "page"
         ],
         "additionalProperties": false

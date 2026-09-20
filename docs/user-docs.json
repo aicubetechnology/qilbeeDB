@@ -1,0 +1,82 @@
+{
+  "release": "0.5.0",
+  "pages": [
+    {
+      "source": "docs/user/index.md",
+      "file": "index.md",
+      "title": "QilbeeDB documentation",
+      "description": "Build applications with durable memory, scoped retrieval and traceable learning.",
+      "order": 0
+    },
+    {
+      "source": "docs/user/quickstart.md",
+      "file": "quickstart.md",
+      "title": "Memory quickstart",
+      "description": "Create a memory and retrieve it with an authorized application credential.",
+      "order": 10
+    },
+    {
+      "source": "docs/user/deployment.md",
+      "file": "deployment.md",
+      "title": "Local Docker deployment",
+      "description": "Run and verify QilbeeDB locally while preserving durable data.",
+      "order": 20
+    },
+    {
+      "source": "docs/api/platform-http.md",
+      "file": "platform-http.md",
+      "title": "HTTP API and credentials",
+      "description": "Authenticate requests, issue credentials and handle platform errors.",
+      "order": 30
+    },
+    {
+      "source": "docs/security/scoped-credentials.md",
+      "file": "authentication.md",
+      "title": "Authentication and scopes",
+      "description": "Understand tenant isolation, exact resource grants, subjects and credential lifecycle.",
+      "order": 40
+    },
+    {
+      "source": "docs/api/versioned-memory.md",
+      "file": "memory.md",
+      "title": "Durable memory API",
+      "description": "Create, update and delete revisioned memories with durable idempotency receipts.",
+      "order": 50
+    },
+    {
+      "source": "docs/api/semantic-memory.md",
+      "file": "semantic-search.md",
+      "title": "Semantic search",
+      "description": "Attach external embeddings and retrieve memories by model-bound cosine similarity.",
+      "order": 60
+    },
+    {
+      "source": "docs/api/lexical-memory.md",
+      "file": "lexical-search.md",
+      "title": "Lexical search",
+      "description": "Retrieve exact terms and identifiers with scoped BM25 scoring.",
+      "order": 70
+    },
+    {
+      "source": "docs/api/hybrid-memory.md",
+      "file": "hybrid-search.md",
+      "title": "Experimental hybrid retrieval",
+      "description": "Combine lexical and dense candidates using a reproducible server-owned ranking version.",
+      "order": 80
+    },
+    {
+      "source": "docs/api/procedural-learning.md",
+      "file": "procedural-learning.md",
+      "title": "Procedural learning",
+      "description": "Record evaluation evidence and controlled publication decisions for procedures.",
+      "order": 90
+    },
+    {
+      "source": "docs/api/learned-tools.md",
+      "file": "learned-tools.md",
+      "title": "Learned tool development",
+      "description": "Manage immutable tool artifacts, executor profiles and development outcomes.",
+      "order": 100
+    }
+  ]
+}

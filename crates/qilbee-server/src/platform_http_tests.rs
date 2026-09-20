@@ -702,3 +702,4 @@ async fn platform_http_browser_reference_is_public_and_root_redirects_to_it() {
 
 mod tools;
 mod semantic;
+mod retrieval;

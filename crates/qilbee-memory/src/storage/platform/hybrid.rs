@@ -3,14 +3,52 @@ use super::snapshot::MemorySnapshot;
 use super::*;
 use std::collections::BTreeMap;
 const RANK_CONSTANT: usize = 60;
-fn default_candidates() -> usize {
-    100
-}
-fn default_weight() -> f64 {
-    0.5
-}
 fn default_min_score() -> f64 {
     -1.0
+}
+/// Server-owned immutable algorithm identity. New parameters require a new version.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HybridRankingVersion {
+    WeightedRrfV1,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct HybridRankingProfile {
+    pub version: HybridRankingVersion,
+    pub method: String,
+    pub lexical_version: String,
+    pub semantic_version: String,
+    pub candidate_limit: usize,
+    pub lexical_weight: f64,
+    pub semantic_weight: f64,
+    pub rank_constant: usize,
+    pub experimental: bool,
+}
+impl HybridRankingVersion {
+    pub fn profile(self) -> HybridRankingProfile {
+        match self {
+            Self::WeightedRrfV1 => HybridRankingProfile {
+                version: self,
+                method: "weighted_rrf".into(),
+                lexical_version: "bm25_v1".into(),
+                semantic_version: "cosine_exact_v1".into(),
+                candidate_limit: 100,
+                lexical_weight: 0.5,
+                semantic_weight: 0.5,
+                rank_constant: RANK_CONSTANT,
+                experimental: true,
+            },
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EmbeddingCoverage {
+    Complete,
+    Partial,
+    Missing,
+    EmptyCorpus,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -19,10 +57,7 @@ pub struct HybridQuery {
     pub space: EmbeddingSpace,
     pub vector: Vec<f32>,
     pub limit: usize,
-    #[serde(default = "default_candidates")]
-    pub candidate_limit: usize,
-    #[serde(default = "default_weight")]
-    pub semantic_weight: f64,
+    pub ranking_version: HybridRankingVersion,
     #[serde(default = "default_min_score")]
     pub min_score: f64,
     #[serde(default = "super::lexical::default_scan_limit")]
@@ -55,6 +90,8 @@ pub struct HybridHit {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct HybridPage {
+    pub ranking: HybridRankingProfile,
+    pub embedding_coverage: EmbeddingCoverage,
     pub hits: Vec<HybridHit>,
     pub next_after: Option<Uuid>,
     pub scanned_records: usize,
@@ -79,14 +116,10 @@ impl MemorySnapshot<'_> {
     pub(super) fn search_hybrid(&self, namespace: &str, query: &HybridQuery) -> Result<HybridPage> {
         query.space.validate()?;
         let query_norm = super::semantic::norm(&query.vector, query.space.dimensions)?;
-        if !(query.limit..=1000).contains(&query.candidate_limit)
-            || !query.semantic_weight.is_finite()
-            || !(0.0..=1.0).contains(&query.semantic_weight)
-            || !query.min_score.is_finite()
-            || !(-1.0..=1.0).contains(&query.min_score)
-        {
+        let profile = query.ranking_version.profile();
+        if !query.min_score.is_finite() || !(-1.0..=1.0).contains(&query.min_score) {
             return Err(Error::ValidationError(
-                "Invalid hybrid candidate limit, weight or cosine threshold".into(),
+                "Invalid hybrid cosine threshold".into(),
             ));
         }
         let lexical_query = LexicalQuery {
@@ -102,17 +135,9 @@ impl MemorySnapshot<'_> {
             records,
             mut embeddings,
             page,
-        } = self.scan_corpus_with_embeddings(
-            namespace,
-            &lexical_query,
-            (query.semantic_weight > 0.0).then_some(&query.space),
-        )?;
+        } = self.scan_corpus_with_embeddings(namespace, &lexical_query, Some(&query.space))?;
         let embedded_records = embeddings.len();
-        let mut lexical = if query.semantic_weight < 1.0 {
-            super::lexical::rank_records(&records, &query.text)
-        } else {
-            vec![]
-        };
+        let mut lexical = super::lexical::rank_records(&records, &query.text);
         let mut semantic = Vec::with_capacity(embeddings.len());
         for (&id, embedding) in &embeddings {
             let denominator =
@@ -131,15 +156,15 @@ impl MemorySnapshot<'_> {
         semantic.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
         let lexical_matches = lexical.len();
         let semantic_matches = semantic.len();
-        lexical.truncate(query.candidate_limit);
-        semantic.truncate(query.candidate_limit);
+        lexical.truncate(profile.candidate_limit);
+        semantic.truncate(profile.candidate_limit);
         let lexical_candidates = lexical.len();
         let semantic_candidates = semantic.len();
         let mut fused =
             BTreeMap::<Uuid, (Option<RankContribution>, Option<RankContribution>)>::new();
         for (is_semantic, candidates, weight) in [
-            (false, lexical, 1.0 - query.semantic_weight),
-            (true, semantic, query.semantic_weight),
+            (false, lexical, profile.lexical_weight),
+            (true, semantic, profile.semantic_weight),
         ] {
             for (index, (id, score)) in candidates.into_iter().enumerate() {
                 let rank = index + 1;
@@ -179,7 +204,18 @@ impl MemorySnapshot<'_> {
                 .then_with(|| a.record.record_id.cmp(&b.record.record_id))
         });
         hits.truncate(query.limit);
+        let embedding_coverage = if page.corpus_records == 0 {
+            EmbeddingCoverage::EmptyCorpus
+        } else if embedded_records == 0 {
+            EmbeddingCoverage::Missing
+        } else if embedded_records == page.corpus_records {
+            EmbeddingCoverage::Complete
+        } else {
+            EmbeddingCoverage::Partial
+        };
         Ok(HybridPage {
+            ranking: profile,
+            embedding_coverage,
             hits,
             next_after: page.next_after,
             scanned_records: page.scanned_records,

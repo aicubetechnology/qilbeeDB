@@ -74,6 +74,10 @@ extra:
 
 nav:
   - Home: index.md
+  - Platform User Guides:
+    - Overview: user/index.md
+    - Memory Quickstart: user/quickstart.md
+    - Local Docker: user/deployment.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md
@@ -108,6 +112,8 @@ nav:
       - Platform HTTP API: api/platform-http.md
       - Versioned Memory API: api/versioned-memory.md
       - Semantic Memory Search: api/semantic-memory.md
+      - Lexical Memory Search: api/lexical-memory.md
+      - Hybrid Memory Retrieval: api/hybrid-memory.md
       - Procedural Learning API: api/procedural-learning.md
       - Learned Tool API: api/learned-tools.md
       - Durable HTTP Memory: api/durable-http-memory.md

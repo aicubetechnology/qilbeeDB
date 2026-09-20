@@ -11,6 +11,8 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/memory/query", post(query))
         .route("/api/v1/memory/embeddings", post(embedding))
         .route("/api/v1/memory/search", post(semantic_search))
+        .route("/api/v1/memory/search/lexical", post(lexical_search))
+        .route("/api/v1/memory/search/hybrid", post(hybrid_search))
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -206,8 +208,62 @@ async fn semantic_search(
                 .search_memory_semantic(&scope.storage_namespace, &request.query)
                 .map_err(ApiError::operation)?;
             Ok(Json(
-                json!({"contract_version":1,"scope":request.scope,"page":page}),
+                json!({"contract_version":1,"scope":request.scope,"mode":"semantic","ranking_version":"cosine_exact_v1","page":page}),
             ))
         })
         .await
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum RetrievalMode {
+    Lexical,
+    Hybrid,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RankedRequest<T> {
+    contract_version: u32,
+    scope: ResourceScope,
+    mode: RetrievalMode,
+    query: T,
+}
+
+async fn lexical_search(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<
+        Json<RankedRequest<qilbee_memory::storage::platform::LexicalQuery>>,
+        JsonRejection,
+    >,
+) -> ApiResult<Json<Value>> {
+    let memory = state.memory.clone();
+    state.run(headers, move |identity, token, _| {
+        let request = json_body(body)?;
+        version(request.contract_version)?;
+        if !matches!(request.mode, RetrievalMode::Lexical) {
+            return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
+        }
+        let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        let page = memory.search_memory_lexical(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
+        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"lexical","ranking_version":"bm25_v1","page":page})))
+    }).await
+}
+
+async fn hybrid_search(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<RankedRequest<qilbee_memory::storage::platform::HybridQuery>>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let memory = state.memory.clone();
+    state.run(headers, move |identity, token, _| {
+        let request = json_body(body)?;
+        version(request.contract_version)?;
+        if !matches!(request.mode, RetrievalMode::Hybrid) {
+            return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
+        }
+        let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        let page = memory.search_memory_hybrid(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
+        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":"weighted_rrf_v1","page":page})))
+    }).await
 }

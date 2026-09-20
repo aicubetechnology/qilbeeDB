@@ -83,7 +83,10 @@ Generate the query embedding externally, then post to
 }
 ```
 
-The response is `{contract_version: 1, scope, page}`:
+The response is `{contract_version: 1, scope, mode: "semantic",
+ranking_version: "cosine_exact_v1", page}`. The added mode/version metadata does
+not change the 0.4.0 cosine score semantics. For text plus vector retrieval, use
+the separate [experimental hybrid endpoint](hybrid-memory.md):
 
 | Page field | Meaning |
 | --- | --- |

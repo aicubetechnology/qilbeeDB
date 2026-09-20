@@ -3,7 +3,7 @@
 The platform memory API stores records, version indexes and idempotency receipts
 in the existing RocksDB memory backend at `<data-directory>/agent-memory`.
 Mutations acknowledge one atomic batch with WAL and synchronous writes. There is
-no implicit episode-retention quota and no required QMN or model-provider service.
+no implicit episode-retention quota or required model-provider service.
 
 ## Base URL and authentication
 
