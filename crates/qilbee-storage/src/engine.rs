@@ -493,8 +493,67 @@ impl StorageEngine {
 
     // ========== Metadata Operations ==========
 
+    /// Atomically compare metadata values and apply a guarded batch.
+    ///
+    /// Every write must have one condition, and keys must be unique in each list.
+    /// Read-only conditions may guard authority or related records. A failed
+    /// comparison returns false without writing anything. Successful mutations
+    /// always use WAL and synchronous writes, independent of bulk graph settings.
+    /// This serializes writers sharing this engine; it is not a read snapshot.
+    pub fn compare_and_write_meta(
+        &self,
+        expected: &[crate::MetadataCondition],
+        writes: &[crate::MetadataWrite],
+    ) -> Result<bool> {
+        let mut guards = std::collections::HashSet::new();
+        for condition in expected {
+            if !guards.insert(condition.key.as_str()) {
+                return Err(Error::ValidationError(
+                    "Duplicate metadata condition".into(),
+                ));
+            }
+        }
+        let mut keys = std::collections::HashSet::new();
+        for write in writes {
+            if !guards.contains(write.key.as_str()) || !keys.insert(write.key.as_str()) {
+                return Err(Error::ValidationError(
+                    "Metadata writes require unique guarded keys".into(),
+                ));
+            }
+        }
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        for condition in expected {
+            if self.get_meta(&condition.key)? != condition.expected {
+                return Ok(false);
+            }
+        }
+        let cf = self.cf(cf::META)?;
+        let mut batch = WriteBatch::default();
+        for write in writes {
+            let key = KeyBuilder::meta(&write.key);
+            match &write.value {
+                Some(value) => batch.put_cf(cf, key, value),
+                None => batch.delete_cf(cf, key),
+            }
+        }
+        let mut options = rocksdb::WriteOptions::default();
+        options.disable_wal(false);
+        options.set_sync(true);
+        self.db
+            .write_opt(batch, &options)
+            .map_err(|e| Error::Storage(e.to_string()))?;
+        Ok(true)
+    }
+
     /// Store metadata
     pub fn put_meta(&self, key: &str, value: &[u8]) -> Result<()> {
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
         let storage_key = KeyBuilder::meta(key);
         let cf = self.cf(cf::META)?;
 
