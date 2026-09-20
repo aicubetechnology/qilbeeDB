@@ -126,3 +126,13 @@ For research on explicitly trained representations at multiple granularities, se
 capabilities belong to the external encoder contract. QilbeeDB does not infer that
 a particular model supports truncation and does not implement a Matryoshka cascade
 or an approximate vector index in this release.
+
+## Error-schema compatibility
+
+The OpenAPI error-code catalog includes `embedding_dimension_limit`,
+`retrieval_scan_limit` and `retrieval_busy`. The search 503 response schemas are
+specific to `retrieval_busy`. A successful partial result still uses 200 with
+coverage fields; it is different from an invalid budget or rejected admission.
+Real HTTP contract tests hold a slot deterministically to exercise overload,
+release it to verify recovery, and check authorization precedence. They do not
+rely on a load race or change process-wide environment variables.
