@@ -108,6 +108,7 @@ nav:
   - Agent Memory:
     - Overview: agent-memory/overview.md
     - Episodes: agent-memory/episodes.md
+    - Episode Lifecycle: agent-memory/episode-lifecycle.md
     - Memory Types: agent-memory/memory-types.md
     - Semantic Search: agent-memory/semantic-search.md
     - Lexical and Hybrid Retrieval: agent-memory/lexical-retrieval.md
