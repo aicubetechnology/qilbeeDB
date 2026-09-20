@@ -249,3 +249,6 @@ impl RocksDbMemoryStorage {
         Ok(Some(checkpoint))
     }
 }
+
+mod recovery;
+pub use recovery::*;

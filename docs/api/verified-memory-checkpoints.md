@@ -102,3 +102,60 @@ Progress and receipts are retained without automatic pruning. There are no
 consumer leases, worker assignment, external exactly-once effects or automatic
 rollback of work already performed outside QilbeeDB. Preserve backups and follow
 the verified journal's upgrade and downgrade restrictions.
+
+## Record an explicit reconciliation
+
+Use `POST /api/v2/memory/checkpoints/recover` when reconciling external consumer
+state requires replacing existing progress, including moving backward. It requires
+the same `memory_read` and `memory_checkpoint` capabilities and exact subject
+ownership. Ordinary checkpoint commits continue to reject backward movement.
+
+Coordinate your consumer workers, inspect the restored memory history and reconcile
+their external state. Read the current checkpoint, choose a valid cursor from the
+current verified feed, then submit `scope` and this recovery command:
+
+| Field | Requirement |
+| --- | --- |
+| `contract_version` | 2 |
+| `idempotency_key` | Stable recovery-operation key, 1–256 UTF-8 bytes |
+| `consumer_id` | Existing subject-owned consumer, 1–128 UTF-8 bytes |
+| `expected_revision` | Exact current checkpoint revision, at least 1 |
+| `expected_checkpoint_digest` | Exact digest from the current checkpoint read |
+| `cursor` | Complete currently valid v2 cursor; it may be earlier than current progress |
+| `evidence_ref` | Nonblank reference to your reconciliation evidence, 1–2,048 UTF-8 bytes, no control characters |
+
+The server does not fetch or verify `evidence_ref`. It records the caller's
+reconciliation declaration, authenticated author, time, previous checkpoint,
+replacement checkpoint and receipt digest. This does not verify the external
+system, undo effects or acquire a worker lease. A cursor from a lost history
+still returns 409; recovery is not an override of journal verification.
+
+An existing checkpoint is required. A missing or stale expectation returns 409;
+use an ordinary initial commit when no v2 checkpoint exists. A successful recovery
+increments its revision and atomically stores the replacement, retry receipt and
+immutable history. No memory event is emitted. Concurrent recovery or ordinary
+progress writes using the same expectation cannot both win.
+
+Retry the same recovery command with the same key to receive its original receipt.
+A retry after later progress does **not** apply the old recovery again. Changing
+its cursor, evidence, consumer or expectation under that key returns 409. Recovery
+keys and ordinary commit keys are separate operation namespaces; applications
+should still use descriptive unique keys to avoid confusion.
+
+Read historical evidence through `POST /api/v2/memory/checkpoints/recoveries/read`:
+
+```json
+{
+  "contract_version": 2,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "consumer_id": "search-cache",
+  "revision": 2
+}
+```
+
+`revision` identifies the checkpoint **produced by the recovery**, not its previous
+revision. The response contains `contract_version: 2` and `receipt`, with
+`previous`, `checkpoint`, `idempotency_key`, `evidence_ref` and `receipt_digest`.
+A revision produced by an ordinary commit has no recovery receipt and returns 404.
+History remains scoped to the owner subject, survives restart and enforces current
+credential authorization. Use `/checkpoints/read` to obtain current progress.

@@ -10,6 +10,7 @@ pub(super) fn routes() -> Router<PlatformState> {
         .merge(checkpoints::routes())
         .merge(verified_changes::routes())
         .merge(verified_checkpoints::routes())
+        .merge(checkpoint_recovery::routes())
         .route("/api/v1/memory/commands", post(command))
         .route("/api/v1/memory/records/:id", get(read))
         .route("/api/v1/memory/query", post(query))
@@ -392,3 +393,5 @@ mod checkpoints;
 mod verified_changes;
 
 mod verified_checkpoints;
+
+mod checkpoint_recovery;
