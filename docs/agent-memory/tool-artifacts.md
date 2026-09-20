@@ -43,3 +43,25 @@ images, verify externally referenced evidence, or attest to runtime isolation.
 Store no credentials in source or lock files. Registration does not authorize
 execution, prove test success, or publish a tool. Development, evaluation,
 publication and execution need their own authenticated contracts.
+
+## External executor profiles
+
+`register_tool_executor(tenant, profile, actor)` registers an immutable
+`ToolExecutorProfile`. It binds an executor ID to an authenticated subject, exact
+runtime image digest, environment revision, permissions revision and positive
+`max_cost_units` / `max_latency_ms` limits. Identities support 1–512 UTF-8 bytes;
+budgets are unsigned 64-bit integers. The returned `ToolExecutor` preserves the
+profile digest, registering actor and timestamp. `tool_executor` verifies its
+identity and digest on read. Identical retries return the original registration;
+changed profiles require a new ID. Profiles are tenant-wide administrative
+contracts, not caller-supplied scope grants.
+
+Profiles contain no passwords, endpoint URLs or executable transport settings.
+Configured server workers contact the platform with separate scoped credentials.
+The registered subject must match the authenticated reporting subject; possession
+of a profile ID is insufficient. Credential rotation preserves subject identity,
+while revocation or expiry blocks later HTTP reports. A profile alone does not
+start workers, grant network access, enforce an operating-system sandbox or
+attest that its declared image was executed. Those properties need independent
+executor deployment and verification. Resource values are reported evidence in a
+shared deployment-defined accounting unit, not a billing integration.

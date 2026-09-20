@@ -15,3 +15,4 @@ pub use store::registry::*;
 #[cfg(test)]
 mod tool_tests;
 pub use store::tools::*;
+pub use store::executors::*;
