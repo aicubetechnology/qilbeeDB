@@ -4839,6 +4839,90 @@
           }
         }
       }
+    },
+    "/api/v1/memory/ranking-profiles": {
+      "get": {
+        "operationId": "listRankingProfiles",
+        "summary": "Discover immutable server ranking profiles",
+        "description": "Requires a current credential with memory_read. Returns only server-wide implementation metadata, not scope data, embedding inventories, tenant policy or production admission. No scope or query parameters are needed. The profiles are generated from the same definitions used during retrieval; an experimental profile is not a recommended default. Pin the full returned profile in an evaluation plan.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankingCatalog"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8685,6 +8769,47 @@
         },
         "required": [
           "retrieval_micros"
+        ],
+        "additionalProperties": false
+      },
+      "RankingCatalog": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "component_versions": {
+            "type": "object",
+            "properties": {
+              "lexical": {
+                "type": "string",
+                "const": "bm25_v1"
+              },
+              "semantic": {
+                "type": "string",
+                "const": "cosine_exact_v1"
+              }
+            },
+            "required": [
+              "lexical",
+              "semantic"
+            ],
+            "additionalProperties": false
+          },
+          "hybrid_profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HybridRankingProfile"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "contract_version",
+          "component_versions",
+          "hybrid_profiles"
         ],
         "additionalProperties": false
       }
