@@ -9,7 +9,7 @@ pub struct ExperienceActor {
     pub credential_id: String,
 }
 impl ExperienceActor {
-    fn validate(&self) -> Result<()> {
+    pub(super) fn validate(&self) -> Result<()> {
         validate_text(&self.subject_id, "experience subject", 512)?;
         validate_text(&self.credential_id, "experience credential", 512)
     }
@@ -179,7 +179,7 @@ impl ExperienceEvent {
     }
 }
 
-fn validate_digest(value: &str) -> Result<()> {
+pub(super) fn validate_digest(value: &str) -> Result<()> {
     if value.len() == 64
         && value
             .bytes()

@@ -23,3 +23,5 @@ pub use store::experience::*;
 mod experience_tests;
 
 pub use store::experience_history::*;
+
+pub use store::experience_artifacts::*;
