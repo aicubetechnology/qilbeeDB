@@ -717,3 +717,4 @@ mod verified_changes;
 mod verified_checkpoints;
 
 mod hybrid_schema;
+mod journal_audit;

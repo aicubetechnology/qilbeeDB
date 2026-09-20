@@ -870,6 +870,10 @@ mod checkpoint_tests;
 
 mod verified_changes;
 pub use verified_changes::*;
+mod journal_audit;
+pub use journal_audit::*;
+#[cfg(test)]
+mod journal_audit_tests;
 #[cfg(test)]
 mod verified_changes_tests;
 

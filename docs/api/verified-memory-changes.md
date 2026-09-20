@@ -142,3 +142,77 @@ enumerating records. An activation retry returns the original baseline, which ma
 now be older than the current tip. Activation is a small synchronous metadata
 transaction; it does not scan the corpus or generate embeddings. Restart before
 the first memory mutation preserves the same baseline.
+
+## Audit a bounded journal range
+
+Available in **0.10.0**.
+
+Call `POST /api/v2/memory/changes/audit` with the same request structure as the
+verified feed and `memory_read` for the scope. It checks event integrity and
+consecutive prefix links without returning event bodies, authors or record IDs.
+The response contains `contract_version: 2`, `scope` and `audit`. For example:
+
+```bash
+curl --fail-with-body http://localhost:7474/api/v2/memory/changes/audit \
+  -H "Authorization: Bearer $QILBEE_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"contract_version":2,"scope":{"project_id":"project","mission_id":null,"agent_id":"agent","visibility":"shared"},"query":{"after":null,"through":null,"limit":100}}'
+```
+
+Use a server running 0.10.0 or later. A 0.9.0 server does not expose this route.
+This read-only operation requires only `memory_read`; it does not activate an
+inactive journal or save consumer checkpoints. Responses use `Cache-Control: no-store`. Each page reauthorizes the current credential and exact scope,
+including the authenticated subject for private memories.
+
+| Audit field | Meaning |
+| --- | --- |
+| `active` | Whether anchoring is active in this scope |
+| `baseline` | Earliest position covered by the verified contract |
+| `checked_after` | Exclusive beginning of this checked page |
+| `checked_through` | Inclusive end actually checked by this page; use as the next `after` |
+| `high_watermark` | Fixed endpoint of the audit cycle; preserve as `through` |
+| `links_checked` | Number of consecutive event/anchor pairs checked in this page, at most `limit` |
+| `complete` | The checked page reached the requested fence |
+
+For a complete audit of the anchored suffix, start with `after: null`, retain the
+first `high_watermark`, then advance `after` using `checked_through` until complete.
+Do not sum a retried page twice. If anchoring is inactive, the cursors are null,
+`links_checked` is zero and no verified range has been audited. An active empty
+journal returns its baseline, zero checked links and `complete: true`.
+
+The limit is 1–256 pairs per request. Counts describe the selected range; they do
+not count constant-size baseline, cursor and tip integrity checks. Each call uses
+one storage snapshot and makes no writes. New mutations do not move a retained
+fence. Restart preserves valid continuations; a divergent continuation returns
+409 and requires reconciliation. A missing event or anchor, digest mismatch or
+broken consecutive link returns 500 with no partial audit result for that page.
+
+Checking only the current tip cannot establish that every middle entry is still
+readable. This endpoint lets operators traverse that middle history with explicit
+coverage and bounded requests. `complete` is **not** a full database health claim:
+this audit does not verify pre-baseline legacy events, current record payloads or
+indexes, embeddings, checkpoint history, authorization-store recovery, external
+effects or the truth of memory content. Retain the exact scope, baseline, fence
+and page results with your operational evidence; these responses are not signed
+third-party attestations. No automatic auditor or retention policy is enabled.
+
+### Handle audit results and failures
+
+Save the first response's `high_watermark` as `through` for the entire cycle.
+For each successful page, save `checked_after`, `checked_through` and
+`links_checked`, then use `checked_through` as the next request's `after`.
+Retain the same scope and stop when `complete` is true. On a network failure,
+retry the same pair of cursors; account for that interval once. A new cycle may
+choose a new fence. This does not create a multi-request storage snapshot: each
+page independently validates its retained cursors against the current history.
+
+| HTTP status | Meaning and action |
+| --- | --- |
+| `400` | Invalid version, limit, cursor encoding, or `after` later than `through`. Correct the request. |
+| `401` / `403` | Credential is unavailable or lacks the required capability or exact scope. Resolve authorization before continuing. |
+| `409` | A cursor does not belong to the current scoped journal history. Preserve the failed request and reconcile the restore boundary. |
+| `500` | Storage or integrity failure. No partial successful audit is returned for this page. Preserve the previous successful boundary and investigate; do not treat a later tip check as proof that the failed range is healthy. |
+
+The pair limit bounds work by event count, not elapsed time. An operator chooses
+request pacing and the total range. The API does not silently repair, skip or
+prune inconsistent entries.
