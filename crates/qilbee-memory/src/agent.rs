@@ -14,6 +14,16 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use tracing::{debug, info, warn};
 
+fn validate_episode_write(config: &MemoryConfig, episode: &Episode) -> Result<()> {
+    if config.agent_id.is_empty() || episode.agent_id != config.agent_id {
+        return Err(Error::ValidationError("Episode must belong to the configured agent".into()));
+    }
+    if config.max_episodes == 0 {
+        return Err(Error::MemoryOperation("Episode capacity is zero".into()));
+    }
+    Ok(())
+}
+
 /// Statistics about agent memory
 #[derive(Debug, Clone)]
 pub struct MemoryStatistics {
@@ -70,6 +80,7 @@ impl AgentMemory {
 
     /// Store an episode
     pub fn store_episode(&self, episode: Episode) -> Result<EpisodeId> {
+        validate_episode_write(&self.config, &episode)?;
         if !self.config.enable_episodic {
             return Err(Error::MemoryOperation(
                 "Episodic memory is disabled".to_string(),
@@ -83,7 +94,10 @@ impl AgentMemory {
         })?;
 
         // Check max episodes limit
-        if episodes.len() >= self.config.max_episodes {
+        let adds_valid_episode = episode.is_valid()
+            && !episodes.get(&id).is_some_and(Episode::is_valid);
+        if adds_valid_episode
+            && episodes.values().filter(|existing| existing.is_valid()).count() >= self.config.max_episodes {
             // Remove oldest low-relevance episode
             self.evict_low_relevance_episode(&mut episodes)?;
         }
@@ -101,6 +115,7 @@ impl AgentMemory {
         })?;
 
         if let Some(episode) = episodes.get_mut(&id) {
+            if !episode.is_valid() { return Ok(None); }
             episode.access();
             Ok(Some(episode.clone()))
         } else {
@@ -571,6 +586,7 @@ impl PersistentAgentMemory {
 
     /// Store an episode
     pub async fn store_episode(&self, episode: Episode) -> Result<EpisodeId> {
+        validate_episode_write(&self.config, &episode)?;
         if !self.config.enable_episodic {
             return Err(Error::MemoryOperation(
                 "Episodic memory is disabled".to_string(),
@@ -584,7 +600,10 @@ impl PersistentAgentMemory {
             Error::Storage(format!("Failed to get episode count: {}", e))
         })?;
 
-        if count >= self.config.max_episodes {
+        let existing = self.storage.get_episode(&self.config.agent_id, id).await?;
+        let adds_valid_episode = episode.is_valid()
+            && !existing.as_ref().is_some_and(Episode::is_valid);
+        if adds_valid_episode && count >= self.config.max_episodes {
             // Evict oldest low-relevance episode
             self.evict_low_relevance_episode().await?;
         }
@@ -608,6 +627,7 @@ impl PersistentAgentMemory {
             .map_err(|e| Error::Storage(format!("Failed to get episode: {}", e)))?;
 
         if let Some(ref mut ep) = episode {
+            if !ep.is_valid() { return Ok(None); }
             ep.access();
             self.storage
                 .update_episode(&self.config.agent_id, ep)
@@ -1218,6 +1238,85 @@ mod tests {
     use super::*;
     use crate::embeddings::EmbeddingProviderType;
 
+    #[test]
+    fn lifecycle_sync_rejects_foreign_writes_before_eviction() {
+        let memory = AgentMemory::new(MemoryConfig::new("owner").max_episodes(1));
+        let own = Episode::observation("owner", "Keep");
+        memory.store_episode(own.clone()).unwrap();
+        assert!(memory.store_episode(Episode::observation("other", "Foreign")).is_err());
+        assert!(memory.get_episode(own.id).unwrap().is_some());
+    }
+
+    #[test]
+    fn lifecycle_invalidated_records_do_not_consume_live_capacity() {
+        let memory = AgentMemory::new(MemoryConfig::new("owner").max_episodes(2));
+        let invalid = Episode::observation("owner", "Old");
+        let keep = Episode::observation("owner", "Keep");
+        memory.store_episode(invalid.clone()).unwrap();
+        memory.store_episode(keep.clone()).unwrap();
+        memory.invalidate_episode(invalid.id).unwrap();
+        memory.store_episode(Episode::observation("owner", "New")).unwrap();
+        assert_eq!(memory.episode_count().unwrap(), 2);
+        assert!(memory.get_episode(keep.id).unwrap().is_some());
+    }
+
+    #[tokio::test]
+    async fn lifecycle_persistent_rejects_foreign_writes_before_eviction() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("owner").max_episodes(1));
+        let own = Episode::observation("owner", "Keep");
+        memory.store_episode(own.clone()).await.unwrap();
+        assert!(memory.store_episode(Episode::observation("other", "Foreign")).await.is_err());
+        assert!(memory.get_episode(own.id).await.unwrap().is_some());
+    }
+
+    #[test]
+    fn lifecycle_sync_invalidation_hides_regular_reads_without_recording_access() {
+        let memory = AgentMemory::for_agent("owner");
+        let own = Episode::observation("owner", "Obsolete");
+        memory.store_episode(own.clone()).unwrap();
+        memory.invalidate_episode(own.id).unwrap();
+        assert!(memory.get_episode(own.id).unwrap().is_none());
+        assert_eq!(memory.episodes.read().unwrap()[&own.id].relevance.access_count, 0);
+    }
+
+    #[tokio::test]
+    async fn lifecycle_persistent_invalidation_hides_regular_reads_without_recording_access() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("owner"));
+        let own = Episode::observation("owner", "Obsolete");
+        memory.store_episode(own.clone()).await.unwrap();
+        memory.invalidate_episode(own.id).await.unwrap();
+        assert!(memory.get_episode(own.id).await.unwrap().is_none());
+        assert_eq!(memory.storage.get_episode("owner", own.id).await.unwrap().unwrap().relevance.access_count, 0);
+    }
+
+    #[test]
+    fn lifecycle_sync_update_at_capacity_preserves_other_records_and_zero_rejects() {
+        let memory = AgentMemory::new(MemoryConfig::new("owner").max_episodes(2));
+        let mut low = Episode::observation("owner", "Low");
+        low.relevance.score = 0.1;
+        let high = Episode::observation("owner", "High");
+        memory.store_episode(low.clone()).unwrap();
+        memory.store_episode(high.clone()).unwrap();
+        memory.store_episode(high).unwrap();
+        assert!(memory.get_episode(low.id).unwrap().is_some());
+        let zero = AgentMemory::new(MemoryConfig::new("owner").max_episodes(0));
+        assert!(zero.store_episode(low).is_err());
+    }
+
+    #[tokio::test]
+    async fn lifecycle_persistent_update_at_capacity_preserves_other_records_and_zero_rejects() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("owner").max_episodes(2));
+        let mut low = Episode::observation("owner", "Low");
+        low.relevance.score = 0.1;
+        let high = Episode::observation("owner", "High");
+        memory.store_episode(low.clone()).await.unwrap();
+        memory.store_episode(high.clone()).await.unwrap();
+        memory.store_episode(high).await.unwrap();
+        assert!(memory.get_episode(low.id).await.unwrap().is_some());
+        let zero = PersistentAgentMemory::in_memory(MemoryConfig::new("owner").max_episodes(0));
+        assert!(zero.store_episode(low).await.is_err());
+    }
+
     #[tokio::test]
     async fn retrieval_rejects_invalid_weights() {
         let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("a"));
@@ -1715,9 +1814,9 @@ mod tests {
 
         assert!(memory.invalidate_episode(id).unwrap());
 
-        // Should still be retrievable but invalid
-        let retrieved = memory.get_episode(id).unwrap().unwrap();
-        assert!(!retrieved.is_valid());
+        // Ordinary reads must not serve invalidated knowledge.
+        assert!(memory.get_episode(id).unwrap().is_none());
+        assert!(!memory.episodes.read().unwrap()[&id].is_valid());
     }
 
     #[test]
