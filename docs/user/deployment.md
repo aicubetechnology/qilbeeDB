@@ -67,3 +67,37 @@ TLS termination and operator-managed credentials.
 See [configure retrieval capacity](../operations/retrieval-capacity.md) for support
 through 32,768 dimensions, including 3,072, explicit scan-byte budgets and bounded
 concurrent retrieval. The ranking catalog reports the active operator settings.
+
+## Integration feature preview
+
+On the integration workstation, validated features awaiting a five-PR merge batch
+use a separate Docker preview. Its **0.7.0 contract is unreleased**. Use the exact
+revision recorded in its deployment metadata when reporting integration results.
+
+| Item | Preview value |
+| --- | --- |
+| Host API/reference | `http://localhost:7475/docs` |
+| Docker container | `qilbeedb-preview` |
+| Address on the configured integration network | `http://qilbeedb-preview:7474` |
+| Private operator directory | `~/.config/qilbeedb/preview` |
+| Compose and image/revision metadata | `compose.json`, `deployment.json` in that directory |
+| Application credential | `integration.json` in that directory |
+| Example registered context | `experience-preview-v1` |
+| Application subject | `preview-agent` |
+| Exact scope | project `experience-preview`, mission `null`, agent `validation-agent`, visibility `shared` |
+
+The preview has its own data volume and credentials. Its application credential
+grants memory read/write and experience read/write/report for the exact scope
+above. Name `preview-agent` as reporter when using that credential. The example
+context is synthetic and does not certify a real model or evaluator. Register an
+appropriate immutable context before using production evidence.
+
+Operators can inspect this instance with:
+
+```bash
+docker compose -f "$HOME/.config/qilbeedb/preview/compose.json" ps
+curl --fail http://localhost:7475/health
+```
+
+The stable integration service remains available on port 7474. Features move to
+that service after a validated batch is merged and its exact image is checked.
