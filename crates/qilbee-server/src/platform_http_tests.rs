@@ -711,3 +711,5 @@ mod memory_review;
 mod derivation;
 
 mod checkpoints;
+
+mod verified_changes;

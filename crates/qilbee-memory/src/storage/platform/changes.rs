@@ -67,7 +67,7 @@ pub(super) struct JournalState {
     schema_version: u32,
     namespace: String,
     pub(super) cursor: MemoryChangeCursor,
-    last_change_digest: String,
+    pub(super) last_change_digest: String,
 }
 fn change_key(namespace: &str, sequence: u64) -> Vec<u8> {
     let mut key = record_prefix(0x21, namespace);
@@ -118,7 +118,7 @@ impl MemorySnapshot<'_> {
         }
         Ok(Some(state))
     }
-    fn change(&self, namespace: &str, cursor: &MemoryChangeCursor) -> Result<MemoryChange> {
+    pub(super) fn change(&self, namespace: &str, cursor: &MemoryChangeCursor) -> Result<MemoryChange> {
         let bytes = self
             .db
             .get_cf(
@@ -180,6 +180,7 @@ impl RocksDbMemoryStorage {
             cursor,
             last_change_digest: change.change_digest.clone(),
         };
+        self.append_verified_change(namespace, batch, &change)?;
         let cf = self.cf(super::super::cf::AGENT_META)?;
         batch.put_cf(
             cf,

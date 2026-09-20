@@ -867,3 +867,8 @@ mod checkpoints;
 pub use checkpoints::*;
 #[cfg(test)]
 mod checkpoint_tests;
+
+mod verified_changes;
+pub use verified_changes::*;
+#[cfg(test)]
+mod verified_changes_tests;

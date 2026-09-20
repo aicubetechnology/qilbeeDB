@@ -110,3 +110,10 @@ retention, replication and cross-region ordering are separate capabilities.
 with monotonic updates and revision checks. They require `memory_checkpoint` in
 addition to `memory_read` and do not generate feed events. Save progress only
 after external effects are durable; retries may redeliver events.
+
+## Detect divergent restore histories
+
+The [version 2 feed](verified-memory-changes.md), available in 0.9.0, adds
+prefix-anchored cursors. Version 1 remains sequence-only: after a restore and
+divergent writes, reaching the same sequence does not prove the same history.
+Use version 2 when consumers require that distinction.

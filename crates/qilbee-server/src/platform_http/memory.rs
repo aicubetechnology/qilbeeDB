@@ -8,6 +8,7 @@ pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .merge(reviews::routes())
         .merge(checkpoints::routes())
+        .merge(verified_changes::routes())
         .route("/api/v1/memory/commands", post(command))
         .route("/api/v1/memory/records/:id", get(read))
         .route("/api/v1/memory/query", post(query))
@@ -386,3 +387,5 @@ async fn changes(
 mod reviews;
 
 mod checkpoints;
+
+mod verified_changes;

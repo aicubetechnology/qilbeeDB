@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.8.0",
+    "version": "0.9.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
@@ -949,7 +949,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -959,7 +959,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -969,7 +969,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -7838,6 +7838,186 @@
           }
         }
       }
+    },
+    "/api/v2/memory/changes": {
+      "post": {
+        "operationId": "verifiedMemoryChanges",
+        "summary": "Read prefix-anchored memory changes",
+        "description": "Requires memory_read. Validates complete version-2 cursors against the authorized scope history, including after divergent restore and sequence catch-up. The baseline bounds the verified suffix; older events are not backfilled. Limits 1–256. Fixed through fence, after exclusive. 409 requires reconciliation; no silent fallback to version 1.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifiedMemoryChangesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifiedMemoryChangesRequest"
+              },
+              "example": {
+                "contract_version": 2,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "query": {
+                  "after": null,
+                  "through": null,
+                  "limit": 100
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7883,14 +8063,14 @@
           "project_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "mission_id": {
             "anyOf": [
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -7900,7 +8080,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "visibility": {
             "$ref": "#/components/schemas/Visibility"
@@ -7919,7 +8099,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -7997,7 +8177,7 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           },
           "spec": {
             "$ref": "#/components/schemas/CredentialSpec"
@@ -8351,7 +8531,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -8413,7 +8593,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -10807,19 +10987,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "dimensions": {
             "type": "integer",
@@ -10850,7 +11030,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -10898,7 +11078,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, without control characters."
+            "description": "1–256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -11186,7 +11366,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -11251,7 +11431,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -12068,7 +12248,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
+            "description": "1–256 UTF-8 bytes, nonblank and without control characters."
           },
           "accounting_unit": {
             "type": "string",
@@ -13403,7 +13583,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -13443,7 +13623,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -13898,7 +14078,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "consumer_id": {
             "type": "string",
@@ -13933,7 +14113,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "checkpoint": {
             "$ref": "#/components/schemas/MemoryCheckpoint"
@@ -14025,6 +14205,186 @@
           "contract_version",
           "scope",
           "checkpoint"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryCursor": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": 2
+          },
+          "journal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "prefix_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "version",
+          "journal_id",
+          "generation",
+          "sequence",
+          "prefix_digest"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryChangesQuery": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "through": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryChange": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "$ref": "#/components/schemas/VerifiedMemoryCursor"
+          },
+          "change": {
+            "$ref": "#/components/schemas/MemoryChange"
+          }
+        },
+        "required": [
+          "cursor",
+          "change"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryChangesPage": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "$ref": "#/components/schemas/VerifiedMemoryChange"
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active",
+          "baseline",
+          "changes",
+          "next_cursor",
+          "high_watermark",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryChangesRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/VerifiedMemoryChangesQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedMemoryChangesResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/VerifiedMemoryChangesPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
         ],
         "additionalProperties": false
       }

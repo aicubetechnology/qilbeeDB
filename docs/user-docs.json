@@ -1,5 +1,5 @@
 {
-  "release": "0.8.0",
+  "release": "0.9.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -168,6 +168,13 @@
       "title": "Durable consumer checkpoints",
       "description": "Resume scoped change consumption with subject-owned progress, monotonic cursors and revision checks.",
       "order": 58
+    },
+    {
+      "source": "docs/api/verified-memory-changes.md",
+      "file": "verified-memory-changes.md",
+      "title": "Verified memory change feed",
+      "description": "Resume scoped collaboration with history-bound cursors and explicit restore divergence detection.",
+      "order": 59
     }
   ]
 }
