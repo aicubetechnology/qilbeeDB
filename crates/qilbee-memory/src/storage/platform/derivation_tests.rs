@@ -292,8 +292,12 @@ fn derivation_dependency_reads_are_cached_bounded_and_integrity_checked() {
     db.db
         .put_cf(db.cf(super::super::cf::EPISODES).unwrap(), key, b"tampered")
         .unwrap();
+    // The oversized fixture may precede the corrupt record in UUID order.
+    // Keep this integrity assertion independent of the separate scan-budget test.
+    let mut integrity_query = lexical();
+    integrity_query.scan_bytes_limit = 64 * 1024 * 1024;
     assert!(matches!(
-        db.search_memory_lexical("scope", &lexical()),
+        db.search_memory_lexical("scope", &integrity_query),
         Err(Error::DataCorruption(_))
     ));
 }
