@@ -373,3 +373,41 @@ impl RocksDbMemoryStorage {
         })
     }
 }
+
+impl RocksDbMemoryStorage {
+    /// Idempotently establish a baseline without inventing a memory mutation.
+    pub fn activate_verified_memory_journal(
+        &self,
+        namespace: &str,
+    ) -> Result<VerifiedMemoryCursor> {
+        Self::validate_agent(namespace)?;
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
+        let view = self.memory_snapshot();
+        if let Some(state) = view.verified_journal(namespace)? {
+            return Ok(state.baseline);
+        }
+        let state = match view.journal(namespace)? {
+            Some(legacy) => VerifiedJournal::new(
+                namespace,
+                legacy.cursor.journal_id,
+                legacy.cursor.sequence,
+                Some(legacy.last_change_digest),
+            )?,
+            None => VerifiedJournal::new(namespace, Uuid::new_v4(), 0, None)?,
+        };
+        let mut batch = rocksdb::WriteBatch::default();
+        batch.put_cf(
+            self.cf(super::super::cf::AGENT_META)?,
+            record_prefix(0x26, namespace),
+            encode(&state)?,
+        );
+        let mut options = rocksdb::WriteOptions::default();
+        options.disable_wal(false);
+        options.set_sync(true);
+        self.db.write_opt(batch, &options).map_err(storage_error)?;
+        Ok(state.baseline)
+    }
+}

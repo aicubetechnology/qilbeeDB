@@ -173,3 +173,99 @@ fn corrupt_anchor_prevents_new_mutations_and_returns_no_partial_feed() {
         1
     );
 }
+
+#[test]
+fn explicit_activation_is_concurrently_idempotent_and_survives_empty_journal_restart() {
+    use std::sync::{Arc, Barrier};
+    let dir = TempDir::new().unwrap();
+    let db = Arc::new(open(dir.path()));
+    let gate = Arc::new(Barrier::new(10));
+    let handles: Vec<_> = (0..10)
+        .map(|_| {
+            let db = db.clone();
+            let gate = gate.clone();
+            std::thread::spawn(move || {
+                gate.wait();
+                db.activate_verified_memory_journal("scope").unwrap()
+            })
+        })
+        .collect();
+    let results: Vec<_> = handles.into_iter().map(|h| h.join().unwrap()).collect();
+    assert!(results.iter().all(|r| r == &results[0]));
+    assert_eq!(results[0].sequence, 0);
+    let baseline = results[0].clone();
+    drop(db);
+    let db = open(dir.path());
+    assert_eq!(
+        db.activate_verified_memory_journal("scope").unwrap(),
+        baseline
+    );
+    let page = db.verified_memory_changes("scope", &query()).unwrap();
+    assert!(page.active && page.complete);
+    assert!(page.changes.is_empty());
+    assert_eq!(page.high_watermark, Some(baseline.clone()));
+    assert!(
+        db.memory_changes(
+            "scope",
+            &MemoryChangesQuery {
+                after: None,
+                through: None,
+                limit: 1
+            }
+        )
+        .unwrap()
+        .high_watermark
+        .is_none()
+    );
+    create(&db, "scope", "first-after-activation");
+    let page = db
+        .verified_memory_changes(
+            "scope",
+            &VerifiedMemoryChangesQuery {
+                after: Some(baseline.clone()),
+                ..query()
+            },
+        )
+        .unwrap();
+    assert_eq!(page.changes.len(), 1);
+    assert_eq!(page.high_watermark.unwrap().journal_id, baseline.journal_id);
+    assert_eq!(
+        db.activate_verified_memory_journal("scope").unwrap(),
+        baseline
+    );
+}
+#[test]
+fn explicit_activation_preserves_legacy_events_and_starts_after_their_tip() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    for i in 1..=3 {
+        create(&db, "scope", &format!("legacy-{i}"));
+    }
+    let q = MemoryChangesQuery {
+        after: None,
+        through: None,
+        limit: 10,
+    };
+    let before = db.memory_changes("scope", &q).unwrap();
+    let cf = db.cf(super::super::cf::AGENT_META).unwrap();
+    db.db.delete_cf(cf, record_prefix(0x26, "scope")).unwrap();
+    for n in 1_u64..=3 {
+        let mut key = record_prefix(0x27, "scope");
+        key.extend_from_slice(&n.to_be_bytes());
+        db.db.delete_cf(cf, key).unwrap();
+    }
+    let baseline = db.activate_verified_memory_journal("scope").unwrap();
+    assert_eq!(baseline.sequence, 3);
+    assert_eq!(db.memory_changes("scope", &q).unwrap(), before);
+    assert!(
+        db.verified_memory_changes("scope", &query())
+            .unwrap()
+            .changes
+            .is_empty()
+    );
+    create(&db, "scope", "first-new");
+    let page = db.verified_memory_changes("scope", &query()).unwrap();
+    assert_eq!(page.changes.len(), 1);
+    assert_eq!(page.changes[0].cursor.sequence, 4);
+    assert_eq!(page.baseline, Some(baseline));
+}

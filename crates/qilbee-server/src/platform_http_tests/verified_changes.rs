@@ -176,3 +176,68 @@ async fn verified_memory_change_feed_isolates_tenants_subjects_grants_and_revoke
         StatusCode::UNAUTHORIZED
     );
 }
+
+#[tokio::test]
+async fn journal_activation_requires_read_and_write_and_keeps_a_stable_baseline() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    let reader = memory_key(&identity, &admin.secret, "reader", false);
+    let writer = memory_key(&identity, &admin.secret, "writer", true);
+    let input = json!({"contract_version":2,"scope":memory_scope("shared")});
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v2/memory/changes/activate",
+            &reader,
+            input.clone()
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let first = request(
+        &router,
+        "POST",
+        "/api/v2/memory/changes/activate",
+        &writer,
+        input.clone(),
+    )
+    .await;
+    assert_eq!(first.0, StatusCode::OK);
+    assert_eq!(first.1["baseline"]["sequence"], 0);
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/commands",
+            &writer,
+            memory_create("first", "content", "shared")
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v2/memory/changes/activate",
+            &writer,
+            input
+        )
+        .await,
+        first
+    );
+    let page = request(
+        &router,
+        "POST",
+        "/api/v2/memory/changes",
+        &reader,
+        body("shared"),
+    )
+    .await;
+    assert_eq!(page.1["page"]["baseline"], first.1["baseline"]);
+    assert_eq!(page.1["page"]["high_watermark"]["sequence"], 1);
+}

@@ -70,6 +70,7 @@ that a consumer already performed in another system.
 ## Upgrade boundary and initial reconciliation
 
 The first new memory mutation after upgrading activates anchoring automatically.
+You can also activate it explicitly before a migration or initial reconciliation.
 For an existing journal, `baseline.sequence` is its previous tip: events at or
 before that position are not retroactively verified. For a new journal the
 baseline sequence is zero. Historical receipts and version 1 events are preserved.
@@ -112,3 +113,32 @@ shared prefix, divergent writes, sequence catch-up, fences, authorization,
 corruption and restart. This is an application-level hash chain, not the Merkle
 consistency-proof protocol defined by
 [RFC 9162](https://www.rfc-editor.org/rfc/rfc9162.html).
+
+## Activate a baseline explicitly
+
+Call `POST /api/v2/memory/changes/activate` with **both** `memory_read` and
+`memory_write` for the scope:
+
+```json
+{
+  "contract_version": 2,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"}
+}
+```
+
+The response contains `contract_version: 2`, `scope` and `baseline`. This operation
+is naturally idempotent: concurrent calls, retries and later calls return the same
+original baseline. No request identifier is required. It does not insert a memory,
+advance the legacy sequence, backfill old events, reset a generation or establish
+consumer progress. A read-only credential receives 403.
+
+For an empty scope, activation durably establishes sequence zero. The next real
+mutation extends that exact journal and generation. For an existing v1 journal,
+the baseline is its current tip and the verified suffix starts with the next
+mutation. Memories, receipts and legacy event bytes remain unchanged.
+
+After activation, read the v2 feed and retain its **current high watermark** before
+enumerating records. An activation retry returns the original baseline, which may
+now be older than the current tip. Activation is a small synchronous metadata
+transaction; it does not scan the corpus or generate embeddings. Restart before
+the first memory mutation preserves the same baseline.
