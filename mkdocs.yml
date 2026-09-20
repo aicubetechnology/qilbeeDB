@@ -124,6 +124,7 @@ nav:
       - Platform HTTP API: api/platform-http.md
       - Versioned Memory API: api/versioned-memory.md
       - Memory Changes: api/memory-changes.md
+      - Verified Memory Changes: api/verified-memory-changes.md
       - Memory Review: api/memory-review.md
       - Derived Memory: api/derived-memory.md
       - Consumer Checkpoints: api/memory-checkpoints.md

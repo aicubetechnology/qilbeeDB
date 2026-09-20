@@ -44,7 +44,7 @@ Use TLS termination for network deployment; this change does not add a TLS liste
 
 ## Identity and credential endpoints
 
-All JSON responses use `contract_version: 1`. Authenticated responses containing
+Version 1 routes use `contract_version: 1`; the [verified change feed](verified-memory-changes.md) uses an explicit version 2 route and response. Authenticated responses containing
 credentials, as well as errors, send `Cache-Control: no-store`.
 
 | Method and path | Permission and response |
