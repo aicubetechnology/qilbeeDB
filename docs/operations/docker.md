@@ -151,8 +151,9 @@ versions fail closed. Do not prune unrelated images, containers or volumes.
 
 ## Scope of the local deployment
 
-The local stack supports durable identity, scoped memory and procedural
-learning. Learned-tool lifecycle services and isolated remote executors remain
+The local stack supports durable identity, scoped memory, model-bound semantic
+retrieval, procedural learning and learned-tool development receipts. Generation
+workers, isolated invocation transport and tool publication gates remain
 subsequent features under the [accepted architecture](../architecture/learned-tools.md).
 This development deployment does not establish distributed availability,
 hardware power-loss behavior or comparative performance leadership.
@@ -196,3 +197,31 @@ OpenAPI document from the same server and does not collect credentials.
 These are synthetic contract and process-recovery tests. They do not execute a
 model, verify external evidence truth or demonstrate improvement on an agent
 benchmark. The earlier memory/isolation/crash tests also passed on this image.
+
+## Tools and semantic release acceptance (0.4.0)
+
+The 0.4.0 release passed 403 Rust workspace tests and six Docker acceptance tests
+on Linux ARM64. The candidate image was first tested in a separate container with
+its own disposable volume and explicit loopback port. The same suites are used
+to validate the merged image on the persistent local deployment.
+
+The new suites validate worker/developer/admin separation, immutable artifacts,
+unknown development consumption, eight concurrent identical reports producing
+one event, atomic successful artifact registration, scoped repair requests and
+executor-confirmed cancellation. A process kill preserves the original request,
+unknown and successful events, and exact artifact digest. All temporary worker
+and administrator credentials are revoked after validation.
+
+Semantic acceptance supplies three synthetic vectors with expected cosine
+scores 1, 0 and -1, validates response schemas, tenant/capability denial and
+partial-scan disclosure, then kills/restarts the container and replays the
+original embedding receipts. Source updates immediately exclude stale vectors;
+deleting the source excludes all its bindings. The browser contract now exposes
+32 operations and 94 schemas, including model identities and scan coverage.
+
+These tests establish transport, ranking, authority and process-recovery
+contracts. They do not measure semantic quality on a language dataset or verify
+external generation/test evidence. Embeddings come from an external model
+service. Artifact source is not executed by the database; configured development
+workers, isolated invocation transport and publication gates remain separate
+integration work. Exact bounded retrieval is not an ANN performance claim.

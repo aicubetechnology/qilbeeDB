@@ -1,8 +1,8 @@
 # Durable scoped credentials
 
 `qilbee_server::security::identity::IdentityStore` is the platform's persistent
-credential authority. It uses the existing storage engine and has no QMN runtime,
-network, model-provider or service dependency. The [platform HTTP API](../api/platform-http.md) uses this authority by default.
+credential authority. It uses the existing storage engine without requiring a network connection,
+model provider or external service. The [platform HTTP API](../api/platform-http.md) uses this authority by default.
 The explicitly opted-in legacy router retains its old authentication and
 resource-authorization limitations.
 
@@ -22,7 +22,11 @@ Capabilities are independent; names do not imply other permissions:
 | `memory_write` | Mutate an explicitly granted memory scope |
 | `procedure_propose` | Propose candidates in a granted scope |
 | `procedure_evaluate` | Submit evaluations in a granted scope |
-| `policy_admin` | Administer tenant policy through its future policy API |
+| `policy_admin` | Register and read immutable tenant policy/context contracts |
+| `tool_read` | Read artifacts and development records in a granted scope |
+| `tool_develop` | Register artifacts, request development and request cancellation in a granted scope |
+| `tool_report` | Report development outcomes as the bound executor subject in a granted scope |
+| `tool_admin` | Register and inspect immutable tenant executor profiles |
 | `credential_admin` | Issue, inspect, rotate and revoke tenant credentials |
 
 A resource grant is an exact tuple of project, optional mission, agent and
@@ -93,9 +97,9 @@ ordinary metadata writes participate in the same lock.
 This does not add snapshots or conflict detection to every graph operation.
 Credential methods perform blocking storage work and must be offloaded by async
 transport adapters. Trusted Rust embedders and filesystem operators retain raw
-storage authority. The default HTTP router excludes the legacy routes. Managing policy and
-learning decisions remains separate work, not an implicit effect of defining
-capability names.
+storage authority. The default HTTP router excludes the legacy routes. The [procedural API](../api/procedural-learning.md) and
+[learned-tool API](../api/learned-tools.md) explicitly check their respective
+capabilities; defining a capability does not implicitly enable an operation.
 
 ## Validation
 
@@ -106,7 +110,7 @@ revocation, and strict issuance payloads. Concurrent bootstrap and rotation each
 produce exactly one winner. Storage tests verify all-or-nothing batches, stale
 conditions, deletion, reopen, duplicate guards and concurrent writers.
 
-The tests use temporary local databases and require no QMN processes or model
-calls. The process-crash test for HTTP memory remains in the workspace suite;
+The tests use temporary local databases and require no external processes or
+model calls. The process-crash test for HTTP memory remains in the workspace suite;
 credential-specific hardware power-loss and operational recovery drills are not
 established by these tests.

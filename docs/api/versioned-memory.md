@@ -257,3 +257,10 @@ returns every original receipt on retry with an exact total of 20 records.
 This validates process-crash recovery on the test filesystem. Hardware power
 loss, backup/restore, indexed retrieval benchmarks, procedural HTTP and shared
 change feeds remain separate acceptance criteria.
+
+## Model-bound semantic retrieval
+
+The text query above remains a substring/filter endpoint. Use the separate
+[semantic search API](semantic-memory.md) to attach externally generated vectors
+to exact source revisions and retrieve by cosine similarity. It enforces model
+identity and scope and discloses partial scan coverage.

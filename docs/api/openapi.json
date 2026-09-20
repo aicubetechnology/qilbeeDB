@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.3.0",
-    "description": "Durable identity, scoped memory and evidence-driven procedural learning for AI agents, with versioned commands and authenticated access."
+    "version": "0.4.0",
+    "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents."
   },
   "servers": [
     {
@@ -4110,6 +4110,338 @@
           }
         }
       }
+    },
+    "/api/v1/memory/embeddings": {
+      "post": {
+        "operationId": "attachMemoryEmbedding",
+        "summary": "Attach a model-bound vector to an exact memory revision",
+        "description": "Requires memory_write and exact scope. Embedding plus original receipt commits atomically. Source changes invalidate eligibility. Vectors are generated externally; anonymous legacy embeddings are not assigned a model.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmbeddingCommandRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/search": {
+      "post": {
+        "operationId": "searchMemorySemantic",
+        "summary": "Rank memory by cosine similarity",
+        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SemanticResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SemanticRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7029,6 +7361,339 @@
         "required": [
           "contract_version",
           "event"
+        ],
+        "additionalProperties": false
+      },
+      "EmbeddingSpace": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
+          },
+          "dimensions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "revision",
+          "dimensions"
+        ],
+        "additionalProperties": false
+      },
+      "EmbeddingCommandRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "record_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -3.4028234663852886e+38,
+              "maximum": 3.4028234663852886e+38
+            },
+            "minItems": 1,
+            "maxItems": 4096,
+            "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "idempotency_key",
+          "record_id",
+          "record_revision",
+          "space",
+          "vector"
+        ],
+        "additionalProperties": false
+      },
+      "EmbeddingReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "record_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "record_id",
+          "record_revision",
+          "space",
+          "vector_digest",
+          "author",
+          "committed_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "EmbeddingResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/EmbeddingReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "SemanticQuery": {
+        "type": "object",
+        "properties": {
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -3.4028234663852886e+38,
+              "maximum": 3.4028234663852886e+38
+            },
+            "minItems": 1,
+            "maxItems": 4096,
+            "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "min_score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "default": -1
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 10000
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "space",
+          "vector",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "SemanticRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/SemanticQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "SemanticHit": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          },
+          "score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity, not a probability."
+          },
+          "embedding": {
+            "$ref": "#/components/schemas/EmbeddingReceipt"
+          }
+        },
+        "required": [
+          "record",
+          "score",
+          "embedding"
+        ],
+        "additionalProperties": false
+      },
+      "SemanticPage": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SemanticHit"
+            },
+            "maxItems": 100
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scanned_embeddings": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matched_records": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "exhaustive": {
+            "type": "boolean",
+            "description": "True only if started without a cursor and ranked the entire authorized registered model space."
+          }
+        },
+        "required": [
+          "hits",
+          "next_after",
+          "scanned_embeddings",
+          "matched_records",
+          "exhaustive"
+        ],
+        "additionalProperties": false
+      },
+      "SemanticResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/SemanticPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
         ],
         "additionalProperties": false
       }
