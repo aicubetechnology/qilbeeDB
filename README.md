@@ -414,7 +414,8 @@ behavior, not production throughput or superiority over other memory systems.
 - [x] Security components (JWT, API keys, RBAC)
 - [ ] Secure production bootstrap and resource ownership across API routes
 - [x] Persistent HTTP episode storage with abrupt-restart regression coverage
-- [ ] Versioned idempotent memory API and authenticated tenant/sharing scopes
+- [x] Versioned idempotent memory API with conditional revisions and authenticated tenant/sharing scopes
+- [ ] Procedural HTTP API, durable change feeds and indexed hybrid retrieval
 - [x] Atomic multi-operation graph entity and index commits
 - [ ] Snapshot isolation and transaction conflict detection
 - [x] BM25 lexical ranking and deterministic hybrid retrieval

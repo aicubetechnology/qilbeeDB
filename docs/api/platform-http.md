@@ -6,9 +6,9 @@ route, or HTTP tenant-bootstrap endpoint in this router. Every operation except
 `GET /health` requires a durable platform bearer credential.
 
 This is an intentional compatibility change from the 0.1 legacy HTTP surface.
-The current increment exposes identity and credential administration. Scoped,
-versioned memory CRUD and procedural operations are the next platform contracts;
-legacy memory routes are not silently mapped into tenant namespaces.
+The platform exposes identity, credential administration and
+[versioned scoped memory](versioned-memory.md). Procedural HTTP operations remain
+pending; legacy memory routes are not silently mapped into tenant namespaces.
 
 ## Provision a tenant locally
 

@@ -16,9 +16,12 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 use uuid::Uuid;
 
+mod memory;
+
 #[derive(Clone)]
 pub(crate) struct PlatformState {
     identity: Arc<IdentityStore>,
+    memory: Arc<qilbee_memory::RocksDbMemoryStorage>,
 }
 
 impl PlatformState {
@@ -43,10 +46,24 @@ impl PlatformState {
 /// The default router exposes only platform contracts. Legacy APIs require an
 /// explicit, separate router and never supply credentials for this authority.
 pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
+    let memory_path = database.storage().path().join("agent-memory");
+    let memory_path = memory_path
+        .to_str()
+        .ok_or_else(|| Error::Configuration("Memory path must be valid UTF-8".into()))?;
+    let memory = Arc::new(qilbee_memory::RocksDbMemoryStorage::open(
+        qilbee_memory::MemoryStorageConfig {
+            path: memory_path.into(),
+            enable_wal: true,
+            sync_writes: true,
+            ..Default::default()
+        },
+    )?);
     let state = PlatformState {
+        memory,
         identity: Arc::new(IdentityStore::new(Arc::new(database.storage().clone()))),
     };
     Ok(Router::new()
+        .merge(memory::routes())
         .route("/health", get(health))
         .route("/api/v1/identity", get(who_am_i))
         .route("/api/v1/credentials", post(issue))
@@ -284,7 +301,22 @@ impl ApiError {
             Error::ValidationError(_) => Self::new(
                 StatusCode::BAD_REQUEST,
                 "invalid_request",
-                "Invalid credential fields",
+                "Invalid request fields",
+            ),
+            Error::KeyNotFound(_) => Self::new(
+                StatusCode::NOT_FOUND,
+                "record_not_found",
+                "No current record exists in the authorized scope",
+            ),
+            Error::ConstraintViolation(_) => Self::new(
+                StatusCode::CONFLICT,
+                "idempotency_conflict",
+                "The idempotency key was already used for a different command",
+            ),
+            Error::DataCorruption(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "storage_inconsistency",
+                "A stored record, index or receipt has an unsupported or inconsistent version",
             ),
             Error::TransactionConflict(_) => Self::new(
                 StatusCode::CONFLICT,

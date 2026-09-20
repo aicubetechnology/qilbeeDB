@@ -236,7 +236,7 @@ fn http_durable_server_child() {
     });
 }
 
-struct TestServerProcess(std::process::Child);
+pub(crate) struct TestServerProcess(pub(crate) std::process::Child);
 
 impl Drop for TestServerProcess {
     fn drop(&mut self) {
@@ -246,15 +246,14 @@ impl Drop for TestServerProcess {
 }
 
 fn crash_server(path: &Path) -> (TestServerProcess, u16) {
+    crash_server_for(path, "http_server_tests::http_durable_server_child")
+}
+
+pub(crate) fn crash_server_for(path: &Path, fixture: &str) -> (TestServerProcess, u16) {
     use std::io::{BufRead, BufReader};
     let mut process = TestServerProcess(
         std::process::Command::new(std::env::current_exe().unwrap())
-            .args([
-                "--ignored",
-                "--exact",
-                "http_server_tests::http_durable_server_child",
-                "--nocapture",
-            ])
+            .args(["--ignored", "--exact", fixture, "--nocapture"])
             .env("QILBEE_TEST_CRASH_DATA", path)
             .env("OPENAI_API_KEY", "")
             .stdout(std::process::Stdio::piped())
@@ -278,7 +277,13 @@ fn crash_server(path: &Path) -> (TestServerProcess, u16) {
     (process, port)
 }
 
-fn wire_request(port: u16, method: &str, path: &str, token: &str, body: Value) -> (u16, Value) {
+pub(crate) fn wire_request(
+    port: u16,
+    method: &str,
+    path: &str,
+    token: &str,
+    body: Value,
+) -> (u16, Value) {
     use std::io::{Read, Write};
     let mut socket = std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
     socket

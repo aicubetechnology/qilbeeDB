@@ -94,6 +94,7 @@ pub enum EpisodeType {
 
 /// Content of an episode
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct EpisodeContent {
     /// Primary content (e.g., user message)
     pub primary: String,

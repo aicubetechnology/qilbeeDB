@@ -303,3 +303,335 @@ async fn platform_http_transport_errors_are_versioned_and_secrets_are_not_cachea
     assert_eq!(response.status(), StatusCode::CREATED);
     assert_eq!(response.headers()["cache-control"], "no-store");
 }
+
+fn memory_scope(visibility: &str) -> Value {
+    json!({"project_id":"project","mission_id":null,"agent_id":"agent","visibility":visibility})
+}
+fn memory_create(key: &str, text: &str, visibility: &str) -> Value {
+    json!({"contract_version":1,"idempotency_key":key,"scope":memory_scope(visibility),"operation":{"type":"create","record":{"episode_type":"Observation","event_time_millis":1_700_000_000_000i64,"content":{"primary":text,"data":{"sequence":7}},"tags":["integration"],"metadata":{"source_request_id":"test-source"}}}})
+}
+fn memory_key(identity: &IdentityStore, admin: &str, subject: &str, write: bool) -> String {
+    let mut definition = spec();
+    definition.subject_id = subject.into();
+    definition.capabilities = [Capability::MemoryRead].into();
+    if write {
+        definition.capabilities.insert(Capability::MemoryWrite);
+    }
+    definition.grants.push(ResourceScope {
+        visibility: Visibility::Private,
+        ..definition.grants[0].clone()
+    });
+    identity.issue(admin, definition).unwrap().secret
+}
+fn record_url(id: &str, visibility: &str) -> String {
+    format!(
+        "/api/v1/memory/records/{id}?contract_version=1&project_id=project&agent_id=agent&visibility={visibility}"
+    )
+}
+#[tokio::test]
+async fn platform_http_memory_commands_preserve_receipts_revisions_and_deletions() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant-a", "operator").unwrap();
+    let token = memory_key(&identity, &admin.secret, "writer", true);
+    let create = memory_create("first", "before", "shared");
+    let (status, original) = request(
+        &router,
+        "POST",
+        "/api/v1/memory/commands",
+        &token,
+        create.clone(),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{original}");
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/commands",
+            &token,
+            create.clone()
+        )
+        .await
+        .1,
+        original
+    );
+    let id = original["receipt"]["record_id"].as_str().unwrap();
+    let (status, found) = request(
+        &router,
+        "GET",
+        &record_url(id, "shared"),
+        &token,
+        Value::Null,
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{found}");
+    assert_eq!(found["record"]["payload"]["content"]["data"]["sequence"], 7);
+    assert_eq!(
+        found["record"]["payload"]["metadata"]["source_request_id"],
+        "test-source"
+    );
+    let mut changed = create.clone();
+    changed["operation"]["record"]["content"]["primary"] = "different".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/commands",
+            &token,
+            changed.clone()
+        )
+        .await
+        .0,
+        StatusCode::CONFLICT
+    );
+    changed["idempotency_key"] = "update".into();
+    changed["operation"]["type"] = "update".into();
+    changed["operation"]["record_id"] = id.into();
+    changed["operation"]["expected_revision"] = 1.into();
+    let (status, updated) = request(
+        &router,
+        "POST",
+        "/api/v1/memory/commands",
+        &token,
+        changed.clone(),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{updated}");
+    assert_eq!(updated["receipt"]["revision"], 2);
+    changed["idempotency_key"] = "stale".into();
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/commands", &token, changed)
+            .await
+            .0,
+        StatusCode::CONFLICT
+    );
+    let delete = json!({"contract_version":1,"idempotency_key":"delete","scope":memory_scope("shared"),"operation":{"type":"delete","record_id":id,"expected_revision":2}});
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/commands", &token, delete)
+            .await
+            .0,
+        StatusCode::OK
+    );
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/commands", &token, create)
+            .await
+            .1,
+        original
+    );
+    assert_eq!(
+        request(
+            &router,
+            "GET",
+            &record_url(id, "shared"),
+            &token,
+            Value::Null
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+}
+#[tokio::test]
+async fn platform_http_memory_scope_and_permissions_apply_to_writes_reads_and_queries() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin_a = identity.bootstrap_tenant("tenant-a", "operator").unwrap();
+    let admin_b = identity.bootstrap_tenant("tenant-b", "operator").unwrap();
+    let alice = memory_key(&identity, &admin_a.secret, "alice", true);
+    let bob = memory_key(&identity, &admin_a.secret, "bob", false);
+    let foreign = memory_key(&identity, &admin_b.secret, "alice", true);
+    let (_, created) = request(
+        &router,
+        "POST",
+        "/api/v1/memory/commands",
+        &alice,
+        memory_create("shared", "private company data", "shared"),
+    )
+    .await;
+    let id = created["receipt"]["record_id"]
+        .as_str()
+        .expect("record receipt");
+    assert_eq!(
+        request(&router, "GET", &record_url(id, "shared"), &bob, Value::Null)
+            .await
+            .0,
+        StatusCode::OK
+    );
+    assert_eq!(
+        request(
+            &router,
+            "GET",
+            &record_url(id, "shared"),
+            &foreign,
+            Value::Null
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/commands",
+            &bob,
+            memory_create("attempt", "denied", "shared")
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let (_, private) = request(
+        &router,
+        "POST",
+        "/api/v1/memory/commands",
+        &alice,
+        memory_create("private", "personal", "private"),
+    )
+    .await;
+    let private_id = private["receipt"]["record_id"].as_str().unwrap();
+    assert_eq!(
+        request(
+            &router,
+            "GET",
+            &record_url(private_id, "private"),
+            &bob,
+            Value::Null
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    let query = json!({"contract_version":1,"scope":memory_scope("shared"),"filter":{"limit":10,"text_contains":"company"}});
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/query",
+            &alice,
+            query.clone()
+        )
+        .await
+        .1["page"]["records"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/query",
+            &foreign,
+            query.clone()
+        )
+        .await
+        .1["page"]["records"]
+            .as_array()
+            .unwrap()
+            .len(),
+        0
+    );
+    let mut forged = query;
+    forged["scope"]["mission_id"] = "not-granted".into();
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/query", &alice, forged)
+            .await
+            .0,
+        StatusCode::FORBIDDEN
+    );
+}
+
+#[test]
+#[ignore = "Subprocess fixture invoked by the platform memory crash-recovery test"]
+fn platform_http_memory_child() {
+    use std::io::Write;
+    let path = std::env::var("QILBEE_TEST_CRASH_DATA").unwrap();
+    tokio::runtime::Runtime::new().unwrap().block_on(async {
+        let (router, _) = app(std::path::Path::new(&path));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        println!("HTTP_CRASH_READY {}", listener.local_addr().unwrap().port());
+        std::io::stdout().flush().unwrap();
+        axum::serve(listener, router).await.unwrap();
+    });
+}
+#[test]
+fn platform_http_memory_acknowledged_commands_and_receipts_survive_process_kill() {
+    use crate::http_server_tests::{crash_server_for, wire_request};
+    let dir = TempDir::new().unwrap();
+    let token = {
+        let (_, identity) = app(dir.path());
+        let admin = identity
+            .bootstrap_tenant("crash-tenant", "operator")
+            .unwrap();
+        memory_key(&identity, &admin.secret, "writer", true)
+    };
+    let fixture = "platform_http_tests::platform_http_memory_child";
+    let (mut server, port) = crash_server_for(dir.path(), fixture);
+    let mut acknowledged = Vec::new();
+    for sequence in 0..20 {
+        let command = memory_create(
+            &format!("crash-{sequence}"),
+            &format!("value-{sequence}"),
+            "shared",
+        );
+        let (status, result) = wire_request(
+            port,
+            "POST",
+            "/api/v1/memory/commands",
+            &token,
+            command.clone(),
+        );
+        assert_eq!(status, 200, "{result}");
+        acknowledged.push((command, result));
+    }
+    server.0.kill().unwrap();
+    server.0.wait().unwrap();
+    let (_restarted, port) = crash_server_for(dir.path(), fixture);
+    for (sequence, (command, receipt)) in acknowledged.iter().enumerate() {
+        let id = receipt["receipt"]["record_id"].as_str().unwrap();
+        let (status, record) =
+            wire_request(port, "GET", &record_url(id, "shared"), &token, Value::Null);
+        assert_eq!(status, 200, "{record}");
+        assert_eq!(
+            record["record"]["payload"]["content"]["primary"],
+            format!("value-{sequence}")
+        );
+        assert_eq!(
+            wire_request(
+                port,
+                "POST",
+                "/api/v1/memory/commands",
+                &token,
+                command.clone()
+            )
+            .1,
+            *receipt
+        );
+    }
+    let query = json!({"contract_version":1,"scope":memory_scope("shared"),"filter":{"limit":100}});
+    let (status, page) = wire_request(port, "POST", "/api/v1/memory/query", &token, query);
+    assert_eq!(status, 200);
+    assert_eq!(
+        page["page"]["records"].as_array().unwrap().len(),
+        acknowledged.len()
+    );
+}
+
+#[tokio::test]
+async fn platform_http_memory_rejects_unrecognized_content_instead_of_dropping_it() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant-a", "operator").unwrap();
+    let token = memory_key(&identity, &admin.secret, "writer", true);
+    let mut command = memory_create("unknown-field", "content", "shared");
+    command["operation"]["record"]["content"]["silently_lost"] = "must not disappear".into();
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/commands", &token, command)
+            .await
+            .0,
+        StatusCode::BAD_REQUEST
+    );
+}
