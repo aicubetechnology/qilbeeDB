@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Durable identity, scoped memory and evidence-driven procedural learning for AI agents, with versioned commands and authenticated access."
   },
   "servers": [
@@ -2712,6 +2712,64 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LearningSelectRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "operationId": "openApiReference",
+        "summary": "Open the browser API reference",
+        "security": [],
+        "responses": {
+          "307": {
+            "description": "Open the browser API reference",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "const": "/docs"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "operationId": "getApiReference",
+        "summary": "Read the browser API reference",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Read the browser API reference",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs/reference.js": {
+      "get": {
+        "operationId": "getApiReferenceScript",
+        "summary": "Load the same-origin API reference script",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Load the same-origin API reference script",
+            "content": {
+              "application/javascript": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           }

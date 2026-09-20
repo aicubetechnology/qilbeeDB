@@ -13,6 +13,8 @@
 !docs/
 !docs/api/
 !docs/api/openapi.json
+!docs/api/reference.html
+!docs/api/reference.js
 !Dockerfile
 !LICENSE
 **/target/

@@ -156,3 +156,11 @@ QilbeeDB owns learned-tool development, repair, versioning, evaluation,
 publication and gateway services. Executors remain isolated on servers, and
 user devices use a lightweight client. The [service boundary and acceptance
 contract](../architecture/learned-tools.md) defines the pending work.
+
+The [procedural HTTP API](../api/procedural-learning.md) now integrates immutable
+administrative contracts, scoped proposals, explicit admission outcomes and
+exact-baseline selection with the existing learning ledger. Candidate, active,
+rejected and suspended states, concurrent retries, unavailable accounting and
+restart history are covered by HTTP contract tests. This does not establish
+external evidence truth, automatic policy retirement, learned-tool execution or
+comparative agent benchmark leadership.

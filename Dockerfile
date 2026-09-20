@@ -6,7 +6,7 @@ ENV CARGO_BUILD_JOBS=2 CARGO_PROFILE_RELEASE_LTO=thin CARGO_PROFILE_RELEASE_CODE
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY crates ./crates
-COPY docs/api/openapi.json ./docs/api/openapi.json
+COPY docs/api ./docs/api
 RUN --mount=type=cache,id=qilbeedb-cargo-registry,target=/usr/local/cargo/registry \
     --mount=type=cache,id=qilbeedb-cargo-git,target=/usr/local/cargo/git \
     --mount=type=cache,id=qilbeedb-release-target,target=/src/target \
@@ -21,7 +21,7 @@ COPY --from=build /usr/local/bin/qilbeedb /usr/local/bin/qilbeedb
 COPY LICENSE /usr/share/doc/qilbeedb/LICENSE
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="QilbeeDB" \
-    org.opencontainers.image.version="0.2.0" \
+    org.opencontainers.image.version="0.3.0" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.source="https://github.com/aicubetechnology/qilbeeDB"
 USER 10001:10001
