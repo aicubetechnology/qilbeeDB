@@ -195,7 +195,7 @@ async fn semantic_search(
     State(state): State<PlatformState>,
     headers: HeaderMap,
     body: Result<Json<SemanticRequest>, JsonRejection>,
-) -> ApiResult<Json<Value>> {
+) -> ApiResult<Response> {
     let memory = state.memory.clone();
     state
         .run(headers, move |identity, token, _| {
@@ -208,10 +208,23 @@ async fn semantic_search(
             let page = memory
                 .search_memory_semantic(&scope.storage_namespace, &request.query)
                 .map_err(ApiError::operation)?;
-            let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
-            Ok(Json(
-                json!({"contract_version":1,"scope":request.scope,"mode":"semantic","ranking_version":"cosine_exact_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}}),
-            ))
+            let retrieval_micros = retrieval_started
+                .elapsed()
+                .as_micros()
+                .min(u64::MAX as u128) as u64;
+            let mut response =
+                Json(json!({"contract_version":1,"scope":request.scope,"page":page}))
+                    .into_response();
+            response.headers_mut().insert(
+                "x-qilbee-ranking-version",
+                HeaderValue::from_static("cosine_exact_v1"),
+            );
+            response.headers_mut().insert(
+                "x-qilbee-retrieval-micros",
+                HeaderValue::from_str(&retrieval_micros.to_string())
+                    .map_err(|_| ApiError::internal())?,
+            );
+            Ok(response)
         })
         .await
 }

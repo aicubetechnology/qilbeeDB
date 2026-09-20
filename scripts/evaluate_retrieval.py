@@ -228,7 +228,19 @@ class Client:
             with self.opener.open(request, timeout=30) as response:
                 raw = response.read()
                 elapsed = (time.perf_counter_ns() - start) / 1e6
-                return json.loads(raw), elapsed, len(raw)
+                body = json.loads(raw)
+                if path == "/api/v1/memory/search":
+                    # Legacy cosine keeps its 0.4.0 JSON envelope; metadata uses headers.
+                    body["mode"] = "semantic"
+                    body["ranking_version"] = response.headers.get(
+                        "X-Qilbee-Ranking-Version"
+                    )
+                    body["timing"] = {
+                        "retrieval_micros": int(
+                            response.headers["X-Qilbee-Retrieval-Micros"]
+                        )
+                    }
+                return body, elapsed, len(raw)
         except urllib.error.HTTPError as error:
             raise RuntimeError(
                 f'HTTP {error.code} from {method} {path.split("?")[0]}'

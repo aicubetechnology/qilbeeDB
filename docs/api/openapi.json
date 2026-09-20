@@ -4294,6 +4294,20 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Ranking-Version": {
+                "description": "Immutable cosine ranking version; JSON envelope remains compatible with 0.4.0.",
+                "schema": {
+                  "type": "string",
+                  "const": "cosine_exact_v1"
+                }
+              },
+              "X-Qilbee-Retrieval-Micros": {
+                "description": "Server retrieval wall time in microseconds; excludes authorization, queueing, serialization, transport and embedding generation.",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
               }
             },
             "content": {
@@ -8071,26 +8085,12 @@
           },
           "page": {
             "$ref": "#/components/schemas/SemanticPage"
-          },
-          "mode": {
-            "type": "string",
-            "const": "semantic"
-          },
-          "ranking_version": {
-            "type": "string",
-            "const": "cosine_exact_v1"
-          },
-          "timing": {
-            "$ref": "#/components/schemas/RetrievalTiming"
           }
         },
         "required": [
           "contract_version",
           "scope",
-          "page",
-          "mode",
-          "ranking_version",
-          "timing"
+          "page"
         ],
         "additionalProperties": false
       },

@@ -106,7 +106,7 @@ test results are separate, and reserved-test results are broken down by category
 | Per-category quality | The same measures with explicit query counts, so an average cannot hide exact-term regressions |
 | Losses | Every reserved query where hybrid nDCG is lower than either baseline, with both rankings |
 | Paired uncertainty | Mean hybrid-minus-baseline nDCG difference with a seeded, 2000-draw, percentile 95% query-bootstrap interval; exploratory and not corrected for multiple comparisons |
-| Retrieval latency | p50/p95 of `timing.retrieval_micros`, converted to milliseconds; server wall time from method entry to result, excluding authentication, pool queueing, serialization, transport and embeddings |
+| Retrieval latency | p50/p95 of `timing.retrieval_micros` (or the legacy cosine `X-Qilbee-Retrieval-Micros` header), converted to milliseconds; server wall time from method entry to result, excluding authentication, pool queueing, serialization, transport and embeddings |
 | HTTP latency | p50/p95 of the client request/response round trip, excluding external embedding generation |
 | Candidate work | Source/binding scan counts, corpus and embedding counts, matches and candidate truncation per query |
 | Response bytes | JSON payload size received by the client, excluding HTTP headers |
