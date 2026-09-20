@@ -13,6 +13,37 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/memory/search", post(semantic_search))
         .route("/api/v1/memory/search/lexical", post(lexical_search))
         .route("/api/v1/memory/search/hybrid", post(hybrid_search))
+        .route("/api/v1/memory/ranking-profiles", get(ranking_profiles))
+}
+
+async fn ranking_profiles(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+) -> ApiResult<Json<Value>> {
+    state
+        .run(headers, |_, _, principal| {
+            if !principal
+                .spec
+                .capabilities
+                .contains(&Capability::MemoryRead)
+            {
+                return Err(ApiError::new(
+                    StatusCode::FORBIDDEN,
+                    "forbidden",
+                    "Memory read is not granted",
+                ));
+            }
+            let profiles: Vec<_> = qilbee_memory::storage::platform::HybridRankingVersion::ALL
+                .into_iter()
+                .map(|version| version.profile())
+                .collect();
+            Ok(Json(json!({
+                "contract_version": 1,
+                "component_versions": {"lexical": "bm25_v1", "semantic": "cosine_exact_v1"},
+                "hybrid_profiles": profiles
+            })))
+        })
+        .await
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -283,6 +314,6 @@ async fn hybrid_search(
         let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_hybrid(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
-        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":"weighted_rrf_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}})))
+        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":page.ranking.version,"page":page,"timing":{"retrieval_micros":retrieval_micros}})))
     }).await
 }

@@ -81,6 +81,39 @@ channel contributes, otherwise null. The record always includes its source
 revision, author, validity and payload. A source can change after the snapshot;
 use the returned revision for subsequent conditional writes.
 
+## Discover the server's supported profiles
+
+Call `GET /api/v1/memory/ranking-profiles` with a current `memory_read` credential.
+No scope or query body is required because this endpoint reads only server-wide
+implementation metadata. It returns no memory records, corpus statistics,
+registered embedding spaces or tenant configuration.
+
+```json
+{
+  "contract_version": 1,
+  "component_versions": {"lexical": "bm25_v1", "semantic": "cosine_exact_v1"},
+  "hybrid_profiles": [{
+    "version": "weighted_rrf_v1", "method": "weighted_rrf",
+    "lexical_version": "bm25_v1", "semantic_version": "cosine_exact_v1",
+    "candidate_limit": 100, "lexical_weight": 0.5, "semantic_weight": 0.5,
+    "rank_constant": 60, "experimental": true
+  }]
+}
+```
+
+Discovery and retrieval use the same profile definitions. Compare a selected
+profile with the version and `page.ranking` returned during execution; fail closed
+if an evaluation's pinned profile differs. Missing, expired or revoked credentials
+return 401; a credential without `memory_read` returns 403, including an operator
+credential that grants only credential/policy administration. Responses use
+`Cache-Control: no-store`; do not use a cached catalog as authorization evidence.
+Each actual search still requires its own exact scope grant.
+
+A listed method is supported by the running implementation. Listing does not admit
+it under enterprise policy, qualify its relevance or select it as a default.
+`weighted_rrf_v1` remains unchanged and experimental. The available development
+results do not currently justify publishing another set of weights.
+
 ## Configure candidate and scan budgets
 
 | Query field | Contract |

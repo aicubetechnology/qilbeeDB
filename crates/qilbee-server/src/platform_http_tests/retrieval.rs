@@ -296,3 +296,53 @@ async fn retrieval_http_identical_text_and_vectors_are_isolated_before_ranking()
         }
     }
 }
+
+#[tokio::test]
+async fn ranking_catalog_requires_live_read_authority_and_matches_execution() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "admin").unwrap();
+    let reader = memory_key(&identity, &admin.secret, "reader", false);
+    let path = "/api/v1/memory/ranking-profiles";
+    for (token, expected) in [
+        ("", StatusCode::UNAUTHORIZED),
+        (admin.secret.as_str(), StatusCode::FORBIDDEN),
+    ] {
+        assert_eq!(
+            request(&router, "GET", path, token, Value::Null).await.0,
+            expected
+        );
+    }
+    let (status, catalog) = request(&router, "GET", path, &reader, Value::Null).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(catalog["contract_version"], 1);
+    assert_eq!(
+        catalog["component_versions"],
+        json!({"lexical":"bm25_v1","semantic":"cosine_exact_v1"})
+    );
+    assert_eq!(catalog["hybrid_profiles"].as_array().unwrap().len(), 1);
+    let (_, result) = request(
+        &router,
+        "POST",
+        "/api/v1/memory/search/hybrid",
+        &reader,
+        hybrid(),
+    )
+    .await;
+    assert_eq!(catalog["hybrid_profiles"][0], result["page"]["ranking"]);
+    assert_eq!(
+        result["ranking_version"],
+        catalog["hybrid_profiles"][0]["version"]
+    );
+    assert_eq!(catalog["hybrid_profiles"][0]["experimental"], true);
+    let principal = identity.authenticate(&reader).unwrap();
+    identity
+        .revoke(&admin.secret, principal.id, principal.revision)
+        .unwrap();
+    assert_eq!(
+        request(&router, "GET", path, &reader, Value::Null).await.0,
+        StatusCode::UNAUTHORIZED
+    );
+    let (_, spec) = request(&router, "GET", "/openapi.json", "", Value::Null).await;
+    assert!(spec["paths"].get(path).is_some());
+}

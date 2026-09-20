@@ -26,6 +26,9 @@ pub struct HybridRankingProfile {
     pub experimental: bool,
 }
 impl HybridRankingVersion {
+    /// Profiles supported by this server build; parameters remain immutable.
+    pub const ALL: [Self; 1] = [Self::WeightedRrfV1];
+
     pub fn profile(self) -> HybridRankingProfile {
         match self {
             Self::WeightedRrfV1 => HybridRankingProfile {
