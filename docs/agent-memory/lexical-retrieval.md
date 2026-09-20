@@ -37,3 +37,37 @@ Seven offline tests cover ranking, corpus-order invariance, query token
 deduplication, Unicode and context matching, invalidation, the BM25 formula,
 stable ties, invalid weights, provider bypass and lexical fallback. These tests
 establish behavior; external retrieval quality remains unmeasured.
+
+## Durable platform records
+
+`RocksDbMemoryStorage::search_memory_lexical(namespace, &LexicalQuery)` applies
+the same tokenizer and BM25 formula to revisioned platform records. It requires
+no vectors and searches existing records without rebuilding or migrating data.
+The caller must authenticate and derive the namespace before calling this
+low-level Rust method.
+
+The query supplies `text`, `limit` (1–100), optional `after`, `episode_type` and
+`tag`, `scan_limit` (1–10000, default 10000), and `scan_bytes_limit` (1–67108864,
+default 8388608). Text is limited to 4096 UTF-8 bytes and 64 distinct lowercase
+alphanumeric terms; empty/punctuation-only text is rejected. All record and
+integrity reads use one request-local RocksDB snapshot and visibility timestamp.
+Expired, deleted and filtered records contribute neither hits nor statistics.
+Only primary, secondary and context text contribute terms; metadata is not searched.
+
+The page contains `hits` (record plus raw BM25 `score`), `matched_records` before
+result truncation, `corpus_records` contributing to statistics, `scanned_records`
+including invisible/filtered rows, `scanned_bytes` of serialized source records,
+`next_after` and `exhaustive`. Scores are not probabilities. Ties use ascending UUID.
+
+A bounded scan is a UUID-ordered corpus page, not a search index. An unvisited
+record produces `next_after` and `exhaustive: false`; a continued request always
+reports false, even on its final page. A byte budget that cannot fit the first
+record returns a validation error instead of a cursor that makes no progress.
+Budgeted bytes exclude RocksDB indexes, keys, allocation overhead and the one
+lookahead record used to detect a remainder; this is not a process memory cap.
+
+**BM25 statistics are local to the filtered scanned corpus.** Scores from separate
+pages cannot be merged into a global BM25 ranking. Use a sufficiently large
+budget or a narrower scope/filter and require `exhaustive: true` for a complete
+ranking. A snapshot only lasts for its request. This implementation does not
+claim an inverted index or sublinear retrieval time.

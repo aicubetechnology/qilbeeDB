@@ -22,27 +22,56 @@ pub(crate) fn rank_episodes(
     query: &str,
     limit: usize,
 ) -> Vec<KeywordSearchResult> {
+    let mut episodes: std::collections::BTreeMap<_, _> = episodes
+        .into_iter()
+        .filter(Episode::is_valid)
+        .map(|episode| (episode.id.as_uuid(), episode))
+        .collect();
+    let ranks = rank_contents(
+        episodes.iter().map(|(id, episode)| (*id, &episode.content)),
+        query,
+        limit,
+    );
+    ranks
+        .into_iter()
+        .map(|(id, score)| KeywordSearchResult {
+            episode: episodes.remove(&id).expect("ranked episode exists"),
+            score,
+        })
+        .collect()
+}
+
+pub(crate) fn rank_contents<'a>(
+    documents: impl IntoIterator<Item = (uuid::Uuid, &'a crate::EpisodeContent)>,
+    query: &str,
+    limit: usize,
+) -> Vec<(uuid::Uuid, f64)> {
     let query: BTreeSet<String> = terms(query).into_iter().collect();
     if limit == 0 || query.is_empty() {
         return Vec::new();
     }
-    let documents: Vec<_> = episodes
+    let documents: Vec<_> = documents
         .into_iter()
-        .filter(Episode::is_valid)
-        .map(|episode| {
-            let text = format!(
-                "{} {} {}",
-                episode.content.primary,
-                episode.content.secondary.as_deref().unwrap_or(""),
-                episode.content.context.as_deref().unwrap_or("")
-            );
-            let tokens = terms(&text);
-            let length = tokens.len();
+        .map(|(id, content)| {
+            let mut length = 0;
             let mut frequencies = HashMap::<String, usize>::new();
-            for token in tokens {
-                *frequencies.entry(token).or_default() += 1;
+            for field in [
+                content.primary.as_str(),
+                content.secondary.as_deref().unwrap_or(""),
+                content.context.as_deref().unwrap_or(""),
+            ] {
+                for token in field
+                    .split(|c: char| !c.is_alphanumeric())
+                    .filter(|s| !s.is_empty())
+                {
+                    length += 1;
+                    let token = token.to_lowercase();
+                    if query.contains(&token) {
+                        *frequencies.entry(token).or_default() += 1;
+                    }
+                }
             }
-            (episode, length, frequencies)
+            (id, length, frequencies)
         })
         .collect();
     if documents.is_empty() {
@@ -69,7 +98,7 @@ pub(crate) fn rank_episodes(
         })
         .collect();
     let mut results = Vec::new();
-    for (episode, length, frequencies) in documents {
+    for (id, length, frequencies) in documents {
         let mut score = 0.0;
         for (term, idf) in &idfs {
             let tf = *frequencies.get(term).unwrap_or(&0) as f64;
@@ -77,14 +106,10 @@ pub(crate) fn rank_episodes(
             score += idf * tf * 2.2 / denominator;
         }
         if score > 0.0 {
-            results.push(KeywordSearchResult { episode, score });
+            results.push((id, score));
         }
     }
-    results.sort_by(|a, b| {
-        b.score
-            .total_cmp(&a.score)
-            .then_with(|| a.episode.id.as_uuid().cmp(&b.episode.id.as_uuid()))
-    });
+    results.sort_by(|a, b| b.1.total_cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
     results.truncate(limit);
     results
 }
