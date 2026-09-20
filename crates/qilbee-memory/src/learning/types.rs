@@ -13,6 +13,7 @@ pub struct LearningScope {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct LearningPolicy {
     /// One fixed sample size. No early acceptance or repeated significance tests.
     pub qualification_trials: u32,
@@ -168,7 +169,14 @@ impl ProcedureProposal {
         for reference in &self.source_refs {
             validate_text(reference, "source reference", 2048)?;
         }
-        let policy = &self.policy;
+        self.policy.validate()
+    }
+}
+
+impl LearningPolicy {
+    /// Validate one fixed-budget policy without registering a proposal.
+    pub fn validate(&self) -> Result<()> {
+        let policy = self;
         if !(2..=1_000_000).contains(&policy.qualification_trials)
             || policy.max_failure_streak == 0
             || policy.max_failure_streak > 1_000_000
