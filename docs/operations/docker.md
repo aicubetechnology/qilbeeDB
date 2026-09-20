@@ -77,13 +77,19 @@ QMN_DOCKER_NETWORK=qilbee-mycelial-network_qmn-network \
   docker compose -f compose.yaml -f compose.qmn.yaml up -d
 ```
 
-Clients on that network can use:
+Containers attached to that network can use this internal Docker DNS name
+(the host browser cannot resolve it):
 
 ```text
 http://qilbeedb-local:7474
 ```
 
-They still need QilbeeDB platform credentials and explicit resource grants.
+In the browser on the Docker host, use `http://localhost:7474/health` or
+`http://localhost:7474/openapi.json`. A `DNS_PROBE_FINISHED_NXDOMAIN` error for
+`qilbeedb-local` in the host browser means the internal container hostname was
+used outside its Docker network.
+
+Network clients still need QilbeeDB platform credentials and explicit resource grants.
 Attaching a network does not migrate QMN data, change QMN's decision authority,
 or configure its applications automatically. Other applications can use the same
 API. The standalone Compose file has no dependency on this external network.

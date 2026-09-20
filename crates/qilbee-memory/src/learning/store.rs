@@ -400,3 +400,5 @@ impl ProcedureRecord {
         Ok(())
     }
 }
+
+pub mod registry;
