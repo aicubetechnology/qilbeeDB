@@ -713,3 +713,5 @@ mod derivation;
 mod checkpoints;
 
 mod verified_changes;
+
+mod verified_checkpoints;

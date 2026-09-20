@@ -13,7 +13,7 @@ struct ChangesRequest {
     scope: ResourceScope,
     query: VerifiedMemoryChangesQuery,
 }
-fn version_two(value: u32) -> ApiResult<()> {
+pub(super) fn version_two(value: u32) -> ApiResult<()> {
     if value != 2 {
         return Err(ApiError::new(
             StatusCode::BAD_REQUEST,
