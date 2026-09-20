@@ -466,3 +466,49 @@ fn semantic_snapshot_keeps_records_indexes_and_embeddings_at_one_revision() {
     assert_eq!(new.hits[0].embedding.record_revision, 2);
     assert_eq!(new.hits[0].score, 0.0);
 }
+
+#[test]
+fn large_dimensions_are_durable_exact_isolated_and_not_silently_truncated() {
+    let dir = TempDir::new().unwrap();
+    let store = open(dir.path());
+    let source = create(&store, "scope", "large embedding");
+    for dimensions in [1536, 3072, 4096, 8192, 32768] {
+        let mut command = attach(
+            source.record_id,
+            &format!("large-{dimensions}"),
+            vec![0.0; dimensions],
+        );
+        command.space.dimensions = dimensions;
+        command.vector[dimensions - 1] = 1.0;
+        store
+            .apply_memory_embedding("scope", &actor(), &command)
+            .unwrap();
+    }
+    drop(store);
+    let store = open(dir.path());
+    for dimensions in [1536, 3072, 4096, 8192, 32768] {
+        let mut query = search();
+        query.space.dimensions = dimensions;
+        query.vector = vec![0.0; dimensions];
+        query.vector[dimensions - 1] = 1.0;
+        let page = store.search_memory_semantic("scope", &query).unwrap();
+        assert_eq!(page.hits.len(), 1);
+        assert_eq!(page.hits[0].score, 1.0);
+        assert_eq!(page.hits[0].embedding.space.dimensions, dimensions);
+        assert!(page.exhaustive);
+        assert!(
+            store
+                .search_memory_semantic("foreign", &query)
+                .unwrap()
+                .hits
+                .is_empty()
+        );
+        query.vector.pop();
+        assert!(store.search_memory_semantic("scope", &query).is_err());
+    }
+    let mut invalid = space();
+    invalid.dimensions = 32769;
+    assert!(invalid.validate().is_err());
+    invalid.dimensions = 0;
+    assert!(invalid.validate().is_err());
+}

@@ -18,6 +18,7 @@ use uuid::Uuid;
 
 mod learning;
 mod memory;
+mod retrieval_limits;
 mod tools;
 
 #[derive(Clone)]
@@ -25,6 +26,7 @@ pub(crate) struct PlatformState {
     identity: Arc<IdentityStore>,
     memory: Arc<qilbee_memory::RocksDbMemoryStorage>,
     learning: Arc<qilbee_memory::learning::LearningMemory>,
+    retrieval_limits: retrieval_limits::RetrievalLimits,
 }
 
 impl PlatformState {
@@ -49,6 +51,7 @@ impl PlatformState {
 /// The default router exposes only platform contracts. Legacy APIs require an
 /// explicit, separate router and never supply credentials for this authority.
 pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
+    let retrieval_limits = retrieval_limits::RetrievalLimits::from_env()?;
     let memory_path = database.storage().path().join("agent-memory");
     let memory_path = memory_path
         .to_str()
@@ -62,6 +65,7 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
         },
     )?);
     let state = PlatformState {
+        retrieval_limits,
         learning: Arc::new(qilbee_memory::learning::LearningMemory::open(
             database.storage().path().join("procedural-learning"),
         )?),

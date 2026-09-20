@@ -133,8 +133,10 @@ def select_profile(fixture, rows, grid, aliases=None):
     }
 
 
-def collect(client, fixture, scope, state_path, cache_path):
+def collect(client, fixture, scope, state_path, cache_path, scan_bytes_limit=67108864):
     validate_fixture(fixture)
+    if type(scan_bytes_limit) is not int or not 1 <= scan_bytes_limit <= 268435456:
+        raise ValueError("Invalid scan byte budget")
     with state_lock(state_path):
         state, tag = prepare(client, fixture, scope, state_path)
         verify_sources(client, fixture, state, tag)
@@ -148,6 +150,8 @@ def collect(client, fixture, scope, state_path, cache_path):
             "split": "development",
             "candidate_limit": 100,
         }
+        if scan_bytes_limit != 67108864:
+            expected["scan_bytes_limit"] = scan_bytes_limit
         cache = (
             json.loads(Path(cache_path).read_text())
             if Path(cache_path).exists()
@@ -166,7 +170,9 @@ def collect(client, fixture, scope, state_path, cache_path):
                 continue
             row = {"query_id": query["id"], "counts": {}}
             for mode in ["lexical", "semantic"]:
-                path, body = query_request(mode, query, fixture, scope, tag)
+                path, body = query_request(
+                    mode, query, fixture, scope, tag, scan_bytes_limit=scan_bytes_limit
+                )
                 body["query"]["limit"] = 100
                 result, _, _ = client.call("POST", path, body)
                 page = result["page"]
@@ -230,6 +236,7 @@ def main():
     ]:
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--base-url", default="http://127.0.0.1:7474")
+    parser.add_argument("--scan-bytes-limit", type=int, default=67108864)
     args = parser.parse_args()
     fixture = json.loads(args.fixture.read_text())
     grid = json.loads(args.grid.read_text())
@@ -238,7 +245,12 @@ def main():
         args.base_url, json.loads(args.credential_file.read_text())["secret"]
     )
     cache, aliases = collect(
-        client, fixture, json.loads(args.scope_file.read_text()), args.state, args.cache
+        client,
+        fixture,
+        json.loads(args.scope_file.read_text()),
+        args.state,
+        args.cache,
+        args.scan_bytes_limit,
     )
     report = select_profile(fixture, cache["rows"], grid, aliases)
     report.update(

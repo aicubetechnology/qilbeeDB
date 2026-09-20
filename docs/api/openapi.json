@@ -4115,7 +4115,7 @@
       "post": {
         "operationId": "attachMemoryEmbedding",
         "summary": "Attach a model-bound vector to an exact memory revision",
-        "description": "Requires memory_write and exact scope. Embedding plus original receipt commits atomically. Source changes invalidate eligibility. Vectors are generated externally; anonymous legacy embeddings are not assigned a model.",
+        "description": "Requires memory_write and exact scope. Embedding plus original receipt commits atomically. Source changes invalidate eligibility. Vectors are generated externally; anonymous legacy embeddings are not assigned a model. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4281,7 +4281,7 @@
       "post": {
         "operationId": "searchMemorySemantic",
         "summary": "Rank memory by cosine similarity",
-        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client. Reads a single request-local storage snapshot without holding the memory writer lock. Score remains cosine, preserving the 0.4.0 contract.",
+        "description": "Requires memory_read and exact scope. Exact cosine ranking of a bounded scan page. Check exhaustive and next_after before interpreting results as global top-k; only the exact model space and current visible source revisions qualify. Query embeddings are supplied by the client. Reads a single request-local storage snapshot without holding the memory writer lock. Score remains cosine, preserving the 0.4.0 contract. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4436,6 +4436,16 @@
                 }
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4609,6 +4619,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -4646,7 +4666,7 @@
       "post": {
         "operationId": "searchMemoryHybrid",
         "summary": "Rank memory with experimental versioned hybrid fusion",
-        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed.",
+        "description": "Requires memory_read and an exact scope grant. One authorized snapshot provides current records and statistics. Check exhaustive before interpreting a corpus page as complete; separate BM25 page scores cannot be merged into a global ranking. Text and externally generated query vector are explicit. Pin weighted_rrf_v1; weights, method and candidate cap are server-owned. Inspect embedding_coverage and candidates_truncated. Raw channel scores, ranks, contributions and vector receipts explain each hit. Storage errors fail the entire request; missing vectors are reported, never silently labeled full hybrid coverage. Experimental: no held-out relevance gain is claimed. Vector requests have a 2 MiB JSON body cap and support up to 32768 dimensions, subject to the configured operator ceiling.",
         "tags": [
           "Memory"
         ],
@@ -4787,6 +4807,16 @@
                 }
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7869,7 +7899,8 @@
           "dimensions": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 4096
+            "maximum": 32768,
+            "description": "Exact external vector dimensionality. The operator may configure a lower ceiling; discover execution_limits in the ranking catalog."
           }
         },
         "required": [
@@ -7916,7 +7947,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           }
         },
@@ -8011,7 +8042,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           },
           "limit": {
@@ -8232,9 +8263,9 @@
           "scan_bytes_limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 67108864,
+            "maximum": 268435456,
             "default": 8388608,
-            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap. The operator ceiling defaults to 67108864 and may be configured up to 268435456; discover the active ceiling in the ranking catalog. Request default remains 8388608."
           }
         },
         "required": [
@@ -8297,9 +8328,9 @@
           "scan_bytes_limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 67108864,
+            "maximum": 268435456,
             "default": 8388608,
-            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap."
+            "description": "Serialized source bytes, plus selected-space bindings for hybrid. Excludes indexes, allocator overhead and lookahead; not a process memory cap. The operator ceiling defaults to 67108864 and may be configured up to 268435456; discover the active ceiling in the ranking catalog. Request default remains 8388608."
           },
           "space": {
             "$ref": "#/components/schemas/EmbeddingSpace"
@@ -8312,7 +8343,7 @@
               "maximum": 3.4028234663852886e+38
             },
             "minItems": 1,
-            "maxItems": 4096,
+            "maxItems": 32768,
             "description": "Finite float32 values, exact declared dimensionality, nonzero norm."
           },
           "min_score": {
@@ -8804,14 +8835,59 @@
             },
             "minItems": 1,
             "uniqueItems": true
+          },
+          "execution_limits": {
+            "$ref": "#/components/schemas/RetrievalExecutionLimits"
           }
         },
         "required": [
           "contract_version",
           "component_versions",
-          "hybrid_profiles"
+          "hybrid_profiles",
+          "execution_limits"
         ],
         "additionalProperties": false
+      },
+      "RetrievalExecutionLimits": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scope",
+          "max_embedding_dimensions",
+          "max_scan_bytes",
+          "default_scan_bytes",
+          "max_concurrent_retrievals",
+          "vector_request_body_bytes"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "const": "server_instance"
+          },
+          "max_embedding_dimensions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32768
+          },
+          "max_scan_bytes": {
+            "type": "integer",
+            "minimum": 8388608,
+            "maximum": 268435456
+          },
+          "default_scan_bytes": {
+            "type": "integer",
+            "const": 8388608
+          },
+          "max_concurrent_retrievals": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "vector_request_body_bytes": {
+            "type": "integer",
+            "const": 2097152
+          }
+        }
       }
     }
   }

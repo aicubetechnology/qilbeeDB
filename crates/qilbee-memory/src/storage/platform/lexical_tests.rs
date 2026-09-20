@@ -154,3 +154,15 @@ fn lexical_scan_limits_disclose_local_statistics_and_validate_inputs() {
     q.scan_limit = 10001;
     assert!(db.search_memory_lexical("scope", &q).is_err());
 }
+
+#[test]
+fn lexical_accepts_operator_sized_budget_without_changing_default_or_unbounding_scan() {
+    let mut query = query("memory");
+    query.scan_bytes_limit = 134_217_728;
+    assert!(query.validate().is_ok());
+    query.scan_bytes_limit = 268_435_456;
+    assert!(query.validate().is_ok());
+    query.scan_bytes_limit += 1;
+    assert!(query.validate().is_err());
+    assert_eq!(super::lexical::default_scan_bytes_limit(), 8_388_608);
+}

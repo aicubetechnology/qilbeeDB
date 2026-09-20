@@ -13,6 +13,9 @@ services:
       - qilbeedb-data:/data
     environment:
       RUST_LOG: ${RUST_LOG:-info}
+      QILBEE_MAX_EMBEDDING_DIMENSIONS: ${QILBEE_MAX_EMBEDDING_DIMENSIONS:-32768}
+      QILBEE_MAX_RETRIEVAL_SCAN_BYTES: ${QILBEE_MAX_RETRIEVAL_SCAN_BYTES:-67108864}
+      QILBEE_MAX_CONCURRENT_RETRIEVALS: ${QILBEE_MAX_CONCURRENT_RETRIEVALS:-2}
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m

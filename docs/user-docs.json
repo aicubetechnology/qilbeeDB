@@ -105,6 +105,13 @@
       "title": "SciFact retrieval evaluation",
       "description": "Compare scoped retrieval with external relevance judgments and development-only ranking selection.",
       "order": 130
+    },
+    {
+      "source": "docs/operations/retrieval-capacity.md",
+      "file": "retrieval-capacity.md",
+      "title": "Retrieval capacity and large vectors",
+      "description": "Configure dimensionality, scan budgets and concurrent retrieval admission with observable coverage.",
+      "order": 135
     }
   ]
 }

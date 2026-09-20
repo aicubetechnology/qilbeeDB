@@ -9,10 +9,25 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/memory/commands", post(command))
         .route("/api/v1/memory/records/:id", get(read))
         .route("/api/v1/memory/query", post(query))
-        .route("/api/v1/memory/embeddings", post(embedding))
-        .route("/api/v1/memory/search", post(semantic_search))
+        .route(
+            "/api/v1/memory/embeddings",
+            post(embedding).layer(DefaultBodyLimit::max(
+                super::retrieval_limits::VECTOR_BODY_BYTES,
+            )),
+        )
+        .route(
+            "/api/v1/memory/search",
+            post(semantic_search).layer(DefaultBodyLimit::max(
+                super::retrieval_limits::VECTOR_BODY_BYTES,
+            )),
+        )
         .route("/api/v1/memory/search/lexical", post(lexical_search))
-        .route("/api/v1/memory/search/hybrid", post(hybrid_search))
+        .route(
+            "/api/v1/memory/search/hybrid",
+            post(hybrid_search).layer(DefaultBodyLimit::max(
+                super::retrieval_limits::VECTOR_BODY_BYTES,
+            )),
+        )
         .route("/api/v1/memory/ranking-profiles", get(ranking_profiles))
 }
 
@@ -20,8 +35,9 @@ async fn ranking_profiles(
     State(state): State<PlatformState>,
     headers: HeaderMap,
 ) -> ApiResult<Json<Value>> {
+    let limits = state.retrieval_limits.clone();
     state
-        .run(headers, |_, _, principal| {
+        .run(headers, move |_, _, principal| {
             if !principal
                 .spec
                 .capabilities
@@ -40,7 +56,8 @@ async fn ranking_profiles(
             Ok(Json(json!({
                 "contract_version": 1,
                 "component_versions": {"lexical": "bm25_v1", "semantic": "cosine_exact_v1"},
-                "hybrid_profiles": profiles
+                "hybrid_profiles": profiles,
+                "execution_limits": limits.metadata()
             })))
         })
         .await
@@ -196,6 +213,7 @@ async fn embedding(
     body: Result<Json<EmbeddingRequest>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let memory = state.memory.clone();
+    let limits = state.retrieval_limits.clone();
     state
         .run(headers, move |identity, token, _| {
             let request = json_body(body)?;
@@ -203,6 +221,7 @@ async fn embedding(
             let scope = identity
                 .authorize(token, Capability::MemoryWrite, &request.scope)
                 .map_err(ApiError::operation)?;
+            limits.dimensions(request.space.dimensions)?;
             let command = qilbee_memory::storage::platform::EmbeddingCommand {
                 contract_version: request.contract_version,
                 idempotency_key: request.idempotency_key,
@@ -228,6 +247,7 @@ async fn semantic_search(
     body: Result<Json<SemanticRequest>, JsonRejection>,
 ) -> ApiResult<Response> {
     let memory = state.memory.clone();
+    let limits = state.retrieval_limits.clone();
     state
         .run(headers, move |identity, token, _| {
             let request = json_body(body)?;
@@ -235,6 +255,8 @@ async fn semantic_search(
             let scope = identity
                 .authorize(token, Capability::MemoryRead, &request.scope)
                 .map_err(ApiError::operation)?;
+            limits.dimensions(request.query.space.dimensions)?;
+            let _permit = limits.acquire()?;
             let retrieval_started = std::time::Instant::now();
             let page = memory
                 .search_memory_semantic(&scope.storage_namespace, &request.query)
@@ -284,6 +306,7 @@ async fn lexical_search(
     >,
 ) -> ApiResult<Json<Value>> {
     let memory = state.memory.clone();
+    let limits = state.retrieval_limits.clone();
     state.run(headers, move |identity, token, _| {
         let request = json_body(body)?;
         version(request.contract_version)?;
@@ -291,6 +314,8 @@ async fn lexical_search(
             return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
         }
         let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        limits.scan_bytes(request.query.scan_bytes_limit)?;
+        let _permit = limits.acquire()?;
         let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_lexical(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
@@ -304,6 +329,7 @@ async fn hybrid_search(
     body: Result<Json<RankedRequest<qilbee_memory::storage::platform::HybridQuery>>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let memory = state.memory.clone();
+    let limits = state.retrieval_limits.clone();
     state.run(headers, move |identity, token, _| {
         let request = json_body(body)?;
         version(request.contract_version)?;
@@ -311,6 +337,9 @@ async fn hybrid_search(
             return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
         }
         let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        limits.scan_bytes(request.query.scan_bytes_limit)?;
+        limits.dimensions(request.query.space.dimensions)?;
+        let _permit = limits.acquire()?;
         let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_hybrid(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;

@@ -61,3 +61,9 @@ not by itself prove host power-loss or storage-hardware guarantees.
 See the [operator Docker reference](../operations/docker.md) for image details
 and optional network configuration. Network-facing deployments need appropriate
 TLS termination and operator-managed credentials.
+
+## Retrieval capacity
+
+See [configure retrieval capacity](../operations/retrieval-capacity.md) for support
+through 32,768 dimensions, including 3,072, explicit scan-byte budgets and bounded
+concurrent retrieval. The ranking catalog reports the active operator settings.

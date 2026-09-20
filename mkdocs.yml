@@ -155,6 +155,7 @@ nav:
   - Operations:
     - Deployment: operations/deployment.md
     - Docker: operations/docker.md
+    - Retrieval capacity: operations/retrieval-capacity.md
     - Monitoring: operations/monitoring.md
     - Backup & Recovery: operations/backup.md
     - Performance Tuning: operations/performance.md
