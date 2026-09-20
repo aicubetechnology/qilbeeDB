@@ -78,6 +78,7 @@ nav:
     - Overview: user/index.md
     - Memory Quickstart: user/quickstart.md
     - Local Docker: user/deployment.md
+    - Retrieval Evaluation: research/retrieval-evaluation.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quickstart.md

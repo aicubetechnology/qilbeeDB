@@ -89,3 +89,11 @@ unknown fields return 400. Missing, revoked or expired credentials return 401;
 missing capability or scope returns 403; oversized JSON bodies return 413;
 encountered storage inconsistency returns 500. Use the shared
 [error envelope](platform-http.md). JSON requests have a 65536-byte body limit.
+
+## Measure retrieval time
+
+The response includes `timing.retrieval_micros`, the server wall time spent in
+the retrieval method. It excludes authentication, blocking-pool queueing, JSON
+serialization, transport and external embedding generation. Measure the client
+round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
+for frozen corpora, graded relevance, category regressions and timing limits.

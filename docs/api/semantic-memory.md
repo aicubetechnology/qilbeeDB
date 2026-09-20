@@ -145,3 +145,11 @@ revocation retain the existing live authorization behavior.
 `EmbeddingReceipt`, `SemanticQuery`, `SemanticHit`, `SemanticPage` and their
 response envelopes. Use [`/docs`](http://localhost:7474/docs) from a browser on
 the Docker host to inspect the complete contract.
+
+## Measure retrieval time
+
+The response includes `timing.retrieval_micros`, the server wall time spent in
+the retrieval method. It excludes authentication, blocking-pool queueing, JSON
+serialization, transport and external embedding generation. Measure the client
+round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
+for frozen corpora, graded relevance, category regressions and timing limits.

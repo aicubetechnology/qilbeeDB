@@ -26,6 +26,10 @@ probabilities and disclose bounded scan coverage. The hybrid endpoint uses an
 immutable server-owned profile; it does not change the cosine score returned by
 the semantic endpoint.
 
+[Evaluate retrieval](../research/retrieval-evaluation.md) on frozen, judged queries
+before adopting a ranking version. Report retrieval quality separately from
+end-to-end agent task outcomes.
+
 ## Build learning workflows
 
 [Procedural learning](../api/procedural-learning.md) records proposals, evaluation

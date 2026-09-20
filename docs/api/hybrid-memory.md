@@ -189,3 +189,11 @@ The UUID cursor traverses source records, not ranked hits or a durable snapshot.
 Its exclusive lower bound prevents returning the same source UUID again on a
 forward continuation, but inserts or updates across requests can change coverage.
 It cannot reproduce a multi-page global ranking under concurrent mutation.
+
+## Measure retrieval time
+
+The response includes `timing.retrieval_micros`, the server wall time spent in
+the retrieval method. It excludes authentication, blocking-pool queueing, JSON
+serialization, transport and external embedding generation. Measure the client
+round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
+for frozen corpora, graded relevance, category regressions and timing limits.

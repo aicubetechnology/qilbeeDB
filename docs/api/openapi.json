@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents."
   },
   "servers": [
@@ -8079,6 +8079,9 @@
           "ranking_version": {
             "type": "string",
             "const": "cosine_exact_v1"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/RetrievalTiming"
           }
         },
         "required": [
@@ -8086,7 +8089,8 @@
           "scope",
           "page",
           "mode",
-          "ranking_version"
+          "ranking_version",
+          "timing"
         ],
         "additionalProperties": false
       },
@@ -8594,6 +8598,9 @@
           },
           "page": {
             "$ref": "#/components/schemas/LexicalPage"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/RetrievalTiming"
           }
         },
         "required": [
@@ -8601,7 +8608,8 @@
           "scope",
           "mode",
           "ranking_version",
-          "page"
+          "page",
+          "timing"
         ],
         "additionalProperties": false
       },
@@ -8651,6 +8659,9 @@
           },
           "page": {
             "$ref": "#/components/schemas/HybridPage"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/RetrievalTiming"
           }
         },
         "required": [
@@ -8658,7 +8669,22 @@
           "scope",
           "mode",
           "ranking_version",
-          "page"
+          "page",
+          "timing"
+        ],
+        "additionalProperties": false
+      },
+      "RetrievalTiming": {
+        "type": "object",
+        "properties": {
+          "retrieval_micros": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Server retrieval wall time in microseconds. Excludes authentication, blocking-pool queueing, JSON serialization, transport and external embedding generation."
+          }
+        },
+        "required": [
+          "retrieval_micros"
         ],
         "additionalProperties": false
       }

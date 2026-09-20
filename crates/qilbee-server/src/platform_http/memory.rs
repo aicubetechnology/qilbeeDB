@@ -204,11 +204,13 @@ async fn semantic_search(
             let scope = identity
                 .authorize(token, Capability::MemoryRead, &request.scope)
                 .map_err(ApiError::operation)?;
+            let retrieval_started = std::time::Instant::now();
             let page = memory
                 .search_memory_semantic(&scope.storage_namespace, &request.query)
                 .map_err(ApiError::operation)?;
+            let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
             Ok(Json(
-                json!({"contract_version":1,"scope":request.scope,"mode":"semantic","ranking_version":"cosine_exact_v1","page":page}),
+                json!({"contract_version":1,"scope":request.scope,"mode":"semantic","ranking_version":"cosine_exact_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}}),
             ))
         })
         .await
@@ -245,8 +247,10 @@ async fn lexical_search(
             return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
         }
         let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_lexical(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
-        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"lexical","ranking_version":"bm25_v1","page":page})))
+        let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
+        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"lexical","ranking_version":"bm25_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}})))
     }).await
 }
 
@@ -263,7 +267,9 @@ async fn hybrid_search(
             return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Search mode does not match the endpoint"));
         }
         let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+        let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_hybrid(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
-        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":"weighted_rrf_v1","page":page})))
+        let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
+        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":"weighted_rrf_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}})))
     }).await
 }
