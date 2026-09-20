@@ -486,3 +486,137 @@ async fn experience_history_http_checks_authority_on_each_continuation() {
         StatusCode::UNAUTHORIZED
     );
 }
+
+#[tokio::test]
+async fn experience_artifact_http_requires_both_capabilities_and_bound_reporter() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    configure(&router, &admin.secret).await;
+    let client = issue(
+        &identity,
+        &admin.secret,
+        "observer",
+        &[
+            "experience_write",
+            "experience_read",
+            "experience_report",
+            "tool_develop",
+            "tool_read",
+        ],
+    );
+    let receipt = request(
+        &router,
+        "POST",
+        "/api/v1/experiences",
+        &client.secret,
+        create_body(),
+    )
+    .await
+    .1;
+    let report = report_body(receipt["receipt"]["context_digest"].as_str().unwrap());
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/events",
+            &client.secret,
+            report
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    let artifact_body = json!({"contract_version":1,"scope":scope(),"artifact":{"id":"tool","source":"pass","dependency_lock":"","runtime_image_digest":format!("sha256:{}","a".repeat(64)),"entrypoint":"run","input_schema":true,"output_schema":true,"source_refs":["fixture"],"parent_artifact_id":null,"repair_evidence_ref":null}});
+    let artifact = request(
+        &router,
+        "POST",
+        "/api/v1/tools/artifacts",
+        &client.secret,
+        artifact_body,
+    )
+    .await
+    .1;
+    let mut bind = read_body();
+    bind["binding"] = json!({"id":"binding","event_id":"observation-v1","artifact_id":"tool","artifact_digest":artifact["artifact"]["artifact_digest"],"role":"candidate"});
+    let bound = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/artifacts",
+        &client.secret,
+        bind.clone(),
+    )
+    .await;
+    assert_eq!(bound.0, StatusCode::OK, "{}", bound.1);
+    let mut read = read_body();
+    read["binding_id"] = "binding".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/artifacts/read",
+            &client.secret,
+            read.clone()
+        )
+        .await,
+        bound
+    );
+    for (subject, caps) in [
+        ("observer", vec!["experience_report", "experience_read"]),
+        ("observer", vec!["tool_read"]),
+        ("other", vec!["experience_report", "tool_read"]),
+    ] {
+        let denied = issue(&identity, &admin.secret, subject, &caps);
+        assert_eq!(
+            request(
+                &router,
+                "POST",
+                "/api/v1/experiences/artifacts",
+                &denied.secret,
+                bind.clone()
+            )
+            .await
+            .0,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            request(
+                &router,
+                "POST",
+                "/api/v1/experiences/artifacts/read",
+                &denied.secret,
+                read.clone()
+            )
+            .await
+            .0,
+            StatusCode::FORBIDDEN
+        );
+    }
+    read["scope"]["visibility"] = "private".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/artifacts/read",
+            &client.secret,
+            read
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    bind["binding"]["id"] = "forged".into();
+    bind["binding"]["artifact_digest"] = "f".repeat(64).into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/artifacts",
+            &client.secret,
+            bind
+        )
+        .await
+        .0,
+        StatusCode::CONFLICT
+    );
+}

@@ -436,3 +436,5 @@ pub mod development;
 pub mod experience;
 
 pub mod experience_history;
+
+pub mod experience_artifacts;

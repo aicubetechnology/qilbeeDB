@@ -268,3 +268,49 @@ The service retains no pagination session, so continuation survives restart.
 An absent attempt returns 404. A cursor for a different receipt returns 409;
 invalid bounds or missing continuation/fence events return 400. This endpoint
 also works for attempts written before history pagination was introduced.
+
+## Bind a stored tool artifact to an observation
+
+When an external worker has used or produced a tool, it can attach a verified
+**stored artifact identity** to an exact observation. Register the immutable
+[tool artifact](learned-tools.md) first. Then call
+`POST /api/v1/experiences/artifacts` with `experience_report` and `tool_read` in
+the same scope, using the attempt's bound reporter subject:
+
+```json
+{
+  "contract_version": 1,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "attempt_id": "attempt-v1",
+  "binding": {
+    "id": "binding-v1",
+    "event_id": "observation-v1",
+    "artifact_id": "tool-v1",
+    "artifact_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "role": "candidate"
+  }
+}
+```
+
+Replace the example digest with `artifact_digest` returned by artifact registration.
+The database verifies the stored source, dependency lock and complete artifact
+proposal digests, and rejects a mismatched submitted digest with 409. The artifact
+and observation must already exist in the exact authorized namespace; absence
+returns 404. The roles `baseline`, `candidate` and `output` describe the reporter's
+assertion. They do not prove execution, fitness, independent evaluation or use by
+a particular model.
+
+The returned `binding` includes the immutable request, attempt ID, original
+`receipt_digest`, exact `event_digest`, verified `source_digest` and
+`dependency_digest`, authenticated actor, server time and opaque `binding_digest`.
+It contains no source code. Binding does not revise the attempt, change its
+outcome or qualify a procedure. Late bindings are allowed and do not establish
+that the artifact existed when an external execution occurred.
+
+A binding ID is immutable within an attempt. An identical request from the same
+reporter subject returns the original binding, including after credential
+rotation or restart. Conflicting reuse returns 409. All writes synchronize the
+WAL. Read it with `POST /api/v1/experiences/artifacts/read` using the usual
+`contract_version`, `scope`, `attempt_id` and `binding_id`. Reading requires both
+`experience_read` and `tool_read`; every read revalidates the artifact and event.
+Multiple bindings to one artifact do not constitute independent evidence.

@@ -555,3 +555,158 @@ fn experience_history_rejects_foreign_cursors_and_invalid_bounds() {
     assert!(empty.complete && empty.events.is_empty());
     assert_eq!(empty.through_revision, 1);
 }
+
+fn artifact(db: &LearningMemory) -> ToolArtifact {
+    db.register_tool_artifact(
+        "tenant",
+        "scope",
+        serde_json::from_value(json!({
+            "id":"tool-v1","source":"def run(): return 1","dependency_lock":"",
+            "runtime_image_digest":format!("sha256:{}", "c".repeat(64)),"entrypoint":"run",
+            "input_schema":true,"output_schema":true,"source_refs":["fixture:request"],
+            "parent_artifact_id":null,"repair_evidence_ref":null
+        }))
+        .unwrap(),
+        ToolActor {
+            subject_id: "developer".into(),
+            credential_id: "key".into(),
+        },
+    )
+    .unwrap()
+}
+fn binding_request(artifact: &ToolArtifact) -> ExperienceArtifactRequest {
+    ExperienceArtifactRequest {
+        id: "binding".into(),
+        event_id: "event".into(),
+        artifact_id: artifact.proposal.id.clone(),
+        artifact_digest: artifact.artifact_digest.clone(),
+        role: ExperienceArtifactRole::Candidate,
+    }
+}
+#[test]
+fn experience_artifact_bindings_verify_bytes_and_survive_rotation_and_restart() {
+    let (dir, db) = setup();
+    let receipt = create(&db);
+    let artifact = artifact(&db);
+    let event = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("event", 1, &receipt.context_digest, "failed"),
+            actor("observer"),
+        )
+        .unwrap();
+    let binding = db
+        .bind_experience_artifact(
+            "tenant",
+            "scope",
+            "attempt",
+            binding_request(&artifact),
+            actor("observer"),
+        )
+        .unwrap();
+    assert_eq!(binding.source_digest, artifact.source_digest);
+    assert_eq!(binding.event_digest, event.event_digest);
+    assert_eq!(binding.receipt_digest, receipt.receipt_digest);
+    // The link does not update the observation, execution result or qualification state.
+    assert_eq!(
+        db.experience("tenant", "scope", "attempt")
+            .unwrap()
+            .unwrap(),
+        event.record
+    );
+    drop(db);
+    let db = LearningMemory::open(dir.path()).unwrap();
+    let mut rotated = actor("observer");
+    rotated.credential_id = "rotated".into();
+    assert_eq!(
+        db.bind_experience_artifact(
+            "tenant",
+            "scope",
+            "attempt",
+            binding_request(&artifact),
+            rotated
+        )
+        .unwrap(),
+        binding
+    );
+    assert_eq!(
+        db.experience_artifact_binding("tenant", "scope", "attempt", "binding")
+            .unwrap(),
+        Some(binding)
+    );
+}
+#[test]
+fn experience_artifact_bindings_reject_forged_content_authority_and_conflicts() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let artifact = artifact(&db);
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("event", 1, &receipt.context_digest, "unknown"),
+        actor("observer"),
+    )
+    .unwrap();
+    let mut wrong = binding_request(&artifact);
+    wrong.artifact_digest = "f".repeat(64);
+    assert!(matches!(
+        db.bind_experience_artifact("tenant", "scope", "attempt", wrong, actor("observer")),
+        Err(Error::ConstraintViolation(_))
+    ));
+    assert!(
+        db.experience_artifact_binding("tenant", "scope", "attempt", "binding")
+            .unwrap()
+            .is_none()
+    );
+    assert!(matches!(
+        db.bind_experience_artifact(
+            "tenant",
+            "scope",
+            "attempt",
+            binding_request(&artifact),
+            actor("writer")
+        ),
+        Err(Error::Unauthorized(_))
+    ));
+    db.bind_experience_artifact(
+        "tenant",
+        "scope",
+        "attempt",
+        binding_request(&artifact),
+        actor("observer"),
+    )
+    .unwrap();
+    let mut changed = binding_request(&artifact);
+    changed.role = ExperienceArtifactRole::Output;
+    assert!(matches!(
+        db.bind_experience_artifact("tenant", "scope", "attempt", changed, actor("observer")),
+        Err(Error::ConstraintViolation(_))
+    ));
+    for (tenant, scope) in [("other", "scope"), ("tenant", "other")] {
+        assert!(
+            db.experience_artifact_binding(tenant, scope, "attempt", "binding")
+                .unwrap()
+                .is_none()
+        );
+        assert!(
+            db.bind_experience_artifact(
+                tenant,
+                scope,
+                "attempt",
+                binding_request(&artifact),
+                actor("observer")
+            )
+            .is_err()
+        );
+    }
+    let mut missing = binding_request(&artifact);
+    missing.id = "other".into();
+    missing.artifact_id = "absent".into();
+    assert!(
+        db.bind_experience_artifact("tenant", "scope", "attempt", missing, actor("observer"))
+            .is_err()
+    );
+}

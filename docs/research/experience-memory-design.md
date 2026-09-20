@@ -45,7 +45,8 @@ These are foundations, not an implemented reasoning-memory loop.
 The [experience receipt API](../api/experiences.md) implements scoped attempts,
 immutable context and parent-event bindings, authenticated observations and
 consumption accounting. It records evidence declarations without independently
-verifying external effects or resolving artifact bytes. Remaining objects below
+verifying external effects. Explicit artifact bindings now verify locally stored
+tool bytes and pin exact observation identities. Remaining objects below
 are design proposals, not current endpoints or accepted request fields. Each
 extension needs its own validated feature PR.
 
@@ -99,8 +100,8 @@ and fresh online execution. Learning across agents needs a comparison with
 isolated agents and equal total compute. Retrieval nDCG cannot substitute for
 any of these outcomes.
 
-Experience receipts now provide the first bounded implementation. The next steps
-are verified artifact/source bindings and candidate strategy derivation. Replay
+Experience receipts now provide the first bounded implementation. Stored tool artifact bindings are also implemented. The next steps
+are revisioned memory-source bindings and candidate strategy derivation. Replay
 and shared release depend on those contracts. Automatic selection can operate within an authorized
 policy after qualification; unmeasured candidates remain candidates, and the
 baseline remains available when evidence is rejected or incomplete.
