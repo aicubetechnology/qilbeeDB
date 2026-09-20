@@ -271,3 +271,10 @@ identity and scope and discloses partial scan coverage.
 Rejected revisions are unavailable to ordinary reads, queries and retrieval.
 Content updates clear the current review; historical decisions remain durable.
 Every decision advances the revision and requires new revision-bound embeddings.
+
+## Derived content
+
+The `derive` operation requires both read and write capabilities and creates a
+record bound to exact source revisions. [Derived memories](derived-memory.md)
+validate source eligibility before retrieval and cannot be edited with ordinary
+updates. Query pages include additional dependency-work counters.

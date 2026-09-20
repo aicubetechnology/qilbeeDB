@@ -106,3 +106,10 @@ profile and from tenant authorization. A byte budget above the configured ceilin
 returns 400 (`retrieval_scan_limit`); exhausted retrieval slots return 503
 (`retrieval_busy`). Use bounded backoff and inspect coverage on each successful
 response. See [configure retrieval capacity](../operations/retrieval-capacity.md).
+
+## Source-dependent eligibility
+
+[Derived memories](derived-memory.md) validate their declared sources in the
+request snapshot before candidate eligibility and corpus statistics. Pages report
+additional source reads in `dependency_work`; these are separate from candidate
+scan budgets. Exceeding the documented dependency limits fails the request.

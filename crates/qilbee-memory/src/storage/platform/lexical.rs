@@ -58,6 +58,8 @@ pub struct LexicalPage {
     pub hits: Vec<LexicalHit>,
     pub next_after: Option<Uuid>,
     pub scanned_records: usize,
+    #[serde(default)]
+    pub dependency_work: DependencyWork,
     pub scanned_bytes: usize,
     pub corpus_records: usize,
     pub matched_records: usize,
@@ -131,6 +133,7 @@ impl MemorySnapshot<'_> {
             hits: vec![],
             next_after: None,
             scanned_records: 0,
+            dependency_work: DependencyWork::default(),
             scanned_bytes: 0,
             corpus_records: 0,
             matched_records: 0,
@@ -164,7 +167,7 @@ impl MemorySnapshot<'_> {
                 break;
             }
             let record = self.record(namespace, id)?.ok_or_else(inconsistent)?;
-            let eligible = visible(&record, self.now)
+            let eligible = self.eligible(namespace, &record)?
                 && record.payload.as_ref().is_some_and(|payload| {
                     query
                         .episode_type
@@ -211,6 +214,7 @@ impl MemorySnapshot<'_> {
             records.push(record);
         }
         page.corpus_records = records.len();
+        page.dependency_work = self.dependency_work();
         Ok(ScannedCorpus {
             records,
             embeddings,

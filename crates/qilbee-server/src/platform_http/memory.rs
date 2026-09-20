@@ -101,6 +101,9 @@ async fn command(
             let scope = identity
                 .authorize(token, Capability::MemoryWrite, &request.scope)
                 .map_err(ApiError::operation)?;
+            if matches!(&request.operation, MemoryOperation::Derive { .. }) {
+                identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+            }
             let receipt = memory
                 .apply_memory_command(
                     &scope.storage_namespace,

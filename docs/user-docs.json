@@ -154,6 +154,13 @@
       "title": "Memory review and correction",
       "description": "Record authorized decisions, suppress rejected revisions and preserve review evidence.",
       "order": 56
+    },
+    {
+      "source": "docs/api/derived-memory.md",
+      "file": "derived-memory.md",
+      "title": "Derived memories and source revisions",
+      "description": "Bind generated knowledge to exact source revisions and validate dependencies before retrieval.",
+      "order": 57
     }
   ]
 }
