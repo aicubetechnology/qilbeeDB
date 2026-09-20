@@ -4,6 +4,7 @@ use crate::embeddings::{
     create_provider, similarity, EmbeddingConfig, EmbeddingProvider, SimilarityMetric,
 };
 use crate::episode::{Episode, EpisodeId, EpisodeType};
+use crate::retrieval::{KeywordSearchResult, rank_episodes};
 use crate::storage::{InMemoryStorage, MemoryStorage, MemoryStorageConfig, RocksDbMemoryStorage};
 use crate::types::{MemoryConfig, MemoryType, Relevance};
 use crate::vector_index::{HnswConfig, HnswIndex};
@@ -186,6 +187,11 @@ impl AgentMemory {
         } else {
             Ok(false)
         }
+    }
+
+    /// Rank valid episodes using BM25. This is a full scan, not an inverted index.
+    pub fn keyword_search(&self, query: &str, limit: usize) -> Result<Vec<KeywordSearchResult>> {
+        Ok(rank_episodes(self.get_all_episodes()?, query, limit))
     }
 
     /// Get episode count
@@ -714,6 +720,11 @@ impl PersistentAgentMemory {
             .map_err(|e| Error::Storage(format!("Failed to get episode count: {}", e)))
     }
 
+    /// Rank valid episodes using BM25, with deterministic UUID tie breaking.
+    pub async fn keyword_search(&self, query: &str, limit: usize) -> Result<Vec<KeywordSearchResult>> {
+        Ok(rank_episodes(self.get_all_episodes().await?, query, limit))
+    }
+
     // ========== Memory Operations ==========
 
     /// Apply relevance decay to all episodes
@@ -1069,32 +1080,21 @@ impl PersistentAgentMemory {
         limit: usize,
         semantic_weight: Option<f32>,
     ) -> Result<Vec<HybridSearchResult>> {
-        let weight = semantic_weight.unwrap_or(0.5).clamp(0.0, 1.0);
-        let keyword_weight = 1.0 - weight;
-
-        // Perform keyword search
-        let keyword_results = self.search_episodes(query).await?;
-
-        // If semantic search is not enabled, return keyword results only
-        if !self.has_semantic_search() {
-            return Ok(keyword_results
-                .into_iter()
-                .take(limit)
-                .enumerate()
-                .map(|(rank, episode)| {
-                    let keyword_score = 1.0 / (rank as f32 + 1.0);
-                    HybridSearchResult {
-                        episode,
-                        score: keyword_score * keyword_weight,
-                        semantic_score: None,
-                        keyword_score: Some(keyword_score),
-                    }
-                })
-                .collect());
+        let mut weight = semantic_weight.unwrap_or(0.5);
+        if !weight.is_finite() || !(0.0..=1.0).contains(&weight) {
+            return Err(Error::ValidationError("Semantic weight must be finite and in [0, 1]".into()));
         }
-
-        // Perform semantic search
-        let semantic_results = self.semantic_search(query, limit * 2).await?;
+        if limit == 0 || query.trim().is_empty() {
+            return Ok(Vec::new());
+        }
+        if !self.has_semantic_search() { weight = 0.0; }
+        let candidates = limit.saturating_mul(2);
+        let keyword_results = if weight < 1.0 {
+            self.keyword_search(query, candidates).await?.into_iter().map(|result| result.episode).collect()
+        } else { Vec::new() };
+        let semantic_results = if weight > 0.0 {
+            self.semantic_search(query, candidates).await?
+        } else { Vec::new() };
 
         // Apply Reciprocal Rank Fusion
         self.reciprocal_rank_fusion(
@@ -1122,15 +1122,15 @@ impl PersistentAgentMemory {
         let mut score_map: HashMap<EpisodeId, (Option<f32>, Option<f32>, Episode)> = HashMap::new();
 
         // Add keyword results with RRF scores
-        for (rank, episode) in keyword_results.into_iter().enumerate() {
+        for (rank, episode) in keyword_results.into_iter().enumerate().filter(|_| keyword_weight > 0.0) {
             let rrf_score = 1.0 / (k + rank as f32 + 1.0);
             score_map.insert(episode.id, (Some(rrf_score), None, episode));
         }
 
         // Add semantic results with RRF scores
-        for (rank, result) in semantic_results.into_iter().enumerate() {
+        for (rank, result) in semantic_results.into_iter().enumerate().filter(|_| semantic_weight > 0.0) {
             let rrf_score = 1.0 / (k + rank as f32 + 1.0);
-            if let Some((keyword_score, semantic_score, _)) = score_map.get_mut(&result.episode.id) {
+            if let Some((_, semantic_score, _)) = score_map.get_mut(&result.episode.id) {
                 *semantic_score = Some(rrf_score);
             } else {
                 score_map.insert(result.episode.id, (None, Some(rrf_score), result.episode));
@@ -1155,11 +1155,8 @@ impl PersistentAgentMemory {
             .collect();
 
         // Sort by combined score (descending)
-        results.sort_by(|a, b| {
-            b.score
-                .partial_cmp(&a.score)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        });
+        results.sort_by(|a, b| b.score.total_cmp(&a.score)
+            .then_with(|| a.episode.id.as_uuid().cmp(&b.episode.id.as_uuid())));
 
         // Limit results
         results.truncate(limit);
@@ -1220,6 +1217,51 @@ impl Clone for PersistentAgentMemory {
 mod tests {
     use super::*;
     use crate::embeddings::EmbeddingProviderType;
+
+    #[tokio::test]
+    async fn retrieval_rejects_invalid_weights() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("a"));
+        for weight in [f32::NAN, f32::INFINITY, -0.1, 1.1] {
+            assert!(memory.hybrid_search("query", 10, Some(weight)).await.is_err());
+        }
+    }
+
+    #[tokio::test]
+    async fn retrieval_zero_limit_and_zero_weight_skip_embedding_provider() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("a"))
+            .with_mock_semantic_search(8).unwrap();
+        memory.store_episode(Episode::observation("a", "query terms")).await.unwrap();
+        // A zero-dimension mock fails to generate embeddings. Neither operation
+        // should call it when there is no semantic retrieval contribution.
+        memory.embedding_provider = Some(Arc::new(crate::embeddings::MockEmbeddingProvider::new(0)));
+        assert!(memory.hybrid_search("query", 0, Some(0.5)).await.unwrap().is_empty());
+        let results = memory.hybrid_search("query", 10, Some(0.0)).await.unwrap();
+        assert_eq!(results.len(), 1);
+        assert!(results[0].score > 0.0);
+    }
+
+    #[tokio::test]
+    async fn retrieval_keyword_fallback_has_positive_scores_for_semantic_weight_one() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("a"));
+        memory.store_episode(Episode::observation("a", "query")).await.unwrap();
+        let results = memory.hybrid_search("query", 10, Some(1.0)).await.unwrap();
+        assert!(results[0].score > 0.0);
+        assert!(results[0].semantic_score.is_none());
+    }
+
+    #[test]
+    fn retrieval_fusion_excludes_zero_weight_channel_and_breaks_ties_by_id() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("a"));
+        let mut one = Episode::observation("a", "one");
+        one.id = EpisodeId::from_uuid(uuid::Uuid::from_u128(1));
+        let mut two = Episode::observation("a", "two");
+        two.id = EpisodeId::from_uuid(uuid::Uuid::from_u128(2));
+        let semantic = vec![SemanticSearchResult { episode: one.clone(), score: 1.0 }];
+        let results = memory.reciprocal_rank_fusion(vec![two.clone()], semantic.clone(), 1.0, 10).unwrap();
+        assert_eq!(results.len(), 1);
+        let tied = memory.reciprocal_rank_fusion(vec![two], semantic, 0.5, 10).unwrap();
+        assert_eq!(tied[0].episode.id, one.id);
+    }
 
     // ==================== Basic AgentMemory Tests ====================
 
