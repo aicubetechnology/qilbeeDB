@@ -16,3 +16,4 @@ pub use store::registry::*;
 mod tool_tests;
 pub use store::tools::*;
 pub use store::executors::*;
+pub use store::development::*;
