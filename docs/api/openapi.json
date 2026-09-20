@@ -29,6 +29,10 @@
     {
       "name": "Learning",
       "description": "Administrative contracts, immutable candidates, evaluation admission and compatible selection."
+    },
+    {
+      "name": "Tools",
+      "description": "Immutable artifacts, executor profiles and durable development/repair reports from external workers."
     }
   ],
   "paths": {
@@ -2775,6 +2779,1337 @@
           }
         }
       }
+    },
+    "/api/v1/tools/artifacts": {
+      "post": {
+        "operationId": "registerToolArtifact",
+        "summary": "Register an immutable artifact",
+        "description": "Requires tool_develop and exact scope. Stores source without executing or approving it.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolArtifactResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolArtifactRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/artifacts/read": {
+      "post": {
+        "operationId": "readToolArtifact",
+        "summary": "Read an exact artifact",
+        "description": "Requires tool_read and exact scope. Verifies stored digests.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolArtifactResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolArtifactRead"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/executors": {
+      "post": {
+        "operationId": "registerToolExecutor",
+        "summary": "Register an external executor profile",
+        "description": "Requires tool_admin. Immutable administrative declaration, not sandbox attestation.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolExecutorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolExecutorRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/executors/{id}": {
+      "get": {
+        "operationId": "readToolExecutor",
+        "summary": "Read an external executor profile",
+        "description": "Requires tool_admin in the profile tenant.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolExecutorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/tools/development/requests": {
+      "post": {
+        "operationId": "createToolDevelopment",
+        "summary": "Record development or repair intent",
+        "description": "Requires tool_develop and exact scope. Returns original receipt. Does not dispatch work.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolDevelopmentReceiptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolDevelopmentCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/development/read": {
+      "post": {
+        "operationId": "readToolDevelopment",
+        "summary": "Read current development state",
+        "description": "Requires tool_read and exact scope. Unknown accounting remains null.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolDevelopmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolDevelopmentRead"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/development/commands": {
+      "post": {
+        "operationId": "recordToolDevelopmentEvent",
+        "summary": "Report a worker outcome or request cancellation",
+        "description": "Requires tool_report plus bound executor subject for report, or tool_develop plus requesting subject for cancellation; exact scope required. Revision checked, immutable event retries. 200 does not imply development success or publication.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolCommandRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tools/development/events/read": {
+      "post": {
+        "operationId": "readToolDevelopmentEvent",
+        "summary": "Read an original development event",
+        "description": "Requires tool_read and exact scope. Returns the original snapshot, which can differ from current state.",
+        "tags": [
+          "Tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolEventRead"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2795,7 +4130,11 @@
           "procedure_propose",
           "procedure_evaluate",
           "policy_admin",
-          "credential_admin"
+          "credential_admin",
+          "tool_read",
+          "tool_develop",
+          "tool_report",
+          "tool_admin"
         ]
       },
       "Visibility": {
@@ -4776,6 +6115,922 @@
           "context_id",
           "selection"
         ]
+      },
+      "ToolActor": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "subject_id",
+          "credential_id"
+        ],
+        "additionalProperties": false
+      },
+      "ToolArtifactProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24576,
+            "description": "At most 24576 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "dependency_lock": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "description": "At most 8192 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "runtime_image_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "entrypoint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "input_schema": {
+            "type": [
+              "object",
+              "boolean"
+            ],
+            "description": "Declared schema, at most 8192 serialized bytes; not executed or compiled by this endpoint."
+          },
+          "output_schema": {
+            "type": [
+              "object",
+              "boolean"
+            ],
+            "description": "Declared schema, at most 8192 serialized bytes."
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048,
+              "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+            },
+            "minItems": 1,
+            "maxItems": 32
+          },
+          "parent_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair_evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "dependency_lock",
+          "runtime_image_digest",
+          "entrypoint",
+          "input_schema",
+          "output_schema",
+          "source_refs"
+        ],
+        "additionalProperties": false
+      },
+      "ToolArtifact": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/ToolArtifactProposal"
+          },
+          "artifact_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "dependency_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "proposal",
+          "artifact_digest",
+          "source_digest",
+          "dependency_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "ToolExecutorProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "runtime_image_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "environment_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "permissions_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "max_cost_units": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "max_latency_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "runtime_image_digest",
+          "environment_revision",
+          "permissions_revision",
+          "max_cost_units",
+          "max_latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "ToolExecutor": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ToolExecutorProfile"
+          },
+          "profile_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "profile",
+          "profile_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "executor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192,
+            "description": "At most 8192 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "parent_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair_evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "executor_id",
+          "objective"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "request": {
+            "$ref": "#/components/schemas/ToolDevelopmentRequest"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "executor_profile_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "request_digest",
+          "executor_profile_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopment": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/ToolDevelopmentReceipt"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "pending_or_unknown",
+              "cancellation_requested",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "last_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "revision",
+          "state",
+          "reason",
+          "last_event_id",
+          "artifact_id",
+          "artifact_digest",
+          "cost_units",
+          "latency_ms",
+          "observed_cost_units",
+          "observed_latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentReport": {
+        "type": "object",
+        "properties": {
+          "executor_profile_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "pending_or_unknown",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8192,
+                "description": "At most 8192 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolArtifactProposal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "executor_profile_digest",
+          "outcome",
+          "evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentAction": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "report"
+              },
+              "report": {
+                "$ref": "#/components/schemas/ToolDevelopmentReport"
+              }
+            },
+            "required": [
+              "type",
+              "report"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "request_cancellation"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+              }
+            },
+            "required": [
+              "type",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "ToolDevelopmentCommand": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "$ref": "#/components/schemas/ToolDevelopmentAction"
+          }
+        },
+        "required": [
+          "event_id",
+          "expected_revision",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentEvent": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "command": {
+            "$ref": "#/components/schemas/ToolDevelopmentCommand"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ToolActor"
+          },
+          "record": {
+            "$ref": "#/components/schemas/ToolDevelopment"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "command",
+          "actor",
+          "record",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "ToolArtifactRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "artifact": {
+            "$ref": "#/components/schemas/ToolArtifactProposal"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "artifact"
+        ],
+        "additionalProperties": false
+      },
+      "ToolArtifactRead": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "artifact_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "artifact_id"
+        ],
+        "additionalProperties": false
+      },
+      "ToolExecutorRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ToolExecutorProfile"
+          }
+        },
+        "required": [
+          "contract_version",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentCreate": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ToolDevelopmentRequest"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "request"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentRead": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "request_id"
+        ],
+        "additionalProperties": false
+      },
+      "ToolCommandRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "command": {
+            "$ref": "#/components/schemas/ToolDevelopmentCommand"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "request_id",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "ToolEventRead": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "request_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "request_id",
+          "event_id"
+        ],
+        "additionalProperties": false
+      },
+      "ToolArtifactResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "artifact": {
+            "$ref": "#/components/schemas/ToolArtifact"
+          }
+        },
+        "required": [
+          "contract_version",
+          "artifact"
+        ],
+        "additionalProperties": false
+      },
+      "ToolExecutorResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "executor": {
+            "$ref": "#/components/schemas/ToolExecutor"
+          }
+        },
+        "required": [
+          "contract_version",
+          "executor"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentReceiptResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ToolDevelopmentReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ToolDevelopmentResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "development": {
+            "$ref": "#/components/schemas/ToolDevelopment"
+          }
+        },
+        "required": [
+          "contract_version",
+          "development"
+        ],
+        "additionalProperties": false
+      },
+      "ToolEventResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "event": {
+            "$ref": "#/components/schemas/ToolDevelopmentEvent"
+          }
+        },
+        "required": [
+          "contract_version",
+          "event"
+        ],
+        "additionalProperties": false
       }
     }
   }

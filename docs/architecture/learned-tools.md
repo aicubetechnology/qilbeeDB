@@ -8,9 +8,11 @@ isolated on servers and are reached through the platform. User devices keep a
 light client for authentication, requests, status and results. QMN and other
 applications consume the same platform contracts.
 
-This is an accepted direction and an implementation acceptance contract, **not a
-claim that learned-tool endpoints already exist**. The currently implemented
-HTTP surface is listed in [OpenAPI](../api/openapi.json). Local Docker is the
+Artifact storage, administrative executor profiles and development/repair
+receipts are implemented in the [Learned Tool API](../api/learned-tools.md).
+Generation workers, isolated invocation transport and tool publication gates
+remain planned. The complete current HTTP surface is listed in
+[OpenAPI](../api/openapi.json). Local Docker is the
 integration environment requested for validation; production placement can use
 remote database and executor servers without moving execution onto user devices.
 
@@ -47,9 +49,9 @@ resource use cannot become zero cost or positive efficacy evidence.
 A published tool references exactly one accepted decision under a supported
 policy. A rollback changes the release pointer to a specific previously approved
 revision and preserves history. Proposing, evaluating, publishing, administering
-policy and invoking are separately authorized actions. Capability names and
-HTTP routes for these actions will be added with their implementations and tests;
-they are not advertised as working endpoints in the current OpenAPI document.
+policy and invoking are separately authorized actions. The current API separately authorizes artifact/development writes, worker
+reports, reads and executor administration. Publication and invocation
+capabilities will accompany their implementations and tests.
 
 ## Invocation and uncertainty
 

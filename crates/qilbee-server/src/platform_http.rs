@@ -18,6 +18,7 @@ use uuid::Uuid;
 
 mod learning;
 mod memory;
+mod tools;
 
 #[derive(Clone)]
 pub(crate) struct PlatformState {
@@ -70,6 +71,7 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     Ok(Router::new()
         .merge(memory::routes())
         .merge(learning::routes())
+        .merge(tools::routes())
         .route(
             "/",
             get(|| async { axum::response::Redirect::temporary("/docs") }),

@@ -13,6 +13,10 @@ pub enum Capability {
     MemoryWrite,
     ProcedurePropose,
     ProcedureEvaluate,
+    ToolRead,
+    ToolDevelop,
+    ToolReport,
+    ToolAdmin,
     PolicyAdmin,
     CredentialAdmin,
 }
