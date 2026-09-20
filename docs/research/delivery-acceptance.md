@@ -137,3 +137,11 @@ belongs to P0 even though scale and broader recovery qualification come later.
 Use [validated feature PRs and five-PR batches](../contributing/feature-delivery.md).
 The existing library features are foundations, not evidence that these API
 acceptance criteria have already been met.
+
+## Implementation checkpoints
+
+The [durable HTTP foundation](../api/durable-http-memory.md) and
+[scoped credential authority](../security/scoped-credentials.md) are separate
+validated increments. The latter is currently a Rust API and has not yet replaced
+legacy HTTP authentication. These checkpoints do not mark the full P0 contracts
+as complete.

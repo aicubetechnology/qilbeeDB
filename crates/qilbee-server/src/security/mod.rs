@@ -32,3 +32,5 @@ pub use password::{validate_password, PasswordPolicy, PasswordValidationResult, 
 pub use security_headers::{security_headers_middleware, SecurityHeadersConfig};
 pub use cors::CorsConfig;
 pub use https::{HttpsConfig, TlsConfig, TlsVersion, https_redirect_middleware, check_tls_config};
+
+pub mod identity;

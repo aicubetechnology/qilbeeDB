@@ -28,3 +28,6 @@ pub mod transaction;
 pub use engine::StorageEngine;
 pub use options::StorageOptions;
 pub use transaction::Transaction;
+
+pub mod metadata;
+pub use metadata::{MetadataCondition, MetadataWrite};

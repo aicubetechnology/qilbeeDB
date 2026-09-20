@@ -126,6 +126,7 @@ nav:
     - Overview: security/overview.md
     - Bootstrap & Initial Setup: security/bootstrap.md
     - Authentication: security/authentication.md
+    - Durable Scoped Credentials: security/scoped-credentials.md
     - Authorization (RBAC): security/authorization.md
     - Rate Limiting: security/rate-limiting.md
     - Audit Logging: security/audit.md
