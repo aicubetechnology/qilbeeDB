@@ -8,7 +8,7 @@ use qilbee_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
 /// Configuration for memory storage
@@ -127,6 +127,8 @@ mod prefix {
 pub struct RocksDbMemoryStorage {
     db: Arc<rocksdb::DB>,
     config: MemoryStorageConfig,
+    // Serialize index read/modify/write operations, including timestamp moves.
+    mutation_lock: Mutex<()>,
 }
 
 impl RocksDbMemoryStorage {
@@ -172,7 +174,76 @@ impl RocksDbMemoryStorage {
         Ok(Self {
             db: Arc::new(db),
             config,
+            mutation_lock: Mutex::new(()),
         })
+    }
+
+    fn validate_agent(agent_id: &str) -> Result<()> {
+        if agent_id.is_empty() || agent_id.len() > u16::MAX as usize {
+            return Err(Error::ValidationError(
+                "Agent ID must contain 1..=65535 bytes".into(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn write_options(&self) -> rocksdb::WriteOptions {
+        let mut options = rocksdb::WriteOptions::default();
+        options.set_sync(self.config.sync_writes && self.config.enable_wal);
+        options.disable_wal(!self.config.enable_wal);
+        options
+    }
+
+    fn index_location(value: &[u8]) -> Result<(&str, i64)> {
+        let invalid = || Error::DataCorruption("Invalid episode index value".into());
+        if value.len() < 2 {
+            return Err(invalid());
+        }
+        let len = u16::from_be_bytes([value[0], value[1]]) as usize;
+        if value.len() != 2 + len + 8 {
+            return Err(invalid());
+        }
+        let agent = std::str::from_utf8(&value[2..2 + len]).map_err(|_| invalid())?;
+        let timestamp = i64::from_be_bytes(value[2 + len..].try_into().map_err(|_| invalid())?);
+        Ok((agent, timestamp))
+    }
+
+    // Bincode cannot deserialize serde_json::Value. Version the envelope and
+    // store that field as JSON text while retaining the binary episode schema.
+    // Legacy records without structured JSON remain readable without migration.
+    fn encode_episode(episode: &Episode) -> Result<Vec<u8>> {
+        let mut binary_episode = episode.clone();
+        let data = binary_episode
+            .content
+            .data
+            .take()
+            .map(|value| serde_json::to_string(&value))
+            .transpose()
+            .map_err(|e| Error::Serialization(e.to_string()))?;
+        let mut value = b"QMEP\0\x01".to_vec();
+        value.extend(
+            bincode::serialize(&(binary_episode, data))
+                .map_err(|e| Error::Serialization(e.to_string()))?,
+        );
+        Ok(value)
+    }
+
+    fn decode_episode(value: &[u8]) -> Result<Episode> {
+        if let Some(payload) = value.strip_prefix(b"QMEP\0\x01") {
+            let (mut episode, data): (Episode, Option<String>) =
+                bincode::deserialize(payload).map_err(|e| Error::Deserialization(e.to_string()))?;
+            episode.content.data = data
+                .map(|json| serde_json::from_str(&json))
+                .transpose()
+                .map_err(|e| Error::Deserialization(e.to_string()))?;
+            Ok(episode)
+        } else if value.starts_with(b"QMEP") {
+            Err(Error::Deserialization(
+                "Unsupported episode record version".into(),
+            ))
+        } else {
+            bincode::deserialize(value).map_err(|e| Error::Deserialization(e.to_string()))
+        }
     }
 
     /// Build episode key: agent_id + timestamp + episode_id
@@ -229,16 +300,24 @@ impl RocksDbMemoryStorage {
 #[async_trait]
 impl MemoryStorage for RocksDbMemoryStorage {
     async fn store_episode(&self, agent_id: &str, episode: &Episode) -> Result<()> {
+        Self::validate_agent(agent_id)?;
+        if episode.agent_id != agent_id {
+            return Err(Error::ValidationError(
+                "Episode agent does not match storage scope".into(),
+            ));
+        }
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
         let episodes_cf = self.cf(cf::EPISODES)?;
         let index_cf = self.cf(cf::EPISODE_INDEX)?;
 
         // Serialize episode
-        let value = bincode::serialize(episode)
-            .map_err(|e| Error::Serialization(format!("Failed to serialize episode: {}", e)))?;
+        let value = Self::encode_episode(episode)?;
 
         // Build keys
-        let episode_key =
-            Self::episode_key(agent_id, episode.event_time.as_millis(), episode.id);
+        let episode_key = Self::episode_key(agent_id, episode.event_time.as_millis(), episode.id);
         let index_key = Self::episode_index_key(episode.id);
 
         // Index value: agent_id + timestamp for lookups
@@ -250,25 +329,39 @@ impl MemoryStorage for RocksDbMemoryStorage {
 
         // Write batch for atomicity
         let mut batch = rocksdb::WriteBatch::default();
+        if let Some(previous) = self
+            .db
+            .get_cf(index_cf, &index_key)
+            .map_err(|e| Error::Storage(e.to_string()))?
+        {
+            let (owner, timestamp) = Self::index_location(&previous)?;
+            if owner != agent_id {
+                return Err(Error::ConstraintViolation(
+                    "Episode ID already belongs to another agent".into(),
+                ));
+            }
+            if timestamp != episode.event_time.as_millis() {
+                batch.delete_cf(episodes_cf, Self::episode_key(owner, timestamp, episode.id));
+            }
+        }
         batch.put_cf(episodes_cf, &episode_key, &value);
         batch.put_cf(index_cf, &index_key, &index_value);
 
-        let mut write_opts = rocksdb::WriteOptions::default();
-        write_opts.set_sync(self.config.sync_writes);
-
         self.db
-            .write_opt(batch, &write_opts)
+            .write_opt(batch, &self.write_options())
             .map_err(|e| Error::Storage(format!("Failed to store episode: {}", e)))?;
 
-        debug!(
-            "Stored episode {} for agent {}",
-            episode.id, agent_id
-        );
+        debug!("Stored episode {} for agent {}", episode.id, agent_id);
 
         Ok(())
     }
 
     async fn get_episode(&self, agent_id: &str, episode_id: EpisodeId) -> Result<Option<Episode>> {
+        Self::validate_agent(agent_id)?;
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
         let index_cf = self.cf(cf::EPISODE_INDEX)?;
         let episodes_cf = self.cf(cf::EPISODES)?;
 
@@ -280,27 +373,16 @@ impl MemoryStorage for RocksDbMemoryStorage {
             Err(e) => return Err(Error::Storage(format!("Failed to read index: {}", e))),
         };
 
-        // Parse index value to get timestamp
-        if index_value.len() < 10 {
-            return Err(Error::Internal("Invalid index value".to_string()));
+        let (owner, timestamp) = Self::index_location(&index_value)?;
+        if owner != agent_id {
+            return Ok(None);
         }
-        let agent_len = u16::from_be_bytes([index_value[0], index_value[1]]) as usize;
-        let timestamp_start = 2 + agent_len;
-        if index_value.len() < timestamp_start + 8 {
-            return Err(Error::Internal("Invalid index value".to_string()));
-        }
-        let timestamp_bytes: [u8; 8] = index_value[timestamp_start..timestamp_start + 8]
-            .try_into()
-            .map_err(|_| Error::Internal("Invalid timestamp bytes".to_string()))?;
-        let timestamp = i64::from_be_bytes(timestamp_bytes);
 
         // Now read the actual episode
         let episode_key = Self::episode_key(agent_id, timestamp, episode_id);
         match self.db.get_cf(episodes_cf, &episode_key) {
             Ok(Some(value)) => {
-                let episode: Episode = bincode::deserialize(&value).map_err(|e| {
-                    Error::Deserialization(format!("Failed to deserialize episode: {}", e))
-                })?;
+                let episode = Self::decode_episode(&value)?;
                 Ok(Some(episode))
             }
             Ok(None) => Ok(None),
@@ -309,6 +391,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
     }
 
     async fn get_all_episodes(&self, agent_id: &str) -> Result<Vec<Episode>> {
+        Self::validate_agent(agent_id)?;
         let episodes_cf = self.cf(cf::EPISODES)?;
         let prefix = Self::episode_prefix(agent_id);
 
@@ -323,9 +406,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
                 break;
             }
 
-            let episode: Episode = bincode::deserialize(&value).map_err(|e| {
-                Error::Deserialization(format!("Failed to deserialize episode: {}", e))
-            })?;
+            let episode = Self::decode_episode(&value)?;
 
             // Only include valid episodes
             if episode.is_valid() {
@@ -342,6 +423,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
         start_time_millis: i64,
         end_time_millis: i64,
     ) -> Result<Vec<Episode>> {
+        Self::validate_agent(agent_id)?;
         let episodes_cf = self.cf(cf::EPISODES)?;
         let prefix = Self::episode_prefix(agent_id);
 
@@ -356,9 +438,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
                 break;
             }
 
-            let episode: Episode = bincode::deserialize(&value).map_err(|e| {
-                Error::Deserialization(format!("Failed to deserialize episode: {}", e))
-            })?;
+            let episode = Self::decode_episode(&value)?;
 
             // Filter by time range and validity
             let event_millis = episode.event_time.as_millis();
@@ -374,6 +454,11 @@ impl MemoryStorage for RocksDbMemoryStorage {
     }
 
     async fn delete_episode(&self, agent_id: &str, episode_id: EpisodeId) -> Result<bool> {
+        Self::validate_agent(agent_id)?;
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
         let index_cf = self.cf(cf::EPISODE_INDEX)?;
         let episodes_cf = self.cf(cf::EPISODES)?;
 
@@ -385,16 +470,10 @@ impl MemoryStorage for RocksDbMemoryStorage {
             Err(e) => return Err(Error::Storage(format!("Failed to read index: {}", e))),
         };
 
-        // Parse timestamp from index
-        if index_value.len() < 10 {
-            return Err(Error::Internal("Invalid index value".to_string()));
+        let (owner, timestamp) = Self::index_location(&index_value)?;
+        if owner != agent_id {
+            return Ok(false);
         }
-        let agent_len = u16::from_be_bytes([index_value[0], index_value[1]]) as usize;
-        let timestamp_start = 2 + agent_len;
-        let timestamp_bytes: [u8; 8] = index_value[timestamp_start..timestamp_start + 8]
-            .try_into()
-            .map_err(|_| Error::Internal("Invalid timestamp bytes".to_string()))?;
-        let timestamp = i64::from_be_bytes(timestamp_bytes);
 
         // Delete both episode and index
         let episode_key = Self::episode_key(agent_id, timestamp, episode_id);
@@ -404,7 +483,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
         batch.delete_cf(index_cf, &index_key);
 
         self.db
-            .write(batch)
+            .write_opt(batch, &self.write_options())
             .map_err(|e| Error::Storage(format!("Failed to delete episode: {}", e)))?;
 
         debug!("Deleted episode {} for agent {}", episode_id, agent_id);
@@ -413,6 +492,11 @@ impl MemoryStorage for RocksDbMemoryStorage {
     }
 
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize> {
+        Self::validate_agent(agent_id)?;
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
         let episodes_cf = self.cf(cf::EPISODES)?;
         let index_cf = self.cf(cf::EPISODE_INDEX)?;
         let prefix = Self::episode_prefix(agent_id);
@@ -430,9 +514,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
             }
 
             // Parse episode to get ID for index deletion
-            let episode: Episode = bincode::deserialize(&value).map_err(|e| {
-                Error::Deserialization(format!("Failed to deserialize episode: {}", e))
-            })?;
+            let episode = Self::decode_episode(&value)?;
 
             let index_key = Self::episode_index_key(episode.id);
 
@@ -443,7 +525,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
 
         if count > 0 {
             self.db
-                .write(batch)
+                .write_opt(batch, &self.write_options())
                 .map_err(|e| Error::Storage(format!("Failed to delete episodes: {}", e)))?;
 
             info!("Deleted {} episodes for agent {}", count, agent_id);
@@ -453,6 +535,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
     }
 
     async fn episode_count(&self, agent_id: &str) -> Result<usize> {
+        Self::validate_agent(agent_id)?;
         let episodes_cf = self.cf(cf::EPISODES)?;
         let prefix = Self::episode_prefix(agent_id);
 
@@ -467,9 +550,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
             }
 
             // Only count valid episodes
-            let episode: Episode = bincode::deserialize(&value).map_err(|e| {
-                Error::Deserialization(format!("Failed to deserialize episode: {}", e))
-            })?;
+            let episode = Self::decode_episode(&value)?;
 
             if episode.is_valid() {
                 count += 1;
@@ -485,9 +566,11 @@ impl MemoryStorage for RocksDbMemoryStorage {
     }
 
     async fn flush(&self) -> Result<()> {
-        self.db
-            .flush()
-            .map_err(|e| Error::Storage(format!("Failed to flush: {}", e)))?;
+        for name in [cf::EPISODES, cf::EPISODE_INDEX, cf::AGENT_META] {
+            self.db
+                .flush_cf(self.cf(name)?)
+                .map_err(|e| Error::Storage(format!("Failed to flush: {}", e)))?;
+        }
         debug!("Memory storage flushed");
         Ok(())
     }
@@ -576,10 +659,7 @@ impl MemoryStorage for InMemoryStorage {
 
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize> {
         let mut episodes = self.episodes.write().await;
-        Ok(episodes
-            .remove(agent_id)
-            .map(|m| m.len())
-            .unwrap_or(0))
+        Ok(episodes.remove(agent_id).map(|m| m.len()).unwrap_or(0))
     }
 
     async fn episode_count(&self, agent_id: &str) -> Result<usize> {
@@ -608,6 +688,165 @@ mod tests {
     use super::*;
     use crate::episode::{Episode, EpisodeContent, EpisodeType};
     use tempfile::TempDir;
+
+    #[tokio::test]
+    async fn regression_wrong_agent_cannot_delete_another_agents_index() {
+        let (storage, _dir) = create_test_storage().await;
+        let episode = Episode::observation("owner", "Keep this memory");
+        storage.store_episode("owner", &episode).await.unwrap();
+        assert!(!storage.delete_episode("other", episode.id).await.unwrap());
+        assert!(
+            storage
+                .get_episode("owner", episode.id)
+                .await
+                .unwrap()
+                .is_some()
+        );
+    }
+
+    #[tokio::test]
+    async fn regression_episode_cannot_change_owner_or_impersonate_agent() {
+        let (storage, _dir) = create_test_storage().await;
+        let mut episode = Episode::observation("owner", "Original");
+        assert!(storage.store_episode("other", &episode).await.is_err());
+        storage.store_episode("owner", &episode).await.unwrap();
+        episode.agent_id = "other".into();
+        assert!(storage.store_episode("other", &episode).await.is_err());
+        assert!(
+            storage
+                .get_episode("owner", episode.id)
+                .await
+                .unwrap()
+                .is_some()
+        );
+        assert!(storage.get_all_episodes("other").await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn regression_event_time_update_removes_old_row() {
+        let (storage, _dir) = create_test_storage().await;
+        let mut episode = Episode::observation("owner", "Before");
+        storage.store_episode("owner", &episode).await.unwrap();
+        episode.event_time = qilbee_core::temporal::EventTime::from_millis(42);
+        episode.content.primary = "After".into();
+        storage.update_episode("owner", &episode).await.unwrap();
+        let episodes = storage.get_all_episodes("owner").await.unwrap();
+        assert_eq!(episodes.len(), 1);
+        assert_eq!(episodes[0].content.primary, "After");
+        assert_eq!(storage.delete_all_episodes("owner").await.unwrap(), 1);
+    }
+
+    #[tokio::test]
+    async fn regression_structured_episode_survives_restart() {
+        let dir = TempDir::new().unwrap();
+        let config = MemoryStorageConfig::for_testing(dir.path());
+        let mut episode = Episode::task_execution("owner", "Solve", "Verified");
+        episode.content.data = Some(serde_json::json!({
+            "score": 0.9, "evidence": [true, null, {"source": "日本語"}]
+        }));
+        {
+            let storage = RocksDbMemoryStorage::open(config.clone()).unwrap();
+            storage.store_episode("owner", &episode).await.unwrap();
+        }
+        let storage = RocksDbMemoryStorage::open(config).unwrap();
+        let restored = storage
+            .get_episode("owner", episode.id)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(restored.content.data, episode.content.data);
+        assert_eq!(storage.episode_count("owner").await.unwrap(), 1);
+    }
+
+    #[tokio::test]
+    async fn regression_truncated_index_returns_error_instead_of_panicking() {
+        let (storage, _dir) = create_test_storage().await;
+        let episode = Episode::observation("owner", "Memory");
+        storage.store_episode("owner", &episode).await.unwrap();
+        let mut corrupt = vec![0; 10];
+        corrupt[1] = 100;
+        storage
+            .db
+            .put_cf(
+                storage.cf(cf::EPISODE_INDEX).unwrap(),
+                RocksDbMemoryStorage::episode_index_key(episode.id),
+                corrupt,
+            )
+            .unwrap();
+        assert!(storage.delete_episode("owner", episode.id).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn regression_legacy_binary_episode_remains_readable_and_updatable() {
+        let (storage, _dir) = create_test_storage().await;
+        let mut episode = Episode::observation("owner", "Legacy record");
+        storage.store_episode("owner", &episode).await.unwrap();
+        let key =
+            RocksDbMemoryStorage::episode_key("owner", episode.event_time.as_millis(), episode.id);
+        storage
+            .db
+            .put_cf(
+                storage.cf(cf::EPISODES).unwrap(),
+                key,
+                bincode::serialize(&episode).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(
+            storage
+                .get_episode("owner", episode.id)
+                .await
+                .unwrap()
+                .unwrap()
+                .content
+                .primary,
+            "Legacy record"
+        );
+        episode.content.data = Some(serde_json::json!({"updated": true}));
+        storage.update_episode("owner", &episode).await.unwrap();
+        assert_eq!(
+            storage.get_all_episodes("owner").await.unwrap()[0]
+                .content
+                .data,
+            episode.content.data
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn regression_concurrent_timestamp_moves_keep_one_row() {
+        let (storage, _dir) = create_test_storage().await;
+        let storage = Arc::new(storage);
+        let episode = Episode::observation("owner", "Moving event");
+        let mut tasks = Vec::new();
+        for millis in 0..32 {
+            let storage = storage.clone();
+            let mut episode = episode.clone();
+            episode.event_time = qilbee_core::temporal::EventTime::from_millis(millis);
+            tasks.push(tokio::spawn(async move {
+                storage.store_episode("owner", &episode).await.unwrap();
+            }));
+        }
+        for task in tasks {
+            task.await.unwrap();
+        }
+        assert_eq!(storage.get_all_episodes("owner").await.unwrap().len(), 1);
+        assert_eq!(storage.episode_count("owner").await.unwrap(), 1);
+        assert!(
+            storage
+                .get_episode("owner", episode.id)
+                .await
+                .unwrap()
+                .is_some()
+        );
+    }
+
+    #[tokio::test]
+    async fn regression_invalid_scope_and_unknown_record_version_fail_closed() {
+        let (storage, _dir) = create_test_storage().await;
+        let episode = Episode::observation("", "No owner");
+        assert!(storage.store_episode("", &episode).await.is_err());
+        assert!(storage.get_all_episodes(&"x".repeat(65536)).await.is_err());
+        assert!(RocksDbMemoryStorage::decode_episode(b"QMEP\0\x02unknown").is_err());
+    }
 
     async fn create_test_storage() -> (RocksDbMemoryStorage, TempDir) {
         let temp_dir = TempDir::new().unwrap();
@@ -658,15 +897,14 @@ mod tests {
         let episode = Episode::observation("agent-1", "Test event");
         storage.store_episode("agent-1", &episode).await.unwrap();
 
-        assert!(storage
-            .delete_episode("agent-1", episode.id)
-            .await
-            .unwrap());
-        assert!(storage
-            .get_episode("agent-1", episode.id)
-            .await
-            .unwrap()
-            .is_none());
+        assert!(storage.delete_episode("agent-1", episode.id).await.unwrap());
+        assert!(
+            storage
+                .get_episode("agent-1", episode.id)
+                .await
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[tokio::test]
