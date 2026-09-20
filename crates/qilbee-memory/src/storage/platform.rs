@@ -24,6 +24,10 @@ pub enum MemoryOperation {
     Create {
         record: RecordInput,
     },
+    Derive {
+        record: RecordInput,
+        derivation: MemoryDerivation,
+    },
     Update {
         record_id: Uuid,
         expected_revision: u64,
@@ -59,6 +63,8 @@ pub struct MemoryRecord {
     pub payload: Option<RecordInput>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub review: Option<MemoryReview>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub derivation: Option<MemoryDerivation>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -85,6 +91,8 @@ pub struct QueryPage {
     pub records: Vec<MemoryRecord>,
     pub next_after: Option<Uuid>,
     pub scanned_records: usize,
+    #[serde(default)]
+    pub dependency_work: DependencyWork,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -153,8 +161,16 @@ impl RocksDbMemoryStorage {
         }
         let now = chrono::Utc::now().timestamp_millis();
         let (record, action) = match &command.operation {
-            MemoryOperation::Create { record } => {
+            MemoryOperation::Create { record } | MemoryOperation::Derive { record, .. } => {
                 validate_input(record)?;
+                let derivation =
+                    if let MemoryOperation::Derive { derivation, .. } = &command.operation {
+                        self.memory_snapshot()
+                            .validate_derivation_sources(namespace, derivation)?;
+                        Some(derivation.clone())
+                    } else {
+                        None
+                    };
                 let id = Uuid::new_v4();
                 if self.platform_record_locked(namespace, id)?.is_some() {
                     return Err(Error::TransactionConflict(
@@ -171,8 +187,13 @@ impl RocksDbMemoryStorage {
                         author: author.clone(),
                         payload: Some(record.clone()),
                         review: None,
+                        derivation,
                     },
-                    "created",
+                    if matches!(command.operation, MemoryOperation::Derive { .. }) {
+                        "derived"
+                    } else {
+                        "created"
+                    },
                 )
             }
             MemoryOperation::Update {
@@ -183,6 +204,11 @@ impl RocksDbMemoryStorage {
                 validate_input(record)?;
                 let mut current =
                     self.platform_record_for_write(namespace, *record_id, *expected_revision)?;
+                if current.derivation.is_some() {
+                    return Err(Error::ConstraintViolation(
+                        "Derived content is immutable; create a new derivation".into(),
+                    ));
+                }
                 current.payload = Some(record.clone());
                 current.review = None;
                 current.author = author.clone();
@@ -239,6 +265,7 @@ impl RocksDbMemoryStorage {
         );
         let kind = match &command.operation {
             MemoryOperation::Create { .. } => MemoryChangeKind::Created,
+            MemoryOperation::Derive { .. } => MemoryChangeKind::Derived,
             MemoryOperation::Update { .. } => MemoryChangeKind::Updated,
             MemoryOperation::Delete { .. } => MemoryChangeKind::Deleted,
         };
@@ -265,10 +292,11 @@ impl RocksDbMemoryStorage {
             .mutation_lock
             .lock()
             .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
-        let now = chrono::Utc::now().timestamp_millis();
-        Ok(self
-            .platform_record_locked(namespace, id)?
-            .filter(|record| visible(record, now)))
+        let snapshot = self.memory_snapshot();
+        match snapshot.record(namespace, id)? {
+            Some(record) if snapshot.eligible(namespace, &record)? => Ok(Some(record)),
+            _ => Ok(None),
+        }
     }
 
     /// Ordered UUID scan with explicit continuation and honest substring filtering.
@@ -293,8 +321,9 @@ impl RocksDbMemoryStorage {
             records: vec![],
             next_after: None,
             scanned_records: 0,
+            dependency_work: DependencyWork::default(),
         };
-        let now = chrono::Utc::now().timestamp_millis();
+        let snapshot = self.memory_snapshot();
         let needle = query.text_contains.as_ref().map(|text| text.to_lowercase());
         for item in self.db.iterator_cf(
             self.cf(super::cf::EPISODES)?,
@@ -312,7 +341,7 @@ impl RocksDbMemoryStorage {
                 .platform_record_locked(namespace, id)?
                 .ok_or_else(inconsistent)?;
             page.scanned_records += 1;
-            if visible(&record, now) {
+            if snapshot.eligible(namespace, &record)? {
                 let input = record
                     .payload
                     .as_ref()
@@ -344,6 +373,7 @@ impl RocksDbMemoryStorage {
                 break;
             }
         }
+        page.dependency_work = snapshot.dependency_work();
         Ok(page)
     }
 
@@ -816,3 +846,8 @@ mod review;
 pub use review::*;
 #[cfg(test)]
 mod review_tests;
+
+mod derivation;
+pub use derivation::*;
+#[cfg(test)]
+mod derivation_tests;

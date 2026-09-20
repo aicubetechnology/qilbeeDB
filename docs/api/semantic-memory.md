@@ -158,3 +158,10 @@ the retrieval method. It excludes authentication, blocking-pool queueing, JSON
 serialization, transport and external embedding generation. Measure the client
 round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
 for frozen corpora, graded relevance, category regressions and timing limits.
+
+## Source-dependent eligibility
+
+[Derived memories](derived-memory.md) validate their declared sources in the
+request snapshot before candidate eligibility and corpus statistics. Pages report
+additional source reads in `dependency_work`; these are separate from candidate
+scan budgets. Exceeding the documented dependency limits fails the request.

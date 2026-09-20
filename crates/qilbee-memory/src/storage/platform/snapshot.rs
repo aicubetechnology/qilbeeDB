@@ -5,6 +5,7 @@ pub(super) struct MemorySnapshot<'a> {
     pub(super) storage: &'a RocksDbMemoryStorage,
     pub(super) db: rocksdb::Snapshot<'a>,
     pub(super) now: i64,
+    pub(super) dependencies: std::cell::RefCell<super::derivation::DependencyState>,
 }
 impl RocksDbMemoryStorage {
     pub(super) fn memory_snapshot(&self) -> MemorySnapshot<'_> {
@@ -12,6 +13,7 @@ impl RocksDbMemoryStorage {
             storage: self,
             db: self.db.snapshot(),
             now: chrono::Utc::now().timestamp_millis(),
+            dependencies: Default::default(),
         }
     }
 }

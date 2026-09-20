@@ -106,6 +106,8 @@ pub struct HybridPage {
     pub hits: Vec<HybridHit>,
     pub next_after: Option<Uuid>,
     pub scanned_records: usize,
+    #[serde(default)]
+    pub dependency_work: DependencyWork,
     pub scanned_bytes: usize,
     pub corpus_records: usize,
     pub embedded_records: usize,
@@ -225,6 +227,7 @@ impl MemorySnapshot<'_> {
             EmbeddingCoverage::Partial
         };
         Ok(HybridPage {
+            dependency_work: page.dependency_work,
             rank_constant: profile.rank_constant,
             ranking: profile,
             embedding_coverage,

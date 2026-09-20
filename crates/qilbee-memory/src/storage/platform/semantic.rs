@@ -84,6 +84,8 @@ pub struct SemanticPage {
     pub hits: Vec<SemanticHit>,
     pub next_after: Option<Uuid>,
     pub scanned_embeddings: usize,
+    #[serde(default)]
+    pub dependency_work: DependencyWork,
     pub matched_records: usize,
     /// True only when this request ranked the whole model space without a cursor.
     pub exhaustive: bool,
@@ -220,10 +222,13 @@ impl RocksDbMemoryStorage {
             }
             return Ok(stored.receipt);
         }
-        let record = self
-            .platform_record_locked(namespace, command.record_id)?
-            .filter(|record| visible(record, chrono::Utc::now().timestamp_millis()))
+        let snapshot = self.memory_snapshot();
+        let record = snapshot
+            .record(namespace, command.record_id)?
             .ok_or_else(|| Error::KeyNotFound("Current memory record".into()))?;
+        if !snapshot.eligible(namespace, &record)? {
+            return Err(Error::KeyNotFound("Current memory record".into()));
+        }
         if record.revision != command.record_revision {
             return Err(Error::TransactionConflict(
                 "Embedding source revision changed".into(),
@@ -260,7 +265,9 @@ impl RocksDbMemoryStorage {
             committed_at_millis: chrono::Utc::now().timestamp_millis(),
         };
         let mut batch = rocksdb::WriteBatch::default();
-        let writes_embedding = existing.as_ref().is_none_or(|existing| existing.receipt.record_revision != command.record_revision);
+        let writes_embedding = existing
+            .as_ref()
+            .is_none_or(|existing| existing.receipt.record_revision != command.record_revision);
         if writes_embedding {
             batch.put_cf(
                 embeddings,
@@ -283,8 +290,15 @@ impl RocksDbMemoryStorage {
             })?,
         );
         if writes_embedding {
-            self.append_memory_change(namespace, &mut batch, MemoryChangeKind::EmbeddingAttached,
-                receipt.record_id, receipt.record_revision, author, receipt.committed_at_millis)?;
+            self.append_memory_change(
+                namespace,
+                &mut batch,
+                MemoryChangeKind::EmbeddingAttached,
+                receipt.record_id,
+                receipt.record_revision,
+                author,
+                receipt.committed_at_millis,
+            )?;
         }
         let mut options = rocksdb::WriteOptions::default();
         options.disable_wal(false);
@@ -345,11 +359,11 @@ impl super::snapshot::MemorySnapshot<'_> {
             hits: vec![],
             next_after: None,
             scanned_embeddings: 0,
+            dependency_work: DependencyWork::default(),
             matched_records: 0,
             exhaustive: query.after.is_none(),
         };
         let mut last_scanned = None;
-        let now = self.now;
         for item in self.db.iterator_cf(
             self.storage.cf(super::super::cf::EPISODE_INDEX)?,
             rocksdb::IteratorMode::From(&start, rocksdb::Direction::Forward),
@@ -374,7 +388,9 @@ impl super::snapshot::MemorySnapshot<'_> {
             if record.revision < embedding.receipt.record_revision {
                 return Err(inconsistent());
             }
-            if record.revision != embedding.receipt.record_revision || !visible(&record, now) {
+            if record.revision != embedding.receipt.record_revision
+                || !self.eligible(namespace, &record)?
+            {
                 continue;
             }
             let payload = record.payload.as_ref().expect("visible memory has content");
@@ -413,6 +429,7 @@ impl super::snapshot::MemorySnapshot<'_> {
             });
             page.hits.truncate(query.limit);
         }
+        page.dependency_work = self.dependency_work();
         Ok(page)
     }
 }

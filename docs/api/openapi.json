@@ -7789,6 +7789,9 @@
           },
           {
             "$ref": "#/components/schemas/DeleteOperation"
+          },
+          {
+            "$ref": "#/components/schemas/DeriveOperation"
           }
         ],
         "discriminator": {
@@ -7796,7 +7799,8 @@
           "mapping": {
             "create": "#/components/schemas/CreateOperation",
             "update": "#/components/schemas/UpdateOperation",
-            "delete": "#/components/schemas/DeleteOperation"
+            "delete": "#/components/schemas/DeleteOperation",
+            "derive": "#/components/schemas/DeriveOperation"
           }
         }
       },
@@ -7905,7 +7909,8 @@
             "enum": [
               "created",
               "updated",
-              "deleted"
+              "deleted",
+              "derived"
             ]
           },
           "committed_at_millis": {
@@ -7978,6 +7983,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/MemoryReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "derivation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryDerivation"
               },
               {
                 "type": "null"
@@ -8132,6 +8147,9 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 10000
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
           }
         },
         "required": [
@@ -10540,6 +10558,9 @@
           "exhaustive": {
             "type": "boolean",
             "description": "True only if started without a cursor and ranked the entire authorized registered model space."
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
           }
         },
         "required": [
@@ -10878,6 +10899,9 @@
           "matched_records": {
             "type": "integer",
             "minimum": 0
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
           }
         },
         "required": [
@@ -10970,6 +10994,9 @@
               60,
               2
             ]
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
           }
         },
         "required": [
@@ -12619,7 +12646,8 @@
           "updated",
           "deleted",
           "embedding_attached",
-          "reviewed"
+          "reviewed",
+          "derived"
         ]
       },
       "MemoryChange": {
@@ -13039,6 +13067,101 @@
           "scope",
           "record_id",
           "revision"
+        ],
+        "additionalProperties": false
+      },
+      "MemorySourceRef": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "record_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryDerivation": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "method_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "sources",
+          "method",
+          "method_revision",
+          "evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "DeriveOperation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "derive"
+          },
+          "record": {
+            "$ref": "#/components/schemas/RecordInput"
+          },
+          "derivation": {
+            "$ref": "#/components/schemas/MemoryDerivation"
+          }
+        },
+        "required": [
+          "type",
+          "record",
+          "derivation"
+        ],
+        "additionalProperties": false
+      },
+      "DependencyWork": {
+        "type": "object",
+        "properties": {
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4096
+          },
+          "bytes_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16777216
+          }
+        },
+        "required": [
+          "records_examined",
+          "bytes_examined"
         ],
         "additionalProperties": false
       }

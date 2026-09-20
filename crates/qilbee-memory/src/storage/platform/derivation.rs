@@ -1,0 +1,158 @@
+//! Provenance-bound derived memories and request-local dependency work accounting.
+use super::snapshot::MemorySnapshot;
+use super::*;
+use std::collections::{BTreeMap, BTreeSet};
+
+pub const MAX_MEMORY_SOURCES: usize = 16;
+pub const MAX_DEPENDENCY_RECORDS: usize = 4096;
+pub const MAX_DEPENDENCY_BYTES: usize = 16 * 1024 * 1024;
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MemorySourceRef {
+    pub record_id: Uuid,
+    pub revision: u64,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MemoryDerivation {
+    pub sources: Vec<MemorySourceRef>,
+    pub method: String,
+    pub method_revision: String,
+    pub evidence_ref: String,
+}
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DependencyWork {
+    pub records_examined: usize,
+    pub bytes_examined: usize,
+}
+#[derive(Default)]
+pub(super) struct DependencyState {
+    pub work: DependencyWork,
+    pub cache: BTreeMap<(String, Uuid), Option<DependencyRecord>>,
+}
+#[derive(Clone)]
+pub(super) struct DependencyRecord {
+    pub revision: u64,
+    pub visible: bool,
+    pub derivation: Option<MemoryDerivation>,
+}
+impl MemoryDerivation {
+    pub(super) fn validate(&self) -> Result<()> {
+        let ids: BTreeSet<_> = self.sources.iter().map(|r| r.record_id).collect();
+        let valid = |s: &str, max: usize| {
+            !s.trim().is_empty() && s.len() <= max && !s.chars().any(char::is_control)
+        };
+        if self.sources.is_empty()
+            || self.sources.len() > MAX_MEMORY_SOURCES
+            || ids.len() != self.sources.len()
+            || self.sources.iter().any(|r| r.revision == 0)
+            || !valid(&self.method, 256)
+            || !valid(&self.method_revision, 256)
+            || !valid(&self.evidence_ref, 2048)
+        {
+            return Err(Error::ValidationError("Derived memory requires 1-16 unique positive source revisions and method/evidence identities".into()));
+        }
+        Ok(())
+    }
+}
+impl MemorySnapshot<'_> {
+    pub(super) fn dependency_work(&self) -> DependencyWork {
+        self.dependencies.borrow().work.clone()
+    }
+    pub(super) fn dependency(&self, namespace: &str, id: Uuid) -> Result<Option<DependencyRecord>> {
+        let key = (namespace.to_owned(), id);
+        if let Some(record) = self.dependencies.borrow().cache.get(&key) {
+            return Ok(record.clone());
+        }
+        if self.dependencies.borrow().work.records_examined >= MAX_DEPENDENCY_RECORDS {
+            return Err(Error::ValidationError(
+                "Dependency record budget exhausted; reduce the candidate scan limit".into(),
+            ));
+        }
+        let bytes = self
+            .db
+            .get_cf(
+                self.storage.cf(super::super::cf::EPISODES)?,
+                record_key(0x10, namespace, id),
+            )
+            .map_err(storage_error)?;
+        let len = bytes.as_ref().map_or(0, Vec::len);
+        if self
+            .dependencies
+            .borrow()
+            .work
+            .bytes_examined
+            .saturating_add(len)
+            > MAX_DEPENDENCY_BYTES
+        {
+            return Err(Error::ValidationError(
+                "Dependency byte budget exhausted; reduce the candidate scan limit".into(),
+            ));
+        }
+        let index = self
+            .db
+            .get_cf(
+                self.storage.cf(super::super::cf::EPISODE_INDEX)?,
+                record_key(0x11, namespace, id),
+            )
+            .map_err(storage_error)?;
+        let record = decode_record_pair(id, bytes, index)?.map(|r| DependencyRecord {
+            revision: r.revision,
+            visible: visible(&r, self.now),
+            derivation: r.derivation,
+        });
+        let mut state = self.dependencies.borrow_mut();
+        state.work.records_examined += 1;
+        state.work.bytes_examined += len;
+        state.cache.insert(key, record.clone());
+        Ok(record)
+    }
+    pub(super) fn eligible(&self, namespace: &str, record: &MemoryRecord) -> Result<bool> {
+        if !visible(record, self.now) {
+            return Ok(false);
+        }
+        let Some(derivation) = &record.derivation else {
+            return Ok(true);
+        };
+        derivation.validate().map_err(|_| inconsistent())?;
+        for source in &derivation.sources {
+            if source.record_id == record.record_id {
+                return Err(inconsistent());
+            }
+            let Some(current) = self.dependency(namespace, source.record_id)? else {
+                return Ok(false);
+            };
+            if current.revision != source.revision
+                || !current.visible
+                || current.derivation.is_some()
+            {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+    pub(super) fn validate_derivation_sources(
+        &self,
+        namespace: &str,
+        derivation: &MemoryDerivation,
+    ) -> Result<()> {
+        derivation.validate()?;
+        for source in &derivation.sources {
+            let current = self
+                .dependency(namespace, source.record_id)?
+                .ok_or_else(|| Error::KeyNotFound("Eligible source memory".into()))?;
+            if current.revision != source.revision || !current.visible {
+                return Err(Error::TransactionConflict(
+                    "Source revision is no longer eligible".into(),
+                ));
+            }
+            if current.derivation.is_some() {
+                return Err(Error::ValidationError(
+                    "Direct derivations require non-derived source records".into(),
+                ));
+            }
+        }
+        Ok(())
+    }
+}

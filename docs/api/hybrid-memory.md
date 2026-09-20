@@ -262,3 +262,10 @@ response. See [configure retrieval capacity](../operations/retrieval-capacity.md
 See the [0.6.0 real-embedding report](../research/scifact-results.md) for the
 300-query SciFact comparison, uncertainty and losses. Both profiles remain
 experimental; the measured gain does not establish a universal ranking policy.
+
+## Source-dependent eligibility
+
+[Derived memories](derived-memory.md) validate their declared sources in the
+request snapshot before candidate eligibility and corpus statistics. Pages report
+additional source reads in `dependency_work`; these are separate from candidate
+scan budgets. Exceeding the documented dependency limits fails the request.

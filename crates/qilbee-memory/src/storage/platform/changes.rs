@@ -6,6 +6,7 @@ use super::*;
 #[serde(rename_all = "snake_case")]
 pub enum MemoryChangeKind {
     Created,
+    Derived,
     Updated,
     Deleted,
     EmbeddingAttached,
