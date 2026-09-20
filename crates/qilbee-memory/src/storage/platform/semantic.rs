@@ -294,7 +294,16 @@ impl RocksDbMemoryStorage {
         namespace: &str,
         query: &SemanticQuery,
     ) -> Result<SemanticPage> {
-        Self::validate_agent(namespace)?;
+        self.memory_snapshot().search_semantic(namespace, query)
+    }
+}
+impl super::snapshot::MemorySnapshot<'_> {
+    pub(super) fn search_semantic(
+        &self,
+        namespace: &str,
+        query: &SemanticQuery,
+    ) -> Result<SemanticPage> {
+        RocksDbMemoryStorage::validate_agent(namespace)?;
         query.space.validate()?;
         let query_norm = norm(&query.vector, query.space.dimensions)?;
         if !(1..=100).contains(&query.limit)
@@ -306,10 +315,6 @@ impl RocksDbMemoryStorage {
                 "Invalid semantic limit, scan budget or score threshold".into(),
             ));
         }
-        let _guard = self
-            .mutation_lock
-            .lock()
-            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
         let prefix = embedding_prefix(namespace, &query.space)?;
         let start = query
             .after
@@ -324,9 +329,9 @@ impl RocksDbMemoryStorage {
             exhaustive: query.after.is_none(),
         };
         let mut last_scanned = None;
-        let now = chrono::Utc::now().timestamp_millis();
+        let now = self.now;
         for item in self.db.iterator_cf(
-            self.cf(super::super::cf::EPISODE_INDEX)?,
+            self.storage.cf(super::super::cf::EPISODE_INDEX)?,
             rocksdb::IteratorMode::From(&start, rocksdb::Direction::Forward),
         ) {
             let (key, bytes) = item.map_err(storage_error)?;
@@ -345,9 +350,7 @@ impl RocksDbMemoryStorage {
             let embedding = decode_embedding(&bytes, namespace, &query.space, id)?;
             page.scanned_embeddings += 1;
             last_scanned = Some(id);
-            let record = self
-                .platform_record_locked(namespace, id)?
-                .ok_or_else(inconsistent)?;
+            let record = self.record(namespace, id)?.ok_or_else(inconsistent)?;
             if record.revision < embedding.receipt.record_revision {
                 return Err(inconsistent());
             }
