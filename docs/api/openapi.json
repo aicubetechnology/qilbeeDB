@@ -7302,6 +7302,182 @@
           }
         }
       }
+    },
+    "/api/v1/memory/eligibility": {
+      "post": {
+        "operationId": "explainMemoryEligibility",
+        "summary": "Explain bounded transitive memory eligibility",
+        "description": "Requires memory_review in the exact scope. Returns metadata only, including current root revision and the first invalidating dependency. Uses one request-local snapshot and time; fail-fast diagnostic is not exhaustive when eligible is false. At most eight dependency edges and 64 distinct source IDs are admissible per derived root. Shared dependency work limits also apply. No payloads, evidence references or vectors are returned.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current eligibility and metadata-only first-failure explanation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryEligibilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryReviewStateRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "record_id": "00000000-0000-4000-8000-000000000042"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13162,6 +13338,142 @@
         "required": [
           "records_examined",
           "bytes_examined"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryEligibilityReason": {
+        "type": "string",
+        "enum": [
+          "eligible",
+          "deleted",
+          "expired",
+          "rejected",
+          "source_missing",
+          "source_revision_changed",
+          "dependency_cycle",
+          "depth_limit",
+          "node_limit"
+        ]
+      },
+      "MemoryEligibilityFailure": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actual_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/MemoryEligibilityReason"
+          }
+        },
+        "required": [
+          "record_id",
+          "expected_revision",
+          "actual_revision",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryEligibility": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first_failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryEligibilityFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dependencies_checked": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "max_depth_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "all_dependencies_checked": {
+            "type": "boolean"
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "record_id",
+          "revision",
+          "eligible",
+          "evaluated_at_millis",
+          "first_failure",
+          "dependencies_checked",
+          "max_depth_examined",
+          "all_dependencies_checked",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryEligibilityResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/MemoryEligibility"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "eligibility"
         ],
         "additionalProperties": false
       }

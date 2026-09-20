@@ -128,3 +128,7 @@ Stored memories from older releases have no review metadata and remain unreviewe
 Review history is retained without automatic pruning in this release. Decisions
 are assertions by authorized reviewers; independent evaluations are still needed
 to measure the effect on answer quality and agent outcomes.
+
+Use the metadata-only [eligibility diagnostic](derived-memory.md#explain-a-dependency-failure)
+to identify the first transitive source that prevents serving a derived memory.
+This diagnostic also requires `memory_review`.

@@ -69,4 +69,4 @@ Use [memory review](../api/memory-review.md) to record decisions and exclude
 rejected revisions while preserving historical evidence.
 
 Use [derived memories](../api/derived-memory.md) to keep conclusions dependent on
-exact source revisions and current source eligibility.
+exact source revisions and transitive source eligibility, with bounded diagnostics.

@@ -46,8 +46,10 @@ evidence when needed for reproduction. These identifiers are declarations by the
 writer; the database does not fetch or verify external evidence.
 
 All sources must exist, match their exact revision, be unexpired and have no
-rejected review. This initial contract accepts direct sources only; a derived
-record cannot itself be a source. Source validation and creation are serialized
+rejected review. Sources may themselves be derived. Each root is limited to eight
+dependency edges along any path and 64 distinct source IDs across its transitive
+graph. Shared ancestors count once; each node retains the 16-direct-source limit.
+Cycles and graphs exceeding these bounds are rejected. Source validation and creation are serialized
 with memory mutations. Record, index, idempotency receipt and `derived` change
 entry commit atomically with synchronous WAL durability.
 
@@ -59,8 +61,8 @@ eligibility; a retry receipt is not a current-availability assertion.
 
 ## Correction and invalidation
 
-A derived record remains eligible only while every recorded source has the same
-revision and remains eligible. Source updates, deletions, expiry and review
+A derived record remains eligible only while every recorded source and its transitive ancestors have the same
+recorded revision and remain eligible. Source updates, deletions, expiry and review
 revisions invalidate the dependent record before direct reads, text/filter
 queries, new embedding attachment, lexical statistics, vector candidates and
 hybrid combination. This check uses the same request-local storage snapshot as
@@ -112,6 +114,62 @@ permanent content-download promise. Metadata does not certify a conclusion's
 truth, relevance or downstream benefit.
 
 Absent sources return 404; changed or ineligible source revisions return 409.
-Invalid source lists or unsupported nesting return 400. Authentication, grants,
+Invalid source lists or graphs exceeding depth/node bounds return 400. Authentication, grants,
 integrity errors, retry rules and the 64 KiB request body limit follow the
 [durable memory API](versioned-memory.md).
+
+## Explain a dependency failure
+
+A reviewer can call `POST /api/v1/memory/eligibility` with `memory_review` and the
+exact scope. This uses the same authorization as metadata-only review state;
+ordinary read or write authority alone is insufficient.
+
+```json
+{
+  "contract_version": 1,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "record_id": "00000000-0000-4000-8000-000000000042"
+}
+```
+
+The response is `{contract_version, scope, eligibility}`:
+
+| Field | Meaning |
+| --- | --- |
+| `record_id`, `revision` | Current root identity, including unavailable roots |
+| `eligible` | All serving prerequisites were established in this request |
+| `evaluated_at_millis` | Server time used for validity checks |
+| `first_failure` | Null when eligible; otherwise the first failed root or dependency check |
+| `dependencies_checked` | Distinct source IDs visited for this root, at most 64 |
+| `max_depth_examined` | Maximum dependency path depth encountered or inferred from a previously checked shared subtree |
+| `all_dependencies_checked` | True only when the complete bounded graph was validated |
+| `dependency_work` | Actual additional reads and raw record bytes, using the same work limits as retrieval |
+
+`first_failure` contains `record_id`, nullable `expected_revision`, nullable
+`actual_revision` and `reason`. Reasons include `deleted`, `expired`, `rejected`,
+`source_missing`, `source_revision_changed`, `dependency_cycle`, `depth_limit`
+and `node_limit`. `eligible` is the successful internal reason and never a
+failure. A reference revision is checked before that source's current disposition:
+if a source was rejected at a newer revision, an older reference reports
+`source_revision_changed`. Null `actual_revision` means it was not established;
+it does not mean revision zero.
+
+The diagnostic stops at the first failed check in the stored source-list traversal
+order. It is not a complete inventory of every issue. A bound failure means the
+service cannot establish eligibility within its admitted graph contract. It does
+not assert that an unvisited source is factually wrong. Depth may exceed eight in
+the diagnostic that reports a bound failure; creation rejects that graph.
+
+No content, vector, method identity, evidence reference or reviewer identity is
+copied into this response. A missing root returns 404. Existing deleted, expired,
+rejected or source-invalid roots return 200 with `eligible: false`. The result is
+an observation of one snapshot and one time, not a durable authorization token or
+a guarantee of eligibility on a later request. Restore or regenerate a conclusion
+only after checking its current sources and creating a new derivation.
+
+Traversal caches compact source metadata and validated subtree heights. This
+avoids repeatedly expanding shared subgraphs while still enforcing the longest
+path bound when the same subtree appears at different depths. All normal serving
+paths use this transitive check, including BM25 corpus construction. There is no
+asynchronous descendant rewrite or eventual-consistency window introduced by a
+background propagation worker.

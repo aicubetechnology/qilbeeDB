@@ -116,3 +116,112 @@ async fn derived_memory_requires_read_and_write_and_preserves_scope_on_source_va
         );
     }
 }
+#[tokio::test]
+async fn eligibility_metadata_requires_review_authority_and_reports_transitive_revision_failure() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    let foreign = identity.bootstrap_tenant("foreign", "operator").unwrap();
+    let writer = memory_key(&identity, &admin.secret, "writer", true);
+    let mut s = spec();
+    s.subject_id = "reviewer".into();
+    s.capabilities = [Capability::MemoryReview].into();
+    s.grants = vec![serde_json::from_value(memory_scope("shared")).unwrap()];
+    let reviewer = identity.issue(&admin.secret, s.clone()).unwrap().secret;
+    let outside = identity.issue(&foreign.secret, s).unwrap().secret;
+    let first = request(
+        &router,
+        "POST",
+        "/api/v1/memory/commands",
+        &writer,
+        memory_create("source", "sensitive payload", "shared"),
+    )
+    .await;
+    let origin = first.1["receipt"]["record_id"].clone();
+    let mut previous = origin.clone();
+    for i in 0..2 {
+        let mut body = memory_create(&format!("derived-{i}"), "sensitive conclusion", "shared");
+        body["operation"]["type"] = "derive".into();
+        body["operation"]["derivation"] = json!({"sources":[{"record_id":previous,"revision":1}],"method":"fixture","method_revision":"v1","evidence_ref":"sensitive evidence"});
+        let result = request(&router, "POST", "/api/v1/memory/commands", &writer, body).await;
+        assert_eq!(result.0, StatusCode::OK);
+        previous = result.1["receipt"]["record_id"].clone();
+    }
+    let body = json!({"contract_version":1,"scope":memory_scope("shared"),"record_id":previous});
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/eligibility",
+            &writer,
+            body.clone()
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/eligibility",
+            &outside,
+            body.clone()
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    let result = request(
+        &router,
+        "POST",
+        "/api/v1/memory/eligibility",
+        &reviewer,
+        body.clone(),
+    )
+    .await;
+    assert_eq!(result.0, StatusCode::OK);
+    assert_eq!(result.1["eligibility"]["eligible"], true);
+    assert_eq!(result.1["eligibility"]["dependencies_checked"], 2);
+    assert!(!result.1.to_string().contains("sensitive"));
+    let delete = json!({"contract_version":1,"scope":memory_scope("shared"),"idempotency_key":"delete","operation":{"type":"delete","record_id":origin,"expected_revision":1}});
+    assert_eq!(
+        request(&router, "POST", "/api/v1/memory/commands", &writer, delete)
+            .await
+            .0,
+        StatusCode::OK
+    );
+    let result = request(
+        &router,
+        "POST",
+        "/api/v1/memory/eligibility",
+        &reviewer,
+        body.clone(),
+    )
+    .await;
+    assert_eq!(result.1["eligibility"]["eligible"], false);
+    assert_eq!(
+        result.1["eligibility"]["first_failure"]["record_id"],
+        origin
+    );
+    assert_eq!(
+        result.1["eligibility"]["first_failure"]["reason"],
+        "source_revision_changed"
+    );
+    let who = identity.authenticate(&reviewer).unwrap();
+    identity
+        .revoke(&admin.secret, who.id, who.revision)
+        .unwrap();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/memory/eligibility",
+            &reviewer,
+            body
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+}

@@ -185,10 +185,6 @@ fn derivation_admission_is_scoped_immutable_idempotent_and_durable() {
         db.apply_memory_command("scope", &who, &command("empty", vec![]))
             .is_err()
     );
-    assert!(
-        db.apply_memory_command("scope", &who, &command("nested", vec![source(&d)]))
-            .is_err()
-    );
     let update = MemoryCommand {
         contract_version: 1,
         idempotency_key: "wash-provenance".into(),
