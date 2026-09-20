@@ -1,7 +1,7 @@
 # HTTP REST API
 
 QilbeeDB Rust 0.2.0 exposes the authenticated platform API for durable identity
-and scoped, versioned memory. The default router requires no QMN service.
+and scoped, versioned memory.
 
 ## Base URL
 
@@ -9,7 +9,7 @@ and scoped, versioned memory. The default router requires no QMN service.
 http://localhost:7474
 ```
 
-For a container on the optional local QMN network, use
+For a container on the configured integration network, use
 `http://qilbeedb-local:7474`. See [Docker deployment](../operations/docker.md).
 
 ## API contract
