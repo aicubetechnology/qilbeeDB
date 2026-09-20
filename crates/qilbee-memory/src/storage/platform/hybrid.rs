@@ -105,7 +105,9 @@ pub struct HybridPage {
     pub embedding_coverage: EmbeddingCoverage,
     pub hits: Vec<HybridHit>,
     pub next_after: Option<Uuid>,
+    #[serde(skip_serializing, default)]
     pub candidate_selection_version: String,
+    #[serde(skip_serializing, default)]
     pub candidate_index_bytes: usize,
     pub scanned_records: usize,
     #[serde(default)]

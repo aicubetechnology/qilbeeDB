@@ -121,7 +121,7 @@ space/query/filters, then merge page candidates by score and UUID. A continued
 request always reports `exhaustive: false`. Continuations do not hold a snapshot
 across requests; concurrent writes can change later pages. Completeness refers to scanning all current candidates in the partition. It does not
 assert that every memory has a current selected-space embedding. Candidates without
-that embedding consume `scan_limit` and `scanned_records`, but not `scanned_embeddings`.
+that embedding consume `scan_limit` and the `X-Qilbee-Scanned-Records` counter, but not `scanned_embeddings`.
 
 ## Validation and errors
 
@@ -167,4 +167,4 @@ request snapshot before candidate eligibility and corpus statistics. Pages repor
 additional source reads in `dependency_work`; these are separate from candidate
 scan budgets. Exceeding the documented dependency limits fails the request.
 
-See [current retrieval candidates](retrieval-candidates.md) for the `current_records_v1` candidate plan, additive page fields, migration and remaining limits. Cosine scores remain unchanged.
+See [current retrieval candidates](retrieval-candidates.md) for the `current_records_v1` candidate plan, HTTP work headers, migration and remaining limits. Cosine scores remain unchanged.

@@ -4312,6 +4312,34 @@
                   "type": "integer",
                   "minimum": 0
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -4488,6 +4516,34 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -4683,6 +4739,34 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -12897,26 +12981,6 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
-          },
-          "candidate_selection_version": {
-            "type": "string",
-            "const": "current_records_v1",
-            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
-          },
-          "candidate_index_bytes": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
-          },
-          "scanned_records": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Current candidate records examined, including candidates without a selected-space binding."
-          },
-          "scanned_bytes": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Serialized current records and selected-space bindings examined. This is not response size, physical I/O or process memory."
           }
         },
         "required": [
@@ -12924,11 +12988,7 @@
           "next_after",
           "scanned_embeddings",
           "matched_records",
-          "exhaustive",
-          "candidate_selection_version",
-          "candidate_index_bytes",
-          "scanned_records",
-          "scanned_bytes"
+          "exhaustive"
         ],
         "additionalProperties": false
       },
@@ -13265,16 +13325,6 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
-          },
-          "candidate_selection_version": {
-            "type": "string",
-            "const": "current_records_v1",
-            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
-          },
-          "candidate_index_bytes": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
           }
         },
         "required": [
@@ -13284,9 +13334,7 @@
           "next_after",
           "exhaustive",
           "hits",
-          "matched_records",
-          "candidate_selection_version",
-          "candidate_index_bytes"
+          "matched_records"
         ],
         "additionalProperties": false
       },
@@ -13372,16 +13420,6 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
-          },
-          "candidate_selection_version": {
-            "type": "string",
-            "const": "current_records_v1",
-            "description": "Current-record projection selected by authorized namespace and exact tag/type before the scan budget."
-          },
-          "candidate_index_bytes": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Logical candidate key/value bytes admitted, excluding lookahead, integrity indexes and dependency reads."
           }
         },
         "required": [
@@ -13399,9 +13437,7 @@
           "ranking",
           "embedding_coverage",
           "candidates_truncated",
-          "rank_constant",
-          "candidate_selection_version",
-          "candidate_index_bytes"
+          "rank_constant"
         ],
         "additionalProperties": false,
         "allOf": [

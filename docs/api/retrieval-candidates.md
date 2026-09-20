@@ -14,25 +14,28 @@ Continue to use the existing endpoints and server-owned ranking versions.
 BM25 and both weighted RRF profiles retain their formulas and tie breaking.
 This change does not introduce approximate neighbors or a new relevance claim.
 
-The page includes these fields in all three search modes:
+Successful responses include these headers in all three search modes:
 
 | Field | Meaning |
 | --- | --- |
-| `candidate_selection_version` | `current_records_v1`; record this with server and ranking versions in comparisons |
-| `scanned_records` | Current candidates admitted from the authorized tag/type partition |
-| `candidate_index_bytes` | Logical candidate key/value bytes admitted, separate from source bytes |
-| `scanned_bytes` | Serialized current records and selected-space bindings admitted; now also available for semantic search |
-| `next_after` | Exclusive UUID of the last examined current candidate if more candidates remain |
-| `exhaustive` | True only when a cursorless request covers the complete current-candidate partition |
+| `X-Qilbee-Candidate-Selection-Version` | `current_records_v1`; record this with server and ranking versions in comparisons |
+| `X-Qilbee-Scanned-Records` | Current candidates admitted from the authorized tag/type partition |
+| `X-Qilbee-Candidate-Index-Bytes` | Logical candidate key/value bytes admitted, separate from source bytes |
+| `X-Qilbee-Scanned-Bytes` | Serialized current records and selected-space bindings admitted; now also available for semantic search |
+| JSON `page.next_after` | Exclusive UUID of the last examined current candidate if more candidates remain |
+| JSON `page.exhaustive` | True only when a cursorless request covers the complete current-candidate partition |
 
-`scan_limit` limits `scanned_records`, including semantic candidates that have no
+`scan_limit` limits the scanned-record counter, including semantic candidates that have no
 binding in the requested model space. `scanned_embeddings` counts only bindings
 actually decoded for eligible current candidates. A stale binding can be decoded
 but cannot contribute a score. Missing bindings never acquire an inferred model
 identity. Hybrid `embedded_records` and `embedding_coverage` retain their meaning.
 
-Page fields are additive; clients with closed response schemas must use the
-published 0.10.0 OpenAPI. Scores retain their previous units. When comparing
+The JSON shape is unchanged, including for clients that forbid unknown response
+fields. Lexical/hybrid pages retain `scanned_records` and `scanned_bytes`; semantic
+pages retain `scanned_embeddings` and expose their new work counters through headers.
+The Rust library also exposes these counters on its native page types.
+Scores retain their previous units. When comparing
 versions, keep the candidate selection version in the report: the examined
 population and work counters differ from the legacy all-record/all-binding scan.
 

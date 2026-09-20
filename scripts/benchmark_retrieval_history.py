@@ -109,7 +109,12 @@ class HistoryBenchmark:
             pages = []
             for sample in range(2 + self.samples):
                 response, headers, elapsed, size = self.request(route, body)
-                page = response["page"]
+                page = dict(response["page"])
+                normalized_headers = {key.lower(): value for key,value in headers.items()}
+                for field in ["candidate_selection_version", "candidate_index_bytes", "scanned_records", "scanned_bytes"]:
+                    value = normalized_headers.get("x-qilbee-" + field.replace("_", "-"))
+                    if value is not None:
+                        page[field] = value if field.endswith("version") else int(value)
                 hit_ids = [hit["record"]["record_id"] for hit in page["hits"]]
                 assert len(hit_ids) == len(set(hit_ids)), "Duplicate result IDs"
                 for hit in page["hits"]:

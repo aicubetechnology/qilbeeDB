@@ -213,17 +213,49 @@ async fn current_candidate_http_coverage_and_work_validate_against_served_openap
         if mode == "hybrid" {
             body["query"]["ranking_version"] = "weighted_rrf_v2".into();
         }
-        let response = post(&client, &base, &route, &token, &body).await;
+        let http = client
+            .post(format!("{base}{route}"))
+            .bearer_auth(&token)
+            .json(&body)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(http.status().as_u16(), 200);
+        let headers = http.headers().clone();
+        let response: Value = http.json().await.unwrap();
         let schema = json!({"$schema":"https://json-schema.org/draft/2020-12/schema",
             "allOf":[api["paths"][&route]["post"]["responses"]["200"]["content"]["application/json"]["schema"]],"components":api["components"]});
         let validator = jsonschema::draft202012::options().build(&schema).unwrap();
         assert!(validator.is_valid(&response), "{mode}: {response}");
         let page = &response["page"];
-        assert_eq!(page["candidate_selection_version"], "current_records_v1");
+        assert!(page.get("candidate_selection_version").is_none());
+        assert!(page.get("candidate_index_bytes").is_none());
+        if mode == "semantic" {
+            assert!(page.get("scanned_records").is_none());
+            assert!(page.get("scanned_bytes").is_none());
+        }
+        assert_eq!(
+            headers["x-qilbee-candidate-selection-version"],
+            "current_records_v1"
+        );
         assert_eq!(page["exhaustive"], true);
-        assert_eq!(page["scanned_records"], 1);
-        assert!(page["candidate_index_bytes"].as_u64().unwrap() > 40);
-        assert!(page["scanned_bytes"].as_u64().unwrap() > 0);
+        assert_eq!(headers["x-qilbee-scanned-records"], "1");
+        assert!(
+            headers["x-qilbee-candidate-index-bytes"]
+                .to_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 40
+        );
+        assert!(
+            headers["x-qilbee-scanned-bytes"]
+                .to_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 0
+        );
         assert_eq!(page["hits"][0]["record"]["record_id"], target);
         if mode == "semantic" {
             assert_eq!(page["hits"][0]["score"], 1.0);

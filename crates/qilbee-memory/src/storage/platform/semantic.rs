@@ -83,9 +83,13 @@ pub struct SemanticHit {
 pub struct SemanticPage {
     pub hits: Vec<SemanticHit>,
     pub next_after: Option<Uuid>,
+    #[serde(skip_serializing, default)]
     pub candidate_selection_version: String,
+    #[serde(skip_serializing, default)]
     pub candidate_index_bytes: usize,
+    #[serde(skip_serializing, default)]
     pub scanned_records: usize,
+    #[serde(skip_serializing, default)]
     pub scanned_bytes: usize,
     pub scanned_embeddings: usize,
     #[serde(default)]
