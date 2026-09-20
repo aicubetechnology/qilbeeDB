@@ -1,5 +1,5 @@
 {
-  "release": "0.7.0",
+  "release": "0.8.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -140,6 +140,13 @@
       "title": "Evaluate experience evidence",
       "description": "Freeze exact observation cohorts and interpret outcomes, unknown consumption and evaluation limits.",
       "order": 155
+    },
+    {
+      "source": "docs/api/memory-changes.md",
+      "file": "memory-changes.md",
+      "title": "Memory change feed",
+      "description": "Consume durable scoped memory changes with bounded pages, immutable fences and restart-safe cursors.",
+      "order": 55
     }
   ]
 }

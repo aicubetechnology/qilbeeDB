@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
@@ -6587,6 +6587,186 @@
           }
         }
       }
+    },
+    "/api/v1/memory/changes": {
+      "post": {
+        "operationId": "readMemoryChanges",
+        "summary": "Read a durable scoped memory change feed",
+        "description": "Requires memory_read. Journal entries commit atomically with memory mutations and newly attached embeddings. No memory content is copied. after is exclusive; through is an optional inclusive fence. complete is relative to that fence, not a closed stream. Persist next_cursor; preserve high_watermark as through while catching up. No historical backfill, expiry events or retention pruning in this release. Wrong-scope or ahead-of-journal cursors return 409.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryChangesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryChangesRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "query": {
+                  "after": null,
+                  "through": null,
+                  "limit": 100
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11864,6 +12044,198 @@
         "required": [
           "contract_version",
           "export"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangeCursor": {
+        "type": "object",
+        "properties": {
+          "journal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "journal_id",
+          "sequence"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangeKind": {
+        "type": "string",
+        "enum": [
+          "created",
+          "updated",
+          "deleted",
+          "embedding_attached"
+        ]
+      },
+      "MemoryChange": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/MemoryChangeCursor"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MemoryChangeKind"
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "record_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "change_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "cursor",
+          "kind",
+          "record_id",
+          "record_revision",
+          "author",
+          "committed_at_millis",
+          "change_digest"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangesQuery": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "through": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangesPage": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryChange"
+            },
+            "maxItems": 256
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "changes",
+          "next_cursor",
+          "high_watermark",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangesRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/MemoryChangesQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryChangesResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/MemoryChangesPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
         ],
         "additionalProperties": false
       }
