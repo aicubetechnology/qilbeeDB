@@ -94,6 +94,36 @@ the evaluator checks the saved document set, unique UUIDs, revision and embeddin
 identities, then verifies existing source content before creating further records.
 It never silently rebuilds a manifest that points at a reset or changed database.
 
+## Pin a trial before executing it
+
+Create a plan without database credentials or HTTP calls:
+
+```bash
+python3 scripts/evaluate_retrieval.py \
+  --fixture benchmarks/retrieval/contract-fixture.json \
+  --split development --ranking-version weighted_rrf_v1 \
+  --repetitions 3 --seed 20260920 \
+  --write-plan /secure/path/development-plan.json
+```
+
+Pass `--plan /secure/path/development-plan.json` to the run command above and omit
+`--repetitions`. A pinned plan cannot be overridden with split, seed, repetition
+or ranking flags. The plan binds the canonical fixture digest, including corpus,
+vectors, model identity, judgments and query splits; it also records the exact
+server profile, final response size and trial budgets. The evaluator rejects a
+changed fixture or returned hybrid profile. Reports retain the plan and its hash.
+Keep plans in version control or an independently timestamped experiment registry.
+Hash matching by itself is not proof of preregistration or independent review.
+
+`--split development` executes only development queries, including warmup and
+resource passes. Test summaries have zero queries and null measurements because
+they were not run. `--split test` executes only test queries; `all` keeps the
+original behavior. Both splits remain in the frozen fixture so the plan detects
+corpus or judgment edits. Preparing document embeddings does not use query
+judgments, but operators must separately control access to reserved queries.
+Previously inspected test queries cannot become fresh holdout evidence by changing
+a flag or an embedding model. Preserve them as regression or exploratory evidence.
+
 ## Compare equivalent requests
 
 All methods use the same corpus tag and authorized scope, queries and final

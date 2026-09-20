@@ -28,6 +28,69 @@ VERSIONS = {
     "hybrid": "weighted_rrf_v1",
 }
 
+PROFILES = {
+    "weighted_rrf_v1": {
+        "version": "weighted_rrf_v1",
+        "method": "weighted_rrf",
+        "lexical_version": "bm25_v1",
+        "semantic_version": "cosine_exact_v1",
+        "candidate_limit": 100,
+        "lexical_weight": 0.5,
+        "semantic_weight": 0.5,
+        "rank_constant": 60,
+        "experimental": True,
+    },
+}
+
+
+def trial_plan(
+    fixture,
+    split="all",
+    ranking_version="weighted_rrf_v1",
+    repetitions=3,
+    seed=20260920,
+):
+    if ranking_version not in PROFILES:
+        raise ValueError("Unknown server-owned ranking version")
+    return {
+        "schema_version": 1,
+        "fixture_sha256": digest(fixture),
+        "split": split,
+        "hybrid_profile": dict(PROFILES[ranking_version]),
+        "repetitions": repetitions,
+        "seed": seed,
+        "k": 10,
+        "scan_limit": 10000,
+        "scan_bytes_limit": 67108864,
+        "min_score": -1.0,
+        "client_concurrency": 1,
+        "warmup_passes": 1,
+    }
+
+
+def validate_plan(plan, fixture):
+    try:
+        expected = trial_plan(
+            fixture,
+            plan["split"],
+            plan["hybrid_profile"]["version"],
+            plan["repetitions"],
+            plan["seed"],
+        )
+        valid = (
+            plan == expected
+            and plan["split"] in ("development", "test", "all")
+            and type(plan["repetitions"]) is int
+            and 1 <= plan["repetitions"] <= 100
+            and type(plan["seed"]) is int
+        )
+    except (KeyError, TypeError, ValueError):
+        valid = False
+    if not valid:
+        raise ValueError(
+            "Trial plan differs from its frozen fixture or supported server profile"
+        )
+
 
 def canonical(value):
     return json.dumps(
@@ -440,14 +503,14 @@ def container_resources(container):
         return {"available": False, "reason": "Container cgroup v2 metrics unavailable"}
 
 
-def query_request(mode, query, fixture, scope, tag):
+def query_request(mode, query, fixture, scope, tag, ranking_version="weighted_rrf_v1"):
     fields = {"limit": 10, "scan_limit": 10000, "tag": tag}
     if mode != "semantic":
         fields.update(text=query["text"], scan_bytes_limit=67108864)
     if mode != "lexical":
         fields.update(space=fixture["space"], vector=query["vector"], min_score=-1.0)
     if mode == "hybrid":
-        fields["ranking_version"] = "weighted_rrf_v1"
+        fields["ranking_version"] = ranking_version
     body = {"contract_version": 1, "scope": scope, "query": fields}
     if mode != "semantic":
         body["mode"] = mode
@@ -488,17 +551,29 @@ def summarize(rows):
     }
 
 
-def evaluate(client, fixture, scope, state_path, repetitions, seed, container=None):
-    with state_lock(state_path):
-        return evaluate_locked(
-            client, fixture, scope, state_path, repetitions, seed, container
-        )
-
-
-def evaluate_locked(
-    client, fixture, scope, state_path, repetitions, seed, container=None
+def evaluate(
+    client, fixture, scope, state_path, repetitions, seed, container=None, plan=None
 ):
     validate_fixture(fixture)
+    plan = (
+        plan
+        if plan is not None
+        else trial_plan(fixture, repetitions=repetitions, seed=seed)
+    )
+    validate_plan(plan, fixture)
+    with state_lock(state_path):
+        return evaluate_locked(client, fixture, scope, state_path, plan, container)
+
+
+def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
+    repetitions, seed = plan["repetitions"], plan["seed"]
+    ranking_version = plan["hybrid_profile"]["version"]
+    versions = dict(VERSIONS, hybrid=ranking_version)
+    queries = [
+        q
+        for q in fixture["queries"]
+        if plan["split"] == "all" or q["split"] == plan["split"]
+    ]
     state, tag = prepare(client, fixture, scope, state_path)
     verify_sources(client, fixture, state, tag)
     frozen = {
@@ -524,20 +599,27 @@ def evaluate_locked(
     for repetition in range(-1, repetitions):
         if repetition == 0:
             before = container_resources(container)
-        jobs = [(query, mode) for query in fixture["queries"] for mode in MODES]
+        jobs = [(query, mode) for query in queries for mode in MODES]
         rng.shuffle(jobs)
         for query, mode in jobs:
-            path, body = query_request(mode, query, fixture, scope, tag)
+            path, body = query_request(
+                mode, query, fixture, scope, tag, ranking_version
+            )
             try:
                 result, elapsed, size = client.call("POST", path, body)
                 page = result["page"]
                 if (
                     result["scope"] != scope
-                    or result["ranking_version"] != VERSIONS[mode]
+                    or result["ranking_version"] != versions[mode]
                     or result["mode"] != mode
                 ):
                     violations["scope_or_corpus"] += 1
                     raise ValueError("Scope or ranking identity changed")
+                if mode == "hybrid" and page.get("ranking") != plan["hybrid_profile"]:
+                    violations["scope_or_corpus"] += 1
+                    raise ValueError(
+                        "Server ranking profile differs from the pinned plan"
+                    )
                 if page["exhaustive"] is not True or page["next_after"] is not None:
                     violations["partial_scan"] += 1
                     raise ValueError("Evaluation requires complete corpus scans")
@@ -638,8 +720,10 @@ def evaluate_locked(
             start_resources = container_resources(container)
             started = time.perf_counter()
             try:
-                for query in fixture["queries"]:
-                    path, body = query_request(mode, query, fixture, scope, tag)
+                for query in queries:
+                    path, body = query_request(
+                        mode, query, fixture, scope, tag, ranking_version
+                    )
                     result, _, _ = client.call("POST", path, body)
                     if result["page"]["exhaustive"] is not True:
                         raise ValueError("Resource pass encountered a partial scan")
@@ -649,7 +733,7 @@ def evaluate_locked(
                 )
             end_resources = container_resources(container)
             resources_by_mode[mode] = {
-                "queries": len(fixture["queries"]),
+                "queries": len(queries),
                 "elapsed_seconds_including_telemetry": time.perf_counter() - started,
                 "before": start_resources,
                 "after": end_resources,
@@ -669,7 +753,7 @@ def evaluate_locked(
     complete = (
         not failures
         and not any(violations.values())
-        and len(rows) == len(fixture["queries"]) * len(MODES)
+        and len(rows) == len(queries) * len(MODES)
         and all(len(r["samples"]) == repetitions for r in rows)
     )
     summaries = {
@@ -694,9 +778,7 @@ def evaluate_locked(
             )
             for mode in MODES
         }
-        for category in sorted(
-            {q["category"] for q in fixture["queries"] if q["split"] == "test"}
-        )
+        for category in sorted({q["category"] for q in queries if q["split"] == "test"})
     }
     paired = {}
     losses = []
@@ -733,6 +815,8 @@ def evaluate_locked(
         paired[baseline] = paired_interval(deltas, seed)
     report = {
         "schema_version": 1,
+        "trial_plan": plan,
+        "trial_plan_sha256": digest(plan),
         "server_health": health,
         "fixture_sha256": digest(fixture),
         "fixture_kind": fixture["kind"],
@@ -747,6 +831,7 @@ def evaluate_locked(
             for alias, entry in state["documents"].items()
         },
         "conditions": {
+            "selected_split": plan["split"],
             "k": 10,
             "scan_records": 10000,
             "lexical_hybrid_scan_bytes": 67108864,
@@ -814,17 +899,21 @@ def markdown_report(report):
     def number(value):
         return "unavailable" if value is None else f"{value:.4f}"
 
+    selected = report.get("conditions", {}).get("selected_split", "all")
+    display_split = "development" if selected == "development" else "test"
     lines = [
         "# Retrieval evaluation report",
+        "",
+        f"Selected split: **{selected}**. Empty split summaries mean not run, never zero relevance.",
         "",
         "This is a "
         + report["fixture_kind"]
         + " comparison. Hybrid remains **experimental**.",
         "",
-        "| Method | Test nDCG@10 | Test Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
+        "| Method | nDCG@10 | Recall@10 | No useful result, answerable | Retrieval p50 / p95 ms | HTTP p50 / p95 ms | Mean response bytes |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
-    for mode, summary in report["summary"]["test"].items():
+    for mode, summary in report["summary"][display_split].items():
         lines.append(
             "| "
             + mode
@@ -893,18 +982,49 @@ def markdown_report(report):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture", type=Path, required=True)
-    parser.add_argument("--credential-file", type=Path, required=True)
-    parser.add_argument("--scope-file", type=Path, required=True)
-    parser.add_argument("--state", type=Path, required=True)
-    parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--credential-file", type=Path)
+    parser.add_argument("--scope-file", type=Path)
+    parser.add_argument("--state", type=Path)
+    parser.add_argument("--report", type=Path)
     parser.add_argument("--base-url", default="http://127.0.0.1:7474")
-    parser.add_argument("--repetitions", type=int, default=3)
-    parser.add_argument("--seed", type=int, default=20260920)
+    parser.add_argument("--repetitions", type=int)
+    parser.add_argument("--seed", type=int)
+    parser.add_argument("--split", choices=["all", "development", "test"])
+    parser.add_argument("--ranking-version", choices=sorted(PROFILES))
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--write-plan", type=Path)
+    group.add_argument("--plan", type=Path)
     parser.add_argument("--container")
     args = parser.parse_args()
-    if not 1 <= args.repetitions <= 100:
-        parser.error("repetitions must be in 1..100")
     fixture = json.loads(args.fixture.read_text())
+    validate_fixture(fixture)
+    if args.plan and any(
+        v is not None
+        for v in (args.split, args.ranking_version, args.repetitions, args.seed)
+    ):
+        parser.error("A pinned --plan cannot be overridden with trial parameters")
+    plan = (
+        json.loads(args.plan.read_text())
+        if args.plan
+        else trial_plan(
+            fixture,
+            args.split or "all",
+            args.ranking_version or "weighted_rrf_v1",
+            args.repetitions if args.repetitions is not None else 3,
+            args.seed if args.seed is not None else 20260920,
+        )
+    )
+    validate_plan(plan, fixture)
+    if args.write_plan:
+        if args.write_plan.exists():
+            parser.error("Plan already exists; use a new path for a new trial")
+        save(args.write_plan, plan)
+        print("Wrote trial plan:", args.write_plan, digest(plan))
+        return 0
+    if not all((args.credential_file, args.scope_file, args.state, args.report)):
+        parser.error(
+            "A run requires --credential-file, --scope-file, --state and --report"
+        )
     scope = json.loads(args.scope_file.read_text())
     secret = json.loads(args.credential_file.read_text())["secret"]
     report = evaluate(
@@ -912,9 +1032,10 @@ def main():
         fixture,
         scope,
         args.state,
-        args.repetitions,
-        args.seed,
+        plan["repetitions"],
+        plan["seed"],
         args.container,
+        plan=plan,
     )
     report["fixture_file_sha256"] = hashlib.sha256(
         args.fixture.read_bytes()
