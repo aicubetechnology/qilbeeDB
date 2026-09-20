@@ -9,6 +9,7 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/experiences/read", post(read))
         .route("/api/v1/experiences/events", post(observe))
         .route("/api/v1/experiences/events/read", post(event))
+        .route("/api/v1/experiences/history", post(history))
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -167,6 +168,40 @@ async fn event(
                 .map_err(ApiError::operation)?
                 .ok_or_else(missing)?;
             Ok(Json(json!({"contract_version":1,"event":event})))
+        })
+        .await
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct HistoryRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+    attempt_id: String,
+    query: ExperienceHistoryQuery,
+}
+async fn history(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<HistoryRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let store = state.learning.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::ExperienceRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let page = store
+                .experience_history(
+                    &scope.tenant_id,
+                    &scope.storage_namespace,
+                    &request.attempt_id,
+                    request.query,
+                )
+                .map_err(ApiError::operation)?;
+            Ok(Json(json!({"contract_version":1,"page":page})))
         })
         .await
 }

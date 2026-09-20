@@ -231,3 +231,40 @@ source-revocation propagation, evidence deduplication, independent execution
 verification or automatic strategy extraction. See the
 [experience-memory design](../research/experience-memory-design.md) for the
 separate acceptance criteria for those extensions.
+
+## Read a bounded observation history
+
+`POST /api/v1/experiences/history` requires `experience_read` for the exact scope.
+Use this endpoint to audit an attempt without remembering every event ID:
+
+```json
+{
+  "contract_version": 1,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "attempt_id": "attempt-v1",
+  "query": {"limit": 32, "cursor": null}
+}
+```
+
+The response's `page` contains `receipt_digest`, `through_revision`, `events`,
+`scanned_events`, `next_cursor` and `complete`. Pass `next_cursor` unchanged in the
+next request. Stop only when `complete` is true. Every continuation rechecks the
+credential and scope; a cursor grants no access and is bound to the attempt receipt.
+
+The first page freezes the attempt's current revision. Later reports are omitted
+from that traversal. This is a **logical revision snapshot** of immutable events,
+not a retained database snapshot. Event IDs are ordered by UTF-8 byte length, then
+by byte value, matching storage keys; this is not chronological order. Sort a
+completed export by each event's `record.revision` when chronology is required.
+
+`limit` is a candidate budget from 1 through 64. Each request examines at most
+that many event candidates; authentication, receipt and fence lookups are
+additional fixed reads. A page can be empty and still have a cursor when newly
+appended events fall beyond the fence. A full final page can require an extra
+empty continuation. New reports can increase scan work, but never enter the frozen
+result set or duplicate previously returned events when the cursor is preserved.
+The service retains no pagination session, so continuation survives restart.
+
+An absent attempt returns 404. A cursor for a different receipt returns 409;
+invalid bounds or missing continuation/fence events return 400. This endpoint
+also works for attempts written before history pagination was introduced.

@@ -414,3 +414,144 @@ fn experience_can_resolve_late_consumption_without_changing_a_terminal_outcome()
         );
     }
 }
+
+#[test]
+fn experience_history_is_bounded_fenced_and_recovers_without_an_index_migration() {
+    let (dir, db) = setup();
+    let receipt = create(&db);
+    for (number, name) in ["z", "aa", "b"].iter().enumerate() {
+        db.observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command(name, number as u64 + 1, &receipt.context_digest, "unknown"),
+            actor("observer"),
+        )
+        .unwrap();
+    }
+    let query = ExperienceHistoryQuery {
+        limit: 1,
+        cursor: None,
+    };
+    let first = db
+        .experience_history("tenant", "scope", "attempt", query)
+        .unwrap();
+    assert_eq!(first.through_revision, 4);
+    assert_eq!(first.events[0].command.event_id, "b");
+    assert_eq!(first.scanned_events, 1);
+    assert!(!first.complete);
+    // This event sorts between existing keys, but lies beyond the immutable fence.
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("c", 4, &receipt.context_digest, "unknown"),
+        actor("observer"),
+    )
+    .unwrap();
+    drop(db);
+    let db = LearningMemory::open(dir.path()).unwrap();
+    let mut cursor = first.next_cursor;
+    let mut ids = vec!["b".to_string()];
+    let mut empty_continuation = false;
+    loop {
+        let page = db
+            .experience_history(
+                "tenant",
+                "scope",
+                "attempt",
+                ExperienceHistoryQuery { limit: 1, cursor },
+            )
+            .unwrap();
+        assert_eq!(page.through_revision, 4);
+        assert!(page.scanned_events <= 1);
+        empty_continuation |= page.events.is_empty() && !page.complete;
+        ids.extend(page.events.into_iter().map(|e| e.command.event_id));
+        cursor = page.next_cursor;
+        if page.complete {
+            break;
+        }
+    }
+    assert_eq!(ids, ["b", "z", "aa"]);
+    assert!(empty_continuation);
+}
+
+#[test]
+fn experience_history_rejects_foreign_cursors_and_invalid_bounds() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("event", 1, &receipt.context_digest, "unknown"),
+        actor("observer"),
+    )
+    .unwrap();
+    for limit in [0, 65, usize::MAX] {
+        assert!(
+            db.experience_history(
+                "tenant",
+                "scope",
+                "attempt",
+                ExperienceHistoryQuery {
+                    limit,
+                    cursor: None
+                }
+            )
+            .is_err()
+        );
+    }
+    let page = db
+        .experience_history(
+            "tenant",
+            "scope",
+            "attempt",
+            ExperienceHistoryQuery {
+                limit: 1,
+                cursor: None,
+            },
+        )
+        .unwrap();
+    db.create_experience("tenant", "other", input("attempt"), actor("writer"))
+        .unwrap();
+    assert!(matches!(
+        db.experience_history(
+            "tenant",
+            "other",
+            "attempt",
+            ExperienceHistoryQuery {
+                limit: 1,
+                cursor: page.next_cursor.clone()
+            }
+        ),
+        Err(Error::ConstraintViolation(_))
+    ));
+    let mut cursor = page.next_cursor.unwrap();
+    cursor.after_event_id = "absent".into();
+    assert!(
+        db.experience_history(
+            "tenant",
+            "scope",
+            "attempt",
+            ExperienceHistoryQuery {
+                limit: 1,
+                cursor: Some(cursor)
+            }
+        )
+        .is_err()
+    );
+    let empty = db
+        .experience_history(
+            "tenant",
+            "other",
+            "attempt",
+            ExperienceHistoryQuery {
+                limit: 64,
+                cursor: None,
+            },
+        )
+        .unwrap();
+    assert!(empty.complete && empty.events.is_empty());
+    assert_eq!(empty.through_revision, 1);
+}

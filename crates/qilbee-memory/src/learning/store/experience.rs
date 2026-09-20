@@ -192,7 +192,7 @@ fn validate_digest(value: &str) -> Result<()> {
         ))
     }
 }
-fn key(kind: u8, tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
+pub(super) fn key(kind: u8, tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
     validate_text(tenant, "tenant", 512)?;
     validate_text(namespace, "experience namespace", 4096)?;
     validate_text(id, "attempt ID", 512)?;
@@ -202,7 +202,7 @@ fn key(kind: u8, tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
     }
     Ok(key)
 }
-fn event_key(tenant: &str, namespace: &str, id: &str, event: &str) -> Result<Vec<u8>> {
+pub(super) fn event_key(tenant: &str, namespace: &str, id: &str, event: &str) -> Result<Vec<u8>> {
     let mut key = key(13, tenant, namespace, id)?;
     validate_text(event, "experience event ID", 512)?;
     append_component(&mut key, event);
