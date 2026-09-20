@@ -3,10 +3,10 @@
 
 ![QilbeeDB Logo](https://preview--agent-chronicle-db.lovable.app/assets/qilbee-logo-c3CsNydB.png)
 
-**Enterprise-Grade Graph Database with Bi-Temporal Agent Memory**
+**Graph Database and Evidence-Driven Memory for AI Agents**
 
 [![License](https://img.shields.io/badge/License-BSL%201.1-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/Rust-tested%20on%201.93.1-orange.svg)](https://www.rust-lang.org/)
 [![Documentation](https://img.shields.io/badge/docs-online-green.svg)](https://docs.qilbeedb.io/)
 [![GitHub](https://img.shields.io/github/stars/aicubetechnology/qilbeeDB?style=social)](https://github.com/aicubetechnology/qilbeeDB)
 
@@ -24,40 +24,56 @@ Created by **[AICUBE TECHNOLOGY LLC](https://www.aicube.ca/)**
 
 ## 🚀 What is QilbeeDB?
 
-QilbeeDB is a high-performance graph database written in Rust, designed specifically for AI agent systems with advanced bi-temporal memory management. It combines the power of graph databases with sophisticated memory architectures to enable AI agents to maintain context, learn from interactions, and evolve over time.
+QilbeeDB is a graph database written in Rust for experimenting with persistent
+agent memory, temporal records, retrieval and outcome-driven procedural learning.
+It is under active development; production guarantees and benchmark leadership
+have not been established.
 
-**The first graph database to natively integrate bi-temporal memory management** (event time + transaction time) with support for episodic, semantic, procedural, and factual memory types.
+**Implementation status:** the Rust library includes a RocksDB episode backend
+and an evidence-driven procedure ledger. The current HTTP memory routes still
+use volatile storage. Cypher support is partial, Bolt is a placeholder, and the
+graph transaction layer does not yet provide atomic multi-operation commits.
+See the [code audit and research roadmap](docs/research/agent-memory-evolution.md)
+before planning production use.
 
 ## ✨ Features
 
 ### 🧠 **AI Agent Memory**
-- **Native Memory Types**: Episodic, semantic, procedural, and factual memory
-- **Automatic Consolidation**: Short-term to long-term memory transitions
-- **Active Forgetting**: Relevance-based memory pruning
-- **Bi-Temporal Tracking**: Track both event time and transaction time
+- **Episode Storage**: In-memory and RocksDB backends, with event and transaction timestamps
+- **Consolidation**: Callable LLM-based summarization and fact extraction
+- **Forgetting**: Callable relevance decay and pruning
+- **Procedural Learning**: Immutable candidates, paired evaluation receipts,
+  fixed-budget promotion and automatic suspension after monitoring failures
+  ([Rust API](docs/agent-memory/learning.md))
 
 ### ⚡ **High Performance**
-- **Rust-Powered**: Zero-cost abstractions and memory safety
-- **RocksDB Backend**: High-performance storage with compression and bloom filters
-- **Vectorized Execution**: SIMD-optimized query processing
-- **Cost-Based Optimization**: Intelligent query planning
+- **Rust Implementation** with a RocksDB storage backend
+- **Vector Retrieval**: In-memory HNSW index and configurable embedding providers in the Rust library
+- **Performance Validation**: Comparative latency, throughput and quality benchmarks are planned
 
 ### 📊 **OpenCypher Support**
-- **Full Query Language**: Complete OpenCypher implementation
-- **Pattern Matching**: Complex graph pattern queries
-- **Aggregations**: COUNT, SUM, AVG, MIN, MAX
-- **Path Finding**: Variable-length path traversal
+- **Partial Cypher Support** through a simple parser and query executor
+- Full language compatibility and conformance testing are planned
 
 ### 🔌 **Multiple Protocols**
-- **Bolt Protocol**: Neo4j-compatible for existing tools
+- **Bolt Protocol**: Placeholder; Neo4j compatibility is not yet available
 - **HTTP REST API**: RESTful JSON interface
 - **gRPC Support**: High-performance RPC (planned)
 
-### 🏢 **Enterprise-Ready**
-- **ACID Transactions**: Full transactional support
-- **Query Optimization**: Cost-based query planner
-- **Monitoring**: Prometheus metrics and distributed tracing
-- **Production-Grade**: Battle-tested query execution engine
+### 🏢 **Production Roadmap**
+- Atomic graph transactions and conflict handling
+- Persistent HTTP memory, resource ownership and secure server bootstrap
+- Verified recovery, observability and reproducible benchmarks
+
+### Run the learning cycle
+
+```bash
+cargo run -p qilbee-memory --example learning_cycle --locked
+```
+
+This offline example evaluates a procedure, promotes it, restores it after
+reopening the database and suspends it after resource regressions. It is a
+deterministic demonstration, not an external agent benchmark.
 
 ## 📦 Installation
 
@@ -100,7 +116,7 @@ volumes:
 ### Building from Source
 
 ```bash
-# Prerequisites: Rust 1.70+, Git
+# Prerequisites: Rust with edition 2024 support (tested on 1.93.1), Git
 git clone https://github.com/aicubetechnology/qilbeeDB.git
 cd qilbeeDB
 
@@ -285,7 +301,7 @@ Comprehensive documentation is available at:
 
 ### Prerequisites
 
-- Rust 1.70 or later
+- Rust with edition 2024 support (tested on 1.93.1)
 - Git
 - Build tools (gcc/clang, make)
 
@@ -374,25 +390,27 @@ If you discover a security vulnerability, please email contact@aicube.ca instead
 
 ## 📊 Benchmarks
 
-QilbeeDB is designed for high performance:
-
-- **Node Creation**: 100,000+ nodes/second
-- **Relationship Creation**: 50,000+ relationships/second
-- **Simple Queries**: Sub-millisecond response times
-- **Complex Pattern Matching**: Optimized with cost-based planning
-- **Memory Consolidation**: Real-time processing with minimal overhead
-
-See our [benchmark documentation](https://docs.qilbeedb.io/operations/performance/#use-parameters) for detailed performance metrics.
+Reproducible performance and agent-quality baselines have not yet been
+published for this implementation. The
+[evaluation plan](docs/research/agent-memory-evolution.md#evaluation-protocol-for-state-of-the-art-comparisons)
+defines the datasets, controls and operational measurements needed before
+making comparative claims. Unit tests and the offline example validate
+behavior, not production throughput or superiority over other memory systems.
 
 ## 🗺️ Roadmap
 
 - [x] Core graph database functionality
-- [x] OpenCypher query language support
-- [x] Bi-temporal memory management
+- [x] Partial Cypher query execution
+- [x] Event and transaction timestamps on episodes
 - [x] HTTP REST API
-- [x] Bolt protocol support
+- [ ] Bolt protocol implementation and conformance
 - [x] Python SDK
-- [x] Enterprise security (JWT, API Keys, RBAC)
+- [x] Security components (JWT, API keys, RBAC)
+- [ ] Secure production bootstrap and resource ownership across API routes
+- [ ] Persistent HTTP memory
+- [ ] Atomic multi-operation graph transactions
+- [x] Durable episode integrity and versioned structured payloads
+- [x] Outcome-driven procedure ledger in the Rust library
 - [x] Rate limiting with token bucket algorithm
 - [ ] Audit logging
 - [ ] Distributed clustering
@@ -454,13 +472,13 @@ QilbeeDB is built on top of excellent open-source projects:
 ## 🌟 Why QilbeeDB?
 
 ### For AI Developers
-Built specifically for AI agents with native memory management. No need to build complex memory systems on top of generic databases.
+Experiment with native episode storage, retrieval and evidence-driven procedure selection. Agent execution and evaluation remain application responsibilities.
 
 ### For Graph Database Users
-Familiar OpenCypher syntax with modern Rust performance. Drop-in replacement for Neo4j-compatible tools via Bolt protocol.
+Explore a Rust graph engine with partial Cypher support. Neo4j/Bolt compatibility is a future goal.
 
 ### For Enterprises
-Production-ready with ACID transactions, monitoring, and enterprise-grade query optimization. Designed for high-throughput workloads.
+Evaluate the implementation against the documented production gaps and research roadmap before deployment.
 
 ---
 

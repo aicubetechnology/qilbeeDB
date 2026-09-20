@@ -22,6 +22,7 @@ pub mod agent;
 pub mod consolidation;
 pub mod embeddings;
 pub mod episode;
+pub mod learning;
 pub mod llm;
 pub mod storage;
 pub mod types;
