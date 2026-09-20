@@ -30,7 +30,7 @@ split for final comparisons. Do not repeatedly tune against the test results.
 
 ## Run a frozen comparison
 
-Use Python 3.9 or later. The evaluator uses the standard library and never calls
+Use Python 3.9 or later on Linux or macOS. The evaluator uses the standard library and never calls
 an embedding provider. Obtain a dedicated platform credential with `memory_read`
 and `memory_write` for an isolated test scope. Store its issuance JSON securely
 outside the repository. Save the scope as a separate JSON file, for example:
@@ -74,6 +74,25 @@ the comparison. The JSON report records failures instead of averaging them away;
 a failed comparison returns a nonzero exit code. Input/model or preparation errors
 fail before qualification. Keep the state file if preparation is interrupted:
 identical retries recover the original durable receipts.
+
+### Manifest persistence and concurrent runs
+
+Use a private, pre-existing directory on a local filesystem for state files. A run
+holds a nonblocking POSIX lock from preparation through final source verification.
+A second process using the same state path fails before issuing requests. The lock
+is released by the operating system on exit or a process crash; its hidden `.lock`
+file stays in place to avoid races between different lock inodes. Do not remove a
+lock file while evaluators are running. These are cooperating-process locks, not
+distributed coordination for network filesystems or different state paths.
+
+Each state replacement writes a mode-0600 temporary file, syncs its contents,
+atomically replaces the state and syncs the containing directory. A directory-sync
+failure is reported as failure even if the replacement is visible; retry with the
+same state and idempotency keys. Filesystem and hardware guarantees still apply.
+State and lock symlinks are refused. Before resuming an interrupted preparation,
+the evaluator checks the saved document set, unique UUIDs, revision and embedding
+identities, then verifies existing source content before creating further records.
+It never silently rebuilds a manifest that points at a reset or changed database.
 
 ## Compare equivalent requests
 
