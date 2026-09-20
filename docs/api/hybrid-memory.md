@@ -156,7 +156,8 @@ The defaults are a starting point, not an assertion that hybrid search improves
 every workload. Evaluate BM25, dense and hybrid retrieval on the same judged
 queries, frozen source corpus and externally generated vectors. Keep candidate
 budgets and output `k` explicit; report missing vectors and incomplete scans.
-Choose weights on development data and report held-out relevance and latency.
+The QilbeeDB team selects new server-owned profiles on development data and
+reports held-out relevance and latency; callers select the immutable version.
 
 The design uses [reciprocal rank fusion (Cormack, Clarke and Buettcher, SIGIR
 2009)](https://research.google/pubs/reciprocal-rank-fusion-outperforms-condorcet-and-individual-rank-learning-methods/).
@@ -189,3 +190,11 @@ The UUID cursor traverses source records, not ranked hits or a durable snapshot.
 Its exclusive lower bound prevents returning the same source UUID again on a
 forward continuation, but inserts or updates across requests can change coverage.
 It cannot reproduce a multi-page global ranking under concurrent mutation.
+
+## Measure retrieval time
+
+The response includes `timing.retrieval_micros`, the server wall time spent in
+the retrieval method. It excludes authentication, blocking-pool queueing, JSON
+serialization, transport and external embedding generation. Measure the client
+round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
+for frozen corpora, graded relevance, category regressions and timing limits.

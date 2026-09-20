@@ -1,6 +1,6 @@
 
 
-> Rust 0.4.0 adds model-bound semantic retrieval and durable learned-tool development.
+> Rust 0.5.0 adds scoped BM25 and experimental, server-versioned hybrid retrieval, reproducible evaluation, and maintained Markdown user guides.
 > Provision a tenant locally before use. Legacy routes require explicit opt-in
 > and retain their known limitations. See the [migration and API contract](docs/api/platform-http.md).
 <div align="center">

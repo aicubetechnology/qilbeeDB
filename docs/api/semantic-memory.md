@@ -83,9 +83,9 @@ Generate the query embedding externally, then post to
 }
 ```
 
-The response is `{contract_version: 1, scope, mode: "semantic",
-ranking_version: "cosine_exact_v1", page}`. The added mode/version metadata does
-not change the 0.4.0 cosine score semantics. For text plus vector retrieval, use
+The response remains `{contract_version: 1, scope, page}`, preserving the 0.4.0
+JSON envelope and cosine score semantics. `X-Qilbee-Ranking-Version` identifies
+`cosine_exact_v1` without adding fields to that legacy envelope. For text plus vector retrieval, use
 the separate [experimental hybrid endpoint](hybrid-memory.md):
 
 | Page field | Meaning |
@@ -145,3 +145,11 @@ revocation retain the existing live authorization behavior.
 `EmbeddingReceipt`, `SemanticQuery`, `SemanticHit`, `SemanticPage` and their
 response envelopes. Use [`/docs`](http://localhost:7474/docs) from a browser on
 the Docker host to inspect the complete contract.
+
+## Measure retrieval time
+
+The `X-Qilbee-Retrieval-Micros` response header measures server wall time spent in
+the retrieval method. It excludes authentication, blocking-pool queueing, JSON
+serialization, transport and external embedding generation. Measure the client
+round trip separately. See the [reproducible evaluation workflow](../research/retrieval-evaluation.md)
+for frozen corpora, graded relevance, category regressions and timing limits.

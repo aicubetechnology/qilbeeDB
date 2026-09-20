@@ -77,6 +77,20 @@
       "title": "Learned tool development",
       "description": "Manage immutable tool artifacts, executor profiles and development outcomes.",
       "order": 100
+    },
+    {
+      "source": "docs/research/retrieval-evaluation.md",
+      "file": "retrieval-evaluation.md",
+      "title": "Evaluate retrieval",
+      "description": "Compare frozen lexical, semantic and hybrid retrieval with explicit evidence and limits.",
+      "order": 110
+    },
+    {
+      "source": "docs/research/retrieval-contract-report.md",
+      "file": "retrieval-report.md",
+      "title": "Synthetic retrieval report",
+      "description": "Inspect the recorded hybrid regressions, uncertainty and limits of the 0.5.0 contract trial.",
+      "order": 120
     }
   ]
 }

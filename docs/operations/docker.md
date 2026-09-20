@@ -225,3 +225,18 @@ external generation/test evidence. Embeddings come from an external model
 service. Artifact source is not executed by the database; configured development
 workers, isolated invocation transport and publication gates remain separate
 integration work. Exact bounded retrieval is not an ANN performance claim.
+
+## Retrieval validation in 0.5.0
+
+The 0.5.0 release preserves cosine search and adds explicit lexical and
+experimental server-versioned hybrid endpoints. Its isolated Docker acceptance
+covers authorization, scoped lifecycle, OpenAPI response schemas, process-crash
+recovery and replay of a frozen 40-record retrieval fixture. The synthetic
+comparison did not qualify hybrid relevance; see the
+[report and limits](../research/retrieval-contract-report.md).
+
+English Markdown user-guide sources are exported into the sibling
+`qilbee-site/app/src/doc/qilbeedb` directory. The exporter and PR documentation
+workflow are described in the repository's `CONTRIBUTING.md`. After a validated
+release, the site export uses `--status released`; the hybrid ranking profile
+continues to report `experimental: true`.

@@ -38,6 +38,16 @@ async fn semantic_http_ranks_model_bound_embeddings_and_replays_after_reopen() {
     assert_eq!(first.0, StatusCode::OK);
     let result = request(&router, "POST", "/api/v1/memory/search", &writer, query()).await;
     assert_eq!(result.0, StatusCode::OK);
+    assert_eq!(
+        result
+            .1
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        vec!["contract_version", "page", "scope"]
+    );
     assert_eq!(result.1["page"]["hits"][0]["record"]["record_id"], id);
     assert_eq!(result.1["page"]["hits"][0]["score"], 1.0);
     assert_eq!(result.1["page"]["exhaustive"], true);
