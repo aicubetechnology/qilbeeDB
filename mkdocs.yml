@@ -111,6 +111,9 @@ nav:
     - Memory Types: agent-memory/memory-types.md
     - Semantic Search: agent-memory/semantic-search.md
     - Persistence: agent-memory/persistence.md
+    - Storage Integrity: agent-memory/storage-integrity.md
+    - Evidence-Driven Learning: agent-memory/learning.md
+    - Research and Evolution: research/agent-memory-evolution.md
     - Consolidation: agent-memory/consolidation.md
     - Forgetting: agent-memory/forgetting.md
     - Statistics: agent-memory/statistics.md
