@@ -1,6 +1,6 @@
 # Configuration
 
-For the current Rust 0.2.0 platform, start with the
+For the current Rust 0.3.0 platform, start with the
 [local Docker guide](../operations/docker.md) and
 [versioned HTTP reference](../api/http-api.md). Legacy graph/SDK examples and
 configuration snippets below are not a compatibility guarantee for the new

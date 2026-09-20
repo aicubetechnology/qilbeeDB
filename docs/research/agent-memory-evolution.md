@@ -36,7 +36,7 @@ database for agents, or that the hypotheses below are previously undiscovered.
 | P1 | Baseline manager writes can evict data before rejecting foreign episodes; reads return invalidated episodes | Scope errors can remove valid memories and invalidated content remains served | Manager validation, update capacity and ordinary reads corrected |
 | P1 | `PersistentAgentMemory::store_episode` does not use `auto_embed` | Configuration suggests behavior the method does not provide | Open |
 | P1 | `types.rs::Relevance::decay` reapplies elapsed time since access to an already decayed score | Maintenance frequency changes forgetting behavior | Open |
-| P1 | No outcome evidence in the consolidation loop | Repetition cannot be distinguished from actual improvement | Procedural ledger implemented; HTTP integration pending |
+| P1 | No outcome evidence in the consolidation loop | Repetition cannot be distinguished from actual improvement | Procedural ledger and authenticated HTTP implemented; external evidence verification remains open |
 | P2 | `parser.rs::parse` is a placeholder; `simple_parser` exists; planner covers a subset | Full OpenCypher claims do not match the implementation | Open |
 | P2 | Bolt handler and listener startup contain placeholders | Neo4j compatibility is not delivered | Open |
 
