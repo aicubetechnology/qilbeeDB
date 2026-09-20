@@ -6224,6 +6224,183 @@
           }
         }
       }
+    },
+    "/api/v1/experiences/lineage": {
+      "post": {
+        "operationId": "readExperienceLineage",
+        "summary": "Read pinned experience ancestry",
+        "description": "Requires experience_read. Visits only exact parent events named by immutable receipts, from immediate parent toward the root, up to max_depth. Never substitutes the latest parent outcome. complete=false and next_parent identify a truncated traversal, not a missing or failed execution. This is recorded provenance, not causal or counterfactual proof.",
+        "tags": [
+          "Experiences"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete response; inspect coverage and immutable identities.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceLineageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceLineageRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "attempt_id": "attempt-v1",
+                "max_depth": 16
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11180,6 +11357,100 @@
         "required": [
           "contract_version",
           "binding"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceLineage": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/ExperienceReceipt"
+          },
+          "ancestors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperienceEvent"
+            },
+            "maxItems": 64
+          },
+          "next_parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceParent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_parent_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "origin",
+          "ancestors",
+          "next_parent",
+          "next_parent_digest",
+          "complete"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceLineageRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "attempt_id",
+          "max_depth"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceLineageResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "lineage": {
+            "$ref": "#/components/schemas/ExperienceLineage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "lineage"
         ],
         "additionalProperties": false
       }

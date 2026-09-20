@@ -710,3 +710,96 @@ fn experience_artifact_bindings_reject_forged_content_authority_and_conflicts() 
             .is_err()
     );
 }
+
+#[test]
+fn experience_lineage_preserves_historical_branch_and_reports_truncation() {
+    let (dir, db) = setup();
+    let root = create(&db);
+    let old = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("old", 1, &root.context_digest, "unknown"),
+            actor("observer"),
+        )
+        .unwrap();
+    let mut middle = input("middle");
+    middle.parent = Some(ExperienceParent {
+        attempt_id: "attempt".into(),
+        event_id: "old".into(),
+    });
+    let middle = db
+        .create_experience("tenant", "scope", middle, actor("writer"))
+        .unwrap();
+    let step = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "middle",
+            command("step", 1, &middle.context_digest, "failed"),
+            actor("observer"),
+        )
+        .unwrap();
+    let mut leaf = input("leaf");
+    leaf.parent = Some(ExperienceParent {
+        attempt_id: "middle".into(),
+        event_id: "step".into(),
+    });
+    db.create_experience("tenant", "scope", leaf, actor("writer"))
+        .unwrap();
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("new", 2, &root.context_digest, "succeeded"),
+        actor("observer"),
+    )
+    .unwrap();
+    let bounded = db.experience_lineage("tenant", "scope", "leaf", 1).unwrap();
+    assert!(!bounded.complete);
+    assert_eq!(bounded.ancestors, vec![step.clone()]);
+    assert_eq!(bounded.next_parent_digest, Some(old.event_digest.clone()));
+    let tail = db
+        .experience_lineage("tenant", "scope", "middle", 1)
+        .unwrap();
+    assert!(tail.complete);
+    assert_eq!(tail.ancestors, vec![old.clone()]);
+    let full = db
+        .experience_lineage("tenant", "scope", "leaf", 64)
+        .unwrap();
+    assert!(full.complete);
+    assert_eq!(full.ancestors, vec![step, old]);
+    drop(db);
+    let db = LearningMemory::open(dir.path()).unwrap();
+    assert_eq!(
+        full,
+        db.experience_lineage("tenant", "scope", "leaf", 64)
+            .unwrap()
+    );
+    let root = db
+        .experience_lineage("tenant", "scope", "attempt", 1)
+        .unwrap();
+    assert!(root.complete && root.ancestors.is_empty() && root.next_parent_digest.is_none());
+}
+#[test]
+fn experience_lineage_enforces_namespace_and_work_limits() {
+    let (_dir, db) = setup();
+    create(&db);
+    for limit in [0, 65, usize::MAX] {
+        assert!(
+            db.experience_lineage("tenant", "scope", "attempt", limit)
+                .is_err()
+        );
+    }
+    for (tenant, namespace, id) in [
+        ("foreign", "scope", "attempt"),
+        ("tenant", "other", "attempt"),
+        ("tenant", "scope", "absent"),
+    ] {
+        assert!(matches!(
+            db.experience_lineage(tenant, namespace, id, 64),
+            Err(Error::KeyNotFound(_))
+        ));
+    }
+}

@@ -314,3 +314,39 @@ WAL. Read it with `POST /api/v1/experiences/artifacts/read` using the usual
 `contract_version`, `scope`, `attempt_id` and `binding_id`. Reading requires both
 `experience_read` and `tool_read`; every read revalidates the artifact and event.
 Multiple bindings to one artifact do not constitute independent evidence.
+
+## Trace the recorded lineage
+
+`POST /api/v1/experiences/lineage` reads the exact parent observations pinned by
+an attempt. It requires `experience_read` for the exact scope:
+
+```json
+{
+  "contract_version": 1,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "attempt_id": "attempt-v1",
+  "max_depth": 16
+}
+```
+
+The response's `lineage` contains the immutable `origin` receipt and `ancestors`
+in immediate-parent-to-root order. Each ancestor is the complete historical event
+whose digest was pinned by its child. A parent that later succeeds, fails or
+receives a consumption update does not change this historical path. A root attempt
+returns an empty ancestry and `complete: true`.
+
+`max_depth` is required and allows 1–64 ancestor events. When the limit is reached
+before the root, `complete` is false and `next_parent` plus `next_parent_digest`
+identify the next unread link. To continue, request the lineage of the **last
+returned ancestor's attempt ID**. Its immutable receipt starts at the next link;
+concatenate the ancestor arrays without repeating the previous page's origin.
+Each request rechecks authorization and scope. The response is not a live-state
+snapshot, a listing of descendants or an enumeration of possible branches.
+
+The reader fails closed when a visited parent is missing, its digest disagrees
+with the child, or a visited cycle is detected. An absent requested origin returns
+404; malformed depth returns 400; inconsistent stored lineage returns 500.
+A truncated path reports its limit explicitly and is never labeled complete.
+
+This records declared provenance. It does not prove a causal dependency, replay
+an execution, invent unobserved transitions or certify the truth of a report.
