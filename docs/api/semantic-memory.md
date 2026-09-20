@@ -106,8 +106,10 @@ and stale source revisions are excluded; tag/type filters apply before ranking.
 The implementation uses an exact cosine scan of durable vectors in the selected
 scope and model space, with float64 accumulation for float32 inputs. It does not
 claim ANN index scale or benchmarked language-model relevance. Each request
-holds the memory mutation lock while validating records, so its scanned page is
-consistent with writes in this process. The scan budget bounds work and should
+reads records, integrity indexes and embeddings through one RocksDB snapshot,
+using one visibility timestamp. Retrieval does not hold the memory mutation
+lock, so writers can commit while a search runs. A result describes the source
+revision at that snapshot; it may be superseded immediately afterward. The scan budget bounds work and should
 be tuned for latency; large indexes need a dedicated ANN/search-index increment.
 
 If `next_after` is not null, the returned hits are the best within that scanned

@@ -390,3 +390,79 @@ fn semantic_competing_embeddings_commit_one_immutable_vector() {
             .is_empty()
     );
 }
+
+#[test]
+fn semantic_search_does_not_wait_for_the_memory_writer_lock() {
+    let dir = TempDir::new().unwrap();
+    let store = std::sync::Arc::new(open(dir.path()));
+    let record = create(&store, "scope", "snapshot");
+    store
+        .apply_memory_embedding(
+            "scope",
+            &actor(),
+            &attach(record.record_id, "vector", vec![1.0, 0.0, 0.0]),
+        )
+        .unwrap();
+    let guard = store.mutation_lock.lock().unwrap();
+    let (tx, rx) = std::sync::mpsc::channel();
+    let reader = store.clone();
+    let thread = std::thread::spawn(move || {
+        tx.send(reader.search_memory_semantic("scope", &search()))
+            .unwrap()
+    });
+    let result = rx.recv_timeout(std::time::Duration::from_secs(1));
+    drop(guard);
+    thread.join().unwrap();
+    assert_eq!(
+        result
+            .expect("search must not acquire the writer lock")
+            .unwrap()
+            .hits
+            .len(),
+        1
+    );
+}
+
+#[test]
+fn semantic_snapshot_keeps_records_indexes_and_embeddings_at_one_revision() {
+    let dir = TempDir::new().unwrap();
+    let store = open(dir.path());
+    let author = actor();
+    let source = create(&store, "scope", "original");
+    store
+        .apply_memory_embedding(
+            "scope",
+            &author,
+            &attach(source.record_id, "first", vec![1.0, 0.0, 0.0]),
+        )
+        .unwrap();
+    let snapshot = store.memory_snapshot();
+    store
+        .apply_memory_command(
+            "scope",
+            &author,
+            &MemoryCommand {
+                contract_version: 1,
+                idempotency_key: "update".into(),
+                operation: MemoryOperation::Update {
+                    record_id: source.record_id,
+                    expected_revision: 1,
+                    record: input("replacement"),
+                },
+            },
+        )
+        .unwrap();
+    let mut replacement = attach(source.record_id, "second", vec![0.0, 1.0, 0.0]);
+    replacement.record_revision = 2;
+    store
+        .apply_memory_embedding("scope", &author, &replacement)
+        .unwrap();
+    let old = snapshot.search_semantic("scope", &search()).unwrap();
+    let new = store.search_memory_semantic("scope", &search()).unwrap();
+    assert_eq!(old.hits[0].record.revision, 1);
+    assert_eq!(old.hits[0].embedding.record_revision, 1);
+    assert_eq!(old.hits[0].score, 1.0);
+    assert_eq!(new.hits[0].record.revision, 2);
+    assert_eq!(new.hits[0].embedding.record_revision, 2);
+    assert_eq!(new.hits[0].score, 0.0);
+}

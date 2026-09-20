@@ -365,25 +365,34 @@ impl RocksDbMemoryStorage {
                 record_key(0x11, namespace, id),
             )
             .map_err(storage_error)?;
-        let (bytes, index) = match (record, index) {
-            (None, None) => return Ok(None),
-            (Some(record), Some(index)) => (record, index),
-            _ => return Err(inconsistent()),
-        };
-        let record: MemoryRecord = decode(&bytes)?;
-        let index: RecordIndex = decode(&index)?;
-        if record.schema_version != 1
-            || index.schema_version != 1
-            || record.record_id != id
-            || record.revision == 0
-            || index.revision != record.revision
-            || index.record_digest != digest(&bytes)
-        {
-            return Err(inconsistent());
-        }
-        Ok(Some(record))
+        decode_record_pair(id, record, index)
     }
 }
+
+fn decode_record_pair(
+    id: Uuid,
+    record: Option<Vec<u8>>,
+    index: Option<Vec<u8>>,
+) -> Result<Option<MemoryRecord>> {
+    let (bytes, index) = match (record, index) {
+        (None, None) => return Ok(None),
+        (Some(record), Some(index)) => (record, index),
+        _ => return Err(inconsistent()),
+    };
+    let record: MemoryRecord = decode(&bytes)?;
+    let index: RecordIndex = decode(&index)?;
+    if record.schema_version != 1
+        || index.schema_version != 1
+        || record.record_id != id
+        || record.revision == 0
+        || index.revision != record.revision
+        || index.record_digest != digest(&bytes)
+    {
+        return Err(inconsistent());
+    }
+    Ok(Some(record))
+}
+
 fn record_prefix(kind: u8, namespace: &str) -> Vec<u8> {
     let mut key = vec![kind];
     key.extend_from_slice(&(namespace.len() as u16).to_be_bytes());
@@ -760,7 +769,9 @@ mod tests {
     }
 }
 
+mod semantic;
 #[cfg(test)]
 mod semantic_tests;
-mod semantic;
 pub use semantic::*;
+
+mod snapshot;
