@@ -620,3 +620,123 @@ async fn experience_artifact_http_requires_both_capabilities_and_bound_reporter(
         StatusCode::CONFLICT
     );
 }
+
+#[tokio::test]
+async fn experience_lineage_http_returns_pinned_parent_with_current_authorization() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    configure(&router, &admin.secret).await;
+    let client = issue(
+        &identity,
+        &admin.secret,
+        "observer",
+        &["experience_write", "experience_read", "experience_report"],
+    );
+    let receipt = request(
+        &router,
+        "POST",
+        "/api/v1/experiences",
+        &client.secret,
+        create_body(),
+    )
+    .await
+    .1;
+    let report = report_body(receipt["receipt"]["context_digest"].as_str().unwrap());
+    let old = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/events",
+        &client.secret,
+        report.clone(),
+    )
+    .await
+    .1;
+    let mut child = create_body();
+    child["request"]["id"] = "child".into();
+    child["request"]["parent"] = json!({"attempt_id":"attempt-v1","event_id":"observation-v1"});
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences",
+            &client.secret,
+            child
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    let mut later = report;
+    later["command"]["event_id"] = "later".into();
+    later["command"]["expected_revision"] = 2.into();
+    later["command"]["outcome"] = "succeeded".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/events",
+            &client.secret,
+            later
+        )
+        .await
+        .0,
+        StatusCode::OK
+    );
+    let mut body = read_body();
+    body["attempt_id"] = "child".into();
+    body["max_depth"] = 1.into();
+    let lineage = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/lineage",
+        &client.secret,
+        body.clone(),
+    )
+    .await;
+    assert_eq!(lineage.0, StatusCode::OK);
+    assert_eq!(lineage.1["lineage"]["ancestors"], json!([old["event"]]));
+    assert_eq!(lineage.1["lineage"]["complete"], true);
+    let denied = issue(&identity, &admin.secret, "observer", &["memory_read"]);
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/lineage",
+            &denied.secret,
+            body.clone()
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let mut private = body.clone();
+    private["scope"]["visibility"] = "private".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/lineage",
+            &client.secret,
+            private
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    identity
+        .revoke(&admin.secret, client.credential.id, 1)
+        .unwrap();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/lineage",
+            &client.secret,
+            body
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+}

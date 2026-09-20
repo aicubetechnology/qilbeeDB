@@ -25,3 +25,5 @@ mod experience_tests;
 pub use store::experience_history::*;
 
 pub use store::experience_artifacts::*;
+
+pub use store::experience_lineage::*;

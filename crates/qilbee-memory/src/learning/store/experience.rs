@@ -555,5 +555,32 @@ mod integrity_tests {
             db.experience("tenant", "scope", "attempt"),
             Err(Error::DataCorruption(_))
         ));
+        db.inner
+            .db
+            .put(&event_key, encode(&event).unwrap())
+            .unwrap();
+        let mut child = event.record.receipt.request.clone();
+        child.id = "child".into();
+        child.parent = Some(ExperienceParent {
+            attempt_id: "attempt".into(),
+            event_id: "event".into(),
+        });
+        let child = db
+            .create_experience("tenant", "scope", child, event.actor.clone())
+            .unwrap();
+        let mut damaged = ExperienceRecord::initial(child);
+        damaged.receipt.parent_event_digest = Some("f".repeat(64));
+        damaged.receipt.receipt_digest = damaged.receipt.digest().unwrap();
+        db.inner
+            .db
+            .put(
+                key(12, "tenant", "scope", "child").unwrap(),
+                encode(&damaged).unwrap(),
+            )
+            .unwrap();
+        assert!(matches!(
+            db.experience_lineage("tenant", "scope", "child", 8),
+            Err(Error::DataCorruption(_))
+        ));
     }
 }
