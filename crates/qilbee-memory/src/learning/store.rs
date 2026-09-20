@@ -131,20 +131,7 @@ impl LearningMemory {
             };
         }
         let key = procedure_key(scope, &proposal.id);
-        let record = ProcedureRecord {
-            scope: scope.clone(),
-            proposal,
-            state: ProcedureState::Candidate,
-            qualification_count: 0,
-            mean_improvement: 0.0,
-            mean_candidate_utility: 0.0,
-            budget_violations: 0,
-            lower_improvement_bound: None,
-            monitoring_count: 0,
-            failure_streak: 0,
-            decisions: Vec::new(),
-            created_at_millis: chrono::Utc::now().timestamp_millis(),
-        };
+        let record = new_procedure_record(scope, proposal);
         self.inner
             .db
             .put_opt(key, encode(&record)?, &write_options())
@@ -401,4 +388,22 @@ impl ProcedureRecord {
     }
 }
 
+pub mod bound;
 pub mod registry;
+
+fn new_procedure_record(scope: &LearningScope, proposal: ProcedureProposal) -> ProcedureRecord {
+    ProcedureRecord {
+        scope: scope.clone(),
+        proposal,
+        state: ProcedureState::Candidate,
+        qualification_count: 0,
+        mean_improvement: 0.0,
+        mean_candidate_utility: 0.0,
+        budget_violations: 0,
+        lower_improvement_bound: None,
+        monitoring_count: 0,
+        failure_streak: 0,
+        decisions: Vec::new(),
+        created_at_millis: chrono::Utc::now().timestamp_millis(),
+    }
+}

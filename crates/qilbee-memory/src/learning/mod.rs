@@ -9,3 +9,4 @@ pub use types::*;
 mod tests;
 
 pub use store::registry::*;
+pub use store::bound::*;

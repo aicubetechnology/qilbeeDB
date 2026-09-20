@@ -3,7 +3,7 @@
   "info": {
     "title": "QilbeeDB Platform API",
     "version": "0.2.0",
-    "description": "Standalone durable identity and scoped memory. QMN is an optional client, not a runtime dependency. Procedural evaluation and learned-tool execution endpoints are not implemented by this contract."
+    "description": "Durable identity, scoped memory, versioned commands and authenticated access for AI agents."
   },
   "servers": [
     {
