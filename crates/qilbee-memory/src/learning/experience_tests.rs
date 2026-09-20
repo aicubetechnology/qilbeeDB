@@ -803,3 +803,190 @@ fn experience_lineage_enforces_namespace_and_work_limits() {
         ));
     }
 }
+
+fn export_ref(event: &ExperienceEvent) -> ExperienceExportRef {
+    ExperienceExportRef {
+        attempt_id: event.record.receipt.request.id.clone(),
+        event_id: event.command.event_id.clone(),
+        event_digest: event.event_digest.clone(),
+    }
+}
+fn export_request(events: &[ExperienceEvent]) -> ExperienceExportRequest {
+    ExperienceExportRequest {
+        context_digest: events[0].record.receipt.context_digest.clone(),
+        accounting_unit: "test-credit-v1".into(),
+        events: events.iter().map(export_ref).collect(),
+    }
+}
+#[test]
+fn experience_exports_are_order_independent_frozen_and_reproducible_after_reopen() {
+    let (dir, db) = setup();
+    let a = create(&db);
+    let a = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("old", 1, &a.context_digest, "unknown"),
+            actor("observer"),
+        )
+        .unwrap();
+    let b = db
+        .create_experience("tenant", "scope", input("second"), actor("writer"))
+        .unwrap();
+    let b = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "second",
+            command("done", 1, &b.context_digest, "succeeded"),
+            actor("observer"),
+        )
+        .unwrap();
+    let frozen = db
+        .export_experiences("tenant", "scope", export_request(&[b.clone(), a.clone()]))
+        .unwrap();
+    db.observe_experience(
+        "tenant",
+        "scope",
+        "attempt",
+        command("new", 2, &a.record.receipt.context_digest, "failed"),
+        actor("observer"),
+    )
+    .unwrap();
+    drop(db);
+    let db = LearningMemory::open(dir.path()).unwrap();
+    assert_eq!(
+        frozen,
+        db.export_experiences("tenant", "scope", export_request(&[a, b]))
+            .unwrap()
+    );
+    assert_eq!(frozen.coverage, "explicit_event_set");
+    assert_eq!(frozen.summary.unknown, 1);
+    assert_eq!(frozen.summary.succeeded, 1);
+    assert_eq!(frozen.events[0].command.event_id, "old");
+}
+#[test]
+fn experience_exports_preserve_unknowns_zero_and_totals_larger_than_u64() {
+    let (_dir, db) = setup();
+    let mut events = Vec::new();
+    for (id, outcome) in [
+        ("a", "succeeded"),
+        ("b", "failed"),
+        ("c", "cancelled"),
+        ("d", "unknown"),
+    ] {
+        let receipt = db
+            .create_experience("tenant", "scope", input(id), actor("writer"))
+            .unwrap();
+        let mut report = command("one", 1, &receipt.context_digest, outcome);
+        report.cost_units = Some(u64::MAX);
+        report.latency_ms = Some(0);
+        events.push(
+            db.observe_experience("tenant", "scope", id, report, actor("observer"))
+                .unwrap(),
+        );
+    }
+    let full = db
+        .export_experiences("tenant", "scope", export_request(&events))
+        .unwrap();
+    assert_eq!(
+        full.summary.cost_units.reported_total,
+        Some((u128::from(u64::MAX) * 4).to_string())
+    );
+    assert_eq!(full.summary.latency_ms.reported_total, Some("0".into()));
+    assert_eq!(
+        (
+            full.summary.succeeded,
+            full.summary.failed,
+            full.summary.cancelled,
+            full.summary.unknown
+        ),
+        (1, 1, 1, 1)
+    );
+    let unknown = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "d",
+            command(
+                "two",
+                2,
+                &events[0].record.receipt.context_digest,
+                "unknown",
+            ),
+            actor("observer"),
+        )
+        .unwrap();
+    events[3] = unknown;
+    let partial = db
+        .export_experiences("tenant", "scope", export_request(&events))
+        .unwrap();
+    assert_eq!(partial.summary.cost_units.reported_total, None);
+    assert_eq!(partial.summary.cost_units.known_reports, 3);
+    assert_eq!(partial.summary.cost_units.unknown_reports, 1);
+    assert_eq!(
+        partial.summary.cost_units.observed_lower_bound,
+        (u128::from(u64::MAX) * 4).to_string()
+    );
+    assert_eq!(partial.summary.latency_ms.reported_total, None);
+    assert_eq!(partial.summary.latency_ms.observed_lower_bound, "0");
+}
+#[test]
+fn experience_exports_fail_as_a_whole_for_mismatch_duplicates_missing_and_foreign_events() {
+    let (_dir, db) = setup();
+    let receipt = create(&db);
+    let event = db
+        .observe_experience(
+            "tenant",
+            "scope",
+            "attempt",
+            command("event", 1, &receipt.context_digest, "unknown"),
+            actor("observer"),
+        )
+        .unwrap();
+    let valid = export_request(&[event]);
+    let mut bad = valid.clone();
+    bad.events[0].event_digest = "f".repeat(64);
+    assert!(matches!(
+        db.export_experiences("tenant", "scope", bad),
+        Err(Error::ConstraintViolation(_))
+    ));
+    let mut bad = valid.clone();
+    bad.context_digest = "c".repeat(64);
+    assert!(matches!(
+        db.export_experiences("tenant", "scope", bad),
+        Err(Error::ConstraintViolation(_))
+    ));
+    let mut bad = valid.clone();
+    bad.accounting_unit = "other-unit".into();
+    assert!(matches!(
+        db.export_experiences("tenant", "scope", bad),
+        Err(Error::ConstraintViolation(_))
+    ));
+    for count in [0, 2, 65] {
+        let mut bad = valid.clone();
+        bad.events = vec![valid.events[0].clone(); count];
+        assert!(matches!(
+            db.export_experiences("tenant", "scope", bad),
+            Err(Error::ValidationError(_))
+        ));
+    }
+    let mut bad = valid.clone();
+    bad.events.push(ExperienceExportRef {
+        attempt_id: "absent".into(),
+        ..valid.events[0].clone()
+    });
+    assert!(matches!(
+        db.export_experiences("tenant", "scope", bad),
+        Err(Error::KeyNotFound(_))
+    ));
+    assert!(matches!(
+        db.export_experiences("foreign", "scope", valid.clone()),
+        Err(Error::KeyNotFound(_))
+    ));
+    assert!(matches!(
+        db.export_experiences("tenant", "private", valid),
+        Err(Error::KeyNotFound(_))
+    ));
+}

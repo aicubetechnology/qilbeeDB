@@ -1,7 +1,7 @@
 # From retrieval to experience-driven memory
 
 Status: **research-informed design**, reviewed September 20, 2026. This document
-maps recent work to testable QilbeeDB extensions. The initial experience receipt contract is now implemented in the unreleased
+maps recent work to testable QilbeeDB extensions. The initial experience receipt contract is implemented in the
 0.7.0 API; other extensions below remain proposals. This document does not
 reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
@@ -105,3 +105,8 @@ are revisioned memory-source bindings and candidate strategy derivation. Replay
 and shared release depend on those contracts. Automatic selection can operate within an authorized
 policy after qualification; unmeasured candidates remain candidates, and the
 baseline remains available when evidence is rejected or incomplete.
+
+Bounded history, pinned ancestry and exact observation exports are also
+implemented. These preserve evidence for a future replay evaluator; they do not
+execute replay or select exploration policies. See the
+[experience evaluation workflow](experience-evaluation.md).

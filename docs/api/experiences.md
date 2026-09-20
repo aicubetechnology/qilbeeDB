@@ -1,6 +1,6 @@
 # Experience receipts API
 
-Availability: **0.7.0, unreleased**. Check `/health` on the server you use; a
+Availability: **0.7.0**. Check `/health` on the server you use; a
 running 0.6.0 server does not expose these routes.
 
 Use experience receipts to preserve what an agent attempted, which execution
@@ -11,7 +11,7 @@ qualify a procedure, dispatch a tool or update model weights.
 
 The API uses the same durable learning store as [procedural learning](procedural-learning.md).
 Procedure qualification retains its existing policy and evaluator authority.
-Models, embeddings, execution and evidence verification remain external services.
+Models, embeddings, execution and verification of external effects remain external services.
 
 ## Routes and authority
 
@@ -27,6 +27,11 @@ accepted. Responses use `Cache-Control: no-store`. JSON bodies are limited to
 | `POST /api/v1/experiences/read` | `experience_read` | `experience`: current attempt state |
 | `POST /api/v1/experiences/events` | `experience_report` and the registered reporter subject | `event`: immutable observation and resulting state |
 | `POST /api/v1/experiences/events/read` | `experience_read` | `event`: the requested historical observation |
+| `POST /api/v1/experiences/history` | `experience_read` | `page`: revision-fenced event history |
+| `POST /api/v1/experiences/artifacts` | `experience_report`, `tool_read` and the registered reporter subject | `binding`: immutable stored-artifact link |
+| `POST /api/v1/experiences/artifacts/read` | `experience_read` and `tool_read` | `binding`: the requested artifact link |
+| `POST /api/v1/experiences/lineage` | `experience_read` | `lineage`: bounded pinned ancestry |
+| `POST /api/v1/experiences/export` | `experience_read` | `export`: exact selected observations and accounting summary |
 
 Capabilities are independent. Memory, tool and procedure permissions do not grant
 experience access. A writer chooses `reporter_subject_id` when registering an
@@ -350,3 +355,63 @@ A truncated path reports its limit explicitly and is never labeled complete.
 
 This records declared provenance. It does not prove a causal dependency, replay
 an execution, invent unobserved transitions or certify the truth of a report.
+
+## Export an exact observation cohort
+
+`POST /api/v1/experiences/export` requires `experience_read` and accepts an explicit
+set of 1–64 observations, with one event per distinct attempt. Supply each exact
+`event_digest`, the common `context_digest` and the common `accounting_unit`:
+
+```json
+{
+  "contract_version": 1,
+  "scope": {"project_id": "project", "mission_id": null, "agent_id": "agent", "visibility": "shared"},
+  "selection": {
+    "context_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "accounting_unit": "test-credit-v1",
+    "events": [{
+      "attempt_id": "attempt-v1",
+      "event_id": "observation-v1",
+      "event_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }]
+  }
+}
+```
+
+Use digests returned by the service, replacing the placeholders above. The
+response's `export` contains full immutable events sorted by attempt ID in UTF-8
+byte order, `method_version: "qilbee.experience-export.v1"`,
+`coverage: "explicit_event_set"`, the common context and accounting unit, a
+`summary`, and `export_digest`. Request order does not affect the output. Later
+observations cannot alter an exported historical event. The server generates the
+same output for the same event set after restart; it does not create an export
+job, retain a snapshot session or write a new ledger record.
+
+The summary counts `attempts`, `succeeded`, `failed`, `cancelled` and `unknown`.
+For each of `cost_units` and `latency_ms`, it reports:
+
+| Field | Meaning |
+| --- | --- |
+| `known_reports` | Selected events with a non-null reported value, including zero |
+| `unknown_reports` | Selected events with a null reported value |
+| `reported_total` | Sum of reported values, or null if any report is unknown |
+| `observed_lower_bound` | Sum of retained known cumulative lower bounds; never a claim of complete consumption |
+
+Totals are exact unsigned decimal **strings**, allowing sums beyond unsigned
+64-bit range without rounding. Individual event values keep their existing
+unsigned 64-bit representation; use a lossless JSON parser when needed. A known
+reported value is still the reporter's cumulative observation, not a certified
+final bill. An unknown outcome remains a separate count.
+
+The response is all-or-error: no partial cohort is returned. Missing or
+out-of-scope events return 404; mismatched event hashes, context or accounting
+unit return 409; duplicate attempts or an invalid count return 400. The standard
+65,536-byte request-body limit also applies. No event is replaced with its latest
+state, excluded silently, or inferred from a parent. Missing observations and
+attempts outside the submitted set are not included in the denominator.
+
+The export covers exactly the submitted set, not the entire namespace, a random
+sample or independently verified trials. Artifact bindings and ancestors are
+available through their own endpoints; the export does not implicitly include
+them. See [evaluate experience evidence](../research/experience-evaluation.md)
+for a reproducible comparison workflow and the limits of these summaries.

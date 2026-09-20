@@ -88,6 +88,7 @@ nav:
     - SciFact Retrieval Evaluation: research/scifact-evaluation.md
     - Real-Embedding Results: research/scifact-results.md
     - Experience-Driven Memory: research/experience-memory-design.md
+    - Experience Evaluation: research/experience-evaluation.md
     - Synthetic Retrieval Report: research/retrieval-contract-report.md
   - Getting Started:
     - Installation: getting-started/installation.md

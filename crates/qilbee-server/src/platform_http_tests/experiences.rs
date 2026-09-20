@@ -740,3 +740,108 @@ async fn experience_lineage_http_returns_pinned_parent_with_current_authorizatio
         StatusCode::UNAUTHORIZED
     );
 }
+
+#[tokio::test]
+async fn experience_export_http_is_exact_and_requires_current_scoped_authority() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    configure(&router, &admin.secret).await;
+    let client = issue(
+        &identity,
+        &admin.secret,
+        "observer",
+        &["experience_write", "experience_read", "experience_report"],
+    );
+    let receipt = request(
+        &router,
+        "POST",
+        "/api/v1/experiences",
+        &client.secret,
+        create_body(),
+    )
+    .await
+    .1;
+    let report = report_body(receipt["receipt"]["context_digest"].as_str().unwrap());
+    let event = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/events",
+        &client.secret,
+        report,
+    )
+    .await
+    .1;
+    let body = json!({"contract_version":1,"scope":scope(),"selection":{"context_digest":receipt["receipt"]["context_digest"],"accounting_unit":"test-credit-v1","events":[{"attempt_id":"attempt-v1","event_id":"observation-v1","event_digest":event["event"]["event_digest"]}]}});
+    let exported = request(
+        &router,
+        "POST",
+        "/api/v1/experiences/export",
+        &client.secret,
+        body.clone(),
+    )
+    .await;
+    assert_eq!(exported.0, StatusCode::OK, "{}", exported.1);
+    assert_eq!(exported.1["export"]["events"], json!([event["event"]]));
+    assert_eq!(
+        exported.1["export"]["summary"]["cost_units"]["reported_total"],
+        Value::Null
+    );
+    assert_eq!(exported.1["export"]["summary"]["unknown"], 1);
+    let mut bad = body.clone();
+    bad["selection"]["events"][0]["event_digest"] = "c".repeat(64).into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/export",
+            &client.secret,
+            bad
+        )
+        .await
+        .0,
+        StatusCode::CONFLICT
+    );
+    let denied = issue(&identity, &admin.secret, "observer", &["memory_read"]);
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/export",
+            &denied.secret,
+            body.clone()
+        )
+        .await
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let mut private = body.clone();
+    private["scope"]["visibility"] = "private".into();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/export",
+            &client.secret,
+            private
+        )
+        .await
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    identity
+        .revoke(&admin.secret, client.credential.id, 1)
+        .unwrap();
+    assert_eq!(
+        request(
+            &router,
+            "POST",
+            "/api/v1/experiences/export",
+            &client.secret,
+            body
+        )
+        .await
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+}
