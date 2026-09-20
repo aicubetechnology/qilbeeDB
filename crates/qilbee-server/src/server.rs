@@ -30,7 +30,7 @@ impl Server {
         let database = Database::open(&config.data_dir)?;
 
         // Run bootstrap if authentication is enabled
-        if config.auth_enabled {
+        if config.enable_legacy_http && config.auth_enabled {
             info!("Authentication is enabled, checking bootstrap status...");
             let user_service = Arc::new(UserService::new());
             let bootstrap = BootstrapService::new(
@@ -88,7 +88,12 @@ impl Server {
             info!("HTTP API enabled on port {}", self.config.http_port);
 
             // Start HTTP server
-            let router = http_server::create_router(Arc::clone(&self.database))?;
+            let router = if self.config.enable_legacy_http {
+                warn!("Legacy HTTP mode enabled; platform credential and scope guarantees do not apply");
+                http_server::create_legacy_router(Arc::clone(&self.database))?
+            } else {
+                http_server::create_router(Arc::clone(&self.database))?
+            };
             let addr = format!("0.0.0.0:{}", self.config.http_port);
             let listener = tokio::net::TcpListener::bind(&addr)
                 .await

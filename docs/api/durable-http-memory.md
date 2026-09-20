@@ -1,5 +1,9 @@
 # Durable HTTP memory
 
+This page describes the **legacy** memory routes. Since Rust version 0.2.0,
+the [platform router](platform-http.md) is the default; legacy routes require
+explicit configuration and retain their known authorization limitations.
+
 The HTTP episode routes now use the existing RocksDB memory backend through
 `PersistentAgentMemory`. One shared store lives at `<data-directory>/agent-memory`;
 agent IDs are database key components, never filesystem paths. Blocking storage
@@ -8,7 +12,7 @@ records through an implicit business quota; retention is separate policy work.
 
 WAL and synchronous writes are enabled for HTTP episode mutations. Startup
 returns an error if the memory store cannot open; it does not fall back to RAM.
-`http_server::create_router` therefore now returns `qilbee_core::Result<Router>`.
+`http_server::create_legacy_router` therefore returns `qilbee_core::Result<Router>`.
 Applications embedding the router must handle that error before serving traffic.
 
 ## Existing endpoint behavior

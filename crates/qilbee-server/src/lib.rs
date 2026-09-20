@@ -25,3 +25,10 @@ pub use security::{
     AuthService, User, UserService, RbacService, TokenService,
     Permission, Role, AuditService,
 };
+
+#[cfg(test)]
+mod platform_http_tests;
+
+pub mod operator;
+
+pub mod platform_http;

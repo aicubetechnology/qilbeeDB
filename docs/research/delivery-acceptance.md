@@ -57,8 +57,8 @@ change policy with its ordinary credential.
 
 Expose `LearningMemory::propose`, `record_evaluation`, `get`, `evaluation` and
 `select`. Carry the baseline revision, immutable candidate, model, tools,
-environment, evaluator contract, evidence, cost and decision. Expose selection
-to the QMN authority through an explicit integration contract. Do not build a
+environment, evaluator contract, evidence, cost and decision. Expose a single selection authority
+through an explicit integration contract usable by QMN or any other client. Do not build a
 second agent executor.
 
 Acceptance: candidate, active/rejected and suspended states are reproducible
@@ -79,7 +79,7 @@ Execution policy remains administrative configuration.
 
 Acceptance: old agent output cannot become independent evidence; review returns
 author, time and scope. Invalidating a source prevents ordinary access to valid
-derivatives. Propagation completion is observable so QMN can invalidate caches.
+derivatives. Propagation completion is observable so clients can invalidate caches.
 
 ### 5. Durable scoped changes for agent collaboration
 
@@ -142,6 +142,6 @@ acceptance criteria have already been met.
 
 The [durable HTTP foundation](../api/durable-http-memory.md) and
 [scoped credential authority](../security/scoped-credentials.md) are separate
-validated increments. The latter is currently a Rust API and has not yet replaced
-legacy HTTP authentication. These checkpoints do not mark the full P0 contracts
-as complete.
+validated increments. The [platform HTTP API](../api/platform-http.md) adopts durable credentials and
+disables legacy routes by default. These checkpoints do not mark the full P0
+contracts as complete.

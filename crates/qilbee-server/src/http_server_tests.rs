@@ -1,4 +1,4 @@
-use crate::http_server::create_router;
+use crate::http_server::create_legacy_router as create_router;
 use axum::{
     Router,
     body::{Body, to_bytes},

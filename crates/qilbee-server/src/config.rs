@@ -21,13 +21,17 @@ pub struct ServerConfig {
     /// Enable HTTP API
     pub enable_http: bool,
 
+    /// Explicitly opt into legacy HTTP routes and their legacy security limitations.
+    #[serde(default)]
+    pub enable_legacy_http: bool,
+
     /// Maximum concurrent connections
     pub max_connections: usize,
 
     /// Query timeout in seconds
     pub query_timeout_secs: u64,
 
-    /// Enable authentication
+    /// Legacy bootstrap option. Platform HTTP authentication is always required.
     pub auth_enabled: bool,
 
     /// Log level
@@ -42,6 +46,7 @@ impl Default for ServerConfig {
             http_port: 7474,
             enable_bolt: true,
             enable_http: true,
+            enable_legacy_http: false,
             max_connections: 1000,
             query_timeout_secs: 300,
             auth_enabled: false,
@@ -128,6 +133,8 @@ mod tests {
         assert_eq!(config.http_port, 7474);
         assert!(config.enable_bolt);
         assert!(config.enable_http);
+        assert!(!config.enable_legacy_http);
+        assert!(!ServerConfig::for_production("/unused").enable_legacy_http);
     }
 
     #[test]

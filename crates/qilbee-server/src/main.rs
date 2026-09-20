@@ -7,6 +7,20 @@ use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    match qilbee_server::operator::bootstrap_command(&args) {
+        Ok(Some(result)) => {
+            // This is the explicit operator result, not an application log.
+            println!("{}", result);
+            return;
+        }
+        Ok(None) => {}
+        Err(error) => {
+            eprintln!("Bootstrap failed: {}", error);
+            std::process::exit(1);
+        }
+    }
+
     // Initialize logging
     tracing_subscriber::fmt()
         .with_env_filter(
