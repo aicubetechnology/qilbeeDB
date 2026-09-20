@@ -10,7 +10,7 @@ pub struct EmbeddingSpace {
     pub dimensions: usize,
 }
 impl EmbeddingSpace {
-    fn validate(&self) -> Result<()> {
+    pub(super) fn validate(&self) -> Result<()> {
         for value in [&self.provider, &self.model, &self.revision] {
             if value.trim().is_empty() || value.len() > 256 || value.chars().any(char::is_control) {
                 return Err(Error::ValidationError(
@@ -87,11 +87,11 @@ pub struct SemanticPage {
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct StoredEmbedding {
+pub(super) struct StoredEmbedding {
     schema_version: u32,
     namespace: String,
-    receipt: EmbeddingReceipt,
-    vector: Vec<f32>,
+    pub(super) receipt: EmbeddingReceipt,
+    pub(super) vector: Vec<f32>,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -116,7 +116,7 @@ fn vector_digest(vector: &[f32]) -> Result<String> {
         .map(|byte| format!("{byte:02x}"))
         .collect())
 }
-fn norm(vector: &[f32], dimensions: usize) -> Result<f64> {
+pub(super) fn norm(vector: &[f32], dimensions: usize) -> Result<f64> {
     if vector.len() != dimensions || vector.iter().any(|value| !value.is_finite()) {
         return Err(Error::ValidationError(
             "Embedding must match dimensions and contain finite values".into(),
@@ -298,6 +298,21 @@ impl RocksDbMemoryStorage {
     }
 }
 impl super::snapshot::MemorySnapshot<'_> {
+    pub(super) fn embedding(
+        &self,
+        namespace: &str,
+        space: &EmbeddingSpace,
+        id: Uuid,
+    ) -> Result<Option<(StoredEmbedding, usize)>> {
+        self.db
+            .get_cf(
+                self.storage.cf(super::super::cf::EPISODE_INDEX)?,
+                embedding_key(namespace, space, id)?,
+            )
+            .map_err(storage_error)?
+            .map(|bytes| Ok((decode_embedding(&bytes, namespace, space, id)?, bytes.len())))
+            .transpose()
+    }
     pub(super) fn search_semantic(
         &self,
         namespace: &str,

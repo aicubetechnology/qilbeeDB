@@ -779,3 +779,7 @@ mod lexical;
 mod lexical_tests;
 mod snapshot;
 pub use lexical::*;
+mod hybrid;
+#[cfg(test)]
+mod hybrid_tests;
+pub use hybrid::*;

@@ -63,6 +63,7 @@ pub struct LexicalPage {
 }
 pub(super) struct ScannedCorpus {
     pub records: Vec<MemoryRecord>,
+    pub embeddings: std::collections::BTreeMap<Uuid, super::semantic::StoredEmbedding>,
     pub page: LexicalPage,
 }
 impl RocksDbMemoryStorage {
@@ -72,8 +73,9 @@ impl RocksDbMemoryStorage {
         namespace: &str,
         query: &LexicalQuery,
     ) -> Result<LexicalPage> {
-        let ScannedCorpus { records, mut page } =
-            self.memory_snapshot().scan_corpus(namespace, query)?;
+        let ScannedCorpus {
+            records, mut page, ..
+        } = self.memory_snapshot().scan_corpus(namespace, query)?;
         let ranks = rank_records(&records, &query.text);
         page.matched_records = ranks.len();
         let mut records: std::collections::BTreeMap<_, _> =
@@ -107,6 +109,14 @@ impl MemorySnapshot<'_> {
         namespace: &str,
         query: &LexicalQuery,
     ) -> Result<ScannedCorpus> {
+        self.scan_corpus_with_embeddings(namespace, query, None)
+    }
+    pub(super) fn scan_corpus_with_embeddings(
+        &self,
+        namespace: &str,
+        query: &LexicalQuery,
+        space: Option<&EmbeddingSpace>,
+    ) -> Result<ScannedCorpus> {
         RocksDbMemoryStorage::validate_agent(namespace)?;
         query.validate()?;
         let prefix = record_prefix(0x10, namespace);
@@ -124,6 +134,7 @@ impl MemorySnapshot<'_> {
             exhaustive: query.after.is_none(),
         };
         let mut records = vec![];
+        let mut embeddings = std::collections::BTreeMap::new();
         let mut last = None;
         for item in self.db.iterator_cf(
             self.storage.cf(super::super::cf::EPISODES)?,
@@ -150,27 +161,57 @@ impl MemorySnapshot<'_> {
                 break;
             }
             let record = self.record(namespace, id)?.ok_or_else(inconsistent)?;
+            let eligible = visible(&record, self.now)
+                && record.payload.as_ref().is_some_and(|payload| {
+                    query
+                        .episode_type
+                        .as_ref()
+                        .is_none_or(|kind| kind == &payload.episode_type)
+                        && query
+                            .tag
+                            .as_ref()
+                            .is_none_or(|tag| payload.tags.contains(tag))
+                });
+            let embedding = if eligible {
+                space
+                    .map(|space| self.embedding(namespace, space, id))
+                    .transpose()?
+                    .flatten()
+            } else {
+                None
+            };
+            let row_bytes = bytes.len() + embedding.as_ref().map_or(0, |(_, size)| *size);
+            if page.scanned_bytes + row_bytes > query.scan_bytes_limit {
+                if last.is_none() {
+                    return Err(Error::ValidationError(
+                        "Scan byte budget cannot fit the next record and embedding".into(),
+                    ));
+                }
+                page.next_after = last;
+                page.exhaustive = false;
+                break;
+            }
             page.scanned_records += 1;
-            page.scanned_bytes += bytes.len();
+            page.scanned_bytes += row_bytes;
             last = Some(id);
-            if !visible(&record, self.now) {
+            if !eligible {
                 continue;
             }
-            let payload = record.payload.as_ref().expect("visible memory has content");
-            if query
-                .episode_type
-                .as_ref()
-                .is_some_and(|kind| kind != &payload.episode_type)
-                || query
-                    .tag
-                    .as_ref()
-                    .is_some_and(|tag| !payload.tags.contains(tag))
-            {
-                continue;
+            if let Some((embedding, _)) = embedding {
+                if embedding.receipt.record_revision > record.revision {
+                    return Err(inconsistent());
+                }
+                if embedding.receipt.record_revision == record.revision {
+                    embeddings.insert(id, embedding);
+                }
             }
             records.push(record);
         }
         page.corpus_records = records.len();
-        Ok(ScannedCorpus { records, page })
+        Ok(ScannedCorpus {
+            records,
+            embeddings,
+            page,
+        })
     }
 }
