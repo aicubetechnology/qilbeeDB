@@ -7,9 +7,11 @@ route, or HTTP tenant-bootstrap endpoint in this router. The API reference (`/`,
 credential.
 
 This is an intentional compatibility change from the 0.1 legacy HTTP surface.
-Version 0.4.0 exposes identity, credential administration,
+The platform exposes identity, credential administration,
 [versioned scoped memory](versioned-memory.md),
 [semantic vector retrieval](semantic-memory.md),
+[lexical retrieval](lexical-memory.md),
+[experimental hybrid retrieval](hybrid-memory.md),
 [procedural learning](procedural-learning.md) and
 [learned-tool development](learned-tools.md). Legacy memory routes are not
 silently mapped into tenant namespaces.
@@ -135,5 +137,5 @@ revision conflicts, rotation and revocation across restart, body limits, duplica
 authorization headers and non-cacheable responses. Operator tests cover explicit
 arguments, one-time bootstrap and authentication after reopening the database.
 
-These tests run without QMN, model providers or permanent auxiliary services.
+These tests run without model providers or permanent auxiliary services.
 They validate the implemented contracts, not completion of all P0 requirements.
