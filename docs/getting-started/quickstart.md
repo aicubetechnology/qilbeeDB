@@ -1,5 +1,11 @@
 # Quick Start Guide
 
+For the current Rust 0.2.0 platform, start with the
+[local Docker guide](../operations/docker.md) and
+[versioned HTTP reference](../api/http-api.md). Legacy graph/SDK examples and
+configuration snippets below are not a compatibility guarantee for the new
+default router.
+
 This guide will help you build your first application with QilbeeDB in just a few minutes. We'll create a simple social network graph and perform basic queries.
 
 ## Prerequisites

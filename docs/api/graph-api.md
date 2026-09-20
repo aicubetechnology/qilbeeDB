@@ -1,5 +1,9 @@
 # Graph API
 
+The HTTP graph routes on this page belong to the explicitly opted-in legacy
+router. They are not exposed by the default 0.2.0 platform router. See
+[HTTP compatibility](http-api.md#compatibility-and-remaining-apis).
+
 Programmatic API for graph operations.
 
 ## Node Operations

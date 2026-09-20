@@ -1,0 +1,27 @@
+name: qilbeedb-local
+services:
+  qilbeedb:
+    image: ${QILBEE_IMAGE:-qilbeedb:local}
+    build:
+      context: .
+      args:
+        VCS_REF: ${QILBEE_REVISION:-unknown}
+    container_name: qilbeedb-local
+    ports:
+      - "127.0.0.1:${QILBEE_HTTP_PORT:-7474}:7474"
+    volumes:
+      - qilbeedb-data:/data
+    environment:
+      RUST_LOG: ${RUST_LOG:-info}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 15s
+volumes:
+  qilbeedb-data:

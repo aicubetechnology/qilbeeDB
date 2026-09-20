@@ -65,6 +65,7 @@ pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     Ok(Router::new()
         .merge(memory::routes())
         .route("/health", get(health))
+        .route("/openapi.json", get(openapi))
         .route("/api/v1/identity", get(who_am_i))
         .route("/api/v1/credentials", post(issue))
         .route("/api/v1/credentials/:id", get(inspect))
@@ -93,6 +94,12 @@ async fn response_headers(request: axum::extract::Request, next: Next) -> Respon
         HeaderValue::from_static("nosniff"),
     );
     response
+}
+async fn openapi() -> impl IntoResponse {
+    (
+        [(header::CONTENT_TYPE, "application/json")],
+        include_str!("../../../docs/api/openapi.json"),
+    )
 }
 async fn health() -> Json<Value> {
     Json(json!({"contract_version":1,"status":"healthy","version":env!("CARGO_PKG_VERSION")}))

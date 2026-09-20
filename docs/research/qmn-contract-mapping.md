@@ -38,3 +38,8 @@ The reference repository has concurrent local work. Inspection is read-only;
 capability migration work belongs in independent qilbeeDB features. Broader
 memory, discovery, program, gateway and identity mappings remain to be inspected
 and qualified under the [delivery acceptance contract](delivery-acceptance.md).
+
+The [learned-tool service boundary](../architecture/learned-tools.md) extends
+this inventory with a later pinned inspection of gateway, remote transport and
+program evidence contracts. Executors stay isolated on servers; user devices
+retain a lightweight client.
