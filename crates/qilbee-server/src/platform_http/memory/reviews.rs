@@ -5,6 +5,7 @@ use qilbee_memory::storage::platform::MemoryReviewCommand;
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .route("/api/v1/memory/reviews", post(review))
+        .route("/api/v1/memory/eligibility", post(eligibility))
         .route("/api/v1/memory/reviews/state", post(current))
         .route("/api/v1/memory/reviews/read", post(read_review))
 }
@@ -108,6 +109,30 @@ async fn read_review(
                 .map_err(ApiError::operation)?
                 .ok_or_else(missing)?;
             Ok(Json(json!({"contract_version":1,"receipt":receipt})))
+        })
+        .await
+}
+
+async fn eligibility(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<StateRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let memory = state.memory.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::MemoryReview, &request.scope)
+                .map_err(ApiError::operation)?;
+            let eligibility = memory
+                .explain_memory_eligibility(&scope.storage_namespace, request.record_id)
+                .map_err(ApiError::operation)?
+                .ok_or_else(missing)?;
+            Ok(Json(
+                json!({"contract_version":1,"scope":request.scope,"eligibility":eligibility}),
+            ))
         })
         .await
 }

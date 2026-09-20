@@ -34,7 +34,7 @@ pub(super) struct DependencyState {
 #[derive(Clone)]
 pub(super) struct DependencyRecord {
     pub revision: u64,
-    pub visible: bool,
+    pub reason: MemoryEligibilityReason,
     pub derivation: Option<MemoryDerivation>,
 }
 impl MemoryDerivation {
@@ -99,7 +99,7 @@ impl MemorySnapshot<'_> {
             .map_err(storage_error)?;
         let record = decode_record_pair(id, bytes, index)?.map(|r| DependencyRecord {
             revision: r.revision,
-            visible: visible(&r, self.now),
+            reason: super::eligibility::record_reason(&r, self.now),
             derivation: r.derivation,
         });
         let mut state = self.dependencies.borrow_mut();
@@ -107,52 +107,5 @@ impl MemorySnapshot<'_> {
         state.work.bytes_examined += len;
         state.cache.insert(key, record.clone());
         Ok(record)
-    }
-    pub(super) fn eligible(&self, namespace: &str, record: &MemoryRecord) -> Result<bool> {
-        if !visible(record, self.now) {
-            return Ok(false);
-        }
-        let Some(derivation) = &record.derivation else {
-            return Ok(true);
-        };
-        derivation.validate().map_err(|_| inconsistent())?;
-        for source in &derivation.sources {
-            if source.record_id == record.record_id {
-                return Err(inconsistent());
-            }
-            let Some(current) = self.dependency(namespace, source.record_id)? else {
-                return Ok(false);
-            };
-            if current.revision != source.revision
-                || !current.visible
-                || current.derivation.is_some()
-            {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    }
-    pub(super) fn validate_derivation_sources(
-        &self,
-        namespace: &str,
-        derivation: &MemoryDerivation,
-    ) -> Result<()> {
-        derivation.validate()?;
-        for source in &derivation.sources {
-            let current = self
-                .dependency(namespace, source.record_id)?
-                .ok_or_else(|| Error::KeyNotFound("Eligible source memory".into()))?;
-            if current.revision != source.revision || !current.visible {
-                return Err(Error::TransactionConflict(
-                    "Source revision is no longer eligible".into(),
-                ));
-            }
-            if current.derivation.is_some() {
-                return Err(Error::ValidationError(
-                    "Direct derivations require non-derived source records".into(),
-                ));
-            }
-        }
-        Ok(())
     }
 }
