@@ -2,7 +2,9 @@
 use super::*;
 use qilbee_memory::storage::platform::VerifiedMemoryChangesQuery;
 pub(super) fn routes() -> Router<PlatformState> {
-    Router::new().route("/api/v2/memory/changes", post(changes))
+    Router::new()
+        .route("/api/v2/memory/changes", post(changes))
+        .route("/api/v2/memory/changes/activate", post(activate))
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -39,6 +41,38 @@ async fn changes(
                 .map_err(ApiError::operation)?;
             Ok(Json(
                 json!({"contract_version":2,"scope":request.scope,"page":page}),
+            ))
+        })
+        .await
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ActivateRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+}
+async fn activate(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<ActivateRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let memory = state.memory.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version_two(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::MemoryWrite, &request.scope)
+                .map_err(ApiError::operation)?;
+            identity
+                .authorize(token, Capability::MemoryRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let baseline = memory
+                .activate_verified_memory_journal(&scope.storage_namespace)
+                .map_err(ApiError::operation)?;
+            Ok(Json(
+                json!({"contract_version":2,"scope":request.scope,"baseline":baseline}),
             ))
         })
         .await

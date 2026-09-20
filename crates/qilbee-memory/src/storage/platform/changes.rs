@@ -118,7 +118,11 @@ impl MemorySnapshot<'_> {
         }
         Ok(Some(state))
     }
-    pub(super) fn change(&self, namespace: &str, cursor: &MemoryChangeCursor) -> Result<MemoryChange> {
+    pub(super) fn change(
+        &self,
+        namespace: &str,
+        cursor: &MemoryChangeCursor,
+    ) -> Result<MemoryChange> {
         let bytes = self
             .db
             .get_cf(
@@ -159,7 +163,10 @@ impl RocksDbMemoryStorage {
                 })?,
             },
             None => MemoryChangeCursor {
-                journal_id: Uuid::new_v4(),
+                journal_id: self
+                    .memory_snapshot()
+                    .verified_journal(namespace)?
+                    .map_or_else(Uuid::new_v4, |state| state.tip.journal_id),
                 sequence: 1,
             },
         };
