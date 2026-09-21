@@ -54,6 +54,7 @@ impl Fixture {
             .unwrap()
             .secret;
         let grant = CredentialSpec {
+            scope_policy: None,
             subject_id: "consumer".into(),
             capabilities: [
                 Capability::MemoryRead,

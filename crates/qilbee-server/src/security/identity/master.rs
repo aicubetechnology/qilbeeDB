@@ -145,6 +145,7 @@ fn global_record(
             revision: 1,
             revoked_at_millis: None,
             history: vec![CredentialEvent {
+                scope_authority_change: None,
                 revision: 1,
                 action: if is_master { "bootstrapped" } else { "issued" }.into(),
                 actor_id: actor,
@@ -542,6 +543,7 @@ impl IdentityStore {
         };
         target.credential.revision = next;
         target.credential.history.push(CredentialEvent {
+            scope_authority_change: None,
             revision: next,
             action: if revoke { "revoked" } else { "rotated" }.into(),
             actor_id: actor.credential.id,
@@ -581,6 +583,7 @@ impl IdentityStore {
         record.credential.revision = next;
         record.credential.revoked_at_millis = None;
         record.credential.history.push(CredentialEvent {
+            scope_authority_change: None,
             revision: next,
             action: "recovered_by_local_operator".into(),
             actor_id: id,
@@ -603,6 +606,7 @@ impl IdentityStore {
 
 fn tenant_admin_spec(subject: &str) -> CredentialSpec {
     CredentialSpec {
+        scope_policy: None,
         subject_id: subject.into(),
         capabilities: [Capability::CredentialAdmin, Capability::PolicyAdmin].into(),
         grants: vec![],

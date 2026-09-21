@@ -1,4 +1,4 @@
-//! Durable tenant credentials and exact resource grants for platform APIs.
+//! Durable tenant credentials, exact grants and explicit company scope policies.
 
 use qilbee_core::{Error, Result};
 use qilbee_storage::StorageEngine;
@@ -7,10 +7,14 @@ use std::{collections::BTreeSet, sync::Arc};
 use uuid::Uuid;
 
 mod master;
+mod scope_policy;
 pub use master::{
     DirectoryPage, GlobalCapability, GlobalCredentialSpec, GlobalCredentialView,
     IssuedGlobalCredential, LoginAccountView, LoginAuthority, LoginSession, TenantDirectoryEntry,
     TenantView,
+};
+pub use scope_policy::{
+    CompanyScopePolicy, CompanyScopePolicyVersion, IdSelector, ScopeAuthority, ScopeAuthorityChange,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -52,6 +56,8 @@ pub struct ResourceScope {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CredentialSpec {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_policy: Option<CompanyScopePolicy>,
     pub subject_id: String,
     pub capabilities: BTreeSet<Capability>,
     pub grants: Vec<ResourceScope>,
@@ -61,6 +67,8 @@ pub struct CredentialSpec {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CredentialEvent {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_authority_change: Option<ScopeAuthorityChange>,
     pub revision: u64,
     pub action: String,
     pub actor_id: Uuid,
@@ -127,6 +135,7 @@ impl IdentityStore {
         valid_id(tenant)?;
         let now = chrono::Utc::now().timestamp_millis();
         let spec = CredentialSpec {
+            scope_policy: None,
             subject_id: subject.into(),
             capabilities: [Capability::CredentialAdmin, Capability::PolicyAdmin].into(),
             grants: vec![],
@@ -156,7 +165,8 @@ impl IdentityStore {
     }
 
     /// Issue a credential inside the authenticated administrator's tenant only.
-    /// Capability names grant no other capabilities, and all resource grants are exact.
+    /// Capability names grant no other capabilities. Scopes use exact grants or
+    /// an explicitly selected company integration policy.
     pub fn issue(&self, admin: &str, spec: CredentialSpec) -> Result<IssuedCredential> {
         let now = chrono::Utc::now().timestamp_millis();
         let (actor, actor_bytes) = self.admin(admin, now)?;
@@ -199,7 +209,8 @@ impl IdentityStore {
 
     /// Derive the namespace from authenticated tenant and subject identity.
     /// Private scopes are owned by this subject; shared scopes are available to
-    /// other subjects only when they have the same explicit grant in the tenant.
+    /// other subjects only when their grants or explicit policy allow the same
+    /// scope in the authenticated tenant.
     pub fn authorize(
         &self,
         token: &str,
@@ -209,7 +220,7 @@ impl IdentityStore {
         validate_scope(scope)?;
         let credential = self.authenticate(token)?;
         if !credential.spec.capabilities.contains(&capability)
-            || !credential.spec.grants.contains(scope)
+            || !scope_policy::allows(&credential.spec, scope)
         {
             return Err(denied());
         }
@@ -283,6 +294,7 @@ impl IdentityStore {
         };
         record.credential.revision = next;
         record.credential.history.push(CredentialEvent {
+            scope_authority_change: None,
             revision: next,
             action: if revoke { "revoked" } else { "rotated" }.into(),
             actor_id: actor.credential.id,
@@ -383,6 +395,7 @@ impl IdentityStore {
         }
         valid_id(&record.credential.tenant_id)?;
         validate_spec(&record.credential.spec, None)?;
+        scope_policy::validate_history(&record.credential)?;
         Ok((record, bytes))
     }
 
@@ -495,6 +508,7 @@ fn validate_spec(spec: &CredentialSpec, now: Option<i64>) -> Result<()> {
             "Credential expiry must be in the future".into(),
         ));
     }
+    scope_policy::validate(spec)?;
     for grant in &spec.grants {
         validate_scope(grant)?;
     }
@@ -535,6 +549,7 @@ fn new_record(
             revision: 1,
             revoked_at_millis: None,
             history: vec![CredentialEvent {
+                scope_authority_change: None,
                 revision: 1,
                 action: action.into(),
                 actor_id: actor,
@@ -565,6 +580,7 @@ mod tests {
     }
     fn spec(subject: &str) -> CredentialSpec {
         CredentialSpec {
+            scope_policy: None,
             subject_id: subject.into(),
             capabilities: [Capability::MemoryRead, Capability::ProcedurePropose].into(),
             grants: vec![scope()],
@@ -667,6 +683,7 @@ mod tests {
             ..scope()
         };
         let private_spec = |name: &str| CredentialSpec {
+            scope_policy: None,
             grants: vec![private.clone()],
             ..spec(name)
         };
@@ -719,6 +736,7 @@ mod tests {
             .issue(
                 &admin.secret,
                 CredentialSpec {
+                    scope_policy: None,
                     expires_at_millis: Some(expires),
                     ..spec("alice")
                 },
@@ -729,6 +747,7 @@ mod tests {
             db.issue(
                 &admin.secret,
                 CredentialSpec {
+                    scope_policy: None,
                     expires_at_millis: Some(0),
                     ..spec("alice")
                 }

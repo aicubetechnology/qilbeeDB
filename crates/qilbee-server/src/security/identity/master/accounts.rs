@@ -247,6 +247,7 @@ impl IdentityStore {
                 revision: 1,
                 disabled_at_millis: None,
                 history: vec![CredentialEvent {
+                    scope_authority_change: None,
                     revision: 1,
                     action: "login_account_created".into(),
                     actor_id: actor,
@@ -318,6 +319,7 @@ impl IdentityStore {
         account.blocked_until_millis = 0;
         account.view.revision = revision.checked_add(1).ok_or_else(conflict)?;
         account.view.history.push(CredentialEvent {
+            scope_authority_change: None,
             revision: account.view.revision,
             action: action.into(),
             actor_id: actor,

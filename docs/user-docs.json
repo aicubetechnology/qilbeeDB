@@ -266,6 +266,13 @@
       "title": "Context consumer qualification",
       "description": "Inspect attributed consumer recovery evidence and the acceptance boundaries for current context reuse.",
       "order": 64
+    },
+    {
+      "source": "docs/security/company-integrations.md",
+      "file": "company-integrations.md",
+      "title": "Company integration policies",
+      "description": "Authorize external project and agent IDs with explicit company policies, preserve private subjects and change access with an audited revision guard.",
+      "order": 41
     }
   ]
 }
