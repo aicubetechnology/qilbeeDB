@@ -139,6 +139,7 @@ nav:
       - Verified Consumer Checkpoints: api/verified-memory-checkpoints.md
       - Consumer diagnostics: api/consumer-diagnostics.md
       - Python Memory Consumer: api/verified-memory-consumer.md
+      - Python Relation Consumer: api/verified-relation-consumer.md
       - Context Consumer Qualification: research/context-consumer-qualification.md
       - Semantic Memory Search: api/semantic-memory.md
       - Lexical Memory Search: api/lexical-memory.md

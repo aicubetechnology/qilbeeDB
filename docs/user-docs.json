@@ -226,6 +226,13 @@
       "order": 63
     },
     {
+      "source": "docs/api/verified-relation-consumer.md",
+      "file": "verified-relation-consumer.md",
+      "title": "Python relation consumer",
+      "description": "Consume typed relation changes with durable destination witnesses, bounded delivery, and verified progress.",
+      "order": 64
+    },
+    {
       "source": "docs/security/global-administration.md",
       "file": "global-administration.md",
       "title": "Global administration and SaaS provisioning",

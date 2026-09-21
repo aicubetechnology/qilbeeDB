@@ -6,6 +6,10 @@ and durable, subject-owned consumer checkpoints. Use it to invalidate cached
 [typed graphs](typed-memory-graph.md) or drive external consolidation workers.
 It performs no model inference and does not establish a learning-quality gain.
 
+The source-preview [Python relation consumer](verified-relation-consumer.md)
+provides bounded delivery, durable sink witnesses and exact checkpoint comparisons
+without a provider dependency.
+
 The relation stream is separate from the existing memory feeds. Existing memory
 clients keep their event kinds and cursor semantics. A graph cache must also
 observe memory changes and revalidate eligibility before reuse: changing or
