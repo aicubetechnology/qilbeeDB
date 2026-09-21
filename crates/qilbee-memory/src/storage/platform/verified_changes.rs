@@ -255,7 +255,7 @@ impl MemorySnapshot<'_> {
             || cursor.sequence > state.tip.sequence
             || self.verified_cursor_at(namespace, state, cursor.sequence)? != *cursor
         {
-            return Err(Error::ConstraintViolation(
+            return Err(Error::JournalHistoryConflict(
                 "Verified cursor does not match this journal history; reconcile restored state"
                     .into(),
             ));
@@ -327,7 +327,7 @@ impl RocksDbMemoryStorage {
         let view = self.memory_snapshot();
         let Some(state) = view.verified_journal(namespace)? else {
             if query.after.is_some() || query.through.is_some() {
-                return Err(Error::ConstraintViolation(
+                return Err(Error::JournalHistoryConflict(
                     "No verified journal in this scope".into(),
                 ));
             }

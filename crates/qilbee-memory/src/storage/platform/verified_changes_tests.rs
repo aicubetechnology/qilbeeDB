@@ -52,7 +52,7 @@ fn verified_feed_detects_divergent_restore_after_sequences_catch_up() {
         }
         assert!(matches!(
             restored.verified_memory_changes("scope", &q),
-            Err(Error::ConstraintViolation(_))
+            Err(Error::JournalHistoryConflict(_))
         ));
     }
     // The compatibility endpoint intentionally retains its older sequence-only semantics.
@@ -105,7 +105,7 @@ fn verified_feed_is_bounded_durable_idempotent_and_scope_local() {
     assert_eq!(second.changes.len(), 1);
     assert!(matches!(
         db.verified_memory_changes("foreign", &q),
-        Err(Error::ConstraintViolation(_))
+        Err(Error::JournalHistoryConflict(_))
     ));
     drop(db);
     let db = open(dir.path());

@@ -70,6 +70,14 @@ pub enum Error {
     #[error("Invalid temporal range: {0}")]
     InvalidTemporalRange(String),
 
+    /// A valid client cursor does not belong to the current verified journal history.
+    #[error("Journal history conflict: {0}")]
+    JournalHistoryConflict(String),
+
+    /// Ordinary checkpoint progress would move backward and requires explicit reconciliation.
+    #[error("Checkpoint regression: {0}")]
+    CheckpointRegression(String),
+
     // ========== Index Errors ==========
     #[error("Index not found: {0}")]
     IndexNotFound(String),
@@ -143,6 +151,8 @@ impl Error {
         matches!(
             self,
             Error::ConstraintViolation(_)
+                | Error::JournalHistoryConflict(_)
+                | Error::CheckpointRegression(_)
                 | Error::UniqueViolation { .. }
                 | Error::NodeKeyViolation(_)
         )
@@ -168,11 +178,25 @@ mod tests {
 
     #[test]
     fn test_error_constraint_violation() {
-        assert!(Error::UniqueViolation {
-            label: "User".to_string(),
-            property: "email".to_string()
-        }
-        .is_constraint_violation());
+        assert!(
+            Error::UniqueViolation {
+                label: "User".to_string(),
+                property: "email".to_string()
+            }
+            .is_constraint_violation()
+        );
         assert!(!Error::NodeNotFound("123".to_string()).is_constraint_violation());
+    }
+
+    #[test]
+    fn history_conflicts_require_reconciliation_without_claiming_storage_corruption() {
+        for error in [
+            Error::JournalHistoryConflict("current history differs".into()),
+            Error::CheckpointRegression("progress would move backward".into()),
+        ] {
+            assert!(error.is_constraint_violation());
+            assert!(!error.is_recoverable());
+            assert!(!error.is_corruption());
+        }
     }
 }

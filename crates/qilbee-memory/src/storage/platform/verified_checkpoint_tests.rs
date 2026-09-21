@@ -64,7 +64,7 @@ fn verified_checkpoint_retries_preserve_original_receipts_and_current_progress()
     backwards.cursor = first.cursor.clone();
     assert!(matches!(
         db.commit_verified_memory_checkpoint("scope", &who, &backwards),
-        Err(Error::ConstraintViolation(_))
+        Err(Error::CheckpointRegression(_))
     ));
     let mut altered = first.clone();
     altered.cursor = tip(&db);
@@ -123,7 +123,7 @@ fn verified_checkpoint_cas_detects_same_revision_after_divergent_restore() {
     lost.cursor = original.checkpoint.cursor.clone();
     assert!(matches!(
         restored.commit_verified_memory_checkpoint("scope", &who, &lost),
-        Err(Error::ConstraintViolation(_))
+        Err(Error::JournalHistoryConflict(_))
     ));
     let branch = restored
         .commit_verified_memory_checkpoint("scope", &who, &command(&restored, &who, "divergent"))
@@ -347,7 +347,7 @@ fn recovery_rejects_unknown_history_blank_evidence_and_corrupt_audit_receipts() 
     invalid.cursor.prefix_digest = "f".repeat(64);
     assert!(matches!(
         db.recover_verified_memory_checkpoint("scope", &who, &invalid),
-        Err(Error::ConstraintViolation(_))
+        Err(Error::JournalHistoryConflict(_))
     ));
     invalid = original.clone();
     invalid.evidence_ref = "  ".into();

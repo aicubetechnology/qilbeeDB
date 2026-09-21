@@ -98,6 +98,47 @@ Conflicts, incompatible histories and changed retry bodies return 409. Stored
 corruption returns 500 with no partial write. Standard 64 KiB request limits and
 `Cache-Control: no-store` apply.
 
+### Choose a recovery action
+
+Starting in **0.10.0**, inspect `error.code` to choose the next action. Each row
+is a failed operation: no partial checkpoint write or recovery is committed.
+
+| HTTP status and code | Meaning | Client action |
+| --- | --- | --- |
+| `409 journal_history_conflict` | A well-formed target cursor does not belong to the current verified history, or the target scope has no verified journal. | Check the authorized scope and current baseline, then reconcile your consumer with current history. Do not invent a cursor or change a retry key to bypass this check. |
+| `409 checkpoint_regression` | An ordinary checkpoint commit would move backward. | Read current progress. If an intentional rewind is required, coordinate workers and use explicit recovery with reconciliation evidence. |
+| `409 revision_conflict` | Expected revision or digest is stale; recovery also uses this code when no current checkpoint exists. | Read current progress before deciding on a new command. A losing worker must not blindly overwrite the winner. |
+| `409 idempotency_conflict` | A previously accepted key was reused with a different command body. | Retry the original command unchanged to obtain its receipt. Use a new key only for an intentionally new operation with current expectations. |
+| `404 checkpoint_not_found` | No current progress exists for this subject and consumer in the exact authorized scope. | Verify subject and scope. Initialize progress only after the required initial reconciliation. |
+| `404 recovery_not_found` | No recovery receipt exists at the requested resulting revision. | Check the subject, consumer and revision. Ordinary commits do not create recovery receipts. |
+
+A code identifies the first failed check, not proof that every other field is
+valid. After request validation, an existing retry receipt is checked before
+current-state comparison. An identical retry returns its historical receipt;
+a changed retry body remains an idempotency conflict. New commands compare
+current progress before validating the target history and forward movement.
+An invalid cursor encoding is rejected before testing whether its journal exists.
+
+Error responses retain the common `contract_version: 1` envelope; successful v2
+responses retain their existing contract version. A failed stored-checkpoint
+integrity or history check is a server-side `500 storage_inconsistency`, not a
+client-history conflict. Preserve that failure for investigation rather than
+replacing stored progress. Malformed requests remain `400` and authorization
+failures remain `401` or `403`.
+
+In 0.9.0, history mismatches and backward commits used `idempotency_conflict`.
+The new codes refine those existing `409` responses. Identical command retries,
+comparison checks and durable state are unchanged. The OpenAPI now also includes
+the existing checkpoint and recovery `404` codes. Refresh generated/cached client
+contracts before upgrading, and retain a fallback for unfamiliar error codes.
+These changes do not reinterpret version-one checkpoint conflicts.
+
+Rust callers receive `Error::JournalHistoryConflict` or
+`Error::CheckpointRegression` for these v2 client failures. Update exhaustive
+matches on `qilbee_core::Error` when upgrading to 0.10.0. Both variants satisfy
+`is_constraint_violation()`, and neither is classified as corruption or eligible
+for recovery by retrying unchanged input through `is_recoverable()`.
+
 Progress and receipts are retained without automatic pruning. There are no
 consumer leases, worker assignment, external exactly-once effects or automatic
 rollback of work already performed outside QilbeeDB. Preserve backups and follow

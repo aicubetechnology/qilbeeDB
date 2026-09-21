@@ -718,3 +718,4 @@ mod verified_checkpoints;
 
 mod hybrid_schema;
 mod journal_audit;
+mod history_errors;

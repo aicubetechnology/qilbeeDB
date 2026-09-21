@@ -217,7 +217,7 @@ fn journal_audit_rejects_divergent_restore_cursors_after_sequence_catch_up() {
         }
         assert!(matches!(
             restored.audit_memory_journal("scope", &q),
-            Err(Error::ConstraintViolation(_))
+            Err(Error::JournalHistoryConflict(_))
         ));
     }
 }

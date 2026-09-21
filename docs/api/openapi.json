@@ -7745,7 +7745,7 @@
             }
           },
           "404": {
-            "description": "No current record in the authorized scope",
+            "description": "No current checkpoint exists for this subject and consumer in the authorized scope.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -7757,7 +7757,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CheckpointNotFoundError"
+                },
+                "examples": {
+                  "checkpoint_not_found": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "checkpoint_not_found",
+                        "message": "No checkpoint exists for this subject and consumer in the authorized scope"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -7939,7 +7950,7 @@
             }
           },
           "409": {
-            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "description": "The client cursor does not match current scoped history. Reconcile the scope, baseline and consumer state; changing an idempotency key is not a remedy.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -7951,7 +7962,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/VerifiedJournalConflictError"
+                },
+                "examples": {
+                  "journal_history_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "journal_history_conflict",
+                        "message": "The cursor does not match the current scoped journal history; reconcile consumer state"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -8294,7 +8316,7 @@
             }
           },
           "409": {
-            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "description": "Inspect error.code: reconcile journal history, use explicit recovery for intentional rewind, reread stale progress, or retry the original idempotent command.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -8306,7 +8328,45 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/VerifiedCheckpointConflictError"
+                },
+                "examples": {
+                  "journal_history_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "journal_history_conflict",
+                        "message": "The cursor does not match the current scoped journal history; reconcile consumer state"
+                      }
+                    }
+                  },
+                  "checkpoint_regression": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "checkpoint_regression",
+                        "message": "Ordinary checkpoint progress cannot move backward; explicit reconciliation is required"
+                      }
+                    }
+                  },
+                  "revision_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "revision_conflict",
+                        "message": "The expected revision or authorizing credential changed"
+                      }
+                    }
+                  },
+                  "idempotency_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "idempotency_conflict",
+                        "message": "The idempotency key was already used for a different command"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -8464,7 +8524,7 @@
             }
           },
           "404": {
-            "description": "No current record in the authorized scope",
+            "description": "No current checkpoint exists for this subject and consumer in the authorized scope.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -8476,7 +8536,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CheckpointNotFoundError"
+                },
+                "examples": {
+                  "checkpoint_not_found": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "checkpoint_not_found",
+                        "message": "No checkpoint exists for this subject and consumer in the authorized scope"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -8658,7 +8729,7 @@
             }
           },
           "409": {
-            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "description": "Inspect error.code: recovery does not override history validation, current checkpoint comparison or idempotency. A missing current checkpoint uses revision_conflict.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -8670,7 +8741,36 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/VerifiedRecoveryConflictError"
+                },
+                "examples": {
+                  "journal_history_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "journal_history_conflict",
+                        "message": "The cursor does not match the current scoped journal history; reconcile consumer state"
+                      }
+                    }
+                  },
+                  "revision_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "revision_conflict",
+                        "message": "The expected revision or authorizing credential changed"
+                      }
+                    }
+                  },
+                  "idempotency_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "idempotency_conflict",
+                        "message": "The idempotency key was already used for a different command"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -8829,7 +8929,7 @@
             }
           },
           "404": {
-            "description": "No current record in the authorized scope",
+            "description": "No recovery receipt exists for this subject, consumer and resulting checkpoint revision.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -8841,7 +8941,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/RecoveryNotFoundError"
+                },
+                "examples": {
+                  "recovery_not_found": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "recovery_not_found",
+                        "message": "No recovery receipt exists for this subject, consumer and revision"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -9042,7 +9153,7 @@
             }
           },
           "409": {
-            "description": "Expected revision, immutable request/event content, terminal outcome or context digest conflict",
+            "description": "The client cursor does not match current scoped history. Reconcile the scope, baseline and consumer state; changing an idempotency key is not a remedy.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -9054,7 +9165,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/VerifiedJournalConflictError"
+                },
+                "examples": {
+                  "journal_history_conflict": {
+                    "value": {
+                      "contract_version": 1,
+                      "error": {
+                        "code": "journal_history_conflict",
+                        "message": "The cursor does not match the current scoped journal history; reconcile consumer state"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -10030,7 +10152,11 @@
                   "record_not_found",
                   "idempotency_conflict",
                   "storage_inconsistency",
-                  "internal_error"
+                  "internal_error",
+                  "journal_history_conflict",
+                  "checkpoint_regression",
+                  "checkpoint_not_found",
+                  "recovery_not_found"
                 ]
               },
               "message": {
@@ -16121,6 +16247,116 @@
           "audit"
         ],
         "additionalProperties": false
+      },
+      "VerifiedJournalConflictError": {
+        "description": "A well-formed client cursor does not match the authorized verified history. No journal, generation, boundary or digest is disclosed.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "journal_history_conflict"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "VerifiedCheckpointConflictError": {
+        "description": "Verified checkpoint failures have distinct codes for history mismatch, backward progress, stale comparison and changed retries.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "journal_history_conflict",
+                      "checkpoint_regression",
+                      "revision_conflict",
+                      "idempotency_conflict"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "VerifiedRecoveryConflictError": {
+        "description": "Explicit recovery permits backward progress but still requires valid history, an existing current checkpoint and an unchanged retry body.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "journal_history_conflict",
+                      "revision_conflict",
+                      "idempotency_conflict"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CheckpointNotFoundError": {
+        "description": "No checkpoint exists for the authenticated subject and exact authorized scope.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "checkpoint_not_found"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RecoveryNotFoundError": {
+        "description": "No recovery receipt exists for the authenticated subject, consumer and resulting revision.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "recovery_not_found"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   }
