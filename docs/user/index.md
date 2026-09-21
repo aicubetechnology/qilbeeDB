@@ -11,6 +11,7 @@ generates embeddings externally and decides how retrieved evidence is used.
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
 - [Automatic agent registration, 0.12.0](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
+- [Agent display names, unreleased](../security/agent-display-profiles.md): recognize external agent IDs and preserve revisioned name changes.
 - [Company integrations, 0.12.0](../security/company-integrations.md): authorize external project and agent IDs through a versioned policy and change access without replacing keys.
 - [Company memory administration, 0.12.0](../security/company-memory-administration.md): discover retained workspaces and inspect company records independently of credential grants.
 - [Memory API](../api/versioned-memory.md): create, update and delete records with durable receipts and revision checks.

@@ -18606,6 +18606,723 @@
           }
         }
       }
+    },
+    "/api/v1/company/agents/query": {
+      "post": {
+        "operationId": "companyAgentQuery",
+        "summary": "Discover registered agents by name or ID",
+        "tags": [
+          "Agent registration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority; company is derived from the credential. Labels do not create agents or change IDs, scopes, grants, registration provenance or execution state. Requests are limited to 65,536 bytes. Existing GET /api/v1/agents is unchanged. Bounded UTF-8 agent-ID traversal with live pages, not a snapshot. Text matches name or ID case-insensitively. Empty pages may have a continuation; use the exact cursor with unchanged text and company. Later inserts or renamed matches behind the cursor require a new traversal.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyAgentQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Discover registered agents by name or ID",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyAgentQueryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/agents/read": {
+      "post": {
+        "operationId": "companyAgentRead",
+        "summary": "Inspect a registered agent and its current display name",
+        "tags": [
+          "Agent registration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority; company is derived from the credential. Labels do not create agents or change IDs, scopes, grants, registration provenance or execution state. Requests are limited to 65,536 bytes. Existing GET /api/v1/agents is unchanged.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyAgentReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Inspect a registered agent and its current display name",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyAgentReadResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/agents/commands": {
+      "post": {
+        "operationId": "companyAgentCommand",
+        "summary": "Set or clear a registered agent display name",
+        "tags": [
+          "Agent registration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority; company is derived from the credential. Labels do not create agents or change IDs, scopes, grants, registration provenance or execution state. Requests are limited to 65,536 bytes. Existing GET /api/v1/agents is unchanged. Command, actor and idempotency key determine an exact replay; reusing a key with different content or actor conflicts. expected_revision=0 initializes an unnamed profile. Atomic current state, historical revision and receipt use synchronous WAL. A replay receipt may be older than current state; read the agent again. display_name must be explicit, including null to clear.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyAgentCommandRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Set or clear a registered agent display name",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyAgentCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/agents/history": {
+      "post": {
+        "operationId": "companyAgentHistory",
+        "summary": "Read the immutable display-name change history",
+        "tags": [
+          "Agent registration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority; company is derived from the credential. Labels do not create agents or change IDs, scopes, grants, registration provenance or execution state. Requests are limited to 65,536 bytes. Existing GET /api/v1/agents is unchanged. Revisions are ascending and immutable. The exclusive after_revision must not exceed current_revision; pages are live observations, not a single snapshot. A receipt does not prove that its value remains current.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyAgentHistoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Read the immutable display-name change history",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyAgentHistoryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -32883,6 +33600,504 @@
           "company_id",
           "resource",
           "details"
+        ],
+        "additionalProperties": false
+      },
+      "AgentDisplayProfile": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updated_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/Author"
+          }
+        },
+        "required": [
+          "schema_version",
+          "company_id",
+          "agent_id",
+          "revision",
+          "display_name",
+          "updated_at_millis",
+          "updated_by"
+        ],
+        "additionalProperties": false
+      },
+      "AgentProfileCommand": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "agent_id",
+          "expected_revision",
+          "display_name",
+          "idempotency_key"
+        ],
+        "additionalProperties": false,
+        "description": "Names use 1–256 UTF-8 bytes, with no control characters or surrounding whitespace; null explicitly clears the label. Labels are not unique identifiers and do not confer authority. A missing display_name is invalid. The idempotency identity is company-bound and its replay also requires the original actor."
+      },
+      "AgentProfileReceipt": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "$ref": "#/components/schemas/AgentProfileCommand"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AgentDisplayProfile"
+          }
+        },
+        "required": [
+          "command",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "AgentProfileOutcome": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/AgentProfileReceipt"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "receipt",
+          "replayed"
+        ],
+        "additionalProperties": false
+      },
+      "NamedAgent": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "registered_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "registered_by": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "first_scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/AgentRegistrationTrigger"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentDisplayProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "agent_id",
+          "registered_at_millis",
+          "registered_by",
+          "first_scope",
+          "private_subject_id",
+          "trigger",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "AgentDirectoryCursor": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "filter_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "after_agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "version",
+          "company_id",
+          "filter_digest",
+          "after_agent_id"
+        ],
+        "additionalProperties": false
+      },
+      "AgentDirectoryQuery": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          },
+          "max_scanned_agents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentDirectoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "NamedAgentPage": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NamedAgent"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentDirectoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scanned_agents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "observed_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "agents",
+          "next_cursor",
+          "scanned_agents",
+          "observed_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "AgentProfileHistory": {
+        "type": "object",
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentProfileReceipt"
+            },
+            "maxItems": 100
+          },
+          "next_after_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "receipts",
+          "next_after_revision",
+          "current_revision"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/AgentDirectoryQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "contract_version",
+          "agent_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentCommandRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "command": {
+            "$ref": "#/components/schemas/AgentProfileCommand"
+          }
+        },
+        "required": [
+          "contract_version",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentHistoryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "after_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615,
+            "default": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          }
+        },
+        "required": [
+          "contract_version",
+          "agent_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "page": {
+            "$ref": "#/components/schemas/NamedAgentPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "agent": {
+            "$ref": "#/components/schemas/NamedAgent"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "agent"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentCommandResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "result": {
+            "$ref": "#/components/schemas/AgentProfileOutcome"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "result"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyAgentHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "page": {
+            "$ref": "#/components/schemas/AgentProfileHistory"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "agent_id",
+          "page"
         ],
         "additionalProperties": false
       }
