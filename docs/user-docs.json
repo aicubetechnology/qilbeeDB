@@ -189,6 +189,20 @@
       "title": "Experience-backed strategy candidates",
       "description": "Register structured strategies from exact experience observations and qualify them through the existing learning authority.",
       "order": 97
+    },
+    {
+      "source": "docs/api/retrieval-candidates.md",
+      "file": "retrieval-candidates.md",
+      "title": "Current retrieval candidates",
+      "description": "Interpret candidate coverage, history maintenance and retrieval work counters.",
+      "order": 86
+    },
+    {
+      "source": "docs/research/retrieval-history-report.md",
+      "file": "retrieval-history-report.md",
+      "title": "Retrieval history qualification",
+      "description": "Review coverage, migration, resource measurements and limits after deletion history.",
+      "order": 87
     }
   ]
 }

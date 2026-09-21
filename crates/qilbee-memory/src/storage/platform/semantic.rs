@@ -83,6 +83,14 @@ pub struct SemanticHit {
 pub struct SemanticPage {
     pub hits: Vec<SemanticHit>,
     pub next_after: Option<Uuid>,
+    #[serde(skip_serializing, default)]
+    pub candidate_selection_version: String,
+    #[serde(skip_serializing, default)]
+    pub candidate_index_bytes: usize,
+    #[serde(skip_serializing, default)]
+    pub scanned_records: usize,
+    #[serde(skip_serializing, default)]
+    pub scanned_bytes: usize,
     pub scanned_embeddings: usize,
     #[serde(default)]
     pub dependency_work: DependencyWork,
@@ -349,15 +357,26 @@ impl super::snapshot::MemorySnapshot<'_> {
                 "Invalid semantic limit, scan budget or score threshold".into(),
             ));
         }
-        let prefix = embedding_prefix(namespace, &query.space)?;
+        let prefix = super::candidates::prefix(
+            namespace,
+            query.tag.as_deref(),
+            query.episode_type.as_ref(),
+        )?;
         let start = query
             .after
-            .map(|id| embedding_key(namespace, &query.space, id))
-            .transpose()?
+            .map(|id| {
+                let mut key = prefix.clone();
+                key.extend_from_slice(id.as_bytes());
+                key
+            })
             .unwrap_or_else(|| prefix.clone());
         let mut page = SemanticPage {
             hits: vec![],
             next_after: None,
+            candidate_selection_version: CANDIDATE_SELECTION_VERSION.into(),
+            candidate_index_bytes: 0,
+            scanned_records: 0,
+            scanned_bytes: 0,
             scanned_embeddings: 0,
             dependency_work: DependencyWork::default(),
             matched_records: 0,
@@ -376,15 +395,24 @@ impl super::snapshot::MemorySnapshot<'_> {
             if query.after.is_some_and(|after| id <= after) {
                 continue;
             }
-            if page.scanned_embeddings == query.scan_limit {
+            if page.scanned_records == query.scan_limit {
                 page.next_after = last_scanned;
                 page.exhaustive = false;
                 break;
             }
-            let embedding = decode_embedding(&bytes, namespace, &query.space, id)?;
-            page.scanned_embeddings += 1;
+            let (record, record_bytes) = self.candidate_record(namespace, id, &bytes)?;
+            page.scanned_records += 1;
+            page.candidate_index_bytes += key.len() + bytes.len();
+            page.scanned_bytes += record_bytes;
             last_scanned = Some(id);
-            let record = self.record(namespace, id)?.ok_or_else(inconsistent)?;
+            if !self.eligible(namespace, &record)? {
+                continue;
+            }
+            let Some((embedding, size)) = self.embedding(namespace, &query.space, id)? else {
+                continue;
+            };
+            page.scanned_embeddings += 1;
+            page.scanned_bytes += size;
             if record.revision < embedding.receipt.record_revision {
                 return Err(inconsistent());
             }

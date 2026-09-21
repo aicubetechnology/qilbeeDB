@@ -84,6 +84,7 @@ nav:
     - Memory Quickstart: user/quickstart.md
     - Local Docker: user/deployment.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
+    - Retrieval history qualification: research/retrieval-history-report.md
     - External Embedding Evaluation: research/external-embedding-evaluation.md
     - SciFact Retrieval Evaluation: research/scifact-evaluation.md
     - Real-Embedding Results: research/scifact-results.md
@@ -131,6 +132,7 @@ nav:
       - Verified Consumer Checkpoints: api/verified-memory-checkpoints.md
       - Semantic Memory Search: api/semantic-memory.md
       - Lexical Memory Search: api/lexical-memory.md
+      - Current candidates: api/retrieval-candidates.md
       - Hybrid Memory Retrieval: api/hybrid-memory.md
       - Procedural Learning API: api/procedural-learning.md
       - Experience Receipts: api/experiences.md

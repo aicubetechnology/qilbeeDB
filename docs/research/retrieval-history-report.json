@@ -1,0 +1,4333 @@
+{
+  "schema_version": 1,
+  "experiment": "current-candidate-coverage-v1",
+  "relevance_evidence": false,
+  "baseline_source_revision": "4d12a1c0f14b28112cce7d8d3ab4d25a0d4471d0",
+  "candidate_source_revision": "ca40867ace7a27876bd45be4aa3b8745fb1f4e73",
+  "baseline_image_id": "sha256:8943554160e682fd8804bc20908fd269afa3fc6dd47df5042f425544d4df4744",
+  "candidate_image_id": "sha256:162fe47ded5669bf8f7a1132642694e4668ca47d6b953434f3f483173493fea6",
+  "server_resources": {
+    "cpus": 2,
+    "memory_limit_bytes": 2147483648,
+    "storage": "Dedicated host bind directories on the same workstation; no shared service restart."
+  },
+  "conditions": {
+    "measured_queries_per_method_and_stage": 20,
+    "warmup_queries": 2,
+    "request_concurrency": 1,
+    "mutation_concurrency": 4,
+    "scan_limit": 10000,
+    "scan_bytes_limit": 134217728,
+    "cache": "Warm repeated queries; no eviction. Other workstation activity was not controlled.",
+    "timing": "Retrieval method wall time, excludes authentication, queueing, serialization, network and external embeddings. HTTP time includes the client round trip.",
+    "resources": "PID 1 process CPU over the query loop including warmup; RSS sampled at boundaries. VmHWM is lifetime peak, not a per-method peak."
+  },
+  "startup": {
+    "complete": true,
+    "startup_seconds_including_container_creation_and_health_poll": 0.969267499865964
+  },
+  "artifact_sha256": {
+    "baseline_history": "bae4ecc72164a78e85c4d2a333152ac59755148c0181eaad5ac44a794ea24971",
+    "baseline_size": "cdfab08aa6de3581093a0c3a23143a2b034e19c4d8557f991b3d965b144bf7dd",
+    "candidate_history_and_size": "bde0af5e7bcd0c736cfb0b330de71ca2db12464d11a4d5bd62ef5665e18e69ee",
+    "same_history_before": "f373dddb9669b7367c74937c52cbb0f5cbe03e25f66a3ab49bd419e4605b5347",
+    "same_history_after": "1807060ff4d1e2193510c5b8f6772d7f0a1c7f0abf10f8e9468c16afb1a43b07",
+    "real_eight_documents": "6ca79ffc0245bd9e2de59a91e482a74ef83e4cf646b3b3b1cd22112d6269b1b8"
+  },
+  "runs": {
+    "baseline_history": {
+      "schema_version": 1,
+      "fixture": "synthetic-history-coverage-v1",
+      "relevance_evidence": false,
+      "documents": 5183,
+      "dimensions": 1536,
+      "candidate_budget": 10000,
+      "lexical_hybrid_byte_budget": 134217728,
+      "result_limit": 10,
+      "request_concurrency": 1,
+      "mutation_concurrency": 4,
+      "warmup_requests": 2,
+      "measured_requests": 20,
+      "timing": "Server retrieval time; HTTP separately. External embedding generation excluded.",
+      "cache": "Warm repeated queries; no cache eviction. Other workstation activity is not controlled.",
+      "vector_sha256": "31e30420154d13cd6ed74a56aa4a27a0d69b9c561af9e402f6baa365cc62b1a7",
+      "results": [
+        {
+          "stage": "initial",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183
+              },
+              "retrieval_ms": {
+                "p50": 103.756,
+                "p95": 160.954,
+                "minimum": 90.839,
+                "maximum": 188.938,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 106.25977104064077,
+                "p95": 163.8103339355439,
+                "minimum": 93.36304198950529,
+                "maximum": 191.73054094426334,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13918,
+                "maximum": 13919
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183
+              },
+              "retrieval_ms": {
+                "p50": 777.6949999999999,
+                "p95": 861.788,
+                "minimum": 734.387,
+                "maximum": 1199.695,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 782.3102079564705,
+                "p95": 867.3562500625849,
+                "minimum": 738.176291109994,
+                "maximum": 1203.869457822293,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18634,
+                "maximum": 18634
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183
+              },
+              "retrieval_ms": {
+                "p50": 851.1735,
+                "p95": 1002.38,
+                "minimum": 795.376,
+                "maximum": 1154.785,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 857.6661460101604,
+                "p95": 1016.8120409362018,
+                "minimum": 801.3807919342071,
+                "maximum": 1163.4618330281228,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20883,
+                "maximum": 20884
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-1-updated",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183
+              },
+              "retrieval_ms": {
+                "p50": 97.059,
+                "p95": 138.705,
+                "minimum": 87.71,
+                "maximum": 217.753,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 100.53791652899235,
+                "p95": 141.67425013147295,
+                "minimum": 90.43654100969434,
+                "maximum": 225.54749995470047,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13918,
+                "maximum": 13919
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183
+              },
+              "retrieval_ms": {
+                "p50": 830.048,
+                "p95": 1303.045,
+                "minimum": 791.375,
+                "maximum": 1370.313,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 837.0963335037231,
+                "p95": 1317.6359999924898,
+                "minimum": 794.9582079891115,
+                "maximum": 1380.0736251287162,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18634,
+                "maximum": 18634
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183
+              },
+              "retrieval_ms": {
+                "p50": 822.441,
+                "p95": 977.26,
+                "minimum": 770.522,
+                "maximum": 1140.203,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 827.6094375178218,
+                "p95": 993.2754999026656,
+                "minimum": 774.8446660116315,
+                "maximum": 1144.9219160713255,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20883,
+                "maximum": 20884
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-1-replaced",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 5183,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 4991,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "scanned_bytes": 7838498,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 132.88400000000001,
+                "p95": 163.409,
+                "minimum": 120.564,
+                "maximum": 168.81,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 136.7769375210628,
+                "p95": 166.98408382944763,
+                "minimum": 123.04575019516051,
+                "maximum": 172.3600421100855,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13977,
+                "maximum": 13977
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1564.6660000000002,
+                "p95": 1729.176,
+                "minimum": 1496.257,
+                "maximum": 1871.099,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1573.9940829807892,
+                "p95": 1735.1796249859035,
+                "minimum": 1506.6074158530682,
+                "maximum": 1887.2659169137478,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18682,
+                "maximum": 18682
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 4991,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 4991,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 91063423,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 4991
+              },
+              "retrieval_ms": {
+                "p50": 911.883,
+                "p95": 1316.602,
+                "minimum": 809.335,
+                "maximum": 1407.17,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 926.3560000108555,
+                "p95": 1342.6593749318272,
+                "minimum": 815.8680000342429,
+                "maximum": 1423.724374966696,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20941,
+                "maximum": 20942
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-2-updated",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 5183,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 4991,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "scanned_bytes": 7838498,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 129.51299999999998,
+                "p95": 154.138,
+                "minimum": 123.746,
+                "maximum": 162.38,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 131.6366249229759,
+                "p95": 160.30933405272663,
+                "minimum": 126.02095818147063,
+                "maximum": 165.74366600252688,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13977,
+                "maximum": 13977
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1673.0095,
+                "p95": 2207.176,
+                "minimum": 1510.881,
+                "maximum": 2674.966,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1678.8412083406001,
+                "p95": 2222.892374964431,
+                "minimum": 1516.9100419152528,
+                "maximum": 2697.269459022209,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18682,
+                "maximum": 18682
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 4991,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 4991,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 4991,
+                "next_after": "f70851fa-3658-4f2c-ad0b-10dca05437a1",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 91063423,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 4991
+              },
+              "retrieval_ms": {
+                "p50": 926.138,
+                "p95": 1408.171,
+                "minimum": 827.321,
+                "maximum": 1465.575,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 931.989207980223,
+                "p95": 1413.7624169234186,
+                "minimum": 832.4004169553518,
+                "maximum": 1477.4573328904808,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20941,
+                "maximum": 20942
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 5009,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 4991
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-2-replaced",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 10366,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 3357,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "scanned_bytes": 6139832,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 105.265,
+                "p95": 118.561,
+                "minimum": 102.336,
+                "maximum": 120.016,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 107.90804156567901,
+                "p95": 123.33291722461581,
+                "minimum": 105.37299979478121,
+                "maximum": 125.14541600830853,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13977,
+                "maximum": 13977
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1780.5895,
+                "p95": 2330.363,
+                "minimum": 1519.436,
+                "maximum": 2703.6,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1788.5388754075393,
+                "p95": 2338.0913329310715,
+                "minimum": 1522.574249887839,
+                "maximum": 2711.3176670391113,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18682,
+                "maximum": 18682
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 3357,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 3357,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 62117807,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 3357
+              },
+              "retrieval_ms": {
+                "p50": 755.9000000000001,
+                "p95": 1533.2,
+                "minimum": 598.436,
+                "maximum": 1604.024,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 761.1113538732752,
+                "p95": 1582.5913329608738,
+                "minimum": 602.0502501633018,
+                "maximum": 1616.302833193913,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20941,
+                "maximum": 20942
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-3-updated",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 10366,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 3357,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "scanned_bytes": 6139832,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 114.1915,
+                "p95": 158.555,
+                "minimum": 103.035,
+                "maximum": 180.671,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 116.4219998754561,
+                "p95": 161.88008291646838,
+                "minimum": 105.26637500151992,
+                "maximum": 183.73762513510883,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13977,
+                "maximum": 13977
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1732.601,
+                "p95": 2982.018,
+                "minimum": 1458.513,
+                "maximum": 3616.436,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1748.535167076625,
+                "p95": 2997.9121249634773,
+                "minimum": 1461.8936670012772,
+                "maximum": 3630.2187079563737,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18682,
+                "maximum": 18682
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 3357,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 3357,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 3357,
+                "next_after": "a5e69faa-d30d-4114-8a27-a5ecfc44b1cb",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 62117807,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 3357
+              },
+              "retrieval_ms": {
+                "p50": 578.4505,
+                "p95": 655.485,
+                "minimum": 563.472,
+                "maximum": 669.16,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 583.0799789400771,
+                "p95": 658.6670409888029,
+                "minimum": 566.6301250457764,
+                "maximum": 672.1791659947485,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20941,
+                "maximum": 20941
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 6643,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 3357
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-3-replaced",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 2548,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2548,
+                "next_after": "7ca56658-b69a-4a97-a51d-6df793d6141b",
+                "scanned_bytes": 5298850,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 132.6445,
+                "p95": 189.104,
+                "minimum": 99.499,
+                "maximum": 206.666,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 140.11722954455763,
+                "p95": 197.32770789414644,
+                "minimum": 102.43729199282825,
+                "maximum": 213.49400002509356,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13970,
+                "maximum": 13971
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7452,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2548
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2548,
+                "next_after": "7ca56658-b69a-4a97-a51d-6df793d6141b",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1670.8445000000002,
+                "p95": 2289.573,
+                "minimum": 1457.614,
+                "maximum": 2504.097,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1678.1993330223486,
+                "p95": 2298.592000035569,
+                "minimum": 1463.8758751098067,
+                "maximum": 2509.338333969936,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18676,
+                "maximum": 18676
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7452,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2548
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 2548,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 2548,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 2548,
+                "next_after": "7ca56658-b69a-4a97-a51d-6df793d6141b",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 47786750,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 2548
+              },
+              "retrieval_ms": {
+                "p50": 472.638,
+                "p95": 718.06,
+                "minimum": 444.016,
+                "maximum": 732.731,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 476.8884584773332,
+                "p95": 727.3715829942375,
+                "minimum": 447.2648750524968,
+                "maximum": 737.7324588596821,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20935,
+                "maximum": 20935
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7452,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2548
+              }
+            }
+          }
+        },
+        {
+          "stage": "outside-tag-background",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 1024,
+          "methods": {
+            "lexical": {
+              "page": {
+                "corpus_records": 2439,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "scanned_bytes": 5700178,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 105.8395,
+                "p95": 119.615,
+                "minimum": 100.817,
+                "maximum": 120.05,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 108.1342080142349,
+                "p95": 122.12733388878405,
+                "minimum": 103.22654200717807,
+                "maximum": 124.26404096186161,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13951,
+                "maximum": 13951
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            },
+            "semantic": {
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1812.7885,
+                "p95": 2504.863,
+                "minimum": 1497.659,
+                "maximum": 3199.072,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1818.7473750440404,
+                "p95": 2515.116333961487,
+                "minimum": 1503.099957946688,
+                "maximum": 3205.8386250864714,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18676,
+                "maximum": 18676
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            },
+            "hybrid": {
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 2439,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 2439,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 46370503,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 2439
+              },
+              "retrieval_ms": {
+                "p50": 464.9015,
+                "p95": 576.175,
+                "minimum": 439.981,
+                "maximum": 724.776,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 473.9467080216855,
+                "p95": 582.3854161426425,
+                "minimum": 443.6585421208292,
+                "maximum": 731.5312081482261,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20915,
+                "maximum": 20915
+              },
+              "controlled_fixture_uuid_prefix": {
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            }
+          }
+        }
+      ]
+    },
+    "baseline_size": {
+      "schema_version": 1,
+      "fixture": "synthetic-history-coverage-v1",
+      "relevance_evidence": false,
+      "documents": 5183,
+      "dimensions": 1536,
+      "candidate_budget": 10000,
+      "lexical_hybrid_byte_budget": 134217728,
+      "result_limit": 10,
+      "request_concurrency": 1,
+      "mutation_concurrency": 4,
+      "warmup_requests": 2,
+      "measured_requests": 20,
+      "timing": "Server retrieval time; HTTP separately. External embedding generation excluded.",
+      "cache": "Warm repeated queries; no cache eviction. Other workstation activity is not controlled.",
+      "vector_sha256": "31e30420154d13cd6ed74a56aa4a27a0d69b9c561af9e402f6baa365cc62b1a7",
+      "results": [
+        {
+          "stage": "size-1024",
+          "server_version": "0.9.0",
+          "current_corpus": 1024,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 0.4099999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 1.8,
+                  "rss_kib": 49160,
+                  "lifetime_peak_rss_kib": 49160
+                },
+                "after": {
+                  "process_cpu_seconds": 2.21,
+                  "rss_kib": 58924,
+                  "lifetime_peak_rss_kib": 59924
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 1024,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 1024,
+                "next_after": null,
+                "scanned_bytes": 1334100,
+                "scanned_records": 1024
+              },
+              "retrieval_ms": {
+                "p50": 17.3675,
+                "p95": 19.674,
+                "minimum": 16.665,
+                "maximum": 19.77,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 19.840938039124012,
+                "p95": 22.000041091814637,
+                "minimum": 18.517332850024104,
+                "maximum": 23.41216686181724,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13922,
+                "maximum": 13922
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 3.1799999999999997,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 2.21,
+                  "rss_kib": 58924,
+                  "lifetime_peak_rss_kib": 59924
+                },
+                "after": {
+                  "process_cpu_seconds": 5.39,
+                  "rss_kib": 58924,
+                  "lifetime_peak_rss_kib": 59924
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 1024,
+                "next_after": null,
+                "scanned_embeddings": 1024
+              },
+              "retrieval_ms": {
+                "p50": 136.7135,
+                "p95": 149.364,
+                "minimum": 134.648,
+                "maximum": 161.949,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 141.2458954146132,
+                "p95": 152.8673330321908,
+                "minimum": 137.57662498392165,
+                "maximum": 169.16162497363985,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18628,
+                "maximum": 18628
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 3.3999999999999995,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 5.39,
+                  "rss_kib": 58924,
+                  "lifetime_peak_rss_kib": 59924
+                },
+                "after": {
+                  "process_cpu_seconds": 8.79,
+                  "rss_kib": 96404,
+                  "lifetime_peak_rss_kib": 97800
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 1024,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 1024,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 1024,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 18409300,
+                "scanned_records": 1024,
+                "semantic_candidates": 100,
+                "semantic_matches": 1024
+              },
+              "retrieval_ms": {
+                "p50": 149.8295,
+                "p95": 162.025,
+                "minimum": 145.538,
+                "maximum": 163.459,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 154.0814379695803,
+                "p95": 165.89766694232821,
+                "minimum": 148.87604187242687,
+                "maximum": 166.6550829540938,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20887,
+                "maximum": 20887
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            }
+          }
+        },
+        {
+          "stage": "size-2592",
+          "server_version": "0.9.0",
+          "current_corpus": 2592,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 1.0899999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 11.28,
+                  "rss_kib": 132512,
+                  "lifetime_peak_rss_kib": 132512
+                },
+                "after": {
+                  "process_cpu_seconds": 12.37,
+                  "rss_kib": 141932,
+                  "lifetime_peak_rss_kib": 141932
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 2592,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 2592,
+                "next_after": null,
+                "scanned_bytes": 3380340,
+                "scanned_records": 2592
+              },
+              "retrieval_ms": {
+                "p50": 45.906,
+                "p95": 56.049,
+                "minimum": 43.054,
+                "maximum": 73.014,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 48.91414591111243,
+                "p95": 59.01058320887387,
+                "minimum": 45.522583881393075,
+                "maximum": 76.86087489128113,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13936,
+                "maximum": 13936
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 7.970000000000001,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 12.37,
+                  "rss_kib": 141932,
+                  "lifetime_peak_rss_kib": 141932
+                },
+                "after": {
+                  "process_cpu_seconds": 20.34,
+                  "rss_kib": 141932,
+                  "lifetime_peak_rss_kib": 141932
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 2592,
+                "next_after": null,
+                "scanned_embeddings": 2592
+              },
+              "retrieval_ms": {
+                "p50": 352.86400000000003,
+                "p95": 384.202,
+                "minimum": 341.619,
+                "maximum": 476.472,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 356.874666409567,
+                "p95": 387.9394580144435,
+                "minimum": 344.51037482358515,
+                "maximum": 483.5772910155356,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18642,
+                "maximum": 18642
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 8.620000000000001,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 20.34,
+                  "rss_kib": 141932,
+                  "lifetime_peak_rss_kib": 141932
+                },
+                "after": {
+                  "process_cpu_seconds": 28.96,
+                  "rss_kib": 216692,
+                  "lifetime_peak_rss_kib": 216692
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 2592,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 2592,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 2592,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 46601940,
+                "scanned_records": 2592,
+                "semantic_candidates": 100,
+                "semantic_matches": 2592
+              },
+              "retrieval_ms": {
+                "p50": 377.851,
+                "p95": 417.458,
+                "minimum": 368.809,
+                "maximum": 503.525,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 383.6409789510071,
+                "p95": 428.4006250090897,
+                "minimum": 372.8809580206871,
+                "maximum": 510.1929581724107,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20901,
+                "maximum": 20901
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            }
+          }
+        },
+        {
+          "stage": "initial",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.1000000000000014,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 34.69,
+                  "rss_kib": 154224,
+                  "lifetime_peak_rss_kib": 216084
+                },
+                "after": {
+                  "process_cpu_seconds": 36.79,
+                  "rss_kib": 202856,
+                  "lifetime_peak_rss_kib": 216084
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183
+              },
+              "retrieval_ms": {
+                "p50": 90.997,
+                "p95": 109.063,
+                "minimum": 89.585,
+                "maximum": 110.337,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 94.35268794186413,
+                "p95": 111.92666599527001,
+                "minimum": 91.58675000071526,
+                "maximum": 112.4208748806268,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13930,
+                "maximum": 13931
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 18.730000000000004,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 36.79,
+                  "rss_kib": 202856,
+                  "lifetime_peak_rss_kib": 216084
+                },
+                "after": {
+                  "process_cpu_seconds": 55.52,
+                  "rss_kib": 194744,
+                  "lifetime_peak_rss_kib": 218916
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183
+              },
+              "retrieval_ms": {
+                "p50": 792.2055,
+                "p95": 1000.978,
+                "minimum": 753.236,
+                "maximum": 1025.858,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 801.3305623317137,
+                "p95": 1008.5769998840988,
+                "minimum": 756.7108329385519,
+                "maximum": 1032.281167106703,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18646,
+                "maximum": 18646
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 20.32999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 55.52,
+                  "rss_kib": 194744,
+                  "lifetime_peak_rss_kib": 218916
+                },
+                "after": {
+                  "process_cpu_seconds": 75.85,
+                  "rss_kib": 508728,
+                  "lifetime_peak_rss_kib": 520092
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183
+              },
+              "retrieval_ms": {
+                "p50": 850.995,
+                "p95": 1074.153,
+                "minimum": 803.194,
+                "maximum": 1633.596,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 860.5973954545334,
+                "p95": 1078.1599590554833,
+                "minimum": 808.0544578842819,
+                "maximum": 1658.9056248776615,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20895,
+                "maximum": 20896
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        }
+      ]
+    },
+    "candidate_history_and_size": {
+      "schema_version": 1,
+      "fixture": "synthetic-history-coverage-v1",
+      "relevance_evidence": false,
+      "documents": 5183,
+      "dimensions": 1536,
+      "candidate_budget": 10000,
+      "lexical_hybrid_byte_budget": 134217728,
+      "result_limit": 10,
+      "request_concurrency": 1,
+      "mutation_concurrency": 4,
+      "warmup_requests": 2,
+      "measured_requests": 20,
+      "timing": "Server retrieval time; HTTP separately. External embedding generation excluded.",
+      "cache": "Warm repeated queries; no cache eviction. Other workstation activity is not controlled.",
+      "vector_sha256": "31e30420154d13cd6ed74a56aa4a27a0d69b9c561af9e402f6baa365cc62b1a7",
+      "results": [
+        {
+          "stage": "size-1024",
+          "server_version": "0.10.0",
+          "current_corpus": 1024,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 0.5099999999999998,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 1.77,
+                  "rss_kib": 51144,
+                  "lifetime_peak_rss_kib": 51144
+                },
+                "after": {
+                  "process_cpu_seconds": 2.28,
+                  "rss_kib": 60992,
+                  "lifetime_peak_rss_kib": 60992
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 1024,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 1024,
+                "next_after": null,
+                "scanned_bytes": 1334100,
+                "scanned_records": 1024,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 294912
+              },
+              "retrieval_ms": {
+                "p50": 21.1735,
+                "p95": 24.701,
+                "minimum": 20.446,
+                "maximum": 29.469,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 24.093562038615346,
+                "p95": 27.03500003553927,
+                "minimum": 22.61862508021295,
+                "maximum": 31.339083099737763,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13918,
+                "maximum": 13918
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 4.18,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 2.28,
+                  "rss_kib": 60992,
+                  "lifetime_peak_rss_kib": 60992
+                },
+                "after": {
+                  "process_cpu_seconds": 6.46,
+                  "rss_kib": 60992,
+                  "lifetime_peak_rss_kib": 60992
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 1024,
+                "next_after": null,
+                "scanned_embeddings": 1024,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 294912,
+                "scanned_records": 1024,
+                "scanned_bytes": 18409300
+              },
+              "retrieval_ms": {
+                "p50": 171.81799999999998,
+                "p95": 200.224,
+                "minimum": 167.61,
+                "maximum": 398.294,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 175.95622886437923,
+                "p95": 209.69979208894074,
+                "minimum": 170.18395895138383,
+                "maximum": 403.5585417877883,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18624,
+                "maximum": 18624
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 4.11,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 6.46,
+                  "rss_kib": 60992,
+                  "lifetime_peak_rss_kib": 60992
+                },
+                "after": {
+                  "process_cpu_seconds": 10.57,
+                  "rss_kib": 98940,
+                  "lifetime_peak_rss_kib": 99124
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 1024,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 1024,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 1024,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 18409300,
+                "scanned_records": 1024,
+                "semantic_candidates": 100,
+                "semantic_matches": 1024,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 294912
+              },
+              "retrieval_ms": {
+                "p50": 179.155,
+                "p95": 200.117,
+                "minimum": 175.018,
+                "maximum": 212.942,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 182.97160393558443,
+                "p95": 203.15516693517566,
+                "minimum": 178.70279191993177,
+                "maximum": 216.22304199263453,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20883,
+                "maximum": 20883
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 1024,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 1024
+              }
+            }
+          }
+        },
+        {
+          "stage": "size-2592",
+          "server_version": "0.10.0",
+          "current_corpus": 2592,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 1.2799999999999994,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 14.56,
+                  "rss_kib": 128828,
+                  "lifetime_peak_rss_kib": 128828
+                },
+                "after": {
+                  "process_cpu_seconds": 15.84,
+                  "rss_kib": 138088,
+                  "lifetime_peak_rss_kib": 138088
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 2592,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 2592,
+                "next_after": null,
+                "scanned_bytes": 3380340,
+                "scanned_records": 2592,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 746496
+              },
+              "retrieval_ms": {
+                "p50": 54.411,
+                "p95": 63.221,
+                "minimum": 53.177,
+                "maximum": 63.785,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 58.086166507564485,
+                "p95": 66.57979218289256,
+                "minimum": 55.36041595041752,
+                "maximum": 68.19954118691385,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13934,
+                "maximum": 13934
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 10.0,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 15.84,
+                  "rss_kib": 138088,
+                  "lifetime_peak_rss_kib": 138088
+                },
+                "after": {
+                  "process_cpu_seconds": 25.84,
+                  "rss_kib": 138088,
+                  "lifetime_peak_rss_kib": 138088
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 2592,
+                "next_after": null,
+                "scanned_embeddings": 2592,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 746496,
+                "scanned_records": 2592,
+                "scanned_bytes": 46601940
+              },
+              "retrieval_ms": {
+                "p50": 438.044,
+                "p95": 477.023,
+                "minimum": 428.704,
+                "maximum": 522.016,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 442.0657913433388,
+                "p95": 481.55004205182195,
+                "minimum": 431.0950830113143,
+                "maximum": 526.6405001748353,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18640,
+                "maximum": 18640
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 10.459999999999997,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 25.84,
+                  "rss_kib": 138088,
+                  "lifetime_peak_rss_kib": 138088
+                },
+                "after": {
+                  "process_cpu_seconds": 36.3,
+                  "rss_kib": 214292,
+                  "lifetime_peak_rss_kib": 219572
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 2592,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 2592,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 2592,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 46601940,
+                "scanned_records": 2592,
+                "semantic_candidates": 100,
+                "semantic_matches": 2592,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 746496
+              },
+              "retrieval_ms": {
+                "p50": 449.79499999999996,
+                "p95": 501.116,
+                "minimum": 440.697,
+                "maximum": 750.729,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 454.80445853900164,
+                "p95": 513.0453340243548,
+                "minimum": 444.4892080500722,
+                "maximum": 754.7968330327421,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20899,
+                "maximum": 20899
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 2592,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2592
+              }
+            }
+          }
+        },
+        {
+          "stage": "initial",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.8599999999999994,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 41.55,
+                  "rss_kib": 172016,
+                  "lifetime_peak_rss_kib": 220772
+                },
+                "after": {
+                  "process_cpu_seconds": 44.41,
+                  "rss_kib": 186368,
+                  "lifetime_peak_rss_kib": 220772
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 120.3135,
+                "p95": 162.551,
+                "minimum": 113.446,
+                "maximum": 172.177,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 125.06249954458326,
+                "p95": 168.1414160411805,
+                "minimum": 115.73674995452166,
+                "maximum": 175.74858316220343,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13929,
+                "maximum": 13929
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 21.450000000000003,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 44.41,
+                  "rss_kib": 186368,
+                  "lifetime_peak_rss_kib": 220772
+                },
+                "after": {
+                  "process_cpu_seconds": 65.86,
+                  "rss_kib": 194212,
+                  "lifetime_peak_rss_kib": 220772
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 921.636,
+                "p95": 1249.183,
+                "minimum": 885.993,
+                "maximum": 1262.36,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 925.909937475808,
+                "p95": 1261.5537089295685,
+                "minimum": 889.4973329734057,
+                "maximum": 1269.6035420522094,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18644,
+                "maximum": 18644
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 22.42,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 65.86,
+                  "rss_kib": 194212,
+                  "lifetime_peak_rss_kib": 220772
+                },
+                "after": {
+                  "process_cpu_seconds": 88.28,
+                  "rss_kib": 412780,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 975.7405,
+                "p95": 1065.899,
+                "minimum": 922.927,
+                "maximum": 1125.964,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 979.3784584617242,
+                "p95": 1069.072750164196,
+                "minimum": 928.2450000755489,
+                "maximum": 1131.5545421093702,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20893,
+                "maximum": 20894
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-1-updated",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 0,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 3.010000000000005,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 101.89,
+                  "rss_kib": 404560,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "after": {
+                  "process_cpu_seconds": 104.9,
+                  "rss_kib": 404560,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 116.9165,
+                "p95": 188.738,
+                "minimum": 114.886,
+                "maximum": 264.919,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 123.02168749738485,
+                "p95": 216.17695805616677,
+                "minimum": 117.30129201896489,
+                "maximum": 287.07124991342425,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13929,
+                "maximum": 13929
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 21.75,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 104.9,
+                  "rss_kib": 404560,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "after": {
+                  "process_cpu_seconds": 126.65,
+                  "rss_kib": 404560,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 945.9770000000001,
+                "p95": 1037.616,
+                "minimum": 908.42,
+                "maximum": 1376.345,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 951.3539159670472,
+                "p95": 1044.1576659213752,
+                "minimum": 911.9542499538511,
+                "maximum": 1385.804166086018,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18644,
+                "maximum": 18644
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 22.060000000000002,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 126.65,
+                  "rss_kib": 404560,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "after": {
+                  "process_cpu_seconds": 148.71,
+                  "rss_kib": 437704,
+                  "lifetime_peak_rss_kib": 443816
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 993.835,
+                "p95": 1112.318,
+                "minimum": 941.591,
+                "maximum": 1135.389,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 999.9925415031612,
+                "p95": 1121.5560839045793,
+                "minimum": 946.9649170059711,
+                "maximum": 1141.3359579164535,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20893,
+                "maximum": 20894
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 5183,
+                "unavailable": 0,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-1-replaced",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 5183,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.6500000000000057,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 173.93,
+                  "rss_kib": 502396,
+                  "lifetime_peak_rss_kib": 502396
+                },
+                "after": {
+                  "process_cpu_seconds": 176.58,
+                  "rss_kib": 511228,
+                  "lifetime_peak_rss_kib": 511228
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 115.44149999999999,
+                "p95": 130.394,
+                "minimum": 113.934,
+                "maximum": 137.804,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 118.17391600925475,
+                "p95": 133.05191695690155,
+                "minimum": 116.70741578564048,
+                "maximum": 140.71129192598164,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13925,
+                "maximum": 13925
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 22.97999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 176.58,
+                  "rss_kib": 511228,
+                  "lifetime_peak_rss_kib": 511228
+                },
+                "after": {
+                  "process_cpu_seconds": 199.56,
+                  "rss_kib": 511228,
+                  "lifetime_peak_rss_kib": 511228
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 964.637,
+                "p95": 1183.794,
+                "minimum": 924.008,
+                "maximum": 1774.354,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 971.1519795237109,
+                "p95": 1202.2893340326846,
+                "minimum": 926.517624873668,
+                "maximum": 1818.0910001974553,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18640,
+                "maximum": 18640
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 24.340000000000003,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 199.56,
+                  "rss_kib": 511228,
+                  "lifetime_peak_rss_kib": 511228
+                },
+                "after": {
+                  "process_cpu_seconds": 223.9,
+                  "rss_kib": 511228,
+                  "lifetime_peak_rss_kib": 511228
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 1087.4565,
+                "p95": 1280.043,
+                "minimum": 974.291,
+                "maximum": 1481.271,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1091.479770373553,
+                "p95": 1285.6580410152674,
+                "minimum": 978.9710838813335,
+                "maximum": 1487.0186250191182,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20889,
+                "maximum": 20890
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-2-updated",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 5183,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.920000000000016,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 238.26,
+                  "rss_kib": 521776,
+                  "lifetime_peak_rss_kib": 521776
+                },
+                "after": {
+                  "process_cpu_seconds": 241.18,
+                  "rss_kib": 524260,
+                  "lifetime_peak_rss_kib": 524260
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 127.084,
+                "p95": 150.002,
+                "minimum": 121.139,
+                "maximum": 157.307,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 129.85922896768898,
+                "p95": 152.4640000425279,
+                "minimum": 123.18508420139551,
+                "maximum": 160.32441705465317,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13925,
+                "maximum": 13925
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 22.279999999999973,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 241.18,
+                  "rss_kib": 524260,
+                  "lifetime_peak_rss_kib": 524260
+                },
+                "after": {
+                  "process_cpu_seconds": 263.46,
+                  "rss_kib": 524260,
+                  "lifetime_peak_rss_kib": 524260
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 933.99,
+                "p95": 1226.14,
+                "minimum": 916.382,
+                "maximum": 1325.565,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 939.807542017661,
+                "p95": 1232.900874922052,
+                "minimum": 919.3707080557942,
+                "maximum": 1339.9320000316948,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18640,
+                "maximum": 18640
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 22.640000000000043,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 263.46,
+                  "rss_kib": 524260,
+                  "lifetime_peak_rss_kib": 524260
+                },
+                "after": {
+                  "process_cpu_seconds": 286.1,
+                  "rss_kib": 524268,
+                  "lifetime_peak_rss_kib": 524268
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 983.508,
+                "p95": 1106.193,
+                "minimum": 944.845,
+                "maximum": 1787.969,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 989.6519375033677,
+                "p95": 1113.0256669130176,
+                "minimum": 956.105874851346,
+                "maximum": 1795.5837920308113,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20889,
+                "maximum": 20890
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 10366,
+                "unavailable": 5183,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-2-replaced",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 10366,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.8799999999999955,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 302.16,
+                  "rss_kib": 544740,
+                  "lifetime_peak_rss_kib": 550172
+                },
+                "after": {
+                  "process_cpu_seconds": 305.04,
+                  "rss_kib": 553684,
+                  "lifetime_peak_rss_kib": 553684
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 122.38550000000001,
+                "p95": 149.132,
+                "minimum": 119.454,
+                "maximum": 182.358,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 126.45677104592323,
+                "p95": 160.51433398388326,
+                "minimum": 122.25916585884988,
+                "maximum": 191.92662509158254,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13929,
+                "maximum": 13929
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 21.589999999999975,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 305.04,
+                  "rss_kib": 553684,
+                  "lifetime_peak_rss_kib": 553684
+                },
+                "after": {
+                  "process_cpu_seconds": 326.63,
+                  "rss_kib": 553684,
+                  "lifetime_peak_rss_kib": 553684
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 939.255,
+                "p95": 1156.672,
+                "minimum": 899.818,
+                "maximum": 1210.004,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 946.7148749390617,
+                "p95": 1162.045249948278,
+                "minimum": 905.5327500682324,
+                "maximum": 1218.2124580722302,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18644,
+                "maximum": 18644
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 22.75999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 326.63,
+                  "rss_kib": 553684,
+                  "lifetime_peak_rss_kib": 553684
+                },
+                "after": {
+                  "process_cpu_seconds": 349.39,
+                  "rss_kib": 551980,
+                  "lifetime_peak_rss_kib": 558808
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 973.61,
+                "p95": 1324.226,
+                "minimum": 921.342,
+                "maximum": 1707.996,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 978.1467915745452,
+                "p95": 1329.7429999802262,
+                "minimum": 925.5767911672592,
+                "maximum": 1714.993042172864,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20893,
+                "maximum": 20894
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-3-updated",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 10366,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 3.6299999999999955,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 366.92,
+                  "rss_kib": 570872,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 370.55,
+                  "rss_kib": 570872,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 135.204,
+                "p95": 180.341,
+                "minimum": 117.529,
+                "maximum": 643.802,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 139.91220854222775,
+                "p95": 187.4024998396635,
+                "minimum": 121.84604094363749,
+                "maximum": 666.3200829643756,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13929,
+                "maximum": 13929
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 22.25999999999999,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 370.55,
+                  "rss_kib": 570872,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 392.81,
+                  "rss_kib": 571396,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 977.9365,
+                "p95": 1146.159,
+                "minimum": 929.765,
+                "maximum": 1250.72,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 985.6079794699326,
+                "p95": 1153.5841671284288,
+                "minimum": 937.0105839334428,
+                "maximum": 1259.164375020191,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18644,
+                "maximum": 18644
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 24.029999999999973,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 392.81,
+                  "rss_kib": 571396,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 416.84,
+                  "rss_kib": 571396,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 1040.4635,
+                "p95": 1264.201,
+                "minimum": 944.252,
+                "maximum": 1328.824,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1050.643103895709,
+                "p95": 1273.3477498404682,
+                "minimum": 948.3924999367446,
+                "maximum": 1336.033958941698,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20893,
+                "maximum": 20894
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 15549,
+                "unavailable": 10366,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "cycle-3-replaced",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 0,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.8600000000000136,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 434.13,
+                  "rss_kib": 578128,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 436.99,
+                  "rss_kib": 582960,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 124.22200000000001,
+                "p95": 147.38,
+                "minimum": 120.683,
+                "maximum": 149.0,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 127.52524937968701,
+                "p95": 149.81770887970924,
+                "minimum": 123.85345809161663,
+                "maximum": 151.0758341755718,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13933,
+                "maximum": 13933
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 20732,
+                "unavailable": 15549,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 24.20999999999998,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 436.99,
+                  "rss_kib": 582960,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 461.2,
+                  "rss_kib": 582960,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 1084.6219999999998,
+                "p95": 1234.996,
+                "minimum": 966.148,
+                "maximum": 1251.505,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1092.7997709950432,
+                "p95": 1246.244875015691,
+                "minimum": 970.2651659026742,
+                "maximum": 1258.7837078608572,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18648,
+                "maximum": 18648
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 20732,
+                "unavailable": 15549,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 26.5,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 461.2,
+                  "rss_kib": 582960,
+                  "lifetime_peak_rss_kib": 587200
+                },
+                "after": {
+                  "process_cpu_seconds": 487.7,
+                  "rss_kib": 592224,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 1160.5515,
+                "p95": 1521.023,
+                "minimum": 992.265,
+                "maximum": 1601.152,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1172.8376040700823,
+                "p95": 1535.7066250871867,
+                "minimum": 997.9051251430064,
+                "maximum": 1639.568833867088,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20897,
+                "maximum": 20898
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 20732,
+                "unavailable": 15549,
+                "outside_tag": 0,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        },
+        {
+          "stage": "outside-tag-background",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 1024,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.8600000000000136,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 490.44,
+                  "rss_kib": 592224,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "after": {
+                  "process_cpu_seconds": 493.3,
+                  "rss_kib": 592724,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 124.1275,
+                "p95": 138.861,
+                "minimum": 121.367,
+                "maximum": 146.011,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 127.44131253566593,
+                "p95": 144.7795000858605,
+                "minimum": 123.53920890018344,
+                "maximum": 150.49116709269583,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13933,
+                "maximum": 13933
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 24.03000000000003,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 493.3,
+                  "rss_kib": 592724,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "after": {
+                  "process_cpu_seconds": 517.33,
+                  "rss_kib": 592724,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 1034.598,
+                "p95": 1299.56,
+                "minimum": 956.717,
+                "maximum": 1900.81,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1043.4664585627615,
+                "p95": 1312.2912079561502,
+                "minimum": 962.1505420655012,
+                "maximum": 1908.5691249929368,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18648,
+                "maximum": 18648
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 27.219999999999914,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 517.33,
+                  "rss_kib": 592724,
+                  "lifetime_peak_rss_kib": 594012
+                },
+                "after": {
+                  "process_cpu_seconds": 544.55,
+                  "rss_kib": 595900,
+                  "lifetime_peak_rss_kib": 595900
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 1105.7404999999999,
+                "p95": 1764.101,
+                "minimum": 961.836,
+                "maximum": 2626.971,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1119.0373750869185,
+                "p95": 1782.3891669977456,
+                "minimum": 965.6121670268476,
+                "maximum": 2650.9557920508087,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20897,
+                "maximum": 20898
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        }
+      ]
+    },
+    "same_history_before": {
+      "schema_version": 1,
+      "fixture": "synthetic-history-coverage-v1",
+      "relevance_evidence": false,
+      "documents": 5183,
+      "dimensions": 1536,
+      "candidate_budget": 10000,
+      "lexical_hybrid_byte_budget": 134217728,
+      "result_limit": 10,
+      "request_concurrency": 1,
+      "mutation_concurrency": 4,
+      "warmup_requests": 2,
+      "measured_requests": 20,
+      "timing": "Server retrieval time; HTTP separately. External embedding generation excluded.",
+      "cache": "Warm repeated queries; no cache eviction. Other workstation activity is not controlled.",
+      "vector_sha256": "31e30420154d13cd6ed74a56aa4a27a0d69b9c561af9e402f6baa365cc62b1a7",
+      "results": [
+        {
+          "stage": "same-history-before-upgrade",
+          "server_version": "0.9.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 1024,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.5599999999999996,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 3.58,
+                  "rss_kib": 37508,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "after": {
+                  "process_cpu_seconds": 6.14,
+                  "rss_kib": 63100,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 2439,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "scanned_bytes": 5700178,
+                "scanned_records": 10000
+              },
+              "retrieval_ms": {
+                "p50": 105.6,
+                "p95": 140.343,
+                "minimum": 99.242,
+                "maximum": 142.235,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 108.96416648756713,
+                "p95": 148.22512492537498,
+                "minimum": 101.59737500362098,
+                "maximum": 148.79962499253452,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13950,
+                "maximum": 13951
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 36.13,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 6.14,
+                  "rss_kib": 63104,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "after": {
+                  "process_cpu_seconds": 42.27,
+                  "rss_kib": 89224,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": false,
+                "matched_records": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "scanned_embeddings": 10000
+              },
+              "retrieval_ms": {
+                "p50": 1480.3745,
+                "p95": 2252.93,
+                "minimum": 1447.146,
+                "maximum": 2825.722,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 1484.7169785061851,
+                "p95": 2258.990000002086,
+                "minimum": 1450.352125102654,
+                "maximum": 2831.0260421130806,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18676,
+                "maximum": 18676
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 10.199999999999996,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 42.27,
+                  "rss_kib": 89224,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "after": {
+                  "process_cpu_seconds": 52.47,
+                  "rss_kib": 114732,
+                  "lifetime_peak_rss_kib": 156760
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 2439,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 2439,
+                "embedding_coverage": "complete",
+                "exhaustive": false,
+                "lexical_candidates": 100,
+                "lexical_matches": 2439,
+                "next_after": "75f1c955-4dd2-4d3f-89bd-ac1f97d24e7f",
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 46370503,
+                "scanned_records": 10000,
+                "semantic_candidates": 100,
+                "semantic_matches": 2439
+              },
+              "retrieval_ms": {
+                "p50": 458.8125,
+                "p95": 500.401,
+                "minimum": 442.239,
+                "maximum": 505.922,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 464.8862500907853,
+                "p95": 507.39966705441475,
+                "minimum": 445.72704192250967,
+                "maximum": 509.69604193232954,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20915,
+                "maximum": 20915
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": true,
+                "total_keys": 10000,
+                "unavailable": 7067,
+                "outside_tag": 494,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 2439
+              }
+            }
+          }
+        }
+      ]
+    },
+    "same_history_after": {
+      "schema_version": 1,
+      "fixture": "synthetic-history-coverage-v1",
+      "relevance_evidence": false,
+      "documents": 5183,
+      "dimensions": 1536,
+      "candidate_budget": 10000,
+      "lexical_hybrid_byte_budget": 134217728,
+      "result_limit": 10,
+      "request_concurrency": 1,
+      "mutation_concurrency": 4,
+      "warmup_requests": 2,
+      "measured_requests": 20,
+      "timing": "Server retrieval time; HTTP separately. External embedding generation excluded.",
+      "cache": "Warm repeated queries; no cache eviction. Other workstation activity is not controlled.",
+      "vector_sha256": "31e30420154d13cd6ed74a56aa4a27a0d69b9c561af9e402f6baa365cc62b1a7",
+      "results": [
+        {
+          "stage": "same-history-after-upgrade",
+          "server_version": "0.10.0",
+          "current_corpus": 5183,
+          "tombstones": 15549,
+          "outside_tag": 1024,
+          "methods": {
+            "lexical": {
+              "server_resources": {
+                "process_cpu_seconds": 2.6100000000000003,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 0.55,
+                  "rss_kib": 63244,
+                  "lifetime_peak_rss_kib": 63244
+                },
+                "after": {
+                  "process_cpu_seconds": 3.16,
+                  "rss_kib": 79176,
+                  "lifetime_peak_rss_kib": 79176
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_bytes": 6761595,
+                "scanned_records": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 115.74350000000001,
+                "p95": 118.457,
+                "minimum": 114.303,
+                "maximum": 118.657,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 118.04556241258979,
+                "p95": 120.91087503358722,
+                "minimum": 117.0290419831872,
+                "maximum": 120.91362499631941,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 13925,
+                "maximum": 13925
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "semantic": {
+              "server_resources": {
+                "process_cpu_seconds": 19.23,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 3.16,
+                  "rss_kib": 79176,
+                  "lifetime_peak_rss_kib": 79176
+                },
+                "after": {
+                  "process_cpu_seconds": 22.39,
+                  "rss_kib": 97000,
+                  "lifetime_peak_rss_kib": 97000
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "exhaustive": true,
+                "matched_records": 5183,
+                "next_after": null,
+                "scanned_embeddings": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704,
+                "scanned_records": 5183,
+                "scanned_bytes": 93188120
+              },
+              "retrieval_ms": {
+                "p50": 830.078,
+                "p95": 1042.46,
+                "minimum": 816.557,
+                "maximum": 1218.243,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 834.8832704359666,
+                "p95": 1146.9672918319702,
+                "minimum": 820.6127909943461,
+                "maximum": 1276.5140829142183,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 18640,
+                "maximum": 18640
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            },
+            "hybrid": {
+              "server_resources": {
+                "process_cpu_seconds": 20.04,
+                "queries_including_warmup": 22,
+                "before": {
+                  "process_cpu_seconds": 22.39,
+                  "rss_kib": 97000,
+                  "lifetime_peak_rss_kib": 97000
+                },
+                "after": {
+                  "process_cpu_seconds": 42.43,
+                  "rss_kib": 159468,
+                  "lifetime_peak_rss_kib": 159468
+                },
+                "limitation": "CPU for the PID 1 server over the query loop; RSS sampled at boundaries, lifetime peak is not a per-method peak."
+              },
+              "page": {
+                "candidates_truncated": true,
+                "corpus_records": 5183,
+                "dependency_work": {
+                  "bytes_examined": 0,
+                  "records_examined": 0
+                },
+                "embedded_records": 5183,
+                "embedding_coverage": "complete",
+                "exhaustive": true,
+                "lexical_candidates": 100,
+                "lexical_matches": 5183,
+                "next_after": null,
+                "rank_constant": 60,
+                "ranking": {
+                  "candidate_limit": 100,
+                  "experimental": true,
+                  "lexical_version": "bm25_v1",
+                  "lexical_weight": 0.5,
+                  "method": "weighted_rrf",
+                  "rank_constant": 60,
+                  "semantic_version": "cosine_exact_v1",
+                  "semantic_weight": 0.5,
+                  "version": "weighted_rrf_v1"
+                },
+                "scanned_bytes": 93188120,
+                "scanned_records": 5183,
+                "semantic_candidates": 100,
+                "semantic_matches": 5183,
+                "candidate_selection_version": "current_records_v1",
+                "candidate_index_bytes": 1492704
+              },
+              "retrieval_ms": {
+                "p50": 873.8810000000001,
+                "p95": 1090.681,
+                "minimum": 849.907,
+                "maximum": 1217.689,
+                "samples": 20
+              },
+              "http_ms": {
+                "p50": 883.3046670770273,
+                "p95": 1099.6442921459675,
+                "minimum": 855.656165862456,
+                "maximum": 1225.6708750501275,
+                "samples": 20
+              },
+              "response_bytes": {
+                "minimum": 20889,
+                "maximum": 20890
+              },
+              "controlled_fixture_uuid_prefix": {
+                "represents_scanned_candidates": false,
+                "total_keys": 21756,
+                "unavailable": 15549,
+                "outside_tag": 1024,
+                "stale_live_embeddings": 0,
+                "expected_current_eligible": 5183
+              }
+            }
+          }
+        }
+      ]
+    },
+    "real_eight_documents": {
+      "complete": true,
+      "new_embedding_calls": 0,
+      "dimensions": 1536,
+      "source_sha256": "4a3cb0db4399cd495fa07562666e6d271c98ec90d495e123ec7539e020912ecb",
+      "source_records": [
+        "4983",
+        "5836",
+        "7912",
+        "18670",
+        "19238",
+        "33370",
+        "36474",
+        "54440"
+      ],
+      "space": {
+        "dimensions": 1536,
+        "model": "text-embedding-3-small",
+        "provider": "openai",
+        "revision": "captured-d5d8446f347b0d94fe631ba7"
+      },
+      "observations": {
+        "before_deletions": {
+          "lexical": {
+            "scanned_candidates": 8,
+            "eligible_documents": 8,
+            "hits": 2,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "semantic": {
+            "scanned_candidates": 8,
+            "eligible_documents": 8,
+            "hits": 8,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "hybrid": {
+            "scanned_candidates": 8,
+            "eligible_documents": 8,
+            "hits": 8,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          }
+        },
+        "after_deletions_budget_4": {
+          "lexical": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 2,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "semantic": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 4,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "hybrid": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 4,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          }
+        },
+        "after_deletions_budget_8": {
+          "lexical": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 2,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "semantic": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 4,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          },
+          "hybrid": {
+            "scanned_candidates": 4,
+            "eligible_documents": 4,
+            "hits": 4,
+            "exhaustive": true,
+            "continuation_present": false,
+            "target_returned": true,
+            "candidate_selection_version": "current_records_v1"
+          }
+        }
+      },
+      "live_records_individually_read": 4,
+      "deletion_events_retained": 4,
+      "legacy_090_response_schema_valid": true,
+      "relevance_comparison": false
+    }
+  },
+  "limitations": [
+    "Synthetic capacity vectors are shared across all generated documents; no relevance or agent-quality inference.",
+    "The eight real vectors are frozen public SciFact data with no new provider calls; this is coverage qualification, not relevance evaluation.",
+    "Legacy and current plans examine different populations when history exhausts the old budget. Partial and complete latency numbers are not equivalent-work speed comparisons.",
+    "Uncontrolled workstation load and 20 samples do not establish a production latency guarantee.",
+    "Logical serialized byte counters exclude physical read amplification, integrity-index reads, lookahead and allocations.",
+    "Expired or transitively invalidated candidates can still consume the current-candidate budget.",
+    "Hybrid channel candidate caps remain unchanged, independently of full corpus coverage.",
+    "The first volume-backed baseline ran out of Docker disk space and was discarded; all reported successful series use fresh dedicated host directories."
+  ]
+}

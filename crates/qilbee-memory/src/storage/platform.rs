@@ -249,6 +249,7 @@ impl RocksDbMemoryStorage {
             record_digest: digest(&encoded),
         };
         let mut batch = rocksdb::WriteBatch::default();
+        self.update_candidates(namespace, &record, &mut batch)?;
         batch.put_cf(
             self.cf(super::cf::EPISODES)?,
             record_key(0x10, namespace, record.record_id),
@@ -837,6 +838,10 @@ mod lexical;
 #[cfg(test)]
 mod lexical_tests;
 mod snapshot;
+mod candidates;
+#[cfg(test)]
+mod candidate_tests;
+pub use candidates::CANDIDATE_SELECTION_VERSION;
 pub use lexical::*;
 mod hybrid;
 #[cfg(test)]

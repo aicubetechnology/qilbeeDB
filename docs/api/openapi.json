@@ -4312,6 +4312,34 @@
                   "type": "integer",
                   "minimum": 0
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -4488,6 +4516,34 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -4683,6 +4739,34 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Candidate-Selection-Version": {
+                "schema": {
+                  "type": "string",
+                  "const": "current_records_v1"
+                },
+                "description": "Current-record candidate selection plan, independent of the ranking profile."
+              },
+              "X-Qilbee-Scanned-Records": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Current candidates examined; this is the scan_limit work counter, including records without the selected embedding space."
+              },
+              "X-Qilbee-Candidate-Index-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Logical admitted candidate key/value bytes. Excludes lookahead, integrity indexes and dependencies."
+              },
+              "X-Qilbee-Scanned-Bytes": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Serialized current records and selected-space bindings examined. Not physical I/O, response size or process memory."
               }
             },
             "content": {
@@ -12786,7 +12870,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "episode_type": {
             "anyOf": [
@@ -12883,7 +12968,8 @@
           },
           "scanned_embeddings": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Selected-space bindings decoded for eligible current candidates, including stale bindings. Excludes deleted/rejected records and other tag/type partitions."
           },
           "matched_records": {
             "type": "integer",
@@ -12891,7 +12977,7 @@
           },
           "exhaustive": {
             "type": "boolean",
-            "description": "True only if started without a cursor and ranked the entire authorized registered model space."
+            "description": "True only for a cursorless complete current-candidate scan; does not assert that all memories have a current embedding."
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
@@ -12939,7 +13025,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "after": {
             "anyOf": [
@@ -13004,7 +13091,8 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 10000,
-            "default": 10000
+            "default": 10000,
+            "description": "Maximum current-record candidates in the authorized tag/type partition (default 10000). Deleted and directly rejected records do not consume this budget; expired or transitively ineligible candidates can. Semantic candidates without the selected embedding space also consume this budget."
           },
           "after": {
             "anyOf": [

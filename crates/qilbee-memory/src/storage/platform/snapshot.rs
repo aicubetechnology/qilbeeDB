@@ -19,6 +19,15 @@ impl RocksDbMemoryStorage {
 }
 impl MemorySnapshot<'_> {
     pub(super) fn record(&self, namespace: &str, id: Uuid) -> Result<Option<MemoryRecord>> {
+        Ok(self
+            .record_with_bytes(namespace, id)?
+            .map(|(record, _, _)| record))
+    }
+    pub(super) fn record_with_bytes(
+        &self,
+        namespace: &str,
+        id: Uuid,
+    ) -> Result<Option<(MemoryRecord, usize, [u8; 32])>> {
         let record = self
             .db
             .get_cf(
@@ -33,6 +42,9 @@ impl MemorySnapshot<'_> {
                 record_key(0x11, namespace, id),
             )
             .map_err(storage_error)?;
-        decode_record_pair(id, record, index)
+        let bytes = record.as_deref().unwrap_or(&[]);
+        let size = bytes.len();
+        let record_digest = digest(bytes);
+        Ok(decode_record_pair(id, record, index)?.map(|record| (record, size, record_digest)))
     }
 }

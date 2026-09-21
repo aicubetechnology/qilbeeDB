@@ -57,6 +57,10 @@ pub struct LexicalHit {
 pub struct LexicalPage {
     pub hits: Vec<LexicalHit>,
     pub next_after: Option<Uuid>,
+    #[serde(skip_serializing, default)]
+    pub candidate_selection_version: String,
+    #[serde(skip_serializing, default)]
+    pub candidate_index_bytes: usize,
     pub scanned_records: usize,
     #[serde(default)]
     pub dependency_work: DependencyWork,
@@ -124,14 +128,24 @@ impl MemorySnapshot<'_> {
     ) -> Result<ScannedCorpus> {
         RocksDbMemoryStorage::validate_agent(namespace)?;
         query.validate()?;
-        let prefix = record_prefix(0x10, namespace);
+        let prefix = super::candidates::prefix(
+            namespace,
+            query.tag.as_deref(),
+            query.episode_type.as_ref(),
+        )?;
         let start = query
             .after
-            .map(|id| record_key(0x10, namespace, id))
+            .map(|id| {
+                let mut key = prefix.clone();
+                key.extend_from_slice(id.as_bytes());
+                key
+            })
             .unwrap_or_else(|| prefix.clone());
         let mut page = LexicalPage {
             hits: vec![],
             next_after: None,
+            candidate_selection_version: CANDIDATE_SELECTION_VERSION.into(),
+            candidate_index_bytes: 0,
             scanned_records: 0,
             dependency_work: DependencyWork::default(),
             scanned_bytes: 0,
@@ -143,7 +157,7 @@ impl MemorySnapshot<'_> {
         let mut embeddings = std::collections::BTreeMap::new();
         let mut last = None;
         for item in self.db.iterator_cf(
-            self.storage.cf(super::super::cf::EPISODES)?,
+            self.storage.cf(super::super::cf::EPISODE_INDEX)?,
             rocksdb::IteratorMode::From(&start, rocksdb::Direction::Forward),
         ) {
             let (key, bytes) = item.map_err(storage_error)?;
@@ -154,9 +168,7 @@ impl MemorySnapshot<'_> {
             if query.after.is_some_and(|after| id <= after) {
                 continue;
             }
-            if page.scanned_records == query.scan_limit
-                || page.scanned_bytes + bytes.len() > query.scan_bytes_limit
-            {
+            if page.scanned_records == query.scan_limit {
                 if last.is_none() {
                     return Err(Error::ValidationError(
                         "Scan byte budget cannot fit the next record".into(),
@@ -166,7 +178,7 @@ impl MemorySnapshot<'_> {
                 page.exhaustive = false;
                 break;
             }
-            let record = self.record(namespace, id)?.ok_or_else(inconsistent)?;
+            let (record, record_bytes) = self.candidate_record(namespace, id, &bytes)?;
             let eligible = self.eligible(namespace, &record)?
                 && record.payload.as_ref().is_some_and(|payload| {
                     query
@@ -186,7 +198,7 @@ impl MemorySnapshot<'_> {
             } else {
                 None
             };
-            let row_bytes = bytes.len() + embedding.as_ref().map_or(0, |(_, size)| *size);
+            let row_bytes = record_bytes + embedding.as_ref().map_or(0, |(_, size)| *size);
             if page.scanned_bytes + row_bytes > query.scan_bytes_limit {
                 if last.is_none() {
                     return Err(Error::ValidationError(
@@ -198,6 +210,7 @@ impl MemorySnapshot<'_> {
                 break;
             }
             page.scanned_records += 1;
+            page.candidate_index_bytes += key.len() + bytes.len();
             page.scanned_bytes += row_bytes;
             last = Some(id);
             if !eligible {

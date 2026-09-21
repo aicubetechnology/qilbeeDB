@@ -96,7 +96,7 @@ fn lexical_filters_visibility_before_statistics_and_uses_all_text_fields() {
     let page = db
         .search_memory_lexical("scope", &query("memória 東京"))
         .unwrap();
-    assert_eq!(page.scanned_records, 3);
+    assert_eq!(page.scanned_records, 2); // Deleted records are absent from the candidate projection.
     assert_eq!(page.corpus_records, 1);
     assert_eq!(page.hits[0].record.record_id, target.record_id);
     assert!((page.hits[0].score - 2.0 * (4.0_f64 / 3.0).ln()).abs() < 1e-12);

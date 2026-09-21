@@ -85,7 +85,7 @@ Generate the query embedding externally, then post to
 
 The response remains `{contract_version: 1, scope, page}`, preserving the 0.4.0
 JSON envelope and cosine score semantics. `X-Qilbee-Ranking-Version` identifies
-`cosine_exact_v1` without adding fields to that legacy envelope. For text plus vector retrieval, use
+`cosine_exact_v1` while keeping that legacy envelope. For text plus vector retrieval, use
 the separate [experimental hybrid endpoint](hybrid-memory.md):
 
 | Page field | Meaning |
@@ -94,10 +94,10 @@ the separate [experimental hybrid endpoint](hybrid-memory.md):
 | `hits[].record` | Current visible `MemoryRecord`, including author, revision, payload and validity |
 | `hits[].score` | Cosine similarity in [-1, 1]; a similarity value, not a probability or calibrated confidence |
 | `hits[].embedding` | Original embedding receipt linking model space, vector digest and exact source revision |
-| `scanned_embeddings` | Number of bindings examined in this authorized model-space page, including stale/expired/filtered bindings |
+| `scanned_embeddings` | Selected-space bindings decoded for eligible current candidates, including stale bindings |
 | `matched_records` | Number of eligible records meeting filters and score threshold in the scanned page, before top-k truncation |
-| `next_after` | Last scanned UUID when another binding remains, otherwise null |
-| `exhaustive` | True only when this request started without a cursor and scanned the whole authorized model space |
+| `next_after` | Last scanned current-candidate UUID when another candidate remains, otherwise null |
+| `exhaustive` | True only when this request started without a cursor and scanned the whole authorized tag/type candidate partition |
 
 No result can come from another tenant, ungranted scope or another subject's
 private namespace. Missing/mismatched model spaces return an empty page. A shared
@@ -119,8 +119,9 @@ If `next_after` is not null, the returned hits are the best within that scanned
 page, **not** a guaranteed global top-k. Continue with that cursor and identical
 space/query/filters, then merge page candidates by score and UUID. A continued
 request always reports `exhaustive: false`. Continuations do not hold a snapshot
-across requests; concurrent writes can change later pages. Completeness refers
-to registered bindings in the selected space, not memories without embeddings.
+across requests; concurrent writes can change later pages. Completeness refers to scanning all current candidates in the partition. It does not
+assert that every memory has a current selected-space embedding. Candidates without
+that embedding consume `scan_limit` and the `X-Qilbee-Scanned-Records` counter, but not `scanned_embeddings`.
 
 ## Validation and errors
 
@@ -129,7 +130,7 @@ Dimensions are 1–32768, subject to the server's configured ceiling; both docum
 contain only finite float32 values and have nonzero norm. Empty, zero, NaN,
 infinite or dimension-mismatched vectors are rejected. Normalization is handled
 by cosine computation; callers need not pre-normalize. `limit` is 1–100,
-`scan_limit` is 1–10000 (default 10000) and `min_score` is finite in [-1, 1]
+`scan_limit` is 1–10000 current-record candidates (default 10000) and `min_score` is finite in [-1, 1]
 (default -1). Vector attachment and search requests reject unknown fields and have a 2097152-byte
 (2 MiB) HTTP body limit, including JSON formatting and every field. Other platform
 routes retain their 65536-byte limit. See [retrieval capacity](../operations/retrieval-capacity.md)
@@ -165,3 +166,5 @@ for frozen corpora, graded relevance, category regressions and timing limits.
 request snapshot before candidate eligibility and corpus statistics. Pages report
 additional source reads in `dependency_work`; these are separate from candidate
 scan budgets. Exceeding the documented dependency limits fails the request.
+
+See [current retrieval candidates](retrieval-candidates.md) for the `current_records_v1` candidate plan, HTTP work headers, migration and remaining limits. Cosine scores remain unchanged.

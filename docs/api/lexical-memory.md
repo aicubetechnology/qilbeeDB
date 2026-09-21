@@ -27,7 +27,7 @@ For combined lexical and semantic evidence, use [hybrid retrieval](hybrid-memory
 Send a platform bearer credential with `memory_read` and an exact grant for the
 scope. The response contains `contract_version: 1`, `scope`, `mode: "lexical"`,
 `ranking_version: "bm25_v1"` and `page`. Existing durable memories are searchable
-without an index migration or an embedding attachment.
+without an embedding attachment. The server builds its current-record projection automatically before serving after an upgrade.
 
 ## Read results and coverage
 
@@ -35,7 +35,7 @@ Each `page.hits` entry contains its current `record` and positive raw BM25 `scor
 Scores order results; they are not probabilities. Equal scores use ascending
 record UUID. `matched_records` counts matches before result truncation,
 `corpus_records` counts visible records passing filters, and `scanned_records`
-includes deleted, expired and filtered source rows examined. `scanned_bytes`
+counts current candidates in the exact tag/type partition. Deleted and directly rejected records are absent; expired or transitively ineligible candidates can still consume this budget. `scanned_bytes`
 counts serialized source records admitted to the scan.
 
 `exhaustive` is true only when a cursorless request scans the whole authorized
@@ -74,10 +74,10 @@ statistics. Source corruption fails the request instead of dropping a candidate.
 | --- | --- |
 | `text` | 1–4096 UTF-8 bytes with 1–64 distinct lowercase alphanumeric terms |
 | `limit` | 1–100 results |
-| `scan_limit` | 1–10000 source records, default 10000 |
+| `scan_limit` | 1–10000 current candidates, default 10000 |
 | `scan_bytes_limit` | 1–268435456 bytes, subject to the operator ceiling (default 67108864); request default 8388608 |
 | `after` | Optional exclusive source UUID cursor |
-| `episode_type`, `tag` | Optional exact filters, applied before statistics |
+| `episode_type`, `tag` | Optional exact filters, applied by the candidate projection before scan budgets and statistics |
 
 The byte budget excludes keys, integrity indexes, allocator overhead and one
 lookahead row. It is not a process memory limit. A budget that cannot fit its
@@ -113,3 +113,5 @@ response. See [configure retrieval capacity](../operations/retrieval-capacity.md
 request snapshot before candidate eligibility and corpus statistics. Pages report
 additional source reads in `dependency_work`; these are separate from candidate
 scan budgets. Exceeding the documented dependency limits fails the request.
+
+See [current retrieval candidates](retrieval-candidates.md) for projection maintenance, upgrade behavior, work counters and remaining limits.

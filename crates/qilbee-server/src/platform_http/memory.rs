@@ -106,7 +106,9 @@ async fn command(
                 .authorize(token, Capability::MemoryWrite, &request.scope)
                 .map_err(ApiError::operation)?;
             if matches!(&request.operation, MemoryOperation::Derive { .. }) {
-                identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+                identity
+                    .authorize(token, Capability::MemoryRead, &request.scope)
+                    .map_err(ApiError::operation)?;
             }
             let receipt = memory
                 .apply_memory_command(
@@ -250,6 +252,29 @@ async fn embedding(
         })
         .await
 }
+fn candidate_headers(
+    mut response: Response,
+    records: usize,
+    index_bytes: usize,
+    source_bytes: usize,
+) -> ApiResult<Response> {
+    response.headers_mut().insert(
+        "x-qilbee-candidate-selection-version",
+        HeaderValue::from_static(qilbee_memory::storage::platform::CANDIDATE_SELECTION_VERSION),
+    );
+    for (name, value) in [
+        ("x-qilbee-scanned-records", records),
+        ("x-qilbee-candidate-index-bytes", index_bytes),
+        ("x-qilbee-scanned-bytes", source_bytes),
+    ] {
+        response.headers_mut().insert(
+            name,
+            HeaderValue::from_str(&value.to_string()).map_err(|_| ApiError::internal())?,
+        );
+    }
+    Ok(response)
+}
+
 async fn semantic_search(
     State(state): State<PlatformState>,
     headers: HeaderMap,
@@ -286,7 +311,12 @@ async fn semantic_search(
                 HeaderValue::from_str(&retrieval_micros.to_string())
                     .map_err(|_| ApiError::internal())?,
             );
-            Ok(response)
+            candidate_headers(
+                response,
+                page.scanned_records,
+                page.candidate_index_bytes,
+                page.scanned_bytes,
+            )
         })
         .await
 }
@@ -313,7 +343,7 @@ async fn lexical_search(
         Json<RankedRequest<qilbee_memory::storage::platform::LexicalQuery>>,
         JsonRejection,
     >,
-) -> ApiResult<Json<Value>> {
+) -> ApiResult<Response> {
     let memory = state.memory.clone();
     let limits = state.retrieval_limits.clone();
     state.run(headers, move |identity, token, _| {
@@ -328,7 +358,8 @@ async fn lexical_search(
         let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_lexical(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
-        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"lexical","ranking_version":"bm25_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}})))
+        let response = Json(json!({"contract_version":1,"scope":request.scope,"mode":"lexical","ranking_version":"bm25_v1","page":page,"timing":{"retrieval_micros":retrieval_micros}})).into_response();
+        candidate_headers(response, page.scanned_records, page.candidate_index_bytes, page.scanned_bytes)
     }).await
 }
 
@@ -336,7 +367,7 @@ async fn hybrid_search(
     State(state): State<PlatformState>,
     headers: HeaderMap,
     body: Result<Json<RankedRequest<qilbee_memory::storage::platform::HybridQuery>>, JsonRejection>,
-) -> ApiResult<Json<Value>> {
+) -> ApiResult<Response> {
     let memory = state.memory.clone();
     let limits = state.retrieval_limits.clone();
     state.run(headers, move |identity, token, _| {
@@ -352,7 +383,8 @@ async fn hybrid_search(
         let retrieval_started = std::time::Instant::now();
         let page = memory.search_memory_hybrid(&scope.storage_namespace, &request.query).map_err(ApiError::operation)?;
         let retrieval_micros = retrieval_started.elapsed().as_micros().min(u64::MAX as u128) as u64;
-        Ok(Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":page.ranking.version,"page":page,"timing":{"retrieval_micros":retrieval_micros}})))
+        let response = Json(json!({"contract_version":1,"scope":request.scope,"mode":"hybrid","ranking_version":page.ranking.version,"page":page,"timing":{"retrieval_micros":retrieval_micros}})).into_response();
+        candidate_headers(response, page.scanned_records, page.candidate_index_bytes, page.scanned_bytes)
     }).await
 }
 

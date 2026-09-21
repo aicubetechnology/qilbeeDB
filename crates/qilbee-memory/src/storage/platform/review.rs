@@ -179,6 +179,7 @@ impl RocksDbMemoryStorage {
             record_digest: digest(&encoded),
         };
         let mut batch = rocksdb::WriteBatch::default();
+        self.update_candidates(namespace, &record, &mut batch)?;
         batch.put_cf(
             self.cf(super::super::cf::EPISODES)?,
             record_key(0x10, namespace, record.record_id),

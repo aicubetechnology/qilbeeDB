@@ -154,3 +154,113 @@ async fn hybrid_profiles_validate_real_http_scores_against_the_served_openapi() 
     server.abort();
     let _ = server.await;
 }
+
+#[tokio::test]
+async fn current_candidate_http_coverage_and_work_validate_against_served_openapi() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity.bootstrap_tenant("tenant", "operator").unwrap();
+    let token = memory_key(&identity, &admin.secret, "candidate-evaluator", true);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let base = format!("http://{}", listener.local_addr().unwrap());
+    let server = tokio::spawn(async move { axum::serve(listener, router).await.unwrap() });
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .unwrap();
+    let api: Value = client
+        .get(format!("{base}/openapi.json"))
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let scope = memory_scope("shared");
+    let space =
+        json!({"provider":"fixture","model":"candidate-schema","revision":"v1","dimensions":3});
+    let mut target = Value::Null;
+    for n in 0..8 {
+        let mut command = memory_create(&format!("history-{n}"), "term identical", "shared");
+        command["operation"]["record"]["tags"] =
+            json!([if n < 4 { "target" } else { "background" }]);
+        let created = post(&client, &base, "/api/v1/memory/commands", &token, &command).await;
+        let id = created["receipt"]["record_id"].clone();
+        post(&client, &base, "/api/v1/memory/embeddings", &token, &json!({"contract_version":1,"scope":scope,
+            "idempotency_key":format!("vector-{n}"),"record_id":id,"record_revision":1,"space":space,"vector":[1,0,0]})).await;
+        if n < 3 {
+            post(&client, &base, "/api/v1/memory/commands", &token, &json!({"contract_version":1,"scope":scope,
+                "idempotency_key":format!("delete-{n}"),"operation":{"type":"delete","record_id":id,"expected_revision":1}})).await;
+        } else if n == 3 {
+            target = id;
+        }
+    }
+    for mode in ["lexical", "semantic", "hybrid"] {
+        let route = match mode {
+            "semantic" => "/api/v1/memory/search".to_owned(),
+            _ => format!("/api/v1/memory/search/{mode}"),
+        };
+        let mut body = json!({"contract_version":1,"scope":scope,"query":{"limit":10,"scan_limit":1,"tag":"target"}});
+        if mode != "semantic" {
+            body["mode"] = mode.into();
+            body["query"]["text"] = "term".into();
+        }
+        if mode != "lexical" {
+            body["query"]["space"] = space.clone();
+            body["query"]["vector"] = json!([1, 0, 0]);
+        }
+        if mode == "hybrid" {
+            body["query"]["ranking_version"] = "weighted_rrf_v2".into();
+        }
+        let http = client
+            .post(format!("{base}{route}"))
+            .bearer_auth(&token)
+            .json(&body)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(http.status().as_u16(), 200);
+        let headers = http.headers().clone();
+        let response: Value = http.json().await.unwrap();
+        let schema = json!({"$schema":"https://json-schema.org/draft/2020-12/schema",
+            "allOf":[api["paths"][&route]["post"]["responses"]["200"]["content"]["application/json"]["schema"]],"components":api["components"]});
+        let validator = jsonschema::draft202012::options().build(&schema).unwrap();
+        assert!(validator.is_valid(&response), "{mode}: {response}");
+        let page = &response["page"];
+        assert!(page.get("candidate_selection_version").is_none());
+        assert!(page.get("candidate_index_bytes").is_none());
+        if mode == "semantic" {
+            assert!(page.get("scanned_records").is_none());
+            assert!(page.get("scanned_bytes").is_none());
+        }
+        assert_eq!(
+            headers["x-qilbee-candidate-selection-version"],
+            "current_records_v1"
+        );
+        assert_eq!(page["exhaustive"], true);
+        assert_eq!(headers["x-qilbee-scanned-records"], "1");
+        assert!(
+            headers["x-qilbee-candidate-index-bytes"]
+                .to_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 40
+        );
+        assert!(
+            headers["x-qilbee-scanned-bytes"]
+                .to_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 0
+        );
+        assert_eq!(page["hits"][0]["record"]["record_id"], target);
+        if mode == "semantic" {
+            assert_eq!(page["hits"][0]["score"], 1.0);
+        }
+    }
+    server.abort();
+    let _ = server.await;
+}

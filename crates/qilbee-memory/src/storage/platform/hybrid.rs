@@ -105,6 +105,10 @@ pub struct HybridPage {
     pub embedding_coverage: EmbeddingCoverage,
     pub hits: Vec<HybridHit>,
     pub next_after: Option<Uuid>,
+    #[serde(skip_serializing, default)]
+    pub candidate_selection_version: String,
+    #[serde(skip_serializing, default)]
+    pub candidate_index_bytes: usize,
     pub scanned_records: usize,
     #[serde(default)]
     pub dependency_work: DependencyWork,
@@ -233,6 +237,8 @@ impl MemorySnapshot<'_> {
             embedding_coverage,
             hits,
             next_after: page.next_after,
+            candidate_selection_version: page.candidate_selection_version,
+            candidate_index_bytes: page.candidate_index_bytes,
             scanned_records: page.scanned_records,
             scanned_bytes: page.scanned_bytes,
             corpus_records: page.corpus_records,

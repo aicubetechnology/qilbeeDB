@@ -171,11 +171,13 @@ impl RocksDbMemoryStorage {
 
         info!("Memory storage opened successfully");
 
-        Ok(Self {
+        let storage = Self {
             db: Arc::new(db),
             config,
             mutation_lock: Mutex::new(()),
-        })
+        };
+        storage.initialize_candidates()?;
+        Ok(storage)
     }
 
     fn validate_agent(agent_id: &str) -> Result<()> {
