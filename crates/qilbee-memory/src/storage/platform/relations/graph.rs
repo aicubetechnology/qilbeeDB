@@ -79,6 +79,8 @@ impl MemorySnapshot<'_> {
         id: Uuid,
         query: &TypedMemoryGraphQuery,
         state: &mut Traversal,
+        episode_type: Option<&EpisodeType>,
+        tag: Option<&str>,
     ) -> Result<bool> {
         if state.records.contains_key(&id) {
             return Ok(true);
@@ -110,7 +112,15 @@ impl MemorySnapshot<'_> {
             )
             .map_err(storage_error)?;
         let record = match decode_record_pair(id, bytes, index)? {
-            Some(record) if self.eligible(namespace, &record)? => Some(record),
+            Some(record)
+                if self.eligible(namespace, &record)?
+                    && record.payload.as_ref().is_some_and(|p| {
+                        episode_type.is_none_or(|kind| kind == &p.episode_type)
+                            && tag.is_none_or(|tag| p.tags.iter().any(|v| v == tag))
+                    }) =>
+            {
+                Some(record)
+            }
             _ => None,
         };
         state.coverage.records_examined += 1;
@@ -123,20 +133,30 @@ impl MemorySnapshot<'_> {
         namespace: &str,
         query: &TypedMemoryGraphQuery,
     ) -> Result<TypedMemoryGraph> {
+        self.typed_graph_filtered(namespace, query, None, None)
+    }
+    pub(in crate::storage::platform) fn typed_graph_filtered(
+        &self,
+        namespace: &str,
+        query: &TypedMemoryGraphQuery,
+        episode_type: Option<&EpisodeType>,
+        tag: Option<&str>,
+    ) -> Result<TypedMemoryGraph> {
         let mut state = Traversal::default();
         let mut roots = Vec::new();
         let mut stops = BTreeSet::new();
         // Reserve no hidden budget: roots are actually read in request order before neighbors.
         for &id in &query.root_record_ids {
-            let status = if !self.typed_graph_record(namespace, id, query, &mut state)? {
-                stops.insert(TypedGraphStopReason::NodeLimit);
-                MemoryGraphRootStatus::NotExamined
-            } else if state.records[&id].is_some() {
-                state.include(id, 0);
-                MemoryGraphRootStatus::Included
-            } else {
-                MemoryGraphRootStatus::Unavailable
-            };
+            let status =
+                if !self.typed_graph_record(namespace, id, query, &mut state, episode_type, tag)? {
+                    stops.insert(TypedGraphStopReason::NodeLimit);
+                    MemoryGraphRootStatus::NotExamined
+                } else if state.records[&id].is_some() {
+                    state.include(id, 0);
+                    MemoryGraphRootStatus::Included
+                } else {
+                    MemoryGraphRootStatus::Unavailable
+                };
             roots.push(MemoryGraphRoot {
                 record_id: id,
                 status,
@@ -225,7 +245,14 @@ impl MemorySnapshot<'_> {
                         state.defer(relation_id, TypedGraphStopReason::DepthLimit);
                         continue;
                     }
-                    if !self.typed_graph_record(namespace, neighbor.record_id, query, &mut state)? {
+                    if !self.typed_graph_record(
+                        namespace,
+                        neighbor.record_id,
+                        query,
+                        &mut state,
+                        episode_type,
+                        tag,
+                    )? {
                         state.defer(relation_id, TypedGraphStopReason::NodeLimit);
                         continue;
                     }

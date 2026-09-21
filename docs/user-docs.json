@@ -329,6 +329,13 @@
       "title": "Typed relation change consumption",
       "description": "Consume history-bound relation events with subject-owned checkpoints, durable revisions, current diagnostics and explicit reconciliation.",
       "order": 69
+    },
+    {
+      "source": "docs/api/graph-assisted-retrieval.md",
+      "file": "graph-assisted-retrieval.md",
+      "title": "Experimental graph-assisted retrieval",
+      "description": "Retrieve revision-bound memories through explicit typed paths, immutable profiles and observable work limits.",
+      "order": 208
     }
   ]
 }

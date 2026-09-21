@@ -131,6 +131,14 @@ impl RocksDbMemoryStorage {
 }
 impl MemorySnapshot<'_> {
     pub(super) fn search_hybrid(&self, namespace: &str, query: &HybridQuery) -> Result<HybridPage> {
+        self.search_hybrid_counted(namespace, query)
+            .map(|(page, _)| page)
+    }
+    pub(super) fn search_hybrid_counted(
+        &self,
+        namespace: &str,
+        query: &HybridQuery,
+    ) -> Result<(HybridPage, usize)> {
         query.space.validate()?;
         let query_norm = super::semantic::norm(&query.vector, query.space.dimensions)?;
         let profile = query.ranking_version.profile();
@@ -220,6 +228,7 @@ impl MemorySnapshot<'_> {
                 .total_cmp(&a.score)
                 .then_with(|| a.record.record_id.cmp(&b.record.record_id))
         });
+        let fused_candidates = hits.len();
         hits.truncate(query.limit);
         let embedding_coverage = if page.corpus_records == 0 {
             EmbeddingCoverage::EmptyCorpus
@@ -230,26 +239,29 @@ impl MemorySnapshot<'_> {
         } else {
             EmbeddingCoverage::Partial
         };
-        Ok(HybridPage {
-            dependency_work: page.dependency_work,
-            rank_constant: profile.rank_constant,
-            ranking: profile,
-            embedding_coverage,
-            hits,
-            next_after: page.next_after,
-            candidate_selection_version: page.candidate_selection_version,
-            candidate_index_bytes: page.candidate_index_bytes,
-            scanned_records: page.scanned_records,
-            scanned_bytes: page.scanned_bytes,
-            corpus_records: page.corpus_records,
-            embedded_records,
-            lexical_matches,
-            semantic_matches,
-            lexical_candidates,
-            semantic_candidates,
-            candidates_truncated: lexical_matches > lexical_candidates
-                || semantic_matches > semantic_candidates,
-            exhaustive: page.exhaustive,
-        })
+        Ok((
+            HybridPage {
+                dependency_work: page.dependency_work,
+                rank_constant: profile.rank_constant,
+                ranking: profile,
+                embedding_coverage,
+                hits,
+                next_after: page.next_after,
+                candidate_selection_version: page.candidate_selection_version,
+                candidate_index_bytes: page.candidate_index_bytes,
+                scanned_records: page.scanned_records,
+                scanned_bytes: page.scanned_bytes,
+                corpus_records: page.corpus_records,
+                embedded_records,
+                lexical_matches,
+                semantic_matches,
+                lexical_candidates,
+                semantic_candidates,
+                candidates_truncated: lexical_matches > lexical_candidates
+                    || semantic_matches > semantic_candidates,
+                exhaustive: page.exhaustive,
+            },
+            fused_candidates,
+        ))
     }
 }

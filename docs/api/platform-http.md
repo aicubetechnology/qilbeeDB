@@ -195,3 +195,9 @@ The unreleased [typed relation change routes](typed-relation-changes.md) expose 
 separate history-bound event stream, subject-owned checkpoints, immutable progress
 receipts and snapshot-local consumer diagnostics. Existing memory feed contracts
 remain unchanged. Graph caches must observe both streams and revalidate expiry.
+
+The unreleased [graph-assisted retrieval API](graph-assisted-retrieval.md) selects lexical, semantic
+or hybrid anchors and ranks memories through exact typed paths in one snapshot.
+Four immutable experimental profiles expose separate base and graph contributions,
+coverage and provenance. Existing search scores and defaults remain unchanged;
+comparative retrieval and agent-task benefits have not yet been demonstrated.

@@ -82,9 +82,18 @@ impl RocksDbMemoryStorage {
         namespace: &str,
         query: &LexicalQuery,
     ) -> Result<LexicalPage> {
+        self.memory_snapshot().search_lexical(namespace, query)
+    }
+}
+impl MemorySnapshot<'_> {
+    pub(super) fn search_lexical(
+        &self,
+        namespace: &str,
+        query: &LexicalQuery,
+    ) -> Result<LexicalPage> {
         let ScannedCorpus {
             records, mut page, ..
-        } = self.memory_snapshot().scan_corpus(namespace, query)?;
+        } = self.scan_corpus(namespace, query)?;
         let ranks = rank_records(&records, &query.text);
         page.matched_records = ranks.len();
         let mut records: std::collections::BTreeMap<_, _> =

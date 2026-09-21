@@ -5,6 +5,7 @@ use axum::extract::{Query, rejection::QueryRejection};
 use qilbee_memory::storage::platform::{MemoryCommand, MemoryOperation, MemoryQuery, RecordAuthor};
 mod batch_read;
 mod evidence_graph;
+mod graph_retrieval;
 mod relation_changes;
 mod relations;
 mod typed_graph;
@@ -16,6 +17,7 @@ pub(super) fn routes() -> Router<PlatformState> {
         .merge(relations::routes())
         .merge(relation_changes::routes())
         .merge(typed_graph::routes())
+        .merge(graph_retrieval::routes())
         .merge(reviews::routes())
         .merge(checkpoints::routes())
         .merge(verified_changes::routes())
