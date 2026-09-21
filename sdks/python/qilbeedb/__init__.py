@@ -29,6 +29,14 @@ from .consumer import (
     ConsumerTransportError,
     ReconciliationRequired,
 )
+from .relation_consumer import (
+    VerifiedRelationConsumer,
+    RelationCursor,
+    RelationCheckpoint,
+    RelationConsumptionResult,
+    RelationDelivery,
+    RelationChangeSink,
+)
 
 _LEGACY_EXPORTS = {
     "QilbeeDB": "client",
@@ -71,6 +79,12 @@ def __dir__():
 
 
 __all__ = [
+    "VerifiedRelationConsumer",
+    "RelationCursor",
+    "RelationCheckpoint",
+    "RelationConsumptionResult",
+    "RelationDelivery",
+    "RelationChangeSink",
     "VerifiedMemoryConsumer",
     "VerifiedCursor",
     "ConsumerCheckpoint",

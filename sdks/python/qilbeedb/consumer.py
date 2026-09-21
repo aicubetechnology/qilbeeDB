@@ -70,11 +70,23 @@ def _hash(value):
 class VerifiedMemoryConsumer:
     """Consume one bounded v2 page, then acknowledge with exact checkpoint CAS.
 
-    Requires the consumer-diagnostics feature in the 0.10.0 server preview.
+    Requires the verified consumer diagnostics available since server 0.10.0.
     Configure the expected tenant and subject explicitly. Each operation pins one
     credential and verifies that identity before accessing the selected scope.
     ``sink`` remains the authority for effects, not a local cache of server state.
     """
+
+    # Closed stream adapters share the delivery/CAS state machine. These are not
+    # caller-selectable protocol options; each public client fixes its contract.
+    _wire = wire
+    _cursor_type = VerifiedCursor
+    _delivery_type = MemoryDelivery
+    _result_type = ConsumptionResult
+    _protocol_version = 2
+    _route = "/api/v2/memory"
+    _binding_domain = "qilbee.consumer.binding.v1"
+    _delivery_domain = "qilbee.consumer.delivery.v1"
+    _command_prefix = "consumer-v1-"
 
     def __init__(
         self,
@@ -105,7 +117,7 @@ class VerifiedMemoryConsumer:
         self._limit = page_size
         self._lock = Lock()
         self._binding_id = _hash(
-            ["qilbee.consumer.binding.v1", tenant_id, subject_id, self._scope, consumer_id]
+            [self._binding_domain, tenant_id, subject_id, self._scope, consumer_id]
         )
 
     @property
@@ -148,19 +160,19 @@ class VerifiedMemoryConsumer:
             witness = sink.load_witness(self.binding_id)
         except Exception:
             raise ConsumerError("sink_witness_read_failed") from None
-        if not isinstance(witness, VerifiedCursor):
+        if not isinstance(witness, self._cursor_type):
             raise ReconciliationRequired("durable_witness_required")
         return witness
 
     def _diagnose(self, token, witness):
         body = {
-            "contract_version": 2,
+            "contract_version": self._protocol_version,
             "scope": self._scope,
             "consumer_id": self._consumer,
             "witness": None if witness is None else witness.to_dict(),
         }
-        response = self._http.request(token, "/api/v2/memory/consumers/diagnose", body)
-        return wire.diagnosis(response, self._scope, self._consumer, self._subject, witness)
+        response = self._http.request(token, self._route + "/consumers/diagnose", body)
+        return self._wire.diagnosis(response, self._scope, self._consumer, self._subject, witness)
 
     @staticmethod
     def _compatible(diagnosis, checkpoint, witness, *, allow_missing=False):
@@ -178,44 +190,45 @@ class VerifiedMemoryConsumer:
 
     def diagnose(self, witness: Optional[VerifiedCursor] = None) -> Dict[str, Any]:
         """Read bounded scoped observations without changing any progress."""
-        if witness is not None and not isinstance(witness, VerifiedCursor):
-            raise TypeError("witness must be a complete VerifiedCursor")
+        if witness is not None and not isinstance(witness, self._cursor_type):
+            raise TypeError("witness must be the complete cursor for this stream")
         with self._operation() as token:
             return self._diagnose(token, witness)[0]
 
-    def _commit(self, token, expected, target):
+    def _command(self, expected, target):
         command = {
-            "contract_version": 2,
+            "contract_version": self._protocol_version,
             "consumer_id": self._consumer,
             "expected_revision": 0 if expected is None else expected.revision,
             "expected_checkpoint_digest": None if expected is None else expected.checkpoint_digest,
             "cursor": target.to_dict(),
         }
-        command["idempotency_key"] = "consumer-v1-" + _hash([self.binding_id, command])
+        command["idempotency_key"] = self._command_prefix + _hash([self.binding_id, command])
+        return command
+
+    def _commit(self, token, expected, target):
+        command = self._command(expected, target)
         response = self._http.request(
             token,
-            "/api/v2/memory/checkpoints",
+            self._route + "/checkpoints",
             {"scope": self._scope, "command": command},
             mutation=True,
         )
         try:
-            receipt = wire.envelope(response, "receipt")
-            wire.object_fields(
-                receipt, "contract_version idempotency_key checkpoint receipt_digest"
-            )
-            wire.require(
-                type(receipt["contract_version"]) is int and receipt["contract_version"] == 2
-            )
-            wire.require(receipt["idempotency_key"] == command["idempotency_key"])
-            wire.digest(receipt["receipt_digest"])
-            saved = wire.checkpoint(receipt["checkpoint"], self._consumer, self._subject)
-            wire.require(
-                saved.revision == command["expected_revision"] + 1 and saved.cursor == target
-            )
-            return receipt, saved
+            return self._validate_receipt(response, command, expected, target)
         except ConsumerError as error:
             error.checkpoint_outcome = "unknown"
             raise
+
+    def _validate_receipt(self, response, command, expected, target):
+        receipt = wire.envelope(response, "receipt")
+        wire.object_fields(receipt, "contract_version idempotency_key checkpoint receipt_digest")
+        wire.require(type(receipt["contract_version"]) is int and receipt["contract_version"] == 2)
+        wire.require(receipt["idempotency_key"] == command["idempotency_key"])
+        wire.digest(receipt["receipt_digest"])
+        saved = wire.checkpoint(receipt["checkpoint"], self._consumer, self._subject)
+        wire.require(saved.revision == command["expected_revision"] + 1 and saved.cursor == target)
+        return receipt, saved
 
     def _current_after_commit(self, token, sink, saved):
         try:
@@ -241,8 +254,8 @@ class VerifiedMemoryConsumer:
         The sink must already durably retain this exact cursor for this binding.
         Existing progress is never overwritten; use consume_once to resume it.
         """
-        if not isinstance(cursor, VerifiedCursor):
-            raise TypeError("cursor must be a complete VerifiedCursor")
+        if not isinstance(cursor, self._cursor_type):
+            raise TypeError("cursor must be the complete cursor for this stream")
         with self._operation() as token:
             witness = self._witness(sink)
             if witness != cursor:
@@ -264,8 +277,8 @@ class VerifiedMemoryConsumer:
         Pass high_watermark as through on following calls to retain a fixed fence.
         On any failure, stop; there is no hidden retry, rewind or checkpoint reset.
         """
-        if through is not None and not isinstance(through, VerifiedCursor):
-            raise TypeError("through must be a complete VerifiedCursor")
+        if through is not None and not isinstance(through, self._cursor_type):
+            raise TypeError("through must be the complete cursor for this stream")
         with self._operation() as token:
             witness = self._witness(sink)
             diagnosis, current = self._diagnose(token, witness)
@@ -281,15 +294,17 @@ class VerifiedMemoryConsumer:
             }
             response = self._http.request(
                 token,
-                "/api/v2/memory/changes",
-                {"contract_version": 2, "scope": self._scope, "query": query},
+                self._route + "/changes",
+                {"contract_version": self._protocol_version, "scope": self._scope, "query": query},
             )
-            page, target, fence = wire.page(response, self._scope, witness, through, self._limit)
+            page, target, fence = self._wire.page(
+                response, self._scope, witness, through, self._limit
+            )
             for row in page["changes"]:
-                cursor = VerifiedCursor.from_dict(row["cursor"])
-                delivery = MemoryDelivery(
+                cursor = self._cursor_type.from_dict(row["cursor"])
+                delivery = self._delivery_type(
                     self.binding_id,
-                    _hash(["qilbee.consumer.delivery.v1", self.binding_id, cursor.to_dict()]),
+                    _hash([self._delivery_domain, self.binding_id, cursor.to_dict()]),
                     cursor,
                     deepcopy(row["change"]),
                 )
@@ -312,6 +327,6 @@ class VerifiedMemoryConsumer:
             if current.cursor != target:
                 receipt, saved = self._commit(token, current, target)
                 current = self._current_after_commit(token, sink, saved)
-            return ConsumptionResult(
+            return self._result_type(
                 len(page["changes"]), target, fence, page["complete"], current, receipt
             )

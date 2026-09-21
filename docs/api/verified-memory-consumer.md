@@ -13,6 +13,11 @@ checkpoint revision and digest. It does not generate embeddings, require model
 credentials, run an agent, or embed a storage engine. The application chooses its
 own durable destination. Legacy graph SDK imports load only when requested.
 
+Use the separate [relation consumer](verified-relation-consumer.md) for typed
+assertion changes. The two clients share delivery safeguards but use distinct
+bindings, cursor types, routes and checkpoint contracts. A graph cache needs both
+streams and current eligibility checks; neither stream emits clock-driven expiry.
+
 ## Configure identity and scope
 
 Use a current credential with `memory_read` and `memory_checkpoint` for the exact

@@ -602,3 +602,15 @@ reconciliation, fixed fences, errors and limitations. The standard-library
 [SQLite invalidation example](examples/verified_consumer_sink.py) demonstrates a
 transactional effect/deduplication/witness boundary. SQLite is optional; applications
 can implement the same two-method sink protocol on their own durable destination.
+
+## Verified relation consumer (source preview)
+
+`VerifiedRelationConsumer` consumes the separate typed-relation feed available in
+server 0.13.0. It shares the memory client's bounded delivery and durable sink
+safeguards, while keeping relation cursors, bindings and checkpoint contracts
+distinct. A historical assertion event is not current eligibility: graph caches
+must also observe memory changes and revalidate context before reuse.
+
+See [the relation consumer guide](../../docs/api/verified-relation-consumer.md) and
+the [SQLite invalidation example](examples/verified_relation_sink.py). This source
+preview has not been published to PyPI. It uses no external model provider.
