@@ -273,6 +273,13 @@
       "title": "Company integration policies",
       "description": "Authorize external project and agent IDs with explicit company policies, preserve private subjects and change access with an audited revision guard.",
       "order": 41
+    },
+    {
+      "source": "docs/security/agent-registration.md",
+      "file": "agent-registration.md",
+      "title": "Automatic agent registration",
+      "description": "Use application-owned agent IDs, register successful authorized requests durably, and inspect the company agent directory.",
+      "order": 42
     }
   ]
 }

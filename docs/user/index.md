@@ -9,6 +9,7 @@ generates embeddings externally and decides how retrieved evidence is used.
 
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
+- [Automatic agent registration, unreleased](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
 - [Company integrations, unreleased](../security/company-integrations.md): authorize external project and agent IDs through a versioned policy and change access without replacing keys.
 - [Memory API](../api/versioned-memory.md): create, update and delete records with durable receipts and revision checks.
 - [Local Docker deployment](deployment.md): run the platform and locate its API reference.
