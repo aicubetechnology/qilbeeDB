@@ -209,10 +209,18 @@ impl MemorySnapshot<'_> {
     ) -> Result<RelationEligibility> {
         let mut reason = local_relation_reason(relation, self.now);
         let mut endpoint = None;
+        let mut evidence_failure = None;
         if reason == RelationEligibilityReason::Eligible {
             if let Err(failure) = self.relation_endpoints(namespace, &relation.input)? {
                 reason = failure.0;
                 endpoint = Some(failure.1);
+            }
+        }
+        if reason == RelationEligibilityReason::Eligible {
+            evidence_failure =
+                self.relation_evidence_failure(namespace, &relation.input.evidence_sources)?;
+            if evidence_failure.is_some() {
+                reason = RelationEligibilityReason::EvidenceUnavailable;
             }
         }
         Ok(RelationEligibility {
@@ -221,6 +229,7 @@ impl MemorySnapshot<'_> {
             evaluated_at_millis: self.now,
             endpoint,
             dependency_work: self.dependency_work(),
+            evidence_failure,
         })
     }
     fn relation_endpoints(
@@ -274,6 +283,18 @@ impl MemorySnapshot<'_> {
             return Err(Error::ValidationError(
                 "temporal_before requires a strictly earlier source event timestamp".into(),
             ));
+        }
+        if let Some(failure) = self.relation_evidence_failure(namespace, &input.evidence_sources)? {
+            return Err(match failure.reason {
+                MemoryEligibilityReason::DepthLimit
+                | MemoryEligibilityReason::NodeLimit
+                | MemoryEligibilityReason::DependencyCycle => Error::ValidationError(
+                    "Relation evidence exceeds dependency graph bounds or contains a cycle".into(),
+                ),
+                _ => Error::TransactionConflict(
+                    "Relation evidence is not an eligible current revision".into(),
+                ),
+            });
         }
         Ok(())
     }
@@ -561,5 +582,7 @@ impl RocksDbMemoryStorage {
             .relation_revision(namespace, id, revision)
     }
 }
+#[cfg(test)]
+mod evidence_tests;
 #[cfg(test)]
 mod tests;

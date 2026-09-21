@@ -67,6 +67,24 @@ checks and explicit work limits. The separate [MuSiQue comparison](graph-retriev
 reports gains and regressions under frozen conditions; it does not establish an
 agent-task benefit or admit a default ranking change.
 
+## Context-bound consolidation prerequisites
+
+MAGMA section 3.4 describes asynchronous inference over a local neighborhood.
+[ReasoningBank](https://research.google/blog/reasoningbank-enabling-agents-to-learn-from-experience/)
+describes retrieval, extraction and consolidation of experience; its initial
+consolidation uses direct addition, with more advanced strategies left as future
+work. Neither description establishes the storage validity contract below.
+
+**Engineering inference:** a relation inferred from several memories must depend
+on all declared supporting context, not just the two graph endpoints. The
+unreleased [relation evidence extension](../api/typed-memory-relations.md#bind-the-context-used-for-inference)
+adds exact same-scope context references, bounded transitive checks, stale-source
+publication rejection and invalidation at traversal and retrieval. Immutable
+history survives invalidation. This is a prerequisite for an external consolidator;
+it does not implement the worker, automatically discover missing evidence, or
+reproduce a published quality gain. Durable job leases, fenced batch publication,
+unknown-outcome accounting and comparative evaluation remain required.
+
 ## Implementation and acceptance map
 
 | Capability | Current status | Required observable contract and evidence |
@@ -79,6 +97,7 @@ agent-task benefit or admit a default ranking change.
 | Relation change consumption | Implemented in the 0.13.0 [relation feed](../api/typed-relation-changes.md) | Atomic lifecycle events, history-bound fenced cursors, subject-owned progress, immutable receipts, stale-writer rejection and explicit reconciliation; endpoint changes and expiry still require current-state checks |
 | Graph-assisted retrieval | Implemented in 0.13.0; experimental | Immutable server profiles, four reproducible anchors, strongest typed path, exact eligible revisions, separate score contributions and coverage; legacy cosine/hybrid contracts preserved |
 | External graph retrieval comparison | Measured in 0.13.0 | Frozen document-only graph and E5 vectors, 100 reserved public-development queries, eight methods and 2,400 requests; primary gain remains uncertain and important category regressions prevent default admission |
+| Additional relation evidence | Implemented in unreleased source | Non-endpoint context binds exact revisions and digest; invalidation affects reads, traversal and graph search; history, scope and work bounds remain enforced |
 | Asynchronous consolidation | Proposed | External workers resume from checkpoints; late or duplicate work cannot publish stale relations; record partial or unknown execution without inventing completion |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |
 | Evidence-based policy improvement | Proposed | Reuse the existing qualification and suspension authority; freeze policy and evaluator versions; retain failure evidence and compare fresh tasks before publication |

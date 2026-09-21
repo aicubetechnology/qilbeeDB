@@ -320,7 +320,7 @@
       "source": "docs/api/typed-memory-relations.md",
       "file": "typed-memory-relations.md",
       "title": "Typed memory relations",
-      "description": "Store revision-bound graph assertions with authenticated provenance, durable lifecycle receipts, review authority and current endpoint eligibility.",
+      "description": "Record typed assertions with exact endpoint revisions, declared context dependencies, provenance and review history.",
       "order": 67
     },
     {

@@ -25,6 +25,7 @@ fn link(
             idempotency_key: key.into(),
             operation: MemoryRelationOperation::Assert {
                 relation: MemoryRelationInput {
+                    evidence_sources: Vec::new(),
                     source: MemorySourceRef {
                         record_id: a.record_id,
                         revision: a.revision,

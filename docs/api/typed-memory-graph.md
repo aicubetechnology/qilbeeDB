@@ -117,6 +117,15 @@ invalid assertion intervals, changed endpoint revisions, deleted/expired/rejecte
 memories and invalid transitive evidence are excluded. Complete memory eligibility
 checks apply even when the memory's evidence sources lie beyond the display depth.
 
+The unreleased [additional context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
+also checks each assertion's declared `evidence_sources` before expanding or
+deferring an edge. Invalid context cannot create a misleading depth cut. Context
+IDs and revisions remain in the returned assertion; their payloads are not added
+to `nodes`. Reads count toward `coverage.dependency_work`, share its cache and
+hard limits, and do not consume the topology `node_limit`. The context walk itself
+is bounded to 64 records and depth 8. An unrelated eligible root remains available
+even when an assertion that refers to it becomes ineligible.
+
 An unreviewed assertion can be eligible. The original `origin` and model identity
 remain caller declarations, while `reported_by` is authenticated authorship.
 Approval remains a review decision. Parallel assertions with different relation

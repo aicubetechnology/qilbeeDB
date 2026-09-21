@@ -1,18 +1,19 @@
 use super::super::semantic_tests::{actor, create, input, open};
 use super::*;
 use tempfile::TempDir;
-fn reference(r: &CommandReceipt) -> MemorySourceRef {
+pub(super) fn reference(r: &CommandReceipt) -> MemorySourceRef {
     MemorySourceRef {
         record_id: r.record_id,
         revision: r.revision,
     }
 }
-fn assertion(source: &CommandReceipt, target: &CommandReceipt) -> MemoryRelationCommand {
+pub(super) fn assertion(source: &CommandReceipt, target: &CommandReceipt) -> MemoryRelationCommand {
     MemoryRelationCommand {
         contract_version: 1,
         idempotency_key: "assert-claim".into(),
         operation: MemoryRelationOperation::Assert {
             relation: MemoryRelationInput {
+                evidence_sources: Vec::new(),
                 source: reference(source),
                 target: reference(target),
                 kind: MemoryRelationKind::CausalClaim,
@@ -33,7 +34,7 @@ fn assertion(source: &CommandReceipt, target: &CommandReceipt) -> MemoryRelation
         },
     }
 }
-fn change(id: Uuid, rev: u64, action: &str) -> MemoryRelationCommand {
+pub(super) fn change(id: Uuid, rev: u64, action: &str) -> MemoryRelationCommand {
     let evidence_ref = "trace://fixture/decision".into();
     let operation = match action {
         "retire" => MemoryRelationOperation::Retire {

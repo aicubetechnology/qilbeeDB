@@ -168,7 +168,12 @@ emitting an event.
 
 Before reusing graph context, read current authorized
 [typed graphs](typed-memory-graph.md) and/or relation eligibility, verify exact
-endpoint revisions, and honor coverage and validity limits. Treat 401/403, missing
+endpoint revisions, and honor coverage and validity limits. On servers supporting
+the unreleased [additional context extension](typed-memory-relations.md#bind-the-context-used-for-inference),
+include declared evidence sources and their transitive ancestors in cache
+dependencies. A relation change event does not contain that full dependency set.
+Use current relation reads, or conservatively invalidate the scoped cache after
+a memory change. Treat 401/403, missing
 relations, changed revisions and expiry as reasons to invalidate or reconcile.
 Receiving all events does not grant a freshness lease. This SDK acknowledges
 notifications; it does not materialize a current knowledge snapshot.

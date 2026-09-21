@@ -1,6 +1,7 @@
 # Typed memory relations
 
-Status: **0.13.0 contract**. Record a directed assertion between two
+Status: **0.13.0 base contract with an unreleased context extension**.
+Record a directed assertion between two
 current memories, retain its provenance and review history, and revalidate both
 endpoints before serving it. This API is the durable foundation for typed memory
 graphs. It does not expand search or extract relations. Use the
@@ -131,6 +132,59 @@ half-open: valid at the lower bound and invalid at the upper bound. Future and
 historical assertions can be stored but are not eligible outside that interval.
 Timestamp validity does not replace endpoint checks.
 
+## Bind the context used for inference
+
+**Unreleased source extension.** The deployed 0.13.0 contract does not accept
+`evidence_sources`; use this field only after upgrading the server and its schema.
+It is optional for existing assertions. Omission means no additional context was
+declared, not that the server verified the completeness of the extractor's input.
+
+If an extractor infers a relation between A and B using memory C, include C's
+exact revision in `operation.relation.evidence_sources`:
+
+```json
+{
+  "evidence_sources": [
+    {
+      "record_id": "018f0000-0000-4000-8000-000000000004",
+      "revision": 3
+    }
+  ]
+}
+```
+
+The field contains at most 16 distinct memory IDs, each with a positive revision,
+in the same company, project, agent, mission, visibility and private-subject
+partition as both endpoints. Exclude A and B themselves: they are already checked.
+Include every additional memory that supports the inference, including negative
+or contradictory evidence. A provenance URL alone does not bind that evidence.
+Cross-scope context is unavailable even when the same caller has another grant;
+the database does not fetch external URLs or infer omitted source identities.
+
+The server checks exact revisions and transitive eligibility inside the same
+write critical section as publication. A changed, missing, rejected, deleted or
+expired source prevents a new assertion or restoration. A previously accepted
+assertion becomes unavailable to ordinary reads, typed traversal and graph search
+when its declared context becomes invalid. Its immutable history and receipt
+remain available to authorized reviewers. Approval cannot override these checks.
+To use corrected context, retire the old assertion and submit a new one.
+
+Additional context does not become a topology neighbor or acquire a graph-ranking
+weight. It is an eligibility dependency. Graph results include its IDs and revisions
+in the returned relation, without its payload. Dependency reads share the existing
+request cache, snapshot and clock. The combined context walk allows at most 64
+unique records and depth 8 from each declared context root; endpoints keep their
+independent existing bounds. An eligible context root with eight derivation hops
+remains usable. Hard dependency-work exhaustion fails the request rather than
+returning a partially validated assertion.
+
+Nonempty context is part of the immutable relation and command digests. Changing
+it under a committed idempotency key returns 409. Empty lists are omitted from
+canonical serialization: legacy relation bytes, history and command digests remain
+unchanged. An old receipt still proves the original commit, not current eligibility.
+Strict clients must load the upgraded response schema before consuming assertions
+with context or the new eligibility reason.
+
 ## Receipts and retries
 
 A successful command returns `contract_version` and `receipt`. The receipt has:
@@ -198,7 +252,11 @@ retired or rejected metadata for authorized reviewers. The explanation contains
 2. `not_yet_valid` or `expired` for the relation's interval.
 3. `endpoint_unavailable` or `endpoint_revision_changed`, checking source then
    target and stopping at the first failure.
-4. `eligible` if all checks succeed.
+4. `evidence_unavailable` if a declared additional context source or its ancestry
+   fails validation. `evidence_failure` contains the first failing record ID,
+   expected and actual revision when known, and a memory eligibility reason.
+   This optional field is present only for this reason; it contains no payload.
+5. `eligible` if all checks succeed.
 
 Inspection is a bounded diagnostic, not an exhaustive list of failures. Use the
 existing [memory eligibility diagnostic](derived-memory.md) to investigate an
@@ -220,7 +278,7 @@ Keep the same request envelope and send an operation such as:
 
 `retire` changes an active relation to retired and removes its serving adjacency
 entries. `restore` requires a retired relation, rechecks the exact original
-endpoints, and makes it active. Restoring never removes a rejection or rewrites
+endpoints and declared context, and makes it active. Restoring never removes a rejection or rewrites
 the immutable input. To correct endpoints, type, model identity or validity,
 retire the old assertion and create a new one with new evidence.
 
@@ -228,7 +286,7 @@ For a review, use `type: "review"` and additionally provide `disposition` as
 `approved` or `rejected`. Review uses the same expected-revision guard and evidence
 reference. Each accepted lifecycle operation advances the relation revision by
 one. A rejected review removes serving adjacency entries. Approval cannot make
-stale endpoints eligible, undo retirement, or override time validity.
+stale endpoints or evidence sources eligible, undo retirement, or override time validity.
 
 Concurrent changes with the same `expected_revision` produce at most one accepted
 new revision. Other distinct commands return 409 `revision_conflict`. Read the
@@ -251,6 +309,7 @@ integer range rather than rounding through a floating-point number.
 | Relation metadata | Canonical value and each immutable history value are independently bounded to 16 KiB |
 | Endpoint records | At most 8 MiB combined serialized canonical record bytes |
 | Endpoint eligibility | Existing transitive depth 8 and 64-source-node rules apply independently to each endpoint; the relation adds no derivation depth |
+| Additional inference context (unreleased) | 0–16 references; one combined walk bounded to 64 records and depth 8; repeated context shares the request cache |
 | Shared dependency work | At most 4096 distinct dependency lookups and 16 MiB per request; reported by inspection |
 | Admission | All routes use the shared retrieval slots after authorization, through response serialization |
 
@@ -262,10 +321,11 @@ empty result. Reduce the size or dependency footprint of the endpoints before
 retrying. There is no unbounded traversal option.
 
 Reads use one snapshot and clock, but a successful read is not a lease. Re-read
-the relation immediately before reuse; endpoints can change and validity can
+the relation immediately before reuse; endpoints or declared context can change and validity can
 expire after the response. The [relation change feed](typed-relation-changes.md)
 now emits typed lifecycle events with history-bound cursors and subject-owned
-checkpoints. It is separate from memory changes: observe both streams and retain
+checkpoints. Changes to additional context also produce only memory events; expiry can occur
+without either event. It is separate from memory changes: observe both streams and retain
 current-state validation. A memory checkpoint alone cannot certify a relation
 cache as current. Bounded neighbor enumeration is available through the typed
 graph API; automatic extraction and consolidation workers remain separate work.
@@ -281,7 +341,7 @@ envelope. Handle errors explicitly:
 | 401 | Missing, expired or revoked credential |
 | 403 | Missing capability or unauthorized scope |
 | 404 `record_not_found` | Relation unavailable for ordinary read, or absent retained relation/history in an authorized inspection |
-| 409 `revision_conflict` | Stale relation revision or an endpoint no longer current and eligible |
+| 409 `revision_conflict` | Stale relation revision or an endpoint or declared evidence source no longer current and eligible |
 | 409 `idempotency_conflict` | Changed command under an already committed key |
 | 413 | Oversized request body |
 | 500 `storage_inconsistency` | Encountered relation, receipt, history or index corruption |
