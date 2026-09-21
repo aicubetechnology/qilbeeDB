@@ -9946,6 +9946,201 @@
           }
         }
       }
+    },
+    "/api/v1/memory/records/batch": {
+      "post": {
+        "operationId": "readMemoryRecordBatch",
+        "summary": "Read 1–100 current memories in one scoped snapshot",
+        "description": "Requires memory_read for one exact scope; tenant and private subject are credential-derived. Preserves request order and checks root and transitive eligibility at one server time. Null means unavailable, without disclosing a reason. No continuation or partial success: invalid/duplicate IDs, 8 MiB root-byte exhaustion or aggregate dependency work exhaustion fail the request. Uses the shared retrieval admission slots, after authorization. This does not activate a journal, advance a checkpoint or certify future freshness; mutations and time can invalidate records after evaluation.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete requested batch observed at one storage snapshot and one evaluation clock",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryBatchReadResponse"
+                },
+                "examples": {
+                  "unavailable": {
+                    "summary": "Uniform unavailable result, without a reason",
+                    "value": {
+                      "contract_version": 1,
+                      "scope": {
+                        "project_id": "project",
+                        "mission_id": null,
+                        "agent_id": "agent",
+                        "visibility": "private"
+                      },
+                      "batch": {
+                        "evaluated_at_millis": 1700000000000,
+                        "entries": [
+                          {
+                            "record_id": "018f0000-0000-4000-8000-000000000001",
+                            "record": null
+                          }
+                        ],
+                        "record_bytes": 0,
+                        "dependency_work": {
+                          "records_examined": 0,
+                          "bytes_examined": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or duplicate UUIDs, count outside 1–100, unsupported contract version, root bytes above 8 MiB or aggregate dependency work exhausted. No successful entries returned.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryBatchReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "record_ids": [
+                  "018f0000-0000-4000-8000-000000000001"
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -17647,6 +17842,116 @@
           "contract_version",
           "scope",
           "diagnostics"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryBatchReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "record_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Distinct record UUIDs, in desired response order. No enumeration or cross-scope lookup."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "record_ids"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryReadEntry": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "record": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MemoryRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Current eligible record, or null for absent/deleted/expired/rejected/ineligible records. The non-null record_id equals the requested record_id; no unavailability reason is disclosed."
+          }
+        },
+        "required": [
+          "record_id",
+          "record"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryReadBatch": {
+        "type": "object",
+        "properties": {
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64",
+            "description": "One server clock for all roots and dependencies in this storage snapshot. Not a cursor, lease, or future validity guarantee."
+          },
+          "entries": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/MemoryReadEntry"
+            },
+            "description": "Exactly one entry per requested UUID, preserving request order."
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608,
+            "description": "Serialized root-record bytes examined, including unavailable roots; excludes index bytes, dependency reads and temporary allocations."
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "evaluated_at_millis",
+          "entries",
+          "record_bytes",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryBatchReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "batch": {
+            "$ref": "#/components/schemas/MemoryReadBatch"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "batch"
         ],
         "additionalProperties": false
       }
