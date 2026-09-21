@@ -97,3 +97,52 @@ Integration with the agent's actual context path remains a separate acceptance
 gate. A long-running task must discard a source corrected during execution and
 resume after restart using this consumer. Keep the model, prompt, tools and task
 criteria fixed before attributing any task improvement to memory.
+
+## Batch-read measurement on the feature image
+
+The [frozen raw samples](context-read-report.json) were collected against database
+commit `79da87f3731c077da1385fe45498d944e54e0d65`, image
+`sha256:4b69e54d8a8dcc538c56186fa566ac8fb00ee8e805aab06561a71a731a0fdc61`.
+This is a separate QilbeeDB qualification, not a rerun of the attributed
+PostgreSQL campaign. All 53 tests across nine isolated Docker suites passed,
+including real-clock expiry without feed changes, transitive source rejection,
+abrupt server restart and the context comparison. The shared team server was
+not changed.
+
+Two synthetic corpora each contained 100 records with roughly 1 KiB of text.
+The second corpus derived every record from one common source. Every measured
+GET and batch returned the same complete records and revisions as the frozen
+initial read; a final batch verified equality again. Feed watermarks did not
+advance during the reads. No embeddings or model calls were used.
+
+The run used local Docker over loopback, one HTTP/1.1 connection, one client,
+20 measured samples per mode/size, two warmups, and alternating mode order.
+Container CPU/memory settings were Docker defaults. Workstation activity was
+uncontrolled. These are warm local observations, not a production capacity
+guarantee or a confidence interval for p95.
+
+| Corpus | Records | GET p50 / p95 (ms) | Batch p50 / p95 (ms) | GET / batch body bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Independent | 1 | 0.453 / 0.616 | 0.447 / 0.833 | 1,580 / 1,771 |
+| Independent | 10 | 5.404 / 8.158 | 0.834 / 1.159 | 15,800 / 15,101 |
+| Independent | 50 | 28.383 / 31.927 | 1.932 / 5.304 | 80,920 / 76,261 |
+| Independent | 100 | 60.168 / 76.068 | 4.052 / 8.420 | 162,320 / 152,712 |
+| Shared source | 1 | 0.598 / 0.972 | 0.624 / 1.200 | 1,746 / 1,939 |
+| Shared source | 10 | 7.840 / 21.571 | 1.444 / 17.724 | 17,460 / 16,763 |
+| Shared source | 50 | 28.374 / 37.395 | 2.359 / 5.889 | 89,220 / 84,563 |
+| Shared source | 100 | 68.536 / 80.841 | 4.755 / 6.880 | 178,920 / 169,314 |
+
+For 100 records, requests decreased from 100 to one. The observed p95 decreased
+from 76.068 to 8.420 ms for independent records, and from 80.841 to 6.880 ms
+for shared-source records. The batch read one distinct shared dependency for
+the whole group. **For a single record, batch p95 was higher in both corpora**;
+the response wrapper also increased body bytes. The shared-source 10-record
+case had substantial tail variation. Preserve these losses and raw samples
+when comparing future implementations.
+
+These measurements establish fewer HTTP round trips and observed local context
+read latency with equal records. They do not establish server CPU or RSS savings,
+performance under six-client load, cold-start behavior, greater retrieval
+relevance, or improved agent reasoning. The correctness benefit of a batch is
+one coherent point-in-time view; a series of individual GETs has separate
+snapshots even when the unchanged test corpus makes their contents equal.
