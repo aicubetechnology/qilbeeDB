@@ -51,13 +51,23 @@ async fn search(
             }
             limits.scan_bytes(request.query.scan_bytes_limit)?;
             let _permit = limits.acquire()?;
+            let retrieval_started = std::time::Instant::now();
             let page = memory
                 .search_memory_graph(&scope.storage_namespace, &request.query)
                 .map_err(ApiError::operation)?;
-            Ok(
+            let retrieval_micros = retrieval_started
+                .elapsed()
+                .as_micros()
+                .min(u64::MAX as u128) as u64;
+            let mut response =
                 Json(json!({"contract_version":1,"scope":request.scope,"page":page}))
-                    .into_response(),
-            )
+                    .into_response();
+            response.headers_mut().insert(
+                "x-qilbee-retrieval-micros",
+                HeaderValue::from_str(&retrieval_micros.to_string())
+                    .map_err(|_| ApiError::internal())?,
+            );
+            Ok(response)
         })
         .await
 }

@@ -86,6 +86,8 @@ nav:
     - Global administration: security/global-administration.md
     - Container security: security/container-security.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
+    - Graph Retrieval Evaluation: research/graph-retrieval-evaluation.md
+    - Graph Retrieval Results: research/graph-retrieval-results.md
     - Retrieval history qualification: research/retrieval-history-report.md
     - Retrieval evidence and regressions: research/retrieval-regressions.md
     - External Embedding Evaluation: research/external-embedding-evaluation.md

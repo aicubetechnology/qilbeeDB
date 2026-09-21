@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "fixture_sha256": "000815eaaf3d155b5b0f8c6a5d215c3a3c07a13876bc52348aab3e255cbec697",
+  "generation_report_file_sha256": "0ba7dbe8268d9d726126d935cdcc922d6a2485a613a6047f369363fdba6ca6f0",
+  "laboratory": {
+    "base_commit": "07010d843c1fde51156febbc2eba92ece8338a8b",
+    "binary_sha256": "e81c657e3e7737b5a107518daf428f3a4a6f87df33c055cd4f3e3b9328c1515d",
+    "processor": "Apple M1 Pro",
+    "logical_cpus": 10,
+    "host_memory_bytes": 17179869184,
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+    "cargo": "cargo 1.93.1 (083ac5135 2025-12-15)",
+    "source_note": "Measurement used PR76 engine plus the graph timing header and the isolated loopback example in PR77. Subsequent Python validation and source formatting changes do not change the ranking implementation. Full proof revalidation is recorded separately."
+  },
+  "encoding": {
+    "documents": {
+      "inputs": 2311,
+      "summed_elapsed_ms": 100148.44575501047,
+      "truncated_inputs": 0
+    },
+    "queries": {
+      "inputs": 130,
+      "summed_elapsed_ms": 1553.3285881392658,
+      "truncated_inputs": 0
+    }
+  },
+  "encoding_timing_scope": "serial per-input tokenization, CPU inference, masked pooling and normalization; excludes asset loading, downloads and file writes; no warmup excluded",
+  "cost": {
+    "amount": null,
+    "reason": "No paid provider call; local hardware and energy costs are unmeasured."
+  },
+  "preparation": {
+    "elapsed_ms": 16546.907791867852,
+    "documents": 2311,
+    "relations": 3791,
+    "fixture_sha256": "000815eaaf3d155b5b0f8c6a5d215c3a3c07a13876bc52348aab3e255cbec697",
+    "manifest_sha256": "fb3e3ae8eaac02988a1d2740f7930eb41d07f7255a6e3db9354355f677c6e90f"
+  },
+  "initial_graph_construction_elapsed_ms": null,
+  "physical_database_bytes_after_shutdown": 84299776,
+  "storage_scope": "Entire dedicated database after graceful shutdown, including source/embedding/relation records, immutable receipts, history, indexes, identity and storage metadata; allocated filesystem bytes, not graph-only amplification.",
+  "shutdown": {
+    "process_absent": true,
+    "access_file_removed": true
+  }
+}

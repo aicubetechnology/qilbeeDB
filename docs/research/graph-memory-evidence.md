@@ -61,8 +61,11 @@ results. Assertions remain externally supplied claims. The unreleased
 outgoing discovery with current endpoint checks, explicit cuts and native company
 administration. The separate [relation feed](../api/typed-relation-changes.md)
 adds history-bound delivery, durable subject-owned progress, diagnostics and
-explicit reconciliation. Graph-assisted ranking and quality comparisons are
-still required before attributing an agent retrieval benefit.
+explicit reconciliation. The [graph-assisted retrieval API](../api/graph-assisted-retrieval.md) now adds
+experimental server-owned path ranking with reproducible anchors, current source
+checks and explicit work limits. The separate [MuSiQue comparison](graph-retrieval-results.md)
+reports gains and regressions under frozen conditions; it does not establish an
+agent-task benefit or admit a default ranking change.
 
 ## Implementation and acceptance map
 
@@ -74,7 +77,8 @@ still required before attributing an agent retrieval benefit.
 | Evidence ancestry traversal | Implemented in the 0.12.0 evidence graph API | Exact-scope outgoing `derived_from` relations, one snapshot and clock, eligible payloads, depth/node cuts, shared admission and company workspace access |
 | Typed memory neighborhood traversal | Implemented in the unreleased 0.13.0 typed graph API | Exact scope before incoming/outgoing discovery, canonical endpoint revalidation, direction and kind selection, bounded nodes/edges/bytes/work, explicit cuts, adjacency completeness checks and native company audit; standalone entity extraction/resolution remains unimplemented |
 | Relation change consumption | Implemented in the unreleased 0.13.0 [relation feed](../api/typed-relation-changes.md) | Atomic lifecycle events, history-bound fenced cursors, subject-owned progress, immutable receipts, stale-writer rejection and explicit reconciliation; endpoint changes and expiry still require current-state checks |
-| Graph-assisted retrieval | Proposed | Versioned server policy, reproducible anchors and tie-breaking, exact eligible revisions, separate channel scores and observable fallback; preserve existing cosine semantics |
+| Graph-assisted retrieval | Implemented in unreleased 0.13.0; experimental | Immutable server profiles, four reproducible anchors, strongest typed path, exact eligible revisions, separate score contributions and coverage; legacy cosine/hybrid contracts preserved |
+| External graph retrieval comparison | Measured in unreleased 0.13.0 | Frozen document-only graph and E5 vectors, 100 reserved public-development queries, eight methods and 2,400 requests; primary gain remains uncertain and important category regressions prevent default admission |
 | Asynchronous consolidation | Proposed | External workers resume from checkpoints; late or duplicate work cannot publish stale relations; record partial or unknown execution without inventing completion |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |
 | Evidence-based policy improvement | Proposed | Reuse the existing qualification and suspension authority; freeze policy and evaluator versions; retain failure evidence and compare fresh tasks before publication |

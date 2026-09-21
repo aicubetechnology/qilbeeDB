@@ -18050,6 +18050,13 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              },
+              "X-Qilbee-Retrieval-Micros": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Monotonic elapsed microseconds for scoped snapshot retrieval after authorization and admission, including seed selection, traversal, affinities and ranking. Excludes JSON serialization, HTTP transport and external query embedding generation."
               }
             }
           },

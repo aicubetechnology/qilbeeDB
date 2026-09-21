@@ -376,6 +376,10 @@ class Client:
                             response.headers["X-Qilbee-Retrieval-Micros"]
                         )
                     }
+                if path == "/api/v1/memory/search/graph":
+                    body["mode"] = "graph"
+                    body["ranking_version"] = body["page"]["ranking"]["version"]
+                    body["timing"] = {"retrieval_micros": int(response.headers["X-Qilbee-Retrieval-Micros"])}
                 return body, elapsed, len(raw)
         except urllib.error.HTTPError as error:
             raise RuntimeError(

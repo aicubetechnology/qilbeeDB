@@ -336,6 +336,20 @@
       "title": "Experimental graph-assisted retrieval",
       "description": "Retrieve revision-bound memories through explicit typed paths, immutable profiles and observable work limits.",
       "order": 208
+    },
+    {
+      "source": "docs/research/graph-retrieval-evaluation.md",
+      "file": "graph-retrieval-evaluation.md",
+      "title": "Evaluate graph-assisted retrieval",
+      "description": "Freeze document-only graph construction, external embeddings, support judgments and bounded retrieval comparisons with auditable failure evidence.",
+      "order": 209
+    },
+    {
+      "source": "docs/research/graph-retrieval-results.md",
+      "file": "graph-retrieval-results.md",
+      "title": "Graph retrieval results and limitations",
+      "description": "Inspect the reserved MuSiQue comparison, uncertainty, individual regressions, graph cuts and measured retrieval costs.",
+      "order": 210
     }
   ]
 }

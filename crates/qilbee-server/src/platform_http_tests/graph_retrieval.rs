@@ -98,6 +98,21 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
             assert_eq!(page["coverage"]["embeddings_complete"], mode == "lexical");
         }
     }
+    let response = http
+        .client
+        .post(format!("{}{SEARCH}", http.base))
+        .bearer_auth(&key)
+        .json(&query())
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(response.status(), 200);
+    let micros: u64 = response.headers()["x-qilbee-retrieval-micros"]
+        .to_str()
+        .unwrap()
+        .parse()
+        .unwrap();
+    jsonschema::validator_for(&http.api["paths"][SEARCH]["post"]["responses"]["200"]["headers"]["X-Qilbee-Retrieval-Micros"]["schema"]).unwrap().validate(&json!(micros)).unwrap();
     // Old cosine continues to expose cosine, not the graph's maximum 1/3 score.
     let old = "/api/v1/memory/search";
     let old_page=http.call("POST",old,old,&key,json!({"contract_version":1,"scope":memory_scope("private"),"query":{"space":space,"vector":[1,0,0],"limit":10}}),200).await;
