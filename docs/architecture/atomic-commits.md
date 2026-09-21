@@ -17,7 +17,7 @@ each operation separately: a later failure could leave earlier writes visible.
 - Cloned engine handles share a writer mutex across old-record reads and batch
   publication. Concurrent replacements cannot race while maintaining indexes.
 - `enable_wal` and `sync_wal` apply to unmanaged low-level entity batches.
-  Synchronous WAL writes are enabled when both options are true. The unreleased
+  Synchronous WAL writes are enabled when both options are true. The 0.12.0
   [durable graph lifecycle](durable-graph-lifecycle.md) always synchronizes the WAL
   for managed named graphs, including when raw storage options disable it.
 

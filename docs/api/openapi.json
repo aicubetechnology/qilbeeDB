@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.11.0",
+    "version": "0.12.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
@@ -14337,7 +14337,7 @@
       "get": {
         "operationId": "listObservedAgents",
         "summary": "List automatically registered company agents",
-        "description": "Unreleased. Requires credential_admin. Company comes from the authenticated principal, never from query parameters. A first successful authorized resource request observes an unchanged external agent ID. New memory commands commit registration, memory and receipt atomically. Other resource operations register after success before returning; a registration failure can follow an already committed operation, requiring reconciliation through its existing contract. Valid empty reads can register agents. This directory starts collecting at feature activation and does not backfill historical IDs. Registration is metadata, never a grant, ownership claim or active-status assertion. Company prefix is selected before traversal; results use UTF-8 byte order with an exclusive after_agent_id cursor. Pages are live, not a snapshot: concurrent insertions before the cursor require a fresh traversal. Default 25, maximum 100 entries.",
+        "description": "Available in the 0.12.0 contract. Requires credential_admin. Company comes from the authenticated principal, never from query parameters. A first successful authorized resource request observes an unchanged external agent ID. New memory commands commit registration, memory and receipt atomically. Other resource operations register after success before returning; a registration failure can follow an already committed operation, requiring reconciliation through its existing contract. Valid empty reads can register agents. This directory starts collecting at feature activation and does not backfill historical IDs. Registration is metadata, never a grant, ownership claim or active-status assertion. Company prefix is selected before traversal; results use UTF-8 byte order with an exclusive after_agent_id cursor. Pages are live, not a snapshot: concurrent insertions before the cursor require a fresh traversal. Default 25, maximum 100 entries.",
         "tags": [
           "Agent registration"
         ],
@@ -14514,7 +14514,7 @@
       "get": {
         "operationId": "listCompanyMemoryWorkspaces",
         "summary": "Discover company memory workspaces from storage",
-        "description": "Unreleased. Requires credential_admin in the authenticated company. Includes all private subjects and retained workspaces even after grants are revoked or all memories become ineligible. The catalog is populated from canonical memory keys at startup and committed with subsequent memory mutations; it does not infer membership from credentials. Selects the company prefix before traversal. Live exclusive continuation by workspace ID, default 25 and maximum 100; restart traversal for concurrent insertions before the cursor. Uses the shared server retrieval admission limit, with 503 retrieval_busy after authorization. No agent registration or temporary credential issuance occurs.",
+        "description": "Available in the 0.12.0 contract. Requires credential_admin in the authenticated company. Includes all private subjects and retained workspaces even after grants are revoked or all memories become ineligible. The catalog is populated from canonical memory keys at startup and committed with subsequent memory mutations; it does not infer membership from credentials. Selects the company prefix before traversal. Live exclusive continuation by workspace ID, default 25 and maximum 100; restart traversal for concurrent insertions before the cursor. Uses the shared server retrieval admission limit, with 503 retrieval_busy after authorization. No agent registration or temporary credential issuance occurs.",
         "tags": [
           "Company memory administration"
         ],
@@ -14697,7 +14697,7 @@
       "post": {
         "operationId": "queryCompanyMemory",
         "summary": "Inspect retained or currently eligible company memory",
-        "description": "Unreleased. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. One workspace and one snapshot per request, including the same eligibility clock and transitive dependency view. Default retained view includes current canonical tombstones and ineligible payloads; it is an administration view, not agent context. Current view suppresses ineligible records. Ordered UUID traversal with explicit continuation after the last examined record, including empty filtered pages. Stop reason identifies record, scan or root-byte budget exhaustion. At most 100 returned records, 10000 examined roots, 8 MiB decoded root bytes; dependency work has the existing 4096-record/16 MiB aggregate bound. Dependency exhaustion fails the whole request; reduce the page/scan limit. Byte counters exclude integrity indexes and the fetched lookahead value and are not an RSS or final response-size cap. Pages are live, not one cross-request snapshot. No ranking or total count is claimed. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
+        "description": "Available in the 0.12.0 contract. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. One workspace and one snapshot per request, including the same eligibility clock and transitive dependency view. Default retained view includes current canonical tombstones and ineligible payloads; it is an administration view, not agent context. Current view suppresses ineligible records. Ordered UUID traversal with explicit continuation after the last examined record, including empty filtered pages. Stop reason identifies record, scan or root-byte budget exhaustion. At most 100 returned records, 10000 examined roots, 8 MiB decoded root bytes; dependency work has the existing 4096-record/16 MiB aggregate bound. Dependency exhaustion fails the whole request; reduce the page/scan limit. Byte counters exclude integrity indexes and the fetched lookahead value and are not an RSS or final response-size cap. Pages are live, not one cross-request snapshot. No ranking or total count is claimed. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
         "tags": [
           "Company memory administration"
         ],
@@ -14878,7 +14878,7 @@
       "post": {
         "operationId": "inspectCompanyMemory",
         "summary": "Inspect a retained company record and its eligibility",
-        "description": "Unreleased. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. Read the current retained record and eligibility in one snapshot, including deleted markers, expired/rejected payloads and invalidated derivations. Missing workspace or record, including a workspace belonging to another company, returns the same 404 record_not_found. It does not retrieve overwritten historical payload revisions or make the record available to ordinary agent retrieval. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
+        "description": "Available in the 0.12.0 contract. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. Read the current retained record and eligibility in one snapshot, including deleted markers, expired/rejected payloads and invalidated derivations. Missing workspace or record, including a workspace belonging to another company, returns the same 404 record_not_found. It does not retrieve overwritten historical payload revisions or make the record available to ordinary agent retrieval. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
         "tags": [
           "Company memory administration"
         ],
@@ -15053,6 +15053,391 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/memory/graph": {
+      "post": {
+        "operationId": "readMemoryEvidenceGraph",
+        "summary": "Read current scoped evidence ancestry in one snapshot",
+        "description": "Available in the 0.12.0 contract. Requires memory_read for one exact scope before storage access or retrieval admission. Traverse outgoing derived_from ancestry of 1–16 distinct root UUIDs, breadth first, roots in request order and children in UUID order. Tenant and private subject are credential-derived. Every returned record and its complete dependency graph must be eligible at one snapshot and server clock, even when display depth is zero. Nodes are deduplicated; edges pin exact revisions and have both endpoints in nodes. No ranking, entity extraction, incoming-edge search, cross-scope expansion or cursor. Depth/node cuts return 200 with explicit incomplete coverage; unavailable roots disclose no reason, and not_examined roots are distinct. Byte or dependency-budget exhaustion and encountered corruption fail the entire request. complete describes currently eligible ancestry from the requested roots, not the entire corpus or future validity. All responses are no-store.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current evidence graph with explicit root availability and traversal coverage",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryGraphResponse"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "scope": {
+                    "project_id": "project",
+                    "mission_id": null,
+                    "agent_id": "agent",
+                    "visibility": "private"
+                  },
+                  "graph": {
+                    "traversal_version": "derived_ancestry_v1",
+                    "evaluated_at_millis": 1700000000000,
+                    "max_depth": 4,
+                    "node_limit": 128,
+                    "roots": [
+                      {
+                        "record_id": "018f0000-0000-4000-8000-000000000001",
+                        "status": "unavailable"
+                      }
+                    ],
+                    "nodes": [],
+                    "edges": [],
+                    "coverage": {
+                      "complete": true,
+                      "stop_reasons": [],
+                      "records_examined": 1,
+                      "record_bytes": 0,
+                      "dependency_work": {
+                        "records_examined": 0,
+                        "bytes_examined": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0–8, node limit outside 1–256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryGraphRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "query": {
+                  "root_record_ids": [
+                    "018f0000-0000-4000-8000-000000000001"
+                  ],
+                  "max_depth": 4,
+                  "node_limit": 128
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/graph": {
+      "post": {
+        "operationId": "readCompanyMemoryEvidenceGraph",
+        "summary": "Read eligible evidence ancestry in a company workspace",
+        "description": "Available in the 0.12.0 contract. Requires credential_admin. Resolve workspace_id only inside the authenticated company, then use the same derived_ancestry_v1 snapshot and eligibility contract as /api/v1/memory/graph. This includes private workspaces of every subject in the company without issuing scoped keys. Missing and other-company workspaces share 404 record_not_found. Unknown or ineligible roots inside an existing workspace have status unavailable. Unlike retained inventory, this graph never returns deleted, expired, rejected or transitively invalid payloads. Depth/node truncation is explicit; byte, dependency and integrity failures return no graph. No caller-selected company or subject and no graph-based ranking. Administrative reads do not register agents or issue credentials.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current evidence graph with explicit root availability and traversal coverage",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryGraphResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0–8, node limit outside 1–256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace exists in the authorized company; foreign workspaces have the same result.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyMemoryGraphRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ]
       }
     }
   },
@@ -24630,6 +25015,317 @@
         ],
         "additionalProperties": false,
         "description": "Retained current canonical revision for company administration. Deleted records preserve audit metadata with a null payload; this is not a historical body archive."
+      },
+      "MemoryGraphQuery": {
+        "type": "object",
+        "properties": {
+          "root_record_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8,
+            "default": 4
+          },
+          "node_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256,
+            "default": 128
+          }
+        },
+        "required": [
+          "root_record_ids"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphRoot": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "included",
+              "unavailable",
+              "not_examined"
+            ]
+          }
+        },
+        "required": [
+          "record_id",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphNode": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          },
+          "depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
+          }
+        },
+        "required": [
+          "record",
+          "depth"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphEdge": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "relation": {
+            "type": "string",
+            "const": "derived_from"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "relation"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphCoverage": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "stop_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "depth_limit",
+                "node_limit"
+              ]
+            },
+            "minItems": 0,
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "complete",
+          "stop_reasons",
+          "records_examined",
+          "record_bytes",
+          "dependency_work"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "complete": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stop_reasons": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "stop_reasons": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ]
+      },
+      "MemoryEvidenceGraph": {
+        "type": "object",
+        "properties": {
+          "traversal_version": {
+            "type": "string",
+            "const": "derived_ancestry_v1"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
+          },
+          "node_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "roots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphRoot"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphNode"
+            },
+            "minItems": 0,
+            "maxItems": 256
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphEdge"
+            },
+            "minItems": 0,
+            "maxItems": 4096
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/MemoryGraphCoverage"
+          }
+        },
+        "required": [
+          "traversal_version",
+          "evaluated_at_millis",
+          "max_depth",
+          "node_limit",
+          "roots",
+          "nodes",
+          "edges",
+          "coverage"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/MemoryGraphQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryGraphResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/MemoryEvidenceGraph"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "graph"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryGraphRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "query": {
+            "$ref": "#/components/schemas/MemoryGraphQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryGraphResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/MemoryEvidenceGraph"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "graph"
+        ],
+        "additionalProperties": false
       }
     }
   }

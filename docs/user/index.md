@@ -9,9 +9,9 @@ generates embeddings externally and decides how retrieved evidence is used.
 
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
-- [Automatic agent registration, unreleased](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
-- [Company integrations, unreleased](../security/company-integrations.md): authorize external project and agent IDs through a versioned policy and change access without replacing keys.
-- [Company memory administration, unreleased](../security/company-memory-administration.md): discover retained workspaces and inspect company records independently of credential grants.
+- [Automatic agent registration, 0.12.0](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
+- [Company integrations, 0.12.0](../security/company-integrations.md): authorize external project and agent IDs through a versioned policy and change access without replacing keys.
+- [Company memory administration, 0.12.0](../security/company-memory-administration.md): discover retained workspaces and inspect company records independently of credential grants.
 - [Memory API](../api/versioned-memory.md): create, update and delete records with durable receipts and revision checks.
 - [Local Docker deployment](deployment.md): run the platform and locate its API reference.
 
@@ -77,7 +77,11 @@ exact source revisions and transitive source eligibility, with bounded diagnosti
 Use [consumer checkpoints](../api/memory-checkpoints.md) to persist each subject’s
 feed progress and reconnect safely after a process restart.
 
-For embedded Rust graphs, see the unreleased
+For embedded Rust graphs, see the 0.12.0
 [durable graph lifecycle](../architecture/durable-graph-lifecycle.md) contract.
 The [graph memory evidence map](../research/graph-memory-evidence.md) explains
 which research informs the next memory integration and what remains unimplemented.
+
+Use the 0.12.0 [memory evidence graph API](../api/memory-evidence-graph.md) to
+read revision-bound ancestry in a single authorized snapshot, including native
+company administration and explicit traversal coverage.

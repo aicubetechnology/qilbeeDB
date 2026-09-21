@@ -86,12 +86,12 @@ For issuance:
 Issuance returns HTTP 201 with `credential` and one-time `secret`. The request
 cannot override tenant identity. Explicit capabilities do not inherit evaluation
 or policy powers. Bootstrap administrators have credential and policy
-administration capabilities, but no implicit agent memory grants. The unreleased
+administration capabilities, but no implicit agent memory grants. The 0.12.0
 [company inventory](../security/company-memory-administration.md) explicitly
 allows `credential_admin` to inspect all retained company workspaces and private
 subjects through separate administrative routes.
 
-The unreleased [company integration policy](../security/company-integrations.md)
+The 0.12.0 [company integration policy](../security/company-integrations.md)
 adds explicit authority over dynamically supplied external IDs. Empty grants on
 existing credentials remain deny-by-default. Its revision-guarded scope-authority
 endpoint can change grants or policy without replacing the credential secret.
@@ -177,3 +177,7 @@ They validate the implemented contracts, not completion of all P0 requirements.
 Provisioned accounts can authenticate to short-lived sessions without receiving
 permanent API keys. See [Administrator accounts and login](../security/human-login.md)
 for the global and tenant endpoints, password lifecycle, cooldowns and exact limits.
+
+The 0.12.0 [memory evidence graph routes](memory-evidence-graph.md) provide
+scoped and company-administrative ancestry reads, exact revision-bound edges and
+explicit coverage under the shared retrieval admission limit.

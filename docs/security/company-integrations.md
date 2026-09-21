@@ -1,8 +1,8 @@
 # Company integration scope policies
 
-**Availability:** implemented in the unreleased company-integration feature.
-The deployed 0.11.0 API does not accept `scope_policy` or the scope-authority
-endpoint. Check the installation's published OpenAPI before using this contract.
+**Availability:** 0.12.0 contract. Versions through 0.11.0 do not accept
+`scope_policy` or the scope-authority endpoint. Check `/health` and the
+installation's published OpenAPI before using this contract.
 
 A company integration can use externally managed project, agent, and mission IDs
 without issuing a credential or adding an exact grant for every new ID. A company
@@ -11,10 +11,11 @@ The application owns ID generation, membership, and resource lifecycle. IDs are
 opaque, case-sensitive UTF-8 strings; QilbeeDB does not normalize them or infer
 identity from display names.
 
-This feature authorizes dynamic scopes. The unreleased
+This feature authorizes dynamic scopes. The 0.12.0
 [automatic agent registration](agent-registration.md) contract records an external
 agent after its first successful authorized resource request. Delegated child-key
-issuance and a storage-backed company memory inventory remain separate capabilities.
+issuance and [company memory inventory](company-memory-administration.md) have
+separate authority contracts.
 
 ## Choose an access model
 
@@ -214,7 +215,7 @@ evidence of improved agent reasoning.
 
 ## Company-wide inspection
 
-Company administrators can use the unreleased [memory inventory](company-memory-administration.md)
+Company administrators can use the 0.12.0 [memory inventory](company-memory-administration.md)
 to discover canonical retained workspaces and inspect each private subject. This
 route uses `credential_admin`; it does not synthesize a company integration key
 or treat an empty grant list as implicit agent access.

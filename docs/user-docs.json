@@ -1,5 +1,5 @@
 {
-  "release": "0.11.0",
+  "release": "0.12.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -301,6 +301,13 @@
       "title": "Graph memory evidence",
       "description": "Connect the supplied graph memory research to implemented foundations, proposed contracts and reproducible evaluation requirements.",
       "order": 131
+    },
+    {
+      "source": "docs/api/memory-evidence-graph.md",
+      "file": "memory-evidence-graph.md",
+      "title": "Memory evidence graphs",
+      "description": "Read authorized evidence ancestry in one snapshot with exact revisions, root availability, bounded traversal and native company administration.",
+      "order": 66
     }
   ]
 }
