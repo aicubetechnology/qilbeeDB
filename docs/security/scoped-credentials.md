@@ -8,6 +8,11 @@ resource-authorization limitations.
 
 ## Identity and grants
 
+The unreleased [company integration contract](company-integrations.md) adds an
+explicit `company_scopes_v1` alternative to exact grants and an audited endpoint
+for replacing scope authority. Credentials without a policy retain the exact
+grant behavior described below; an empty list never acquires wildcard authority.
+
 A credential binds one tenant and one subject. Administrative issuance derives
 the tenant from the authenticated administrator, never from an issuance payload.
 The strict `CredentialSpec` decoder rejects extra fields such as `tenant_id`.
@@ -77,6 +82,10 @@ the verifier as well as the secret.
   This API cannot reactivate a revoked credential.
 - `inspect(admin_token, credential_id)` returns sanitized metadata and successful
   change history within the administrator's tenant.
+- `set_scope_authority(admin_token, credential_id, expected_revision, authority)`
+  replaces exact grants or an integration policy without changing the key,
+  capabilities, subject or expiry. The before/after authority is recorded in the
+  same revision-guarded write; old login sessions bound to that revision expire.
 
 Each successful change appends actor ID, action, time and revision to the same
 record. Stale revision writes fail. The administrator's exact credential revision

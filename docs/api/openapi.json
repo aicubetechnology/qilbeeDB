@@ -196,7 +196,7 @@
       "post": {
         "operationId": "issueCredential",
         "summary": "Issue a credential in the authenticated tenant",
-        "description": "Requires credential_admin. Secret delivery is one-time and not idempotent.",
+        "description": "Requires credential_admin. Secret delivery is one-time and not idempotent. Use exact grants or an explicit company_scopes_v1 scope_policy. A company policy allows external IDs within its selectors, requires grants=[] and excludes credential_admin; capabilities and credential lifetime remain explicit.",
         "tags": [
           "Identity"
         ],
@@ -14173,6 +14173,165 @@
           }
         }
       }
+    },
+    "/api/v1/credentials/{id}/scope-authority": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "setCredentialScopeAuthority",
+        "summary": "Replace exact grants or company integration scope policy",
+        "description": "Requires credential_admin in the same tenant. Replaces only scope authority under an exact revision guard; preserves the key secret, subject, tenant, capabilities and expiry. Every success increments the revision and atomically records previous/current authority. Existing login sessions bound to the changed credential become invalid. Requests already authorized may finish. A lost response is reconciled by inspection; a stale replay returns 409, never an unguarded overwrite. Revoked targets are denied. Empty grants without a policy deny all data scopes. This operation does not register agents or issue child keys.",
+        "tags": [
+          "Identity"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CredentialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopeAuthorityRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14290,6 +14449,17 @@
                 "type": "null"
               }
             ]
+          },
+          "scope_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyScopePolicy"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Omitted or null preserves legacy exact-grant authorization. Never inferred from empty grants. A company policy requires grants=[] and excludes credential_admin."
           }
         },
         "required": [
@@ -14297,7 +14467,35 @@
           "capabilities",
           "grants"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "scope_policy"
+              ],
+              "properties": {
+                "scope_policy": {
+                  "type": "object"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "grants": {
+                  "maxItems": 0
+                },
+                "capabilities": {
+                  "not": {
+                    "contains": {
+                      "const": "credential_admin"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "CredentialEvent": {
         "type": "object",
@@ -14315,7 +14513,8 @@
               "rotated",
               "revoked",
               "tenant_registered_by_global_authority",
-              "admin_issued_by_global_authority"
+              "admin_issued_by_global_authority",
+              "scope_authority_changed"
             ]
           },
           "actor_id": {
@@ -14325,6 +14524,9 @@
           "at_millis": {
             "type": "integer",
             "format": "int64"
+          },
+          "scope_authority_change": {
+            "$ref": "#/components/schemas/ScopeAuthorityChange"
           }
         },
         "required": [
@@ -14333,7 +14535,30 @@
           "actor_id",
           "at_millis"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "const": "scope_authority_changed"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "scope_authority_change"
+              ]
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "scope_authority_change"
+                ]
+              }
+            }
+          }
+        ]
       },
       "Credential": {
         "type": "object",
@@ -22888,6 +23113,220 @@
           "batch"
         ],
         "additionalProperties": false
+      },
+      "ExternalIdSelector": {
+        "description": "Explicit selection. all permits dynamically supplied IDs; only uses exact IDs. An empty only list permits no IDs. Selectors do not register projects, agents or missions.",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "const": "all"
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "const": "only"
+              },
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "An opaque external identifier: 1–256 UTF-8 bytes, not blank, without control characters. Matching is exact."
+                },
+                "maxItems": 256,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "mode",
+              "ids"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "CompanyScopePolicy": {
+        "type": "object",
+        "description": "Versioned, explicit company integration authority. Tenant and private subject are derived from the credential, never supplied by this policy. Resource selectors are intersected and do not replace capability checks.",
+        "properties": {
+          "version": {
+            "type": "string",
+            "const": "company_scopes_v1"
+          },
+          "projects": {
+            "$ref": "#/components/schemas/ExternalIdSelector"
+          },
+          "agents": {
+            "$ref": "#/components/schemas/ExternalIdSelector"
+          },
+          "missions": {
+            "$ref": "#/components/schemas/ExternalIdSelector"
+          },
+          "allow_unassigned_mission": {
+            "type": "boolean",
+            "description": "Whether mission_id=null or omitted is permitted, independently of assigned mission IDs."
+          },
+          "visibilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Visibility"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "version",
+          "projects",
+          "agents",
+          "missions",
+          "allow_unassigned_mission",
+          "visibilities"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "version": "company_scopes_v1",
+            "projects": {
+              "mode": "all"
+            },
+            "agents": {
+              "mode": "all"
+            },
+            "missions": {
+              "mode": "all"
+            },
+            "allow_unassigned_mission": true,
+            "visibilities": [
+              "shared",
+              "private"
+            ]
+          }
+        ]
+      },
+      "ScopeAuthority": {
+        "type": "object",
+        "properties": {
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          },
+          "scope_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyScopePolicy"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Omitted or null preserves legacy exact-grant authorization. Never inferred from empty grants. A company policy requires grants=[] and excludes credential_admin."
+          }
+        },
+        "required": [
+          "grants"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "scope_policy"
+              ],
+              "properties": {
+                "scope_policy": {
+                  "type": "object"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "grants": {
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ScopeAuthorityChange": {
+        "type": "object",
+        "properties": {
+          "previous": {
+            "$ref": "#/components/schemas/ScopeAuthority"
+          },
+          "current": {
+            "$ref": "#/components/schemas/ScopeAuthority"
+          }
+        },
+        "required": [
+          "previous",
+          "current"
+        ],
+        "additionalProperties": false
+      },
+      "ScopeAuthorityRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "authority": {
+            "$ref": "#/components/schemas/ScopeAuthority"
+          }
+        },
+        "required": [
+          "contract_version",
+          "expected_revision",
+          "authority"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "contract_version": 1,
+            "expected_revision": 1,
+            "authority": {
+              "grants": [],
+              "scope_policy": {
+                "version": "company_scopes_v1",
+                "projects": {
+                  "mode": "all"
+                },
+                "agents": {
+                  "mode": "all"
+                },
+                "missions": {
+                  "mode": "all"
+                },
+                "allow_unassigned_mission": true,
+                "visibilities": [
+                  "shared",
+                  "private"
+                ]
+              }
+            }
+          }
+        ]
       }
     }
   }

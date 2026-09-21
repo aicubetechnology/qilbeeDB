@@ -47,6 +47,7 @@ async fn request(
 }
 fn spec() -> CredentialSpec {
     CredentialSpec {
+        scope_policy: None,
         subject_id: "agent-user".into(),
         capabilities: [Capability::MemoryRead, Capability::ProcedurePropose].into(),
         grants: vec![ResourceScope {
@@ -727,3 +728,4 @@ mod administration;
 mod login;
 
 mod directory;
+mod scope_authority;

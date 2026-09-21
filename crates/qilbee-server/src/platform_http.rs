@@ -23,6 +23,7 @@ mod learning;
 mod login;
 mod memory;
 mod retrieval_limits;
+mod scope_authority;
 mod tools;
 
 #[derive(Clone)]
@@ -97,6 +98,7 @@ fn create_router_with_limits(
         .merge(administration::routes())
         .merge(directory::routes())
         .merge(login::routes())
+        .merge(scope_authority::routes())
         .merge(memory::routes())
         .merge(learning::routes())
         .merge(experiences::routes())

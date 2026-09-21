@@ -12,6 +12,7 @@ async fn administrative_directory_http_pages_preserve_scope_and_published_schema
         .issue(
             &a.secret,
             CredentialSpec {
+                scope_policy: None,
                 subject_id: "worker".into(),
                 capabilities: [Capability::MemoryRead].into(),
                 grants: vec![],
