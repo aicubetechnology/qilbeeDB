@@ -153,6 +153,63 @@ impl Fixture {
 }
 
 #[tokio::test]
+async fn published_request_limits_match_real_http_boundaries() {
+    let f = Fixture::start().await;
+    assert!(!f.api.to_string().contains("Unreleased 0.13.0"));
+    for route in [
+        "/api/v1/memory/embeddings",
+        "/api/v1/memory/search",
+        "/api/v1/memory/search/hybrid",
+        "/api/v1/memory/search/graph",
+    ] {
+        let operation = &f.api["paths"][route]["post"];
+        assert_eq!(
+            operation["x-qilbee-max-request-body-bytes"],
+            VECTOR_BODY_BYTES
+        );
+        assert!(
+            operation["responses"]["413"]["description"]
+                .as_str()
+                .unwrap()
+                .contains("2,097,152 bytes")
+        );
+    }
+    for (mode, limit) in [
+        ("graph_search", VECTOR_BODY_BYTES),
+        ("typed_graph", 64 * 1024),
+    ] {
+        let (route, body) = query(mode);
+        let encoded = serde_json::to_string(&body).unwrap();
+        // Valid JSON padding tests transport bytes without violating field bounds.
+        for (bytes, status) in [(limit, 200), (limit + 1, 413)] {
+            let mut padded = encoded.clone();
+            padded.extend(std::iter::repeat_n(' ', bytes - padded.len()));
+            let response = f
+                .client
+                .post(format!("{}{route}", f.base))
+                .bearer_auth(&f.token)
+                .header("content-type", "application/json")
+                .body(padded)
+                .send()
+                .await
+                .unwrap();
+            assert_eq!(response.status().as_u16(), status, "{route}: {bytes} bytes");
+            assert_eq!(response.headers()["cache-control"], "no-store");
+            let value: Value = response.json().await.unwrap();
+            let schema = &f.api["paths"][&route]["post"]["responses"][status.to_string()]["content"]
+                ["application/json"]["schema"];
+            let document = json!({"allOf":[schema],"components":f.api["components"]});
+            assert!(
+                jsonschema::draft202012::options()
+                    .build(&document)
+                    .unwrap()
+                    .is_valid(&value)
+            );
+        }
+    }
+}
+
+#[tokio::test]
 async fn dimension_and_scan_limits_match_served_schemas() {
     let f = Fixture::start().await;
     for mode in ["semantic", "hybrid"] {
