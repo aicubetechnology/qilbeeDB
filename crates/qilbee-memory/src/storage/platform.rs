@@ -868,6 +868,8 @@ mod batch_read;
 pub use batch_read::*;
 mod evidence_graph;
 pub use evidence_graph::*;
+mod relations;
+pub use relations::*;
 #[cfg(test)]
 mod semantic_tests;
 pub use semantic::*;

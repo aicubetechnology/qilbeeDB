@@ -146,3 +146,55 @@ performance under six-client load, cold-start behavior, greater retrieval
 relevance, or improved agent reasoning. The correctness benefit of a batch is
 one coherent point-in-time view; a series of individual GETs has separate
 snapshots even when the unchanged test corpus makes their contents equal.
+
+## Independent production integration acceptance on 0.12.0
+
+On September 21, 2026, the Qilbee integration team published a separate
+[production integration report](https://github.com/aicubetechnology/qilbee-ecosystem/blob/81eb9626516e85a55ac15a5273fad5af987717d4/docs/qilbeedb-batch-context-results.md)
+and [observations](https://github.com/aicubetechnology/qilbee-ecosystem/blob/81eb9626516e85a55ac15a5273fad5af987717d4/docs/validations/2026-09-21-qilbeedb012-batch-context.json)
+at immutable commit `81eb9626516e85a55ac15a5273fad5af987717d4`.
+The observations SHA-256 is
+`ddec8b14f42aec0aee301f7992ef6ebe2ee8bc6f394efea680800ceca19096a2`.
+This is attributed external acceptance, distinct from the earlier local Docker
+measurement and from qualification of the unreleased typed-relation contract.
+
+The application replaced five individual source reads with one existing batch
+request, retaining its feed and checkpoint checks. Six sequential pairs used a
+preselected randomized order, one reused real 1536-dimensional vector, identical
+scope and unchanged complete context. Each query opened a fresh HTTP client and
+reused its connection within the query. Concurrency was one, with no retries or
+503 responses. Timing surrounded the real context-retrieval function with a
+monotonic clock; it included network and consumer work but excluded endpoint
+queueing/authentication, embedding generation and inference.
+
+| Observation | Individual reads | Batch revalidation |
+| --- | ---: | ---: |
+| HTTP requests per context | 12 | 8 |
+| Median retrieval time | 3481.605 ms | 2812.995 ms |
+| Observed range | 3432.08–3570.35 ms | 2706.53–3001.40 ms |
+| Measured contexts | 6 | 6 |
+
+Recalculation from the published samples gives a 19.2% reduction in the median.
+All twelve responses preserved source IDs, exact revisions, text, scores and the
+context stamp. This does not establish p95, server throughput, token savings or
+a reduction in an agent's full task time. Network/engine spans were not separated,
+and reuse of a warm connection across queries was not compared. Six checkpoint
+and feed calls plus a search remain alongside the batch; instrument those stages
+before changing the consistency guarantees.
+
+Focused 0.12.0 acceptance also covered three owned synthetic records forming a
+two-edge dependency chain. Graph and batch reads agreed on transitive source
+invalidation; depth-zero display preserved eligibility checks; node cuts
+distinguished unexamined roots from unavailable roots. Eighteen fixture responses
+and eight initial real-memory responses were validated against the served
+OpenAPI. The team removed its three fixtures and reported 107 preexisting memories
+unchanged, with seven fixture changes reconciled to a stable remote/SQL checkpoint.
+It created no credentials and generated no new embeddings or model calls.
+
+The team reported 402 passing integration tests, including 77 focused tests.
+Production key revocation and eventless expiry were not repeated against live
+credentials; those cases remain client-regression evidence. Administrative UI
+acceptance is separate and remains pending. QilbeeDB context was disabled again
+after the installation check while the remaining application migration and
+billing work continued. This report establishes a focused API integration and
+an observed latency change, not a completed memory migration or reasoning gain.
