@@ -13,6 +13,10 @@ use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
+#[path = "graph_lifecycle.rs"]
+mod graph_lifecycle;
+pub use graph_lifecycle::GraphIdentity;
+
 fn ordered_meta_key(key: &str) -> Vec<u8> {
     let mut bytes = Vec::with_capacity(key.len() + 1);
     bytes.push(0xf0);
@@ -754,8 +758,9 @@ impl StorageEngine {
             }
         }
         let mut options = rocksdb::WriteOptions::default();
-        options.disable_wal(!self.options.enable_wal);
-        options.set_sync(self.options.enable_wal && self.options.sync_wal);
+        let managed = self.stage_graph_allocator(&mut batch, graph_id, operations)?;
+        options.disable_wal(!managed && !self.options.enable_wal);
+        options.set_sync(managed || (self.options.enable_wal && self.options.sync_wal));
         self.db
             .write_opt(batch, &options)
             .map_err(|e| Error::Storage(e.to_string()))

@@ -25,7 +25,7 @@ pub mod keys;
 pub mod options;
 pub mod transaction;
 
-pub use engine::StorageEngine;
+pub use engine::{GraphIdentity, StorageEngine};
 pub use options::StorageOptions;
 pub use transaction::Transaction;
 

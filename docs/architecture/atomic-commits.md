@@ -16,14 +16,16 @@ each operation separately: a later failure could leave earlier writes visible.
 - Direct entity puts and deletes use the same batch preparation path.
 - Cloned engine handles share a writer mutex across old-record reads and batch
   publication. Concurrent replacements cannot race while maintaining indexes.
-- `enable_wal` and `sync_wal` apply to entity batches. Synchronous WAL writes are
-  enabled only when both options are true. Disabling WAL sacrifices recovery of
-  unflushed writes; the database's default profile does not enable synchronous
-  WAL writes.
+- `enable_wal` and `sync_wal` apply to unmanaged low-level entity batches.
+  Synchronous WAL writes are enabled when both options are true. The unreleased
+  [durable graph lifecycle](durable-graph-lifecycle.md) always synchronizes the WAL
+  for managed named graphs, including when raw storage options disable it.
 
-The storage format and public method signatures are unchanged. These changes
+Entity formats and existing public method signatures are unchanged. These changes
 apply to Rust storage transactions; a sequence of separate HTTP requests does
-not become a transaction. The graph metadata methods are outside this batch.
+not become a transaction. Durable allocation metadata now participates in entity
+batches. Graph catalog creation and retirement use separate synchronous batches;
+arbitrary metadata writes are not part of an entity transaction.
 
 ## Isolation and recovery limits
 
@@ -34,17 +36,20 @@ do not detect stale reads or conflicting updates: later writes can overwrite
 earlier decisions. The shared writer mutex serializes publication, not the
 application's entire read/modify/write sequence.
 
-This feature does not add endpoint existence, uniqueness or cascade constraints.
+Low-level transactions do not add endpoint existence, uniqueness or cascade constraints.
+The managed graph methods separately guard endpoint checks and detach deletion
+under the shared writer lock, as documented in the lifecycle contract.
 It does not rebuild stale index keys left by older versions. Property indexing
 retains its existing hash format, including the unresolved ordering problem for
 map-valued properties; cleanup guarantees for such values require a canonical
 hash format and migration. Do not infer full index conformance from scalar
 property regression tests.
 
-The tests exercise preparation failure, concurrent writers, database snapshots
-and graceful reopen. They do not simulate power loss, disk exhaustion, process
-termination during a write or corrupted WAL recovery. Recovery guarantees need
-a separately declared fault model and corresponding tests.
+The original atomic commit tests exercise preparation failure, concurrent writers,
+database snapshots and graceful reopen. The lifecycle tests additionally kill a
+process after acknowledged managed writes and verify recovery. Neither suite
+simulates power loss, disk exhaustion, termination at every point during a write
+or corrupted WAL recovery.
 
 ## Validation
 

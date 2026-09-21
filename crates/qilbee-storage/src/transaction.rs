@@ -44,6 +44,8 @@ pub struct Transaction {
     /// Graph this transaction operates on
     graph_id: GraphId,
 
+    graph_identity: Option<crate::GraphIdentity>,
+
     /// Reference to the storage engine
     engine: StorageEngine,
 
@@ -66,12 +68,20 @@ impl Transaction {
         Self {
             id: TRANSACTION_COUNTER.fetch_add(1, Ordering::SeqCst),
             graph_id,
+            graph_identity: None,
             engine,
             state: TransactionState::Active,
             operations: Vec::new(),
             node_cache: HashMap::new(),
             rel_cache: HashMap::new(),
         }
+    }
+
+    /// Bind every transaction operation and commit to one active named generation.
+    pub fn for_graph(engine: StorageEngine, identity: crate::GraphIdentity) -> Self {
+        let mut transaction = Self::new(engine, identity.id());
+        transaction.graph_identity = Some(identity);
+        transaction
     }
 
     /// Get the transaction ID
@@ -90,6 +100,9 @@ impl Transaction {
     }
 
     fn check_active(&self) -> Result<()> {
+        if let Some(identity) = &self.graph_identity {
+            self.engine.validate_graph_identity(identity)?;
+        }
         if !self.is_active() {
             return Err(Error::TransactionAborted(
                 "Transaction is no longer active".to_string(),
@@ -204,8 +217,13 @@ impl Transaction {
     pub fn commit(mut self) -> Result<()> {
         self.check_active()?;
 
-        self.engine
-            .apply_operations(self.graph_id, &self.operations)?;
+        if let Some(identity) = &self.graph_identity {
+            self.engine
+                .apply_graph_operations(identity, &self.operations)?;
+        } else {
+            self.engine
+                .apply_operations(self.graph_id, &self.operations)?;
+        }
 
         self.state = TransactionState::Committed;
         Ok(())
@@ -215,7 +233,11 @@ impl Transaction {
     ///
     /// Discards all pending operations.
     pub fn rollback(mut self) -> Result<()> {
-        self.check_active()?;
+        if !self.is_active() {
+            return Err(Error::TransactionAborted(
+                "Transaction is no longer active".into(),
+            ));
+        }
 
         // Clear all pending operations
         self.operations.clear();

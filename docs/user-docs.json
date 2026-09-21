@@ -287,6 +287,20 @@
       "title": "Company memory administration",
       "description": "Discover retained company workspaces, inspect all private subjects, and distinguish administrative visibility from current memory eligibility.",
       "order": 43
+    },
+    {
+      "source": "docs/architecture/durable-graph-lifecycle.md",
+      "file": "durable-graph-lifecycle.md",
+      "title": "Durable graph lifecycle",
+      "description": "Preserve graph generations and entity allocation across restarts, retire names safely, and understand migration and transaction limits.",
+      "order": 130
+    },
+    {
+      "source": "docs/research/graph-memory-evidence.md",
+      "file": "graph-memory-evidence.md",
+      "title": "Graph memory evidence",
+      "description": "Connect the supplied graph memory research to implemented foundations, proposed contracts and reproducible evaluation requirements.",
+      "order": 131
     }
   ]
 }
