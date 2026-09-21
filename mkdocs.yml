@@ -171,6 +171,7 @@ nav:
     - Authentication: security/authentication.md
     - Durable Scoped Credentials: security/scoped-credentials.md
     - Administrator login: security/human-login.md
+    - Administrative directories: security/administration-directory.md
     - Authorization (RBAC): security/authorization.md
     - Rate Limiting: security/rate-limiting.md
     - Audit Logging: security/audit.md

@@ -146,3 +146,7 @@ examples/output/
 
 # Operator-delivered production secrets
 /cred-prod/
+
+# Local deployment records and corporate UI must never enter this repository.
+/aws-deploy/
+/qilbeedb-ui/

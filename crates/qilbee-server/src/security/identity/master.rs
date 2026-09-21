@@ -4,7 +4,9 @@ use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use hmac::{Hmac, Mac};
 
 mod accounts;
+mod directory;
 pub use accounts::{LoginAccountView, LoginAuthority, LoginSession};
+pub use directory::{DirectoryPage, TenantDirectoryEntry};
 
 const BOOTSTRAP_KEY: &str = "identity/v1/global-bootstrap";
 const VERIFIER_DOMAIN: &[u8] = b"qilbeedb-global-credential-verifier-v1";
@@ -64,6 +66,8 @@ struct StoredGlobalCredential {
 pub struct TenantView {
     pub schema_version: u32,
     pub tenant_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
     pub created_at_millis: i64,
     pub created_by: Uuid,
     pub initial_admin_id: Uuid,
@@ -335,6 +339,19 @@ impl IdentityStore {
         tenant: &str,
         subject: &str,
     ) -> Result<(TenantView, IssuedCredential)> {
+        self.register_tenant_named(token, tenant, subject, None)
+    }
+
+    pub fn register_tenant_named(
+        &self,
+        token: &str,
+        tenant: &str,
+        subject: &str,
+        display_name: Option<&str>,
+    ) -> Result<(TenantView, IssuedCredential)> {
+        if let Some(name) = display_name {
+            valid_id(name)?;
+        }
         let (actor, actor_bytes) = self.global_authority(token, GlobalCapability::TenantCreate)?;
         valid_id(tenant)?;
         let now = chrono::Utc::now().timestamp_millis();
@@ -354,6 +371,7 @@ impl IdentityStore {
         let registration = TenantView {
             schema_version: 1,
             tenant_id: tenant.into(),
+            display_name: display_name.map(str::to_owned),
             created_at_millis: now,
             created_by: actor.credential.id,
             initial_admin_id: id,

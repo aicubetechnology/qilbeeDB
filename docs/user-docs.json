@@ -245,6 +245,13 @@
       "title": "Administrator accounts and login",
       "description": "Provision human accounts, sign in with bounded sessions and manage passwords within the correct company or global authority.",
       "order": 38
+    },
+    {
+      "source": "docs/security/administration-directory.md",
+      "file": "administration-directory.md",
+      "title": "Administrative directories",
+      "description": "Enumerate authorized companies, credentials and human accounts with bounded pages and explicit browser-origin configuration.",
+      "order": 39
     }
   ]
 }

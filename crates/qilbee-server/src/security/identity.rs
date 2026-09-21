@@ -8,8 +8,9 @@ use uuid::Uuid;
 
 mod master;
 pub use master::{
-    GlobalCapability, GlobalCredentialSpec, GlobalCredentialView, IssuedGlobalCredential,
-    LoginAccountView, LoginAuthority, LoginSession, TenantView,
+    DirectoryPage, GlobalCapability, GlobalCredentialSpec, GlobalCredentialView,
+    IssuedGlobalCredential, LoginAccountView, LoginAuthority, LoginSession, TenantDirectoryEntry,
+    TenantView,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -387,9 +388,40 @@ impl IdentityStore {
 
     fn commit(
         &self,
-        expected: Vec<qilbee_storage::MetadataCondition>,
-        writes: Vec<qilbee_storage::MetadataWrite>,
+        mut expected: Vec<qilbee_storage::MetadataCondition>,
+        mut writes: Vec<qilbee_storage::MetadataWrite>,
     ) -> Result<()> {
+        let mut indexes = Vec::new();
+        for update in &writes {
+            if update.key.starts_with("identity/v1/credential/") {
+                if let Some(bytes) = &update.value {
+                    let record: StoredCredential = serde_json::from_slice(bytes)
+                        .map_err(|_| Error::DataCorruption("Invalid indexed credential".into()))?;
+                    if update.key != credential_key(record.credential.id) {
+                        return Err(Error::DataCorruption("Credential identity mismatch".into()));
+                    }
+                    let index = tenant_credential_index(
+                        &record.credential.tenant_id,
+                        record.credential.id,
+                    )?;
+                    let value = serde_json::to_vec(&record.credential.id)
+                        .map_err(|e| Error::Serialization(e.to_string()))?;
+                    match self.storage.get_meta(&index)? {
+                        None => {
+                            expected.push(condition(&index, None));
+                            indexes.push(write(&index, value));
+                        }
+                        Some(existing) if existing == value => {}
+                        Some(_) => {
+                            return Err(Error::DataCorruption(
+                                "Invalid tenant credential index".into(),
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        writes.extend(indexes);
         if self.storage.compare_and_write_meta(&expected, &writes)? {
             Ok(())
         } else {
@@ -403,6 +435,15 @@ fn denied() -> Error {
 }
 fn conflict() -> Error {
     Error::TransactionConflict("Credential revision or tenant authority changed".into())
+}
+fn tenant_credential_prefix(tenant: &str) -> Result<String> {
+    Ok(format!(
+        "identity/v1/tenant-credential/{}/",
+        serialize_string(tenant)?
+    ))
+}
+fn tenant_credential_index(tenant: &str, id: Uuid) -> Result<String> {
+    Ok(format!("{}{id}", tenant_credential_prefix(tenant)?))
 }
 fn credential_key(id: Uuid) -> String {
     format!("identity/v1/credential/{id}")

@@ -179,3 +179,6 @@ Account-specific cooldowns can temporarily block a legitimate user targeted by
 repeated failures. Keep the separately secured operator API key for administrative
 recovery. Internet-facing deployments should also enforce appropriate edge abuse
 controls. This native password contract does not provide MFA or federation.
+
+Use the [administrative directories](administration-directory.md) to list authorized
+accounts and credentials with bounded pagination.

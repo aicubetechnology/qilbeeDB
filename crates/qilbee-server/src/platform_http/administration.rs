@@ -65,6 +65,7 @@ fn operation_error(error: Error) -> ApiError {
 struct RegisterRequest {
     contract_version: u32,
     tenant_id: String,
+    display_name: Option<String>,
     subject_id: String,
 }
 
@@ -103,7 +104,7 @@ async fn register(
     run(state, headers, move |identity, token| {
         let request = json_body(body)?;
         version(request.contract_version)?;
-        let (tenant, issued) = identity.register_tenant(token, &request.tenant_id, &request.subject_id).map_err(operation_error)?;
+        let (tenant, issued) = identity.register_tenant_named(token, &request.tenant_id, &request.subject_id, request.display_name.as_deref()).map_err(operation_error)?;
         Ok((StatusCode::CREATED, Json(json!({"contract_version":1,"tenant":tenant,"credential":issued.credential,"secret":issued.secret}))))
     }).await
 }

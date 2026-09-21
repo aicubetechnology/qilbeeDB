@@ -17,6 +17,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 mod administration;
+mod directory;
 mod experiences;
 mod learning;
 mod login;
@@ -56,7 +57,13 @@ impl PlatformState {
 /// explicit, separate router and never supply credentials for this authority.
 pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     let retrieval_limits = retrieval_limits::RetrievalLimits::from_env()?;
-    create_router_with_limits(database, retrieval_limits)
+    let cors = directory::cors(std::env::var("QILBEE_ADMIN_ORIGIN").ok().as_deref())?;
+    let router = create_router_with_limits(database, retrieval_limits)?;
+    Ok(if let Some(cors) = cors {
+        router.layer(cors)
+    } else {
+        router
+    })
 }
 
 fn create_router_with_limits(
@@ -75,6 +82,8 @@ fn create_router_with_limits(
             ..Default::default()
         },
     )?);
+    let identity = Arc::new(IdentityStore::new(Arc::new(database.storage().clone())));
+    identity.prepare_administration_directory()?;
     let state = PlatformState {
         login_limits: login::LoginLimits::default(),
         retrieval_limits,
@@ -82,10 +91,11 @@ fn create_router_with_limits(
             database.storage().path().join("procedural-learning"),
         )?),
         memory,
-        identity: Arc::new(IdentityStore::new(Arc::new(database.storage().clone()))),
+        identity,
     };
     Ok(Router::new()
         .merge(administration::routes())
+        .merge(directory::routes())
         .merge(login::routes())
         .merge(memory::routes())
         .merge(learning::routes())
