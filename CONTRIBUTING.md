@@ -39,3 +39,11 @@ export/check the site Markdown, and include evidence in the PR description.
 Repeat the export after PR validation so the site sources match the final feature.
 The publication workflow merges validated features in batches of five and then
 verifies the exact merged image in local Docker.
+
+## Human-centered interfaces
+
+The permanent [interface design requirements](docs/contributing/interface-design.md)
+apply to every new or changed interface. Validate the person's complete task,
+including accessibility, errors, and recovery, before publishing. Record the
+journey and its evidence with the change; a successful API response alone is not
+acceptance of the user experience.

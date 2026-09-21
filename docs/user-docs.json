@@ -364,6 +364,13 @@
       "title": "QilbeeDB 0.13.0 availability",
       "description": "Adopt released typed graph contracts with scoped upgrade checks, current-state validation and measured experimental ranking limits.",
       "order": 1
+    },
+    {
+      "source": "docs/api/company-learning-catalog.md",
+      "file": "company-learning-catalog.md",
+      "title": "Discover company learning resources",
+      "description": "Find and inspect retained experiences, learning records and tools using company administrator authority, with explicit scope and continuation.",
+      "order": 212
     }
   ]
 }

@@ -19,6 +19,7 @@ use uuid::Uuid;
 mod administration;
 mod agents;
 mod company_memory;
+mod company_learning;
 mod directory;
 mod experiences;
 mod learning;
@@ -104,6 +105,7 @@ fn create_router_with_limits(
         .merge(administration::routes())
         .merge(agents::routes())
         .merge(company_memory::routes())
+        .merge(company_learning::routes())
         .merge(directory::routes())
         .merge(login::routes())
         .merge(scope_authority::routes())

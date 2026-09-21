@@ -30,3 +30,4 @@ pub use store::experience_lineage::*;
 
 pub use store::experience_export::*;
 pub use store::strategies::*;
+pub use store::catalog::*;
