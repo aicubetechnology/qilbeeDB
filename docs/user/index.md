@@ -76,3 +76,8 @@ exact source revisions and transitive source eligibility, with bounded diagnosti
 
 Use [consumer checkpoints](../api/memory-checkpoints.md) to persist each subject’s
 feed progress and reconnect safely after a process restart.
+
+For embedded Rust graphs, see the unreleased
+[durable graph lifecycle](../architecture/durable-graph-lifecycle.md) contract.
+The [graph memory evidence map](../research/graph-memory-evidence.md) explains
+which research informs the next memory integration and what remains unimplemented.

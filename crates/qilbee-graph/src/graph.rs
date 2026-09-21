@@ -2,12 +2,12 @@
 
 use crate::schema::Schema;
 use qilbee_core::{
-    Direction, EntityId, Error, GraphId, IdGenerator, Label, Node, NodeId, Property,
-    PropertyValue, Relationship, RelationshipId, Result,
+    Direction, EntityId, Error, GraphId, Label, Node, NodeId, Property, PropertyValue,
+    Relationship, RelationshipId, Result,
 };
-use qilbee_storage::{StorageEngine, Transaction};
+use qilbee_storage::{GraphIdentity, StorageEngine, Transaction};
 use std::sync::{Arc, RwLock};
-use tracing::{debug, info};
+use tracing::debug;
 
 /// A graph instance in QilbeeDB
 pub struct Graph {
@@ -20,8 +20,8 @@ pub struct Graph {
     /// Storage engine reference
     storage: StorageEngine,
 
-    /// ID generator for this graph
-    id_gen: Arc<IdGenerator>,
+    /// Durable generation checked before access and at mutation publication.
+    identity: GraphIdentity,
 
     /// Schema for this graph
     schema: Arc<RwLock<Schema>>,
@@ -29,13 +29,14 @@ pub struct Graph {
 
 impl Graph {
     /// Create a new graph instance (internal use)
-    pub(crate) fn new(name: String, storage: StorageEngine) -> Self {
-        let id = GraphId::from_name(&name);
+    pub(crate) fn from_identity(identity: GraphIdentity, storage: StorageEngine) -> Self {
+        let id = identity.id();
+        let name = identity.name().to_owned();
         Self {
             id,
             name,
             storage,
-            id_gen: Arc::new(IdGenerator::new()),
+            identity,
             schema: Arc::new(RwLock::new(Schema::new())),
         }
     }
@@ -68,94 +69,69 @@ impl Graph {
         I: IntoIterator<Item = L>,
         L: Into<Label>,
     {
-        let node = Node::with_labels(self.id_gen.next_node_id(), labels);
-        self.storage.put_node(self.id, &node)?;
+        let node = Node::with_labels(NodeId::from_internal(0), labels);
+        let node = self
+            .storage
+            .create_graph_node(&self.identity, node, |node| {
+                self.check_node_constraints(node)
+            })?;
         debug!("Created node {:?} in graph {}", node.id, self.name);
         Ok(node)
     }
 
     /// Create a new node with labels and properties
-    pub fn create_node_with_properties<I, L>(
-        &self,
-        labels: I,
-        properties: Property,
-    ) -> Result<Node>
+    pub fn create_node_with_properties<I, L>(&self, labels: I, properties: Property) -> Result<Node>
     where
         I: IntoIterator<Item = L>,
         L: Into<Label>,
     {
-        let node = Node::with_labels_and_properties(self.id_gen.next_node_id(), labels, properties);
-
-        // Check unique constraints
-        self.check_node_constraints(&node)?;
-
-        self.storage.put_node(self.id, &node)?;
+        let node = Node::with_labels_and_properties(NodeId::from_internal(0), labels, properties);
+        let node = self
+            .storage
+            .create_graph_node(&self.identity, node, |node| {
+                self.check_node_constraints(node)
+            })?;
         debug!("Created node {:?} in graph {}", node.id, self.name);
         Ok(node)
     }
 
     /// Get a node by ID
     pub fn get_node(&self, node_id: NodeId) -> Result<Option<Node>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         self.storage.get_node(self.id, node_id)
     }
 
     /// Update a node
     pub fn update_node(&self, node: &Node) -> Result<()> {
-        // Verify node exists
-        if self.storage.get_node(self.id, node.id)?.is_none() {
-            return Err(Error::NodeNotFound(format!("{:?}", node.id)));
-        }
-
-        // Check constraints
-        self.check_node_constraints(node)?;
-
-        self.storage.put_node(self.id, node)?;
+        self.storage
+            .update_graph_node(&self.identity, node, |node| {
+                self.check_node_constraints(node)
+            })?;
         debug!("Updated node {:?} in graph {}", node.id, self.name);
         Ok(())
     }
 
     /// Delete a node (must have no relationships)
     pub fn delete_node(&self, node_id: NodeId) -> Result<bool> {
-        // Check for relationships
-        let outgoing = self.storage.get_outgoing_relationships(self.id, node_id)?;
-        let incoming = self.storage.get_incoming_relationships(self.id, node_id)?;
-
-        if !outgoing.is_empty() || !incoming.is_empty() {
-            return Err(Error::InvalidGraphOperation(format!(
-                "Cannot delete node {:?}: has {} outgoing and {} incoming relationships. Use detach_delete_node instead.",
-                node_id,
-                outgoing.len(),
-                incoming.len()
-            )));
-        }
-
-        self.storage.delete_node(self.id, node_id)
+        self.storage
+            .delete_graph_node(&self.identity, node_id, false)
     }
 
-    /// Delete a node and all its relationships
+    /// Delete a node and its relationships in one guarded batch.
     pub fn detach_delete_node(&self, node_id: NodeId) -> Result<bool> {
-        // Delete all relationships first
-        let outgoing = self.storage.get_outgoing_relationships(self.id, node_id)?;
-        for rel in outgoing {
-            self.storage.delete_relationship(self.id, rel.id)?;
-        }
-
-        let incoming = self.storage.get_incoming_relationships(self.id, node_id)?;
-        for rel in incoming {
-            self.storage.delete_relationship(self.id, rel.id)?;
-        }
-
-        // Now delete the node
-        self.storage.delete_node(self.id, node_id)
+        self.storage
+            .delete_graph_node(&self.identity, node_id, true)
     }
 
     /// Find nodes by label
     pub fn find_nodes_by_label(&self, label: &str) -> Result<Vec<Node>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         self.storage.get_nodes_by_label(self.id, label)
     }
 
     /// Get all nodes in this graph
     pub fn get_all_nodes(&self) -> Result<Vec<Node>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         self.storage.get_all_nodes(self.id)
     }
 
@@ -167,8 +143,10 @@ impl Graph {
         property: &str,
         value: &PropertyValue,
     ) -> Result<Vec<Node>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         // Use property index for efficient lookup
-        self.storage.get_nodes_by_property(self.id, label, property, value)
+        self.storage
+            .get_nodes_by_property(self.id, label, property, value)
     }
 
     /// Find nodes by label and property range
@@ -180,16 +158,16 @@ impl Graph {
         min_value: Option<&PropertyValue>,
         max_value: Option<&PropertyValue>,
     ) -> Result<Vec<Node>> {
-        self.storage.get_nodes_by_property_range(self.id, label, property, min_value, max_value)
+        self.storage.validate_graph_identity(&self.identity)?;
+        self.storage
+            .get_nodes_by_property_range(self.id, label, property, min_value, max_value)
     }
 
     /// Find nodes that have a specific property (any value)
-    pub fn find_nodes_with_property(
-        &self,
-        label: &str,
-        property: &str,
-    ) -> Result<Vec<Node>> {
-        self.storage.get_nodes_with_property(self.id, label, property)
+    pub fn find_nodes_with_property(&self, label: &str, property: &str) -> Result<Vec<Node>> {
+        self.storage.validate_graph_identity(&self.identity)?;
+        self.storage
+            .get_nodes_with_property(self.id, label, property)
     }
 
     // ========== Relationship Operations ==========
@@ -201,21 +179,12 @@ impl Graph {
         rel_type: L,
         target: NodeId,
     ) -> Result<Relationship> {
-        // Verify both nodes exist
-        if self.storage.get_node(self.id, source)?.is_none() {
-            return Err(Error::NodeNotFound(format!("{:?}", source)));
-        }
-        if self.storage.get_node(self.id, target)?.is_none() {
-            return Err(Error::NodeNotFound(format!("{:?}", target)));
-        }
+        let rel = Relationship::new(RelationshipId::from_internal(0), rel_type, source, target);
+        let rel = self
+            .storage
+            .create_graph_relationship(&self.identity, rel)?;
 
-        let rel = Relationship::new(self.id_gen.next_relationship_id(), rel_type, source, target);
-        self.storage.put_relationship(self.id, &rel)?;
-
-        debug!(
-            "Created relationship {:?} in graph {}",
-            rel.id, self.name
-        );
+        debug!("Created relationship {:?} in graph {}", rel.id, self.name);
         Ok(rel)
     }
 
@@ -227,50 +196,36 @@ impl Graph {
         target: NodeId,
         properties: Property,
     ) -> Result<Relationship> {
-        // Verify both nodes exist
-        if self.storage.get_node(self.id, source)?.is_none() {
-            return Err(Error::NodeNotFound(format!("{:?}", source)));
-        }
-        if self.storage.get_node(self.id, target)?.is_none() {
-            return Err(Error::NodeNotFound(format!("{:?}", target)));
-        }
-
         let rel = Relationship::with_properties(
-            self.id_gen.next_relationship_id(),
+            RelationshipId::from_internal(0),
             rel_type,
             source,
             target,
             properties,
         );
-        self.storage.put_relationship(self.id, &rel)?;
+        let rel = self
+            .storage
+            .create_graph_relationship(&self.identity, rel)?;
 
-        debug!(
-            "Created relationship {:?} in graph {}",
-            rel.id, self.name
-        );
+        debug!("Created relationship {:?} in graph {}", rel.id, self.name);
         Ok(rel)
     }
 
     /// Get a relationship by ID
     pub fn get_relationship(&self, rel_id: RelationshipId) -> Result<Option<Relationship>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         self.storage.get_relationship(self.id, rel_id)
     }
 
     /// Update a relationship
     pub fn update_relationship(&self, rel: &Relationship) -> Result<()> {
-        // Verify relationship exists
-        if self.storage.get_relationship(self.id, rel.id)?.is_none() {
-            return Err(Error::RelationshipNotFound(format!("{:?}", rel.id)));
-        }
-
-        self.storage.put_relationship(self.id, rel)?;
-        debug!("Updated relationship {:?} in graph {}", rel.id, self.name);
-        Ok(())
+        self.storage.update_graph_relationship(&self.identity, rel)
     }
 
-    /// Delete a relationship
+    /// Delete a relationship from the active generation.
     pub fn delete_relationship(&self, rel_id: RelationshipId) -> Result<bool> {
-        self.storage.delete_relationship(self.id, rel_id)
+        self.storage
+            .delete_graph_relationship(&self.identity, rel_id)
     }
 
     /// Get relationships from a node
@@ -279,6 +234,7 @@ impl Graph {
         node_id: NodeId,
         direction: Direction,
     ) -> Result<Vec<Relationship>> {
+        self.storage.validate_graph_identity(&self.identity)?;
         match direction {
             Direction::Outgoing => self.storage.get_outgoing_relationships(self.id, node_id),
             Direction::Incoming => self.storage.get_incoming_relationships(self.id, node_id),
@@ -328,15 +284,16 @@ impl Graph {
 
     /// Begin a new transaction
     pub fn begin_transaction(&self) -> Transaction {
-        Transaction::new(self.storage.clone(), self.id)
+        Transaction::for_graph(self.storage.clone(), self.identity.clone())
     }
 
     // ========== Private Helpers ==========
 
     fn check_node_constraints(&self, node: &Node) -> Result<()> {
-        let schema = self.schema.read().map_err(|_| {
-            Error::Internal("Failed to acquire schema lock".to_string())
-        })?;
+        let schema = self
+            .schema
+            .read()
+            .map_err(|_| Error::Internal("Failed to acquire schema lock".to_string()))?;
 
         for label in &node.labels {
             for constraint in schema.constraints_for_label(label) {
@@ -352,10 +309,8 @@ impl Graph {
                                 )?;
 
                                 // Allow if only match is the node itself
-                                let conflicts: Vec<_> = existing
-                                    .into_iter()
-                                    .filter(|n| n.id != node.id)
-                                    .collect();
+                                let conflicts: Vec<_> =
+                                    existing.into_iter().filter(|n| n.id != node.id).collect();
 
                                 if !conflicts.is_empty() {
                                     return Err(Error::UniqueViolation {
@@ -404,7 +359,7 @@ impl Clone for Graph {
             id: self.id,
             name: self.name.clone(),
             storage: self.storage.clone(),
-            id_gen: Arc::clone(&self.id_gen),
+            identity: self.identity.clone(),
             schema: Arc::clone(&self.schema),
         }
     }
@@ -421,7 +376,7 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let options = StorageOptions::for_testing(temp_dir.path());
         let storage = StorageEngine::open(options).unwrap();
-        let graph = Graph::new("test".to_string(), storage);
+        let graph = crate::Database::new(storage).graph("test").unwrap();
         (graph, temp_dir)
     }
 

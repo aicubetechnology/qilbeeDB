@@ -17,3 +17,6 @@ pub mod schema;
 pub use database::Database;
 pub use graph::Graph;
 pub use schema::{Constraint, ConstraintType, Index, IndexType, Schema};
+
+#[cfg(test)]
+mod durable_graph_process;

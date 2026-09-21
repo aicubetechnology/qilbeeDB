@@ -162,6 +162,7 @@ nav:
     - Tool Artifacts: agent-memory/tool-artifacts.md
     - Tool Development: agent-memory/tool-development.md
     - Research and Evolution: research/agent-memory-evolution.md
+    - Graph Memory Evidence: research/graph-memory-evidence.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md
     - Consolidation: agent-memory/consolidation.md
@@ -200,6 +201,7 @@ nav:
       - Overview: architecture/overview.md
       - Storage Engine: architecture/storage.md
       - Atomic Graph Commits: architecture/atomic-commits.md
+      - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
       - Learned Tool Services: architecture/learned-tools.md

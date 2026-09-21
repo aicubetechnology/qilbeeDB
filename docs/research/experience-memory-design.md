@@ -8,6 +8,9 @@ remains external. Discovery replay and mutable-source-aware strategy selection
 remain proposals. This document does not
 reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
+The [graph memory evidence map](graph-memory-evidence.md) extends this review with
+the subsequently supplied graph research and the unreleased durable graph
+foundation, while keeping memory integration and quality evaluation explicit.
 
 ## What the supplied research contributes
 
