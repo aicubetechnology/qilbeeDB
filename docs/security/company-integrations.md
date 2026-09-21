@@ -211,3 +211,10 @@ Authorization design follows [OWASP request-level checks](https://cheatsheetseri
 and [object-level authorization guidance](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/).
 These references guide implementation; they are not a security certification or
 evidence of improved agent reasoning.
+
+## Company-wide inspection
+
+Company administrators can use the unreleased [memory inventory](company-memory-administration.md)
+to discover canonical retained workspaces and inspect each private subject. This
+route uses `credential_admin`; it does not synthesize a company integration key
+or treat an empty grant list as implicit agent access.

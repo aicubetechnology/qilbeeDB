@@ -238,3 +238,49 @@ async fn existing_unreviewed_record_has_state_but_no_immutable_review_receipt() 
     )
     .await;
 }
+
+#[tokio::test]
+async fn company_inventory_uses_shared_admission_after_company_authorization() {
+    let mut f = Fixture::start().await;
+    let reader = f.token.clone();
+    let permit = f.limits.acquire().ok().unwrap();
+    let queries = [
+        (
+            "/api/v1/company/memory/query",
+            json!({"contract_version":1,"workspace_id":"0".repeat(64),"filter":{}}),
+        ),
+        (
+            "/api/v1/company/memory/read",
+            json!({"contract_version":1,"workspace_id":"0".repeat(64),"record_id":Uuid::new_v4()}),
+        ),
+    ];
+    for (route, body) in &queries {
+        f.token = reader.clone();
+        f.check(route, body.clone(), 403, Some("forbidden")).await;
+        f.token = f.admin.clone();
+        f.check(route, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+    }
+    let route = "/api/v1/company/memory/workspaces";
+    for (token, status) in [(&reader, 403), (&f.admin, 503)] {
+        let response = f
+            .client
+            .get(format!("{}{route}?contract_version=1", f.base))
+            .bearer_auth(token)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status().as_u16(), status);
+        let body: Value = response.json().await.unwrap();
+        let schema = json!({"allOf":[f.api["paths"][route]["get"]["responses"][status.to_string()]["content"]["application/json"]["schema"]],"components":f.api["components"]});
+        jsonschema::draft202012::options()
+            .build(&schema)
+            .unwrap()
+            .validate(&body)
+            .unwrap();
+    }
+    drop(permit);
+    for (route, body) in queries {
+        f.check(route, body, 404, Some("record_not_found")).await;
+    }
+}

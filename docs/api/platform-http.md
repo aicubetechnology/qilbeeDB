@@ -58,6 +58,9 @@ credentials, as well as errors, send `Cache-Control: no-store`.
 | `GET /api/v1/credentials/{id}` | `credential_admin`; inspect a credential in the same tenant |
 | `POST /api/v1/credentials/{id}/rotate` | `credential_admin`; replace the secret at an expected revision |
 | `POST /api/v1/credentials/{id}/revoke` | `credential_admin`; revoke at an expected revision |
+| `GET /api/v1/company/memory/workspaces` | Unreleased: `credential_admin`; discover all retained company memory workspaces |
+| `POST /api/v1/company/memory/query` | Unreleased: `credential_admin`; inspect retained or eligible company records with bounded continuation |
+| `POST /api/v1/company/memory/read` | Unreleased: `credential_admin`; inspect one retained record and its eligibility |
 | `GET /api/v1/agents` | Unreleased: `credential_admin`; page through automatically registered agents in the authenticated company |
 | `POST /api/v1/credentials/{id}/scope-authority` | Unreleased: `credential_admin`; replace exact grants or a company integration policy with a before/after audit event |
 
@@ -83,7 +86,10 @@ For issuance:
 Issuance returns HTTP 201 with `credential` and one-time `secret`. The request
 cannot override tenant identity. Explicit capabilities do not inherit evaluation
 or policy powers. Bootstrap administrators have credential and policy
-administration capabilities, but no implicit memory grants.
+administration capabilities, but no implicit agent memory grants. The unreleased
+[company inventory](../security/company-memory-administration.md) explicitly
+allows `credential_admin` to inspect all retained company workspaces and private
+subjects through separate administrative routes.
 
 The unreleased [company integration policy](../security/company-integrations.md)
 adds explicit authority over dynamically supplied external IDs. Empty grants on

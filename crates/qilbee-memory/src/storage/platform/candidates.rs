@@ -64,6 +64,7 @@ impl RocksDbMemoryStorage {
         record: &MemoryRecord,
         batch: &mut rocksdb::WriteBatch,
     ) -> Result<()> {
+        self.append_company_workspace(namespace, batch)?;
         let cf = self.cf(super::super::cf::EPISODE_INDEX)?;
         if let Some(old) = self.memory_snapshot().record(namespace, record.record_id)? {
             for key in keys(namespace, &old)? {
@@ -105,6 +106,13 @@ impl RocksDbMemoryStorage {
             let namespace = std::str::from_utf8(&key[3..3 + length])
                 .map_err(|_| inconsistent())?
                 .to_owned();
+            // Source keys are authoritative. Backfill membership on upgrade,
+            // including namespaces whose only retained records are tombstones.
+            let mut workspace_batch = rocksdb::WriteBatch::default();
+            self.append_company_workspace(&namespace, &mut workspace_batch)?;
+            if workspace_batch.len() > 0 {
+                self.candidate_batch(workspace_batch)?;
+            }
             let record_prefix = record_prefix(0x10, &namespace);
             let tip_key = super::record_prefix(TIP, &namespace);
             let journal = self

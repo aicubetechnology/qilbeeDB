@@ -14509,6 +14509,551 @@
           }
         ]
       }
+    },
+    "/api/v1/company/memory/workspaces": {
+      "get": {
+        "operationId": "listCompanyMemoryWorkspaces",
+        "summary": "Discover company memory workspaces from storage",
+        "description": "Unreleased. Requires credential_admin in the authenticated company. Includes all private subjects and retained workspaces even after grants are revoked or all memories become ineligible. The catalog is populated from canonical memory keys at startup and committed with subsequent memory mutations; it does not infer membership from credentials. Selects the company prefix before traversal. Live exclusive continuation by workspace ID, default 25 and maximum 100; restart traversal for concurrent insertions before the cursor. Uses the shared server retrieval admission limit, with 503 retrieval_busy after authorization. No agent registration or temporary credential issuance occurs.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryWorkspaceResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contract_version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "const": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "after_workspace_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "Opaque SHA-256 identifier of the unchanged canonical company, scope and private subject address. This identifier grants no authority."
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/company/memory/query": {
+      "post": {
+        "operationId": "queryCompanyMemory",
+        "summary": "Inspect retained or currently eligible company memory",
+        "description": "Unreleased. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. One workspace and one snapshot per request, including the same eligibility clock and transitive dependency view. Default retained view includes current canonical tombstones and ineligible payloads; it is an administration view, not agent context. Current view suppresses ineligible records. Ordered UUID traversal with explicit continuation after the last examined record, including empty filtered pages. Stop reason identifies record, scan or root-byte budget exhaustion. At most 100 returned records, 10000 examined roots, 8 MiB decoded root bytes; dependency work has the existing 4096-record/16 MiB aggregate bound. Dependency exhaustion fails the whole request; reduce the page/scan limit. Byte counters exclude integrity indexes and the fetched lookahead value and are not an RSS or final response-size cap. Pages are live, not one cross-request snapshot. No ranking or total count is claimed. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryInventoryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace or record exists in the authorized company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyMemoryQueryRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/read": {
+      "post": {
+        "operationId": "inspectCompanyMemory",
+        "summary": "Inspect a retained company record and its eligibility",
+        "description": "Unreleased. Requires credential_admin. The company is derived from authentication; workspace IDs are resolved only within it. No caller-selected company, private owner or authority override is accepted. Read the current retained record and eligibility in one snapshot, including deleted markers, expired/rejected payloads and invalidated derivations. Missing workspace or record, including a workspace belonging to another company, returns the same 404 record_not_found. It does not retrieve overwritten historical payload revisions or make the record available to ordinary agent retrieval. Authorization precedes the shared retrieval admission limit. No partial success after integrity or dependency-budget failure; capacity returns 503 retrieval_busy. Administrative reads do not register agents, alter reviews or issue delegated credentials.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryInspectionResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace or record exists in the authorized company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyMemoryInspectionRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -23651,6 +24196,440 @@
           "page"
         ],
         "additionalProperties": false
+      },
+      "CompanyMemoryWorkspace": {
+        "type": "object",
+        "properties": {
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Opaque SHA-256 identifier of the unchanged canonical company, scope and private subject address. This identifier grants no authority."
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "workspace_id",
+          "company_id",
+          "scope",
+          "private_subject_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryWorkspacePage": {
+        "type": "object",
+        "properties": {
+          "workspaces": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+            }
+          },
+          "next_after_workspace_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "description": "Opaque SHA-256 identifier of the unchanged canonical company, scope and private subject address. This identifier grants no authority."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "workspaces",
+          "next_after_workspace_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryWorkspaceResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "page": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspacePage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 500
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "current",
+              "retained"
+            ],
+            "default": "retained"
+          },
+          "text_contains": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "description": "At most 4096 UTF-8 bytes. Case-insensitive substring match across primary, secondary and context text; not semantic retrieval."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "description": "Exact tag filter, at most 256 UTF-8 bytes."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "CompanyMemoryQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Opaque SHA-256 identifier of the unchanged canonical company, scope and private subject address. This identifier grants no authority."
+          },
+          "filter": {
+            "$ref": "#/components/schemas/CompanyMemoryQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "filter"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryInspectionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "Opaque SHA-256 identifier of the unchanged canonical company, scope and private subject address. This identifier grants no authority."
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "record_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryEntry": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/CompanyRetainedMemoryRecord"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/MemoryEligibility"
+          }
+        },
+        "required": [
+          "record",
+          "eligibility"
+        ],
+        "additionalProperties": false,
+        "description": "Current retained revision and its eligibility in one snapshot. In retained view, payloads may be expired, rejected or invalid for agent reuse. Deleted records have null payloads. Entry dependency_work counts incremental reads for that entry; the page reports aggregate work. Administrative visibility does not make a record eligible."
+      },
+      "CompanyMemoryInventoryPage": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/CompanyMemoryEntry"
+            }
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "exhausted",
+              "record_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "entries",
+          "next_after",
+          "stop_reason",
+          "evaluated_at_millis",
+          "scanned_records",
+          "record_bytes",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryInventoryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "page": {
+            "$ref": "#/components/schemas/CompanyMemoryInventoryPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryInspectionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/CompanyMemoryEntry"
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "entry",
+          "record_bytes"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryNotFoundError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "record_not_found"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CompanyRetainedMemoryRecord": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modified_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "derivation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryDerivation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "schema_version",
+          "record_id",
+          "revision",
+          "created_at_millis",
+          "modified_at_millis",
+          "author",
+          "payload"
+        ],
+        "additionalProperties": false,
+        "description": "Retained current canonical revision for company administration. Deleted records preserve audit metadata with a null payload; this is not a historical body archive."
       }
     }
   }

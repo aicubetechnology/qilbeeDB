@@ -220,3 +220,8 @@ kills the server after acknowledged memory and read registrations and verifies
 both associations and the original memory receipt after restart. These checks
 validate the registration contract; they do not establish retrieval relevance or
 improved agent reasoning.
+
+The unreleased [company memory inventory](company-memory-administration.md) is a
+separate directory derived from retained memory storage. Its startup migration
+includes pre-existing private workspaces without fabricating historical agent
+registration events.

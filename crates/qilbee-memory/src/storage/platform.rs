@@ -878,6 +878,8 @@ mod candidates;
 #[cfg(test)]
 mod candidate_tests;
 pub use candidates::CANDIDATE_SELECTION_VERSION;
+mod company;
+pub use company::*;
 mod agents;
 pub use agents::*;
 pub use lexical::*;
