@@ -13,6 +13,13 @@ use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
+fn ordered_meta_key(key: &str) -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(key.len() + 1);
+    bytes.push(0xf0);
+    bytes.extend_from_slice(key.as_bytes());
+    bytes
+}
+
 /// Compute a hash for a property value for indexing
 fn hash_property_value(value: &PropertyValue) -> u64 {
     let mut hasher = DefaultHasher::new();
@@ -535,8 +542,14 @@ impl StorageEngine {
         for write in writes {
             let key = KeyBuilder::meta(&write.key);
             match &write.value {
-                Some(value) => batch.put_cf(cf, key, value),
-                None => batch.delete_cf(cf, key),
+                Some(value) => {
+                    batch.put_cf(cf, key, value);
+                    batch.put_cf(cf, ordered_meta_key(&write.key), []);
+                }
+                None => {
+                    batch.delete_cf(cf, key);
+                    batch.delete_cf(cf, ordered_meta_key(&write.key));
+                }
             }
         }
         let mut options = rocksdb::WriteOptions::default();
@@ -548,6 +561,112 @@ impl StorageEngine {
         Ok(true)
     }
 
+    /// Rebuild ordered logical-key markers before serving traffic. Legacy metadata
+    /// uses a length-prefixed physical key, which cannot support lexical prefix seeks.
+    /// Repeating this repair also handles metadata written by an older binary.
+    pub fn ensure_ordered_metadata_keys(&self) -> Result<()> {
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        let cf = self.cf(cf::META)?;
+        // Remove stale markers too, including deletions performed by an older binary.
+        let mut old = self.db.raw_iterator_cf(cf);
+        old.seek([0xf0]);
+        let mut cleanup = WriteBatch::default();
+        let mut pending = 0;
+        while let Some(key) = old.key() {
+            if key.first() != Some(&0xf0) {
+                break;
+            }
+            cleanup.delete_cf(cf, key);
+            pending += 1;
+            if pending == 1000 {
+                self.db
+                    .write(cleanup)
+                    .map_err(|e| Error::Storage(e.to_string()))?;
+                cleanup = WriteBatch::default();
+                pending = 0;
+            }
+            old.next();
+        }
+        old.status().map_err(|e| Error::Storage(e.to_string()))?;
+        self.db
+            .write(cleanup)
+            .map_err(|e| Error::Storage(e.to_string()))?;
+        let mut iter = self.db.raw_iterator_cf(cf);
+        iter.seek([crate::keys::prefix::META]);
+        let mut batch = WriteBatch::default();
+        let mut count = 0;
+        while let Some(key) = iter.key() {
+            if key.first() != Some(&crate::keys::prefix::META) {
+                break;
+            }
+            if key.len() >= 3 && u16::from_be_bytes([key[1], key[2]]) as usize == key.len() - 3 {
+                if let Ok(logical) = std::str::from_utf8(&key[3..]) {
+                    batch.put_cf(cf, ordered_meta_key(logical), []);
+                    count += 1;
+                    if count == 1000 {
+                        self.db
+                            .write(batch)
+                            .map_err(|e| Error::Storage(e.to_string()))?;
+                        batch = WriteBatch::default();
+                        count = 0;
+                    }
+                }
+            }
+            iter.next();
+        }
+        iter.status().map_err(|e| Error::Storage(e.to_string()))?;
+        self.db
+            .write(batch)
+            .map_err(|e| Error::Storage(e.to_string()))?;
+        Ok(())
+    }
+
+    /// Live, forward-only pagination inside one exact server-selected logical prefix.
+    /// The cursor is the last returned key; pages do not form a database snapshot.
+    pub fn scan_meta_keys(
+        &self,
+        prefix: &str,
+        after: Option<&str>,
+        limit: usize,
+    ) -> Result<(Vec<String>, bool)> {
+        if prefix.is_empty()
+            || prefix.len() > 4096
+            || !(1..=100).contains(&limit)
+            || after.is_some_and(|key| !key.starts_with(prefix) || key.len() > 4096)
+        {
+            return Err(Error::ValidationError(
+                "Invalid metadata page boundary".into(),
+            ));
+        }
+        let physical_prefix = ordered_meta_key(prefix);
+        let start = ordered_meta_key(after.unwrap_or(prefix));
+        let cf = self.cf(cf::META)?;
+        let mut iter = self.db.raw_iterator_cf(cf);
+        iter.seek(&start);
+        let mut keys = Vec::new();
+        let mut more = false;
+        while let Some(key) = iter.key() {
+            if !key.starts_with(&physical_prefix) {
+                break;
+            }
+            if after.is_none() || key > start.as_slice() {
+                if keys.len() == limit {
+                    more = true;
+                    break;
+                }
+                let logical = std::str::from_utf8(&key[1..])
+                    .map_err(|_| Error::DataCorruption("Invalid metadata directory key".into()))?;
+                keys.push(logical.to_owned());
+            }
+            iter.next();
+        }
+        iter.status().map_err(|e| Error::Storage(e.to_string()))?;
+        Ok((keys, more))
+    }
+
     /// Store metadata
     pub fn put_meta(&self, key: &str, value: &[u8]) -> Result<()> {
         let _guard = self
@@ -557,8 +676,11 @@ impl StorageEngine {
         let storage_key = KeyBuilder::meta(key);
         let cf = self.cf(cf::META)?;
 
+        let mut batch = WriteBatch::default();
+        batch.put_cf(cf, storage_key, value);
+        batch.put_cf(cf, ordered_meta_key(key), []);
         self.db
-            .put_cf(&cf, &storage_key, value)
+            .write(batch)
             .map_err(|e| Error::Storage(e.to_string()))?;
 
         Ok(())
@@ -1474,5 +1596,92 @@ mod tests {
             .get_nodes_by_property_range(graph_id, "Person", "age", None, Some(&max_age))
             .unwrap();
         assert_eq!(at_most_35.len(), 2); // ages 20 and 30
+    }
+}
+
+#[cfg(test)]
+mod ordered_metadata_tests {
+    use super::*;
+    #[test]
+    fn legacy_length_prefixed_keys_rebuild_and_page_by_exact_logical_prefix() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let db = StorageEngine::open(StorageOptions::for_testing(dir.path())).unwrap();
+        let cf = db.cf(cf::META).unwrap();
+        for key in [
+            "identity/a/z",
+            "identity/a/longer-name",
+            "identity/a/a",
+            "identity/ab/secret",
+        ] {
+            // Emulate an older binary, which wrote only the original physical key.
+            db.db.put_cf(cf, KeyBuilder::meta(key), b"legacy").unwrap();
+        }
+        assert!(
+            db.scan_meta_keys("identity/a/", None, 2)
+                .unwrap()
+                .0
+                .is_empty()
+        );
+        db.ensure_ordered_metadata_keys().unwrap();
+        let (first, more) = db.scan_meta_keys("identity/a/", None, 2).unwrap();
+        assert_eq!(first, ["identity/a/a", "identity/a/longer-name"]);
+        assert!(more);
+        let (last, more) = db
+            .scan_meta_keys("identity/a/", first.last().map(String::as_str), 2)
+            .unwrap();
+        assert_eq!(last, ["identity/a/z"]);
+        assert!(!more);
+        assert!(
+            db.scan_meta_keys("identity/a/", Some("identity/ab/secret"), 2)
+                .is_err()
+        );
+        let key = "identity/a/new";
+        db.compare_and_write_meta(
+            &[crate::MetadataCondition {
+                key: key.into(),
+                expected: None,
+            }],
+            &[crate::MetadataWrite {
+                key: key.into(),
+                value: Some(b"new".to_vec()),
+            }],
+        )
+        .unwrap();
+        assert!(
+            db.scan_meta_keys("identity/a/", None, 100)
+                .unwrap()
+                .0
+                .contains(&key.to_owned())
+        );
+        db.compare_and_write_meta(
+            &[crate::MetadataCondition {
+                key: key.into(),
+                expected: Some(b"new".to_vec()),
+            }],
+            &[crate::MetadataWrite {
+                key: key.into(),
+                value: None,
+            }],
+        )
+        .unwrap();
+        assert!(
+            !db.scan_meta_keys("identity/a/", None, 100)
+                .unwrap()
+                .0
+                .contains(&key.to_owned())
+        );
+        db.ensure_ordered_metadata_keys().unwrap();
+        assert_eq!(
+            db.scan_meta_keys("identity/a/", None, 100).unwrap().0.len(),
+            3
+        );
+        db.db
+            .delete_cf(cf, KeyBuilder::meta("identity/a/a"))
+            .unwrap();
+        db.ensure_ordered_metadata_keys().unwrap();
+        assert_eq!(
+            db.scan_meta_keys("identity/a/", None, 100).unwrap().0.len(),
+            2
+        );
     }
 }

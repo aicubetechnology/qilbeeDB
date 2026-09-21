@@ -143,3 +143,10 @@ examples/output/
 # Lock files from services
 *.lock
 !Cargo.lock
+
+# Operator-delivered production secrets
+/cred-prod/
+
+# Local deployment records and corporate UI must never enter this repository.
+/aws-deploy/
+/qilbeedb-ui/

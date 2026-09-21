@@ -13,12 +13,14 @@ cd qilbeeDB
 QILBEE_REVISION="$(git rev-parse HEAD)" docker compose build
 ```
 
-The image uses digest-pinned Rust 1.93.1 and Debian Bookworm bases, the committed
+The image uses a digest-pinned Rust 1.93.1 Bookworm build stage and Debian Trixie runtime, the committed
 Cargo lockfile, and a release build with thin LTO. Build concurrency is two jobs
 to fit local development machines. Dependency/target caches belong to BuildKit;
 the build context excludes local data, credentials, Git state and host targets.
+The runtime upgrades base packages before installing its required libraries. The first production qualification found security fixes available in Trixie that were absent from the Bookworm runtime; see the [container security qualification](../security/container-security.md).
+
 The runtime includes the server, required native libraries, CA certificates,
-curl for health checks, and the license. It runs as UID/GID 10001.
+a built-in loopback health probe, and the license. It runs as UID/GID 10001.
 
 The resulting default image is `qilbeedb:local`. This builds locally; it does not
 publish an image to a registry. Use an explicit image tag and Git revision when

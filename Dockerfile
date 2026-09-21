@@ -13,20 +13,20 @@ RUN --mount=type=cache,id=qilbeedb-cargo-registry,target=/usr/local/cargo/regist
     cargo build --locked --release -p qilbee-server --bin qilbeedb && \
     install -m 0755 target/release/qilbeedb /usr/local/bin/qilbeedb
 
-FROM debian:bookworm-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251 AS runtime
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl libssl3 libstdc++6 && rm -rf /var/lib/apt/lists/* && \
+FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS runtime
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates libssl3t64 libstdc++6 && rm -rf /var/lib/apt/lists/* && \
     groupadd --gid 10001 qilbee && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin qilbee && \
     install -d -o qilbee -g qilbee -m 0700 /data
 COPY --from=build /usr/local/bin/qilbeedb /usr/local/bin/qilbeedb
 COPY LICENSE /usr/share/doc/qilbeedb/LICENSE
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="QilbeeDB" \
-    org.opencontainers.image.version="0.10.0" \
+    org.opencontainers.image.version="0.11.0" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.source="https://github.com/aicubetechnology/qilbeeDB"
 USER 10001:10001
 WORKDIR /data
 EXPOSE 7474
-HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 CMD curl --fail --silent http://127.0.0.1:7474/health > /dev/null || exit 1
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 CMD ["/usr/local/bin/qilbeedb", "health-check"]
 ENTRYPOINT ["/usr/local/bin/qilbeedb"]
 CMD ["/data"]

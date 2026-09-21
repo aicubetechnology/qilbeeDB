@@ -1560,7 +1560,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-core"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "chrono",
  "proptest",
@@ -1573,7 +1573,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-graph"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "async-trait",
  "qilbee-core",
@@ -1588,7 +1588,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-memory"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1609,7 +1609,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-protocol"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "async-trait",
  "qilbee-core",
@@ -1622,7 +1622,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-query"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "logos",
  "proptest",
@@ -1636,7 +1636,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-server"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "argon2",
  "async-trait",
@@ -1672,7 +1672,7 @@ dependencies = [
 
 [[package]]
 name = "qilbee-storage"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1689,7 +1689,7 @@ dependencies = [
 
 [[package]]
 name = "qilbeedb"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "qilbee-core",
  "qilbee-graph",

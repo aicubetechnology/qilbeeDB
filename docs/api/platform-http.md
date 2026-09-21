@@ -16,6 +16,8 @@ The platform exposes identity, credential administration,
 [learned-tool development](learned-tools.md). Legacy memory routes are not
 silently mapped into tenant namespaces.
 
+For a multi-company installation, bootstrap the separate [installation master](../security/global-administration.md) and delegate a registration-only service key. Global `qdbg1_` keys authenticate only administration routes; tenant `qdb1_` keys remain company-bound.
+
 ## Provision a tenant locally
 
 Stop any server using the data directory, then run the explicit operator command:
@@ -156,3 +158,9 @@ arguments, one-time bootstrap and authentication after reopening the database.
 
 These tests run without model providers or permanent auxiliary services.
 They validate the implemented contracts, not completion of all P0 requirements.
+
+## Human administrator login
+
+Provisioned accounts can authenticate to short-lived sessions without receiving
+permanent API keys. See [Administrator accounts and login](../security/human-login.md)
+for the global and tenant endpoints, password lifecycle, cooldowns and exact limits.
