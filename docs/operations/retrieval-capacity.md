@@ -61,11 +61,20 @@ scope authorization precede retrieval admission and candidate selection.
 
 ## Size requests and scans separately
 
-`POST /api/v1/memory/embeddings`, `/api/v1/memory/search` and
-`/api/v1/memory/search/hybrid` accept JSON bodies up to **2 MiB**. This includes
+`POST /api/v1/memory/embeddings`, `/api/v1/memory/search`,
+`/api/v1/memory/search/hybrid` and `/api/v1/memory/search/graph` accept JSON bodies
+up to **2 MiB**. This includes
 scope, text, model identity, the vector, numeric formatting and whitespace. Other
-platform endpoints retain their 64 KiB body limit. A vector must also contain only
+memory endpoints retain their 64 KiB body limit. Login and login-account JSON
+requests have a separate 8 KiB limit. A vector must also contain only
 finite float32 values, match its declared dimension exactly and have nonzero norm.
+
+The four vector-capable OpenAPI operations expose the byte limit as
+`x-qilbee-max-request-body-bytes`; their HTTP 413 descriptions use the same value.
+This is a whole-body transport limit, not a JSON Schema string-length constraint
+or an embedding dimension allowance. A smaller valid query may still fail another
+limit. Documentation extensions describe the published router and do not change
+operator configuration or request processing.
 
 A 3,072-dimensional float32 vector has 12,288 raw component bytes; an 8,192-dimensional
 vector has 32,768; a 32,768-dimensional vector has 131,072. JSON on the wire and in

@@ -168,7 +168,9 @@ can still consume bounded work. Queries do not cross the authorized namespace.
 | `expansion.embedding_bytes_limit` | 8 MiB | 1–8 MiB of newly read selected-space bindings |
 
 Omit `expansion` for these defaults. If supplied, include every expansion field.
-The request body is limited to 2 MiB. Lexical text is at most 4,096 UTF-8 bytes
+The request body is limited to 2 MiB (2,097,152 bytes), including all JSON fields
+and whitespace. The OpenAPI operation records this in
+`x-qilbee-max-request-body-bytes` and its HTTP 413 description. Lexical text is at most 4,096 UTF-8 bytes
 with 1–64 distinct alphanumeric terms, using the existing BM25 tokenizer.
 
 Base scanning follows the current-record index, so deletion tombstones do not

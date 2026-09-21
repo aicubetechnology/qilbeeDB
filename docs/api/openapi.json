@@ -4466,7 +4466,8 @@
               }
             }
           }
-        }
+        },
+        "x-qilbee-max-request-body-bytes": 2097152
       }
     },
     "/api/v1/memory/search": {
@@ -4699,7 +4700,8 @@
               }
             }
           }
-        }
+        },
+        "x-qilbee-max-request-body-bytes": 2097152
       }
     },
     "/api/v1/memory/search/lexical": {
@@ -5188,7 +5190,8 @@
               }
             }
           }
-        }
+        },
+        "x-qilbee-max-request-body-bytes": 2097152
       }
     },
     "/api/v1/memory/ranking-profiles": {
@@ -15446,7 +15449,7 @@
           "Memory"
         ],
         "summary": "Commit a revision-bound typed memory assertion or lifecycle decision",
-        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_write for assert/retire/restore; review requires memory_read and memory_review. Authorization and retrieval admission precede atomic WAL publication. Idempotency is scoped to authenticated subject and namespace. A replay returns the original receipt, not current eligibility.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_write for assert/retire/restore; review requires memory_read and memory_review. Authorization and retrieval admission precede atomic WAL publication. Idempotency is scoped to authenticated subject and namespace. A replay returns the original receipt, not current eligibility.",
         "operationId": "memoryRelationCommands",
         "requestBody": {
           "required": true,
@@ -15667,7 +15670,7 @@
           "Memory"
         ],
         "summary": "Read a currently eligible typed memory relation",
-        "description": "Unreleased 0.13.0 contract. Requires memory_read. Returns 404 for absent, retired, rejected, not-yet-valid, expired or endpoint-invalid relations. One snapshot and evaluation clock recheck both exact endpoint revisions and their transitive evidence.",
+        "description": "Available since 0.13.0. Requires memory_read. Returns 404 for absent, retired, rejected, not-yet-valid, expired or endpoint-invalid relations. One snapshot and evaluation clock recheck both exact endpoint revisions and their transitive evidence.",
         "operationId": "memoryRelationRead",
         "requestBody": {
           "required": true,
@@ -15843,7 +15846,7 @@
           "Memory"
         ],
         "summary": "Inspect retained typed relation metadata and current eligibility",
-        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_review. Includes retained states and the first eligibility failure; does not include endpoint payloads or certify the assertion.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_review. Includes retained states and the first eligibility failure; does not include endpoint payloads or certify the assertion.",
         "operationId": "memoryRelationInspect",
         "requestBody": {
           "required": true,
@@ -16019,7 +16022,7 @@
           "Memory"
         ],
         "summary": "Read an immutable typed relation revision and its original receipt",
-        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_review. Historical assertions are audit evidence, not current retrieval results; always revalidate before reuse.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_review. Historical assertions are audit evidence, not current retrieval results; always revalidate before reuse.",
         "operationId": "memoryRelationRevision",
         "requestBody": {
           "required": true,
@@ -16194,7 +16197,7 @@
       "post": {
         "operationId": "typedMemoryGraph",
         "summary": "Read a bounded typed memory neighborhood",
-        "description": "Unreleased 0.13.0 contract. Requires memory_read in the exact credential-derived company/private-subject scope. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
+        "description": "Available since 0.13.0. Requires memory_read in the exact credential-derived company/private-subject scope. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
         "tags": [
           "Memory"
         ],
@@ -16366,7 +16369,7 @@
       "post": {
         "operationId": "companyTypedMemoryGraph",
         "summary": "Read typed neighbors in a company workspace",
-        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
+        "description": "Available since 0.13.0. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
         "tags": [
           "Administration"
         ],
@@ -16542,7 +16545,7 @@
       "post": {
         "operationId": "inspectCompanyMemoryRelation",
         "summary": "Inspect retained relation state in a company workspace",
-        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
+        "description": "Available since 0.13.0. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
         "tags": [
           "Administration"
         ],
@@ -16713,7 +16716,7 @@
       "post": {
         "operationId": "readCompanyMemoryRelationRevision",
         "summary": "Read immutable relation history in a company workspace",
-        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
+        "description": "Available since 0.13.0. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
         "tags": [
           "Administration"
         ],
@@ -16887,7 +16890,7 @@
           "Memory"
         ],
         "summary": "Read a fenced suffix of typed relation changes",
-        "description": "Unreleased 0.13.0. Requires memory_read in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationChanges",
         "requestBody": {
           "required": true,
@@ -17067,7 +17070,7 @@
           "Memory"
         ],
         "summary": "Activate a relation journal without fabricating historical events",
-        "description": "Unreleased 0.13.0. Requires memory_read and memory_write in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_write in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationChangesActivate",
         "requestBody": {
           "required": true,
@@ -17242,7 +17245,7 @@
           "Memory"
         ],
         "summary": "Advance or explicitly reconcile subject-owned relation progress",
-        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationCheckpoint",
         "requestBody": {
           "required": true,
@@ -17433,7 +17436,7 @@
           "Memory"
         ],
         "summary": "Read currently history-compatible relation progress",
-        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationCheckpointRead",
         "requestBody": {
           "required": true,
@@ -17627,7 +17630,7 @@
           "Memory"
         ],
         "summary": "Read an immutable subject-owned relation checkpoint receipt",
-        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationCheckpointRevision",
         "requestBody": {
           "required": true,
@@ -17822,7 +17825,7 @@
           "Memory"
         ],
         "summary": "Diagnose relation history, checkpoint and durable witness compatibility",
-        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "description": "Available since 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
         "operationId": "memoryRelationConsumerDiagnose",
         "requestBody": {
           "required": true,
@@ -18003,7 +18006,7 @@
       "post": {
         "operationId": "searchMemoryGraph",
         "summary": "Retrieve memory through experimental versioned typed paths",
-        "description": "Unreleased 0.13.0. Requires memory_read in the exact authorized scope. Selects up to four anchors from up to 100 lexical, external-vector or hybrid candidates, expands revision-bound typed neighbors and combines base/path ranks. One snapshot and clock, filters before expansion, no automatic relation extraction, no provider calls. Inspect coverage and proof paths. Scores are not cosine or probabilities. Hard errors fail the whole response. No continuation cursor, default promotion or measured quality gain. 2 MiB request body and shared retrieval admission. See the graph-assisted retrieval guide for immutable formulas and work accounting.",
+        "description": "Available since 0.13.0. Requires memory_read in the exact authorized scope. Selects up to four anchors from up to 100 lexical, external-vector or hybrid candidates, expands revision-bound typed neighbors and combines base/path ranks. One snapshot and clock, filters before expansion, no automatic relation extraction, no provider calls. Inspect coverage and proof paths. Scores are not cosine or probabilities. Hard errors fail the whole response. No continuation cursor, default promotion or measured quality gain. 2 MiB request body and shared retrieval admission. See the graph-assisted retrieval guide for immutable formulas and work accounting.",
         "tags": [
           "Memory"
         ],
@@ -18115,7 +18118,7 @@
             }
           },
           "413": {
-            "description": "Request exceeds the 65536-byte body limit.",
+            "description": "Request exceeds 2,097,152 bytes (2 MiB), including every JSON field and formatting",
             "content": {
               "application/json": {
                 "schema": {
@@ -18168,7 +18171,8 @@
               }
             }
           }
-        }
+        },
+        "x-qilbee-max-request-body-bytes": 2097152
       }
     },
     "/api/v1/memory/graph-ranking-profiles": {

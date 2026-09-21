@@ -56,9 +56,9 @@ reference at `/docs`. On the local Docker host, open
 running version. Release-stage metadata in these Markdown sources distinguishes
 preview documentation from a validated deployment.
 
-The platform rejects unknown request fields. Vector attachment, cosine search and
-hybrid search accept JSON bodies up to 2 MiB; other routes retain the 65536-byte
-limit. External vector spaces support 1–32768 dimensions, including 3072, subject
+The platform rejects unknown request fields. Vector attachment, cosine, hybrid
+and graph-assisted search accept JSON bodies up to 2 MiB. Other memory routes
+retain the 65536-byte limit; login and login-account JSON requests use 8192 bytes. External vector spaces support 1–32768 dimensions, including 3072, subject
 to the [operator capacity configuration](../operations/retrieval-capacity.md). Start with the [HTTP contract and errors](../api/platform-http.md) when
 integrating a new client. The current default router covers the documented
 platform endpoints; legacy graph and memory routes are a separate compatibility
