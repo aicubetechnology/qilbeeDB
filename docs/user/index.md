@@ -48,6 +48,10 @@ execute tool development outside the database process. These contracts make
 outcomes observable; they do not guarantee that every learned procedure improves
 an agent or that a generated program is safe merely because it was recorded.
 
+The unreleased [company learning catalog](../api/company-learning-catalog.md) adds
+company-wide discovery and inspection of retained experiences, procedures,
+strategies and tools, without requiring a memory record or an active writer key.
+
 ## Use the exact deployed contract
 
 The server publishes its OpenAPI document at `/openapi.json` and an interactive

@@ -18,6 +18,64 @@ impl Drop for Fixture {
         self.server.abort();
     }
 }
+
+#[tokio::test]
+async fn company_learning_capacity_errors_follow_current_administrative_authorization() {
+    let mut f = Fixture::start().await;
+    let requests = [
+        (
+            "/api/v1/company/learning/query",
+            json!({"contract_version":1,"query":{"kind":"experience"}}),
+        ),
+        (
+            "/api/v1/company/learning/read",
+            json!({"contract_version":1,"resource":{"kind":"policy","id":"missing"}}),
+        ),
+    ];
+    let administrator = f
+        .identity
+        .issue(
+            &f.admin,
+            CredentialSpec {
+                subject_id: "catalog-reader".into(),
+                capabilities: [Capability::CredentialAdmin].into(),
+                grants: vec![],
+                scope_policy: None,
+                expires_at_millis: None,
+            },
+        )
+        .unwrap();
+    let permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 403, Some("forbidden")).await;
+    }
+    f.token = administrator.secret;
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+    }
+    drop(permit);
+    f.check(requests[0].0, requests[0].1.clone(), 200, None)
+        .await;
+    f.check(
+        requests[1].0,
+        requests[1].1.clone(),
+        404,
+        Some("record_not_found"),
+    )
+    .await;
+    f.identity
+        .revoke(
+            &f.admin,
+            administrator.credential.id,
+            administrator.credential.revision,
+        )
+        .unwrap();
+    let _permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in requests {
+        f.check(route, body, 401, Some("unauthorized")).await;
+    }
+}
 fn scope() -> Value {
     json!({"project_id":"project","mission_id":null,"agent_id":"agent","visibility":"shared"})
 }

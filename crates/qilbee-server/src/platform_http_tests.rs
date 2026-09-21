@@ -1,4 +1,5 @@
 mod company_memory;
+mod company_learning;
 mod memory_graph;
 mod memory_relations;
 mod typed_graph;

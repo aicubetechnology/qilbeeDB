@@ -148,7 +148,11 @@ async fn batch_read_http_matches_current_records_and_rejects_malformed_batches()
             .all(|e| e["record"].is_null())
     );
     let oversized = format!("{}{}", " ".repeat(65_536), body(json!([ids[1]]), "shared"));
-    let response = reqwest::Client::new()
+    let response = reqwest::Client::builder()
+        .no_proxy()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .unwrap()
         .post(format!("{}{ROUTE}", server.base))
         .bearer_auth(&token)
         .header("Content-Type", "application/json")

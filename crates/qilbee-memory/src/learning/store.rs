@@ -443,3 +443,4 @@ pub mod experience_lineage;
 
 pub mod experience_export;
 pub mod strategies;
+pub mod catalog;
