@@ -162,6 +162,7 @@ nav:
     - Tool Artifacts: agent-memory/tool-artifacts.md
     - Tool Development: agent-memory/tool-development.md
     - Research and Evolution: research/agent-memory-evolution.md
+    - Memory Evidence Graph API: api/memory-evidence-graph.md
     - Graph Memory Evidence: research/graph-memory-evidence.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md

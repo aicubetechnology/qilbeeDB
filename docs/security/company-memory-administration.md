@@ -1,8 +1,8 @@
 # Company memory administration
 
-**Availability:** implemented in the unreleased company inventory feature. These
-routes are not available in the deployed 0.11.0 API. Check the installation's
-`/openapi.json` before integrating them.
+**Availability:** 0.12.0 contract. These routes are not available in versions
+through 0.11.0. Check `/health` and the installation's `/openapi.json` before
+integrating them.
 
 A company administrator can discover and inspect every retained platform memory
 workspace in that company, including each private subject. Discovery reads a
@@ -216,3 +216,11 @@ filtered and byte-limited continuation, eligibility, failed mutation atomicity,
 corruption detection, real HTTP/OpenAPI validation, admission exhaustion, and
 acknowledged writes surviving a killed server process. This validates the
 administrative contract; it does not measure retrieval relevance or agent ability.
+
+## Read current evidence ancestry
+
+The 0.12.0 `POST /api/v1/company/memory/graph` route accepts a workspace ID
+and root memory UUIDs. It returns eligible nodes and revision-bound evidence
+edges in one snapshot, with explicit depth/node cuts. It uses the same company
+administrative authority without delegated credentials. Unlike retained inventory,
+it omits unavailable payloads. See [memory evidence graphs](../api/memory-evidence-graph.md).

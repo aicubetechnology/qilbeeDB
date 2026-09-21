@@ -64,6 +64,11 @@ pub struct CompanyMemoryInspection {
     pub entry: CompanyMemoryEntry,
     pub record_bytes: usize,
 }
+#[derive(Debug, Clone)]
+pub struct CompanyMemoryGraph {
+    pub workspace: CompanyMemoryWorkspace,
+    pub graph: MemoryEvidenceGraph,
+}
 impl CompanyMemoryQuery {
     fn validate(&self) -> Result<()> {
         if !(1..=100).contains(&self.limit) || !(1..=10_000).contains(&self.scan_limit) {
@@ -108,6 +113,24 @@ impl CompanyMemoryQuery {
     }
 }
 impl RocksDbMemoryStorage {
+    /// Resolve the company-owned workspace and eligible evidence in one snapshot.
+    /// The caller must authenticate a company administrator first.
+    pub fn read_company_memory_graph(
+        &self,
+        company: &str,
+        workspace_id: &str,
+        query: &MemoryGraphQuery,
+    ) -> Result<Option<CompanyMemoryGraph>> {
+        address::valid_id(company)?;
+        validate_workspace_id(workspace_id)?;
+        query.validate()?;
+        let snapshot = self.memory_snapshot();
+        let Some(workspace) = snapshot.company_workspace(company, workspace_id)? else {
+            return Ok(None);
+        };
+        let graph = snapshot.evidence_graph(&workspace.address()?.namespace()?, query)?;
+        Ok(Some(CompanyMemoryGraph { workspace, graph }))
+    }
     /// Administrative access is deliberately separate from agent retrieval. The
     /// caller authenticates a company administrator; a workspace ID is not a grant.
     pub fn query_company_memory(

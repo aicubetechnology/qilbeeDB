@@ -1,6 +1,6 @@
 # Durable graph lifecycle
 
-Status: **unreleased Rust library contract**. This guide covers named graphs in
+Status: **0.12.0 Rust library contract**. This guide covers named graphs in
 `qilbee_graph::Database`. It does not add a graph endpoint to the platform HTTP
 API or change memory search ranking. See the [graph memory evidence map](../research/graph-memory-evidence.md)
 for the separate integration and evaluation work.

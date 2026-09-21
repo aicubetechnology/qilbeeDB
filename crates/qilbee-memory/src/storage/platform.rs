@@ -866,6 +866,8 @@ mod tests {
 mod semantic;
 mod batch_read;
 pub use batch_read::*;
+mod evidence_graph;
+pub use evidence_graph::*;
 #[cfg(test)]
 mod semantic_tests;
 pub use semantic::*;

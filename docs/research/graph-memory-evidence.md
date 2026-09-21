@@ -34,10 +34,11 @@ The current [derived memory contract](../api/derived-memory.md) stores explicit
 dependencies on exact source revisions and checks transitive eligibility.
 It is a graph of declared evidence dependencies. It does not extract entities,
 discover causal relationships or expand hybrid search through semantic graph
-neighbors. Displaying those dependencies in an administrative interface does not
-change the search algorithm.
+neighbors. The 0.12.0 [evidence graph API](../api/memory-evidence-graph.md)
+now exposes that ancestry in one scoped snapshot with exact revisions, bounded
+traversal and native company administration. It does not change the search algorithm.
 
-The unreleased [durable graph lifecycle](../architecture/durable-graph-lifecycle.md)
+The 0.12.0 [durable graph lifecycle](../architecture/durable-graph-lifecycle.md)
 corrects three demonstrated defects in the separate Rust graph engine: IDs reused
 after restart, relationship IDs reused after restart, and old records exposed by
 recreating a name. Durable generations and counters are prerequisites for stable
@@ -54,10 +55,11 @@ are not guarantees provided by a graph representation alone.
 
 | Capability | Current status | Required observable contract and evidence |
 | --- | --- | --- |
-| Stable general graph identity | Implemented in the unreleased lifecycle feature | Restart preserves allocation; a retired name creates a fresh generation; stale handles cannot publish writes; failed preparation publishes nothing |
+| Stable general graph identity | Implemented in the 0.12.0 lifecycle feature | Restart preserves allocation; a retired name creates a fresh generation; stale handles cannot publish writes; failed preparation publishes nothing |
 | Revision-bound evidence dependencies | Available through derived memories | Existing source eligibility checks apply to reads and retrieval; changes, rejection and expiration suppress stale derived context |
 | Typed memory relations | Proposed | Exact memory IDs and revisions, relation type, authenticated reporter, extraction/model version, explicit claim or observation status, validity and reversible retirement |
-| Scope-aware graph traversal | Proposed | Authorize company, project, agent, mission and private subject before selecting anchors or traversing neighbors; bound nodes, edges, bytes and depth; report truncation and evidence paths |
+| Evidence ancestry traversal | Implemented in the 0.12.0 evidence graph API | Exact-scope outgoing `derived_from` relations, one snapshot and clock, eligible payloads, depth/node cuts, shared admission and company workspace access |
+| Semantic/entity graph traversal | Proposed | Authorize company, project, agent, mission and private subject before selecting anchors or traversing neighbors; bound nodes, edges, bytes and depth; report truncation and evidence paths |
 | Graph-assisted retrieval | Proposed | Versioned server policy, reproducible anchors and tie-breaking, exact eligible revisions, separate channel scores and observable fallback; preserve existing cosine semantics |
 | Asynchronous consolidation | Proposed | External workers resume from checkpoints; late or duplicate work cannot publish stale relations; record partial or unknown execution without inventing completion |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |

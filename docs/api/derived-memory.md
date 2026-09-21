@@ -173,3 +173,11 @@ path bound when the same subtree appears at different depths. All normal serving
 paths use this transitive check, including BM25 corpus construction. There is no
 asynchronous descendant rewrite or eventual-consistency window introduced by a
 background propagation worker.
+
+## Traverse source ancestry
+
+The 0.12.0 [memory evidence graph API](memory-evidence-graph.md) reads current
+`derived_from` ancestry from explicit roots in one authorized snapshot. It
+returns eligible records and exact revision-bound edges, deduplicates shared
+sources, and reports traversal coverage. Display limits never skip the complete
+eligibility checks required for a returned record.

@@ -72,5 +72,6 @@ finding**. These are observations for this candidate, not a vulnerability-free c
   but the affected `Pod::Text` module is absent. The server does not process POD
   documents. Retain the scan finding and package inventory for reassessment.
 
-The AWS service remains private until deployment, persistence, login, and isolated
-restore qualification finishes. Functional tests do not replace a penetration test.
+These findings describe the first 0.11.0 candidate, not a scan of later releases.
+Every later image needs its own package assessment, functional checks and recovery
+qualification before deployment. Functional tests do not replace a penetration test.

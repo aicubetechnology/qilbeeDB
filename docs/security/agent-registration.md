@@ -1,8 +1,8 @@
 # Automatic agent registration
 
-**Availability:** implemented in the unreleased automatic-registration feature.
-The deployed 0.11.0 API does not expose this directory. Check the installation's
-published OpenAPI before using `GET /api/v1/agents`.
+**Availability:** 0.12.0 contract. Versions through 0.11.0 do not expose this
+directory. Check `/health` and the installation's published OpenAPI before using
+`GET /api/v1/agents`.
 
 Your application assigns each agent its ID. On the first successful authorized
 resource request carrying that ID, QilbeeDB durably records the association
@@ -221,7 +221,7 @@ both associations and the original memory receipt after restart. These checks
 validate the registration contract; they do not establish retrieval relevance or
 improved agent reasoning.
 
-The unreleased [company memory inventory](company-memory-administration.md) is a
+The 0.12.0 [company memory inventory](company-memory-administration.md) is a
 separate directory derived from retained memory storage. Its startup migration
 includes pre-existing private workspaces without fabricating historical agent
 registration events.
