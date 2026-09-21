@@ -716,8 +716,14 @@ mod verified_changes;
 
 mod verified_checkpoints;
 mod consumer_diagnostics;
+mod batch_read;
 
 mod hybrid_schema;
 mod journal_audit;
 mod history_errors;
 mod strategies;
+mod administration;
+
+mod login;
+
+mod directory;

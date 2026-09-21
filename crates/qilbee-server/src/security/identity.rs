@@ -6,6 +6,13 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeSet, sync::Arc};
 use uuid::Uuid;
 
+mod master;
+pub use master::{
+    DirectoryPage, GlobalCapability, GlobalCredentialSpec, GlobalCredentialView,
+    IssuedGlobalCredential, LoginAccountView, LoginAuthority, LoginSession, TenantDirectoryEntry,
+    TenantView,
+};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Capability {
@@ -166,7 +173,8 @@ impl IdentityStore {
             "issued",
         );
         let key = credential_key(id);
-        self.commit(
+        self.commit_authenticated(
+            admin,
             vec![
                 condition(&credential_key(actor.credential.id), Some(actor_bytes)),
                 condition(&key, None),
@@ -292,7 +300,7 @@ impl IdentityStore {
         } else if expected[0].expected.as_deref() != Some(actor_bytes.as_slice()) {
             return Err(conflict());
         }
-        self.commit(expected, vec![write(&key, encode(&record)?)])?;
+        self.commit_authenticated(admin, expected, vec![write(&key, encode(&record)?)])?;
         Ok((record, secret))
     }
 
@@ -311,6 +319,9 @@ impl IdentityStore {
     }
 
     fn authenticated_record(&self, token: &str, now: i64) -> Result<(StoredCredential, Vec<u8>)> {
+        if token.starts_with("qdbst1_") {
+            return self.tenant_session_record(token, now);
+        }
         use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
         use hmac::{Hmac, Mac};
         // Limit parsing work and require canonical encodings for the 256-bit secret.
@@ -377,9 +388,40 @@ impl IdentityStore {
 
     fn commit(
         &self,
-        expected: Vec<qilbee_storage::MetadataCondition>,
-        writes: Vec<qilbee_storage::MetadataWrite>,
+        mut expected: Vec<qilbee_storage::MetadataCondition>,
+        mut writes: Vec<qilbee_storage::MetadataWrite>,
     ) -> Result<()> {
+        let mut indexes = Vec::new();
+        for update in &writes {
+            if update.key.starts_with("identity/v1/credential/") {
+                if let Some(bytes) = &update.value {
+                    let record: StoredCredential = serde_json::from_slice(bytes)
+                        .map_err(|_| Error::DataCorruption("Invalid indexed credential".into()))?;
+                    if update.key != credential_key(record.credential.id) {
+                        return Err(Error::DataCorruption("Credential identity mismatch".into()));
+                    }
+                    let index = tenant_credential_index(
+                        &record.credential.tenant_id,
+                        record.credential.id,
+                    )?;
+                    let value = serde_json::to_vec(&record.credential.id)
+                        .map_err(|e| Error::Serialization(e.to_string()))?;
+                    match self.storage.get_meta(&index)? {
+                        None => {
+                            expected.push(condition(&index, None));
+                            indexes.push(write(&index, value));
+                        }
+                        Some(existing) if existing == value => {}
+                        Some(_) => {
+                            return Err(Error::DataCorruption(
+                                "Invalid tenant credential index".into(),
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        writes.extend(indexes);
         if self.storage.compare_and_write_meta(&expected, &writes)? {
             Ok(())
         } else {
@@ -393,6 +435,15 @@ fn denied() -> Error {
 }
 fn conflict() -> Error {
     Error::TransactionConflict("Credential revision or tenant authority changed".into())
+}
+fn tenant_credential_prefix(tenant: &str) -> Result<String> {
+    Ok(format!(
+        "identity/v1/tenant-credential/{}/",
+        serialize_string(tenant)?
+    ))
+}
+fn tenant_credential_index(tenant: &str, id: Uuid) -> Result<String> {
+    Ok(format!("{}{id}", tenant_credential_prefix(tenant)?))
 }
 fn credential_key(id: Uuid) -> String {
     format!("identity/v1/credential/{id}")

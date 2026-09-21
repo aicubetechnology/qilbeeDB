@@ -8,6 +8,13 @@ use tracing_subscriber::EnvFilter;
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("health-check") {
+        if args.len() != 1 || qilbee_server::health_probe::check().is_err() {
+            eprintln!("QilbeeDB health check failed");
+            std::process::exit(1);
+        }
+        return;
+    }
     match qilbee_server::operator::bootstrap_command(&args) {
         Ok(Some(result)) => {
             // This is the explicit operator result, not an application log.

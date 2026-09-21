@@ -25,6 +25,10 @@ fn query(mode: &str) -> (String, Value) {
     let space = json!({"provider":"fixture","model":"capacity","revision":"v1","dimensions":3});
     let mut body = json!({"contract_version":1,"scope":scope(),"query":{"space":space,"vector":[1,0,0],"limit":10,"scan_limit":10}});
     let route = match mode {
+        "batch" => {
+            body = json!({"contract_version":1,"scope":scope(),"record_ids":[Uuid::new_v4()]});
+            "/api/v1/memory/records/batch"
+        }
         "semantic" => "/api/v1/memory/search",
         "hybrid" => {
             body["mode"] = "hybrid".into();
@@ -164,7 +168,7 @@ async fn dimension_and_scan_limits_match_served_schemas() {
 async fn busy_slots_preserve_authorization_precedence_and_release() {
     let f = Fixture::start().await;
     let permit = f.limits.acquire().ok().unwrap();
-    for mode in ["semantic", "lexical", "hybrid"] {
+    for mode in ["semantic", "lexical", "hybrid", "batch"] {
         let (route, body) = query(mode);
         f.check(&route, body.clone(), 503, Some("retrieval_busy"))
             .await;
@@ -173,7 +177,7 @@ async fn busy_slots_preserve_authorization_precedence_and_release() {
         f.check(&route, wrong, 403, Some("forbidden")).await;
     }
     drop(permit);
-    for mode in ["semantic", "lexical", "hybrid"] {
+    for mode in ["semantic", "lexical", "hybrid", "batch"] {
         let (route, body) = query(mode);
         f.check(&route, body, 200, None).await;
     }

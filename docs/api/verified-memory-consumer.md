@@ -2,9 +2,10 @@
 
 The source SDK includes `VerifiedMemoryConsumer`, a synchronous, standard-library
 client for the verified memory feed. It requires a server exposing
-`/api/v2/memory/consumers/diagnose` from the **0.10.0 feature preview**. Earlier
-0.10.0 images do not expose that route. This SDK feature is unreleased; installing
-an existing PyPI package does not establish that it is available.
+`/api/v2/memory/consumers/diagnose`, included in merged main 0.10.0 at
+`e4308e1bcda13b87158ae6bef1fc023fe9cd787f`. Earlier 0.10.0 preview images do not
+expose that route. This SDK is available from source; installing an existing
+PyPI package does not establish that the consumer is available.
 
 The client reads one bounded page, validates it before delivering any events,
 applies durable effects through your sink, and commits progress with the exact
@@ -93,6 +94,11 @@ A separate worker must refetch current authorized memory, handle missing records
 and revision changes, and expire cached data independently. The event feed contains
 no record bodies or embeddings. Clock-driven expiry emits no event, and receiving
 an event does not prove that its old revision is still available or authorized.
+
+When the server advertises `/api/v1/memory/records/batch`, the application can
+[reread a group](memory-batch-read.md) in one record/dependency snapshot and compare
+every retained revision. The SDK does not automatically make that request or
+provide a reusable context cache. Batch evaluation is not a freshness lease.
 
 ## Initialize only after reconciliation
 

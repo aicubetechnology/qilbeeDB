@@ -67,3 +67,7 @@ TLS termination and operator-managed credentials.
 See [configure retrieval capacity](../operations/retrieval-capacity.md) for support
 through 32,768 dimensions, including 3,072, explicit scan-byte budgets and bounded
 concurrent retrieval. The ranking catalog reports the active operator settings.
+
+## Production image qualification
+
+The production runtime uses a digest-pinned Debian Trixie base with package updates applied during the build. Validate both API behavior and the image vulnerability scan before release; a passing functional test suite does not establish that system libraries are patched. See [container security qualification](../security/container-security.md) for the recorded image and limits.

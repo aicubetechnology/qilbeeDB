@@ -1,5 +1,5 @@
 {
-  "release": "0.10.0",
+  "release": "0.11.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -224,6 +224,48 @@
       "title": "Python memory consumer",
       "description": "Resume verified events from durable effects, commit progress safely, and reconcile failures without overwriting checkpoints.",
       "order": 63
+    },
+    {
+      "source": "docs/security/global-administration.md",
+      "file": "global-administration.md",
+      "title": "Global administration and SaaS provisioning",
+      "description": "Bootstrap a master, delegate registration-only service keys and administer companies with separate global and tenant authority.",
+      "order": 35
+    },
+    {
+      "source": "docs/security/container-security.md",
+      "file": "container-security.md",
+      "title": "Container security qualification",
+      "description": "Inspect runtime package updates, scan evidence and the boundaries of container qualification.",
+      "order": 27
+    },
+    {
+      "source": "docs/security/human-login.md",
+      "file": "administrator-login.md",
+      "title": "Administrator accounts and login",
+      "description": "Provision human accounts, sign in with bounded sessions and manage passwords within the correct company or global authority.",
+      "order": 38
+    },
+    {
+      "source": "docs/security/administration-directory.md",
+      "file": "administration-directory.md",
+      "title": "Administrative directories",
+      "description": "Enumerate authorized companies, credentials and human accounts with bounded pages and explicit browser-origin configuration.",
+      "order": 39
+    },
+    {
+      "source": "docs/api/memory-batch-read.md",
+      "file": "memory-batch-read.md",
+      "title": "Read memory batches",
+      "description": "Read current context records in one authorized snapshot and handle expiry, dependencies and bounded work.",
+      "order": 54
+    },
+    {
+      "source": "docs/research/context-consumer-qualification.md",
+      "file": "context-consumer-qualification.md",
+      "title": "Context consumer qualification",
+      "description": "Inspect attributed consumer recovery evidence and the acceptance boundaries for current context reuse.",
+      "order": 64
     }
   ]
 }
