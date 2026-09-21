@@ -49,3 +49,28 @@ This process does not establish that the software has no vulnerabilities. A
 current scan is a time-bounded observation, and functional acceptance is separate
 from independent penetration testing. Reassess future releases and rebuild when
 maintainer security updates become available.
+
+## Qualified candidate and remaining findings
+
+The ARM64 candidate at source revision `6da42e216d588df70a85ddd62570abd861acd2f2`
+passed 541 Rust tests, 51 disposable-container acceptance tests, 13 existing route
+smokes, 20 global-authority HTTP checks and the native health probe. Its ECR digest
+is `sha256:a741f8bdd3972628c284d62a3c995e50899cef8fdf0e3f52b7961079c4610e1f`.
+The completed scan reported **zero critical, one high and one undefined-severity
+finding**. These are observations for this candidate, not a vulnerability-free claim.
+
+- **CVE-2026-85091 (high):** the installed zlib package remains flagged and the
+  [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2026-85091) does
+  not provide a fixed Trixie package at qualification time. The advisory concerns
+  nonblocking gzip file writes followed by `gzprintf`/`gzvprintf`. The platform
+  exposes JSON contracts and does not offer gzip file-writing or arbitrary-code
+  execution endpoints. zlib remains a transitive shared-library dependency; this
+  limited exposure assessment does not prove every native call path unreachable.
+  Keep the finding open and rebuild when a vendor fix is available.
+- **CVE-2026-82560 (undefined):** the scanner attributes a POD text-formatting
+  exhaustion issue to the Perl source package. The runtime contains `perl-base`,
+  but the affected `Pod::Text` module is absent. The server does not process POD
+  documents. Retain the scan finding and package inventory for reassessment.
+
+The AWS service remains private until deployment, persistence, login, and isolated
+restore qualification finishes. Functional tests do not replace a penetration test.
