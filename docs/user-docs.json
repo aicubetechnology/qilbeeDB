@@ -378,6 +378,13 @@
       "title": "Agent display names and history",
       "description": "Discover registered agents, name them without changing identity, and recover concurrent or unconfirmed edits.",
       "order": 44
+    },
+    {
+      "source": "docs/api/learning-evidence-history.md",
+      "file": "learning-evidence-history.md",
+      "title": "Inspect learning evidence and historical outcomes",
+      "description": "Discover original evaluation submissions, paired receipts, experience observations and tool development events with bounded authorized continuation.",
+      "order": 213
     }
   ]
 }

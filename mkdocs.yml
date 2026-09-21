@@ -172,6 +172,7 @@ nav:
     - Typed Relation Changes API: api/typed-relation-changes.md
     - Graph-assisted Retrieval API: api/graph-assisted-retrieval.md
     - Company Learning Catalog: api/company-learning-catalog.md
+    - Learning Evidence History: api/learning-evidence-history.md
     - Graph Memory Evidence: research/graph-memory-evidence.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md

@@ -44,7 +44,7 @@ pub struct ToolArtifact {
     pub recorded_at_millis: i64,
 }
 impl ToolArtifactProposal {
-    fn validate(&self) -> Result<()> {
+    pub(super) fn validate(&self) -> Result<()> {
         validate_text(&self.id, "artifact ID", 512)?;
         validate_text(&self.source, "artifact source", 24 * 1024)?;
         validate_text(&self.entrypoint, "entrypoint", 512)?;

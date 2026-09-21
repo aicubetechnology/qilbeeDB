@@ -115,3 +115,7 @@ Four immutable experimental profiles expose separate base and graph contribution
 coverage and provenance. Existing search scores and defaults remain unchanged;
 the [reserved comparison](../research/graph-retrieval-results.md) found uncertain
 mean improvement and material regressions. Agent-task benefits remain unmeasured.
+
+The unreleased [learning evidence history](../api/learning-evidence-history.md)
+lets administrators inspect original evaluation submissions and retained events
+from a selected learning resource, with explicit historical states and recovery.
