@@ -141,3 +141,8 @@ work and latency are not constant-time guarantees. To check intermediate events,
 use the [bounded journal audit](verified-memory-changes.md#audit-a-bounded-journal-range)
 and retain its explicit coverage. A successful diagnostic can coexist with
 unencountered middle-history corruption; it is not a full-volume integrity claim.
+
+The [lightweight Python consumer](verified-memory-consumer.md) uses this diagnostic
+with a destination-owned durable witness before applying a bounded verified page.
+It treats incompatible history as a reconciliation condition and does not reset
+checkpoints automatically.

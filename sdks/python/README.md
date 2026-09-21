@@ -586,3 +586,19 @@ Apache License 2.0
 - Documentation: https://docs.qilbeedb.com
 - Issues: https://github.com/your-org/qilbeedb/issues
 - Email: contact@aicube.ca
+
+## Verified memory consumer (source preview)
+
+`VerifiedMemoryConsumer` is a standard-library-only client for the scoped v2
+change feed and checkpoints. It requires the consumer-diagnostics feature in the
+0.10.0 server preview and an application-owned durable sink witness. It validates
+a whole page before callbacks, commits exact revision/digest comparisons only
+after durable effects, and stops on incompatible history or uncertain responses.
+It never initializes or rewinds progress implicitly. Existing PyPI releases do
+not imply availability of this source feature.
+
+See [the consumer guide](../../docs/api/verified-memory-consumer.md) for initial
+reconciliation, fixed fences, errors and limitations. The standard-library
+[SQLite invalidation example](examples/verified_consumer_sink.py) demonstrates a
+transactional effect/deduplication/witness boundary. SQLite is optional; applications
+can implement the same two-method sink protocol on their own durable destination.
