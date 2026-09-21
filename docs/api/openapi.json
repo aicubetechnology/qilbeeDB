@@ -9243,6 +9243,387 @@
           }
         }
       }
+    },
+    "/api/v1/learning/strategies": {
+      "post": {
+        "operationId": "proposeExperienceStrategy",
+        "summary": "Register a strategy candidate from exact experience observations",
+        "description": "Requires procedure_propose and experience_read for the exact scope. Validates 1-16 distinct immutable development observations and registers the strategy and procedure atomically. Does not admit evaluation evidence or activate a procedure. Extraction remains external.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrategyCandidateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Strategy, source observation, policy or context is missing in the authorized namespace.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Changed immutable candidate, conflicting procedure ID, or mismatched evidence/context digest.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyCandidateRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "strategy": {
+                  "id": "receipt-recovery-v1",
+                  "policy_id": "policy-v1",
+                  "context_id": "context-v1",
+                  "instructions": "Read the operation receipt before deciding whether to retry.",
+                  "preconditions": [
+                    "The operation provides a durable receipt lookup."
+                  ],
+                  "counterexamples": [
+                    "A timeout alone does not establish that the operation failed."
+                  ],
+                  "extractor": {
+                    "provider": "external-provider",
+                    "model": "external-extractor",
+                    "model_revision": "model-v1",
+                    "prompt_revision": "extraction-v1",
+                    "evidence_ref": "trace://development/receipt-recovery"
+                  },
+                  "selection": {
+                    "context_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "accounting_unit": "tokens",
+                    "events": [
+                      {
+                        "attempt_id": "development-failure-1",
+                        "event_id": "observed-failure",
+                        "event_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/strategies/read": {
+      "post": {
+        "operationId": "readExperienceStrategy",
+        "summary": "Read the original strategy evidence receipt",
+        "description": "Requires memory_read and experience_read for the exact scope. Revalidates the immutable observation and procedure bindings. The receipt retains original candidate state after later qualification; read the procedure for current state.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrategyCandidateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Strategy, source observation, policy or context is missing in the authorized namespace.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Changed immutable candidate, conflicting procedure ID, or mismatched evidence/context digest.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyCandidateReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "strategy_id": "receipt-recovery-v1"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -16357,6 +16738,247 @@
             }
           }
         ]
+      },
+      "StrategyExtractor": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "model_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "prompt_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Nonblank, at most 2048 UTF-8 bytes; server limits bytes, not Unicode code points."
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "model_revision",
+          "prompt_revision",
+          "evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyObservationSelection": {
+        "type": "object",
+        "properties": {
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperienceExportRef"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "context_digest",
+          "accounting_unit",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyCandidate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16384,
+            "description": "Nonblank, at most 16384 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "preconditions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank, at most 1024 UTF-8 bytes; server limits bytes, not Unicode code points."
+            }
+          },
+          "counterexamples": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank, at most 1024 UTF-8 bytes; server limits bytes, not Unicode code points."
+            }
+          },
+          "extractor": {
+            "$ref": "#/components/schemas/StrategyExtractor"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/StrategyObservationSelection"
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "instructions",
+          "preconditions",
+          "counterexamples",
+          "extractor",
+          "selection"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyCandidateReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "method_version": {
+            "type": "string",
+            "const": "qilbee.experience-strategy.v1"
+          },
+          "request": {
+            "$ref": "#/components/schemas/StrategyCandidate"
+          },
+          "export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ExperienceExportSummary"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/ProposalReceipt"
+          },
+          "strategy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "method_version",
+          "request",
+          "export_digest",
+          "summary",
+          "proposal",
+          "strategy_digest"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyCandidateRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/StrategyCandidate"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "strategy"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyCandidateReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "strategy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "strategy_id"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyCandidateResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/StrategyCandidateReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
       }
     }
   }

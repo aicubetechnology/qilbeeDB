@@ -134,6 +134,7 @@ nav:
       - Hybrid Memory Retrieval: api/hybrid-memory.md
       - Procedural Learning API: api/procedural-learning.md
       - Experience Receipts: api/experiences.md
+      - Experience Strategy Candidates: api/experience-strategies.md
       - Learned Tool API: api/learned-tools.md
       - Durable HTTP Memory: api/durable-http-memory.md
   - Agent Memory:

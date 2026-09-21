@@ -29,3 +29,4 @@ pub use store::experience_artifacts::*;
 pub use store::experience_lineage::*;
 
 pub use store::experience_export::*;
+pub use store::strategies::*;

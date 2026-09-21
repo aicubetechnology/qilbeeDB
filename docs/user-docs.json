@@ -124,7 +124,7 @@
       "source": "docs/research/experience-memory-design.md",
       "file": "experience-memory-design.md",
       "title": "Experience-driven memory research",
-      "description": "Map reasoning memory, shared evidence and discovery replay research to proposed contracts and acceptance criteria.",
+      "description": "Trace supplied memory research to implemented foundations, planned learning capabilities and acceptance evidence.",
       "order": 150
     },
     {
@@ -182,6 +182,13 @@
       "title": "Verified consumer checkpoints",
       "description": "Persist history-bound progress with exact checkpoint comparison and explicit migration.",
       "order": 61
+    },
+    {
+      "source": "docs/api/experience-strategies.md",
+      "file": "experience-strategies.md",
+      "title": "Experience-backed strategy candidates",
+      "description": "Register structured strategies from exact experience observations and qualify them through the existing learning authority.",
+      "order": 97
     }
   ]
 }

@@ -103,4 +103,5 @@ continues to own qualification and selection. Experience exports do not bypass i
 evidence rules or automatically activate a procedure. Retrieval ranking metrics
 and synthetic contract tests are separate from evidence of improved agent-task
 performance. The [research design](experience-memory-design.md) describes the
-remaining derivation, source-invalidation and replay work.
+implemented source-revision and [strategy candidate](../api/experience-strategies.md)
+foundations, plus remaining mutable-source eligibility and replay work.
