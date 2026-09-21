@@ -174,6 +174,7 @@ nav:
     - Durable Scoped Credentials: security/scoped-credentials.md
     - Automatic Agent Registration: security/agent-registration.md
     - Company Integration Policies: security/company-integrations.md
+    - Company Memory Administration: security/company-memory-administration.md
     - Administrator login: security/human-login.md
     - Administrative directories: security/administration-directory.md
     - Authorization (RBAC): security/authorization.md

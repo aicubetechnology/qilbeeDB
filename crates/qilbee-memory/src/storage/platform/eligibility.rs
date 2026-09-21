@@ -158,7 +158,7 @@ impl MemorySnapshot<'_> {
     pub(super) fn eligible(&self, namespace: &str, record: &MemoryRecord) -> Result<bool> {
         Ok(self.explain_eligibility(namespace, record)?.eligible)
     }
-    fn explain_eligibility(
+    pub(super) fn explain_eligibility(
         &self,
         namespace: &str,
         record: &MemoryRecord,

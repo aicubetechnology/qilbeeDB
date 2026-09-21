@@ -37,21 +37,10 @@ pub enum Capability {
     CredentialAdmin,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Visibility {
-    Private,
-    Shared,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct ResourceScope {
-    pub project_id: String,
-    pub mission_id: Option<String>,
-    pub agent_id: String,
-    pub visibility: Visibility,
-}
+use qilbee_memory::storage::platform::CompanyMemoryAddress;
+pub use qilbee_memory::storage::platform::{
+    MemoryResourceScope as ResourceScope, MemoryVisibility as Visibility,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -228,11 +217,11 @@ impl IdentityStore {
             Visibility::Private => Some(credential.spec.subject_id.as_str()),
             Visibility::Shared => None,
         };
-        let namespace = serde_json::to_string(&(&credential.tenant_id, scope, private_subject))
-            .map_err(|e| Error::Serialization(e.to_string()))?;
+        let namespace =
+            CompanyMemoryAddress::new(&credential.tenant_id, scope, private_subject)?.namespace()?;
         Ok(AuthorizedScope {
             credential_id: credential.id,
-            storage_namespace: format!("qdb:scope:v1:{namespace}"),
+            storage_namespace: namespace,
             tenant_id: credential.tenant_id,
             subject_id: credential.spec.subject_id,
         })
