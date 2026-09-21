@@ -14,7 +14,7 @@ RUN --mount=type=cache,id=qilbeedb-cargo-registry,target=/usr/local/cargo/regist
     install -m 0755 target/release/qilbeedb /usr/local/bin/qilbeedb
 
 FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS runtime
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates curl libssl3t64 libstdc++6 && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates libssl3t64 libstdc++6 && rm -rf /var/lib/apt/lists/* && \
     groupadd --gid 10001 qilbee && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin qilbee && \
     install -d -o qilbee -g qilbee -m 0700 /data
 COPY --from=build /usr/local/bin/qilbeedb /usr/local/bin/qilbeedb
@@ -27,6 +27,6 @@ LABEL org.opencontainers.image.title="QilbeeDB" \
 USER 10001:10001
 WORKDIR /data
 EXPOSE 7474
-HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 CMD curl --fail --silent http://127.0.0.1:7474/health > /dev/null || exit 1
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 CMD ["/usr/local/bin/qilbeedb", "health-check"]
 ENTRYPOINT ["/usr/local/bin/qilbeedb"]
 CMD ["/data"]

@@ -26,6 +26,12 @@ qualified through the complete disposable-container acceptance suite, including
 credential lifecycle and crash recovery. The update does not change API scores,
 retrieval defaults or embedding generation.
 
+## Built-in health probe
+
+The container no longer installs curl or its optional protocol libraries solely for health checks. `qilbeedb health-check` connects only to `127.0.0.1:7474`, bounds its response to 8 KiB, uses socket timeouts, refuses redirects and requires the current server version with a healthy status. Docker applies a three-second overall probe timeout. The probe validates process health, not scoped write readiness or storage recovery.
+
+The first Trixie scan also flagged curl. Removing this unused general-purpose client reduces the runtime dependency surface; package metadata remains intact for scanning.
+
 ## Release evidence
 
 Record the candidate's exact image digest and package versions after building.

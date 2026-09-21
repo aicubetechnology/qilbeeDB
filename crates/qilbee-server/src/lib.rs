@@ -30,5 +30,6 @@ pub use security::{
 mod platform_http_tests;
 
 pub mod operator;
+pub mod health_probe;
 
 pub mod platform_http;
