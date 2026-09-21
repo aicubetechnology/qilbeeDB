@@ -241,3 +241,9 @@ with fixed model, prompts and tools. Neither test class substitutes for the othe
 
 See [retrieval evaluation](../research/retrieval-evaluation.md) for the comparison
 protocol and [OpenAPI](openapi.json) for exact wire shapes.
+
+`X-Qilbee-Retrieval-Micros` reports monotonic elapsed time after authorization and
+retrieval admission, covering seed selection, traversal, affinities and ranking.
+It excludes JSON serialization, network transport and external embedding generation.
+Measure complete client latency separately and preserve query-embedding timing
+when estimating end-to-end costs; the header is elapsed wall time, not CPU time.

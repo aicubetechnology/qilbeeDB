@@ -21,7 +21,7 @@ COPY --from=build /usr/local/bin/qilbeedb /usr/local/bin/qilbeedb
 COPY LICENSE /usr/share/doc/qilbeedb/LICENSE
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="QilbeeDB" \
-    org.opencontainers.image.version="0.12.0" \
+    org.opencontainers.image.version="0.13.0" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.source="https://github.com/aicubetechnology/qilbeeDB"
 USER 10001:10001
