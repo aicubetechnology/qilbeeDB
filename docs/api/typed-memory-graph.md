@@ -1,6 +1,6 @@
 # Traverse a typed memory graph
 
-Status: **unreleased 0.13.0 contract**. Read a bounded neighborhood of
+Status: **0.13.0 contract**. Read a bounded neighborhood of
 [typed memory assertions](typed-memory-relations.md), with current eligible
 memories, exact endpoint revisions, original provenance and explicit coverage.
 The server evaluates the graph in one storage snapshot and at one clock value.

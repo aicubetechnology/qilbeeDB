@@ -7,7 +7,7 @@ but the paired interval includes zero. Queries with no labeled support increased
 from 3% to 8%, and retrieval p95 increased by 26.6%. **The result does not qualify
 graph retrieval as a default.** The API remains an explicit experimental option.
 
-These are native laboratory measurements of the unreleased 0.13.0 serving path,
+These are native laboratory measurements taken before the 0.13.0 release,
 not production qualification or evidence of improved agent reasoning. The
 [protocol](graph-retrieval-evaluation.md) describes selection, external graph
 construction, isolation, metrics and reproduction. No source-paper experiment

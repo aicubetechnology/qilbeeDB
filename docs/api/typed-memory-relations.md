@@ -1,6 +1,6 @@
 # Typed memory relations
 
-Status: **unreleased 0.13.0 contract**. Record a directed assertion between two
+Status: **0.13.0 contract**. Record a directed assertion between two
 current memories, retain its provenance and review history, and revalidate both
 endpoints before serving it. This API is the durable foundation for typed memory
 graphs. It does not expand search or extract relations. Use the

@@ -2,7 +2,7 @@
 
 Use graph-assisted retrieval when relevant memories may be connected by explicit
 entity, temporal, semantic or evidential assertions that a direct query misses.
-This **unreleased 0.13.0** API selects initial memories, traverses their typed
+This **0.13.0** API selects initial memories, traverses their typed
 relations and returns ranked memories with the exact paths used. It is opt-in and
 experimental. No relevance, latency or agent-task improvement has been established.
 

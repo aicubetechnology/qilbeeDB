@@ -156,7 +156,7 @@ at immutable commit `81eb9626516e85a55ac15a5273fad5af987717d4`.
 The observations SHA-256 is
 `ddec8b14f42aec0aee301f7992ef6ebe2ee8bc6f394efea680800ceca19096a2`.
 This is attributed external acceptance, distinct from the earlier local Docker
-measurement and from qualification of the unreleased typed-relation contract.
+measurement and from the separate qualification of the 0.13.0 typed-relation contract.
 
 The application replaced five individual source reads with one existing batch
 request, retaining its feed and checkpoint checks. Six sequential pairs used a

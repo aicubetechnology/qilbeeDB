@@ -1,6 +1,6 @@
 # Consume typed relation changes and retain progress
 
-**Unreleased 0.13.0.** This contract delivers committed changes to
+**Available in 0.13.0.** This contract delivers committed changes to
 [typed memory relations](typed-memory-relations.md), with history-bound cursors
 and durable, subject-owned consumer checkpoints. Use it to invalidate cached
 [typed graphs](typed-memory-graph.md) or drive external consolidation workers.

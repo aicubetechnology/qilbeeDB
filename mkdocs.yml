@@ -81,6 +81,7 @@ nav:
   - Home: index.md
   - Platform User Guides:
     - Overview: user/index.md
+    - Release 0.13.0: releases/0.13.0.md
     - Memory Quickstart: user/quickstart.md
     - Local Docker: user/deployment.md
     - Global administration: security/global-administration.md
