@@ -231,6 +231,13 @@
       "title": "Global administration and SaaS provisioning",
       "description": "Bootstrap a master, delegate registration-only service keys and administer companies with separate global and tenant authority.",
       "order": 35
+    },
+    {
+      "source": "docs/security/container-security.md",
+      "file": "container-security.md",
+      "title": "Container security qualification",
+      "description": "Inspect runtime package updates, scan evidence and the boundaries of container qualification.",
+      "order": 27
     }
   ]
 }

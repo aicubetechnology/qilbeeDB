@@ -84,6 +84,7 @@ nav:
     - Memory Quickstart: user/quickstart.md
     - Local Docker: user/deployment.md
     - Global administration: security/global-administration.md
+    - Container security: security/container-security.md
     - Retrieval Evaluation: research/retrieval-evaluation.md
     - Retrieval history qualification: research/retrieval-history-report.md
     - Retrieval evidence and regressions: research/retrieval-regressions.md
