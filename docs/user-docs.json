@@ -1,5 +1,5 @@
 {
-  "release": "0.12.0",
+  "release": "0.13.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -308,6 +308,13 @@
       "title": "Memory evidence graphs",
       "description": "Read authorized evidence ancestry in one snapshot with exact revisions, root availability, bounded traversal and native company administration.",
       "order": 66
+    },
+    {
+      "source": "docs/api/typed-memory-relations.md",
+      "file": "typed-memory-relations.md",
+      "title": "Typed memory relations",
+      "description": "Store revision-bound graph assertions with authenticated provenance, durable lifecycle receipts, review authority and current endpoint eligibility.",
+      "order": 67
     }
   ]
 }

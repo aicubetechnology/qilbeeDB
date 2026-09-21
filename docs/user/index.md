@@ -85,3 +85,8 @@ which research informs the next memory integration and what remains unimplemente
 Use the 0.12.0 [memory evidence graph API](../api/memory-evidence-graph.md) to
 read revision-bound ancestry in a single authorized snapshot, including native
 company administration and explicit traversal coverage.
+
+The unreleased 0.13.0 [typed memory relation API](../api/typed-memory-relations.md)
+stores semantic, entity, temporal, causal, support and contradiction assertions
+with exact endpoint revisions, declared provenance and separate review authority.
+It does not yet change retrieval or provide a relation change feed.

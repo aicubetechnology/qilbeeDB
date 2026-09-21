@@ -196,6 +196,51 @@ async fn busy_slots_preserve_authorization_precedence_and_release() {
 }
 
 #[tokio::test]
+async fn typed_relation_routes_share_admission_after_authorization() {
+    let f = Fixture::start().await;
+    let id = Uuid::new_v4();
+    let requests = [
+        (
+            "/api/v1/memory/relations/commands",
+            json!({"contract_version":1,"scope":scope(),"idempotency_key":"retire-missing","operation":{"type":"retire","relation_id":id,"expected_revision":1,"evidence_ref":"trace://capacity"}}),
+        ),
+        (
+            "/api/v1/memory/relations/read",
+            json!({"contract_version":1,"scope":scope(),"relation_id":id}),
+        ),
+        (
+            "/api/v1/memory/relations/inspect",
+            json!({"contract_version":1,"scope":scope(),"relation_id":id}),
+        ),
+        (
+            "/api/v1/memory/relations/revision",
+            json!({"contract_version":1,"scope":scope(),"relation_id":id,"revision":1}),
+        ),
+    ];
+    let permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+        let mut unauthorized = body.clone();
+        unauthorized["scope"]["agent_id"] = "outside".into();
+        f.check(route, unauthorized, 403, Some("forbidden")).await;
+    }
+    drop(permit);
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 404, Some("record_not_found"))
+            .await;
+    }
+    let principal = f.identity.authenticate(&f.token).unwrap();
+    f.identity
+        .revoke(&f.admin, principal.id, principal.revision)
+        .unwrap();
+    let _permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in requests {
+        f.check(route, body, 401, Some("unauthorized")).await;
+    }
+}
+
+#[tokio::test]
 async fn absent_reviews_match_served_schemas_without_cross_scope_probes() {
     let f = Fixture::start().await;
     for route in [

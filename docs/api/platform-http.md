@@ -181,3 +181,8 @@ for the global and tenant endpoints, password lifecycle, cooldowns and exact lim
 The 0.12.0 [memory evidence graph routes](memory-evidence-graph.md) provide
 scoped and company-administrative ancestry reads, exact revision-bound edges and
 explicit coverage under the shared retrieval admission limit.
+
+The unreleased 0.13.0 [typed memory relation routes](typed-memory-relations.md)
+add durable assertions, current eligible reads, reviewer inspection and immutable
+history. Writers and reviewers have separate capabilities; relation changes use
+idempotency and expected-revision checks.

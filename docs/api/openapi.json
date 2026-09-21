@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
@@ -15439,6 +15439,756 @@
           }
         ]
       }
+    },
+    "/api/v1/memory/relations/commands": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Commit a revision-bound typed memory assertion or lifecycle decision",
+        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_write for assert/retire/restore; review requires memory_read and memory_review. Authorization and retrieval admission precede atomic WAL publication. Idempotency is scoped to authenticated subject and namespace. A replay returns the original receipt, not current eligibility.",
+        "operationId": "memoryRelationCommands",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryRelationCommandRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "idempotency_key": "extract-run-42-relation-1",
+                "operation": {
+                  "type": "assert",
+                  "relation": {
+                    "source": {
+                      "record_id": "018f0000-0000-4000-8000-000000000001",
+                      "revision": 2
+                    },
+                    "target": {
+                      "record_id": "018f0000-0000-4000-8000-000000000002",
+                      "revision": 1
+                    },
+                    "kind": "supports",
+                    "provenance": {
+                      "origin": "model_inference",
+                      "method": "support-extraction",
+                      "method_revision": "prompt-v3",
+                      "evidence_ref": "trace://run-42/relation-1",
+                      "model": {
+                        "provider": "example-provider",
+                        "model": "example-model",
+                        "revision": "example-pinned-revision"
+                      }
+                    },
+                    "valid_from_millis": null,
+                    "valid_until_millis": null
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationCommandsResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, version, revision, provenance, validity, lifecycle transition or work budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relation or revision unavailable in the authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency content mismatch, expected relation revision conflict, or endpoint revision/eligibility conflict.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/read": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Read a currently eligible typed memory relation",
+        "description": "Unreleased 0.13.0 contract. Requires memory_read. Returns 404 for absent, retired, rejected, not-yet-valid, expired or endpoint-invalid relations. One snapshot and evaluation clock recheck both exact endpoint revisions and their transitive evidence.",
+        "operationId": "memoryRelationRead",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryRelationReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "relation_id": "018f0000-0000-4000-8000-000000000003"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationReadResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, version, revision, provenance, validity, lifecycle transition or work budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relation or revision unavailable in the authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/inspect": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Inspect retained typed relation metadata and current eligibility",
+        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_review. Includes retained states and the first eligibility failure; does not include endpoint payloads or certify the assertion.",
+        "operationId": "memoryRelationInspect",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryRelationReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "relation_id": "018f0000-0000-4000-8000-000000000003"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationInspectResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, version, revision, provenance, validity, lifecycle transition or work budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relation or revision unavailable in the authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/revision": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Read an immutable typed relation revision and its original receipt",
+        "description": "Unreleased 0.13.0 contract. Requires memory_read and memory_review. Historical assertions are audit evidence, not current retrieval results; always revalidate before reuse.",
+        "operationId": "memoryRelationRevision",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryRelationRevisionRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "relation_id": "018f0000-0000-4000-8000-000000000003",
+                "revision": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationRevisionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, version, revision, provenance, validity, lifecycle transition or work budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Relation or revision unavailable in the authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15462,6 +16212,737 @@
       }
     },
     "schemas": {
+      "MemoryRelationKind": {
+        "type": "string",
+        "enum": [
+          "semantic_related",
+          "same_entity",
+          "temporal_before",
+          "causal_claim",
+          "supports",
+          "contradicts"
+        ],
+        "description": "Directed source-to-target assertions. Symmetry or causation is not inferred. temporal_before additionally checks strict endpoint event-time order."
+      },
+      "RelationOrigin": {
+        "type": "string",
+        "enum": [
+          "model_inference",
+          "tool_observation",
+          "human_statement",
+          "imported_assertion"
+        ],
+        "description": "Reporter-declared origin; this field does not authenticate a human, certify a tool result or establish external truth."
+      },
+      "RelationModelIdentity": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "RelationProvenance": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/RelationOrigin"
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "method_revision": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationModelIdentity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "origin",
+          "method",
+          "method_revision",
+          "evidence_ref"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "origin": {
+                  "const": "model_inference"
+                }
+              },
+              "required": [
+                "origin"
+              ]
+            },
+            "then": {
+              "properties": {
+                "model": {
+                  "$ref": "#/components/schemas/RelationModelIdentity"
+                }
+              },
+              "required": [
+                "model"
+              ]
+            }
+          }
+        ]
+      },
+      "MemoryRelationInput": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MemoryRelationKind"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/RelationProvenance"
+          },
+          "valid_from_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_until_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "kind",
+          "provenance"
+        ],
+        "additionalProperties": false,
+        "description": "Immutable revision-bound directed assertion. Endpoints must be distinct current eligible records in the same authorized namespace. A configured validity interval is half-open and ordered. No embeddings or provider credentials are accepted."
+      },
+      "MemoryRelationOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "assert"
+              },
+              "relation": {
+                "$ref": "#/components/schemas/MemoryRelationInput"
+              }
+            },
+            "required": [
+              "type",
+              "relation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "retire"
+              },
+              "relation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+              }
+            },
+            "required": [
+              "type",
+              "relation_id",
+              "expected_revision",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "restore"
+              },
+              "relation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+              }
+            },
+            "required": [
+              "type",
+              "relation_id",
+              "expected_revision",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "review"
+              },
+              "relation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+              },
+              "disposition": {
+                "$ref": "#/components/schemas/MemoryReviewDisposition"
+              }
+            },
+            "required": [
+              "type",
+              "relation_id",
+              "expected_revision",
+              "evidence_ref",
+              "disposition"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type"
+        },
+        "examples": [
+          {
+            "type": "assert",
+            "relation": {
+              "source": {
+                "record_id": "018f0000-0000-4000-8000-000000000001",
+                "revision": 2
+              },
+              "target": {
+                "record_id": "018f0000-0000-4000-8000-000000000002",
+                "revision": 1
+              },
+              "kind": "supports",
+              "provenance": {
+                "origin": "model_inference",
+                "method": "support-extraction",
+                "method_revision": "prompt-v3",
+                "evidence_ref": "trace://run-42/relation-1",
+                "model": {
+                  "provider": "example-provider",
+                  "model": "example-model",
+                  "revision": "example-pinned-revision"
+                }
+              },
+              "valid_from_millis": null,
+              "valid_until_millis": null
+            }
+          },
+          {
+            "type": "retire",
+            "relation_id": "018f0000-0000-4000-8000-000000000003",
+            "expected_revision": 1,
+            "evidence_ref": "review://case-42/withdrawal"
+          },
+          {
+            "type": "restore",
+            "relation_id": "018f0000-0000-4000-8000-000000000003",
+            "expected_revision": 2,
+            "evidence_ref": "review://case-42/withdrawal"
+          },
+          {
+            "type": "review",
+            "relation_id": "018f0000-0000-4000-8000-000000000003",
+            "expected_revision": 3,
+            "evidence_ref": "review://case-42/withdrawal",
+            "disposition": "approved"
+          }
+        ]
+      },
+      "MemoryRelationCommandRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "operation": {
+            "$ref": "#/components/schemas/MemoryRelationOperation"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "idempotency_key",
+          "operation"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "relation_id"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationRevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "relation_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelation": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "input": {
+            "$ref": "#/components/schemas/MemoryRelationInput"
+          },
+          "reported_by": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modified_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "retired"
+            ]
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryReview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "schema_version",
+          "relation_id",
+          "revision",
+          "input",
+          "reported_by",
+          "created_at_millis",
+          "modified_at_millis",
+          "state",
+          "review"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "asserted",
+              "retired",
+              "restored",
+              "reviewed"
+            ]
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+          },
+          "relation_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "command_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "relation_id",
+          "revision",
+          "action",
+          "author",
+          "committed_at_millis",
+          "evidence_ref",
+          "relation_digest",
+          "command_digest",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "RelationEligibility": {
+        "type": "object",
+        "properties": {
+          "eligible": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "retired",
+              "rejected",
+              "not_yet_valid",
+              "expired",
+              "endpoint_unavailable",
+              "endpoint_revision_changed"
+            ]
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemorySourceRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "eligible",
+          "reason",
+          "evaluated_at_millis",
+          "endpoint",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationInspection": {
+        "type": "object",
+        "properties": {
+          "relation": {
+            "$ref": "#/components/schemas/MemoryRelation"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/RelationEligibility"
+          }
+        },
+        "required": [
+          "relation",
+          "eligibility"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationRevision": {
+        "type": "object",
+        "properties": {
+          "relation": {
+            "$ref": "#/components/schemas/MemoryRelation"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/MemoryRelationReceipt"
+          }
+        },
+        "required": [
+          "relation",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationCommandsResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/MemoryRelationReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "relation": {
+            "$ref": "#/components/schemas/MemoryRelation"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "relation",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationInspectResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/MemoryRelationInspection"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "inspection",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationRevisionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "history": {
+            "$ref": "#/components/schemas/MemoryRelationRevision"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "history",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryRelationNotFoundError": {
+        "description": "No relation or requested historical revision is available under the current authorized read contract.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "const": "record_not_found"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "MemoryRelationConflictError": {
+        "description": "Endpoint or relation revisions are no longer admissible, or a different command reuses an already committed idempotency key.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "revision_conflict",
+                      "idempotency_conflict"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
       "Capability": {
         "type": "string",
         "enum": [

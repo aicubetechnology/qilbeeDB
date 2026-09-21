@@ -1,5 +1,6 @@
 mod company_memory;
 mod memory_graph;
+mod memory_relations;
 use crate::{
     http_server::create_router,
     security::identity::{Capability, CredentialSpec, IdentityStore, ResourceScope, Visibility},

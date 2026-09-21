@@ -51,13 +51,22 @@ and repeated copies of a source must not count as independent corroboration.
 These are QilbeeDB contract requirements inferred from the failure risks; they
 are not guarantees provided by a graph representation alone.
 
+The unreleased 0.13.0 [typed relation ledger](../api/typed-memory-relations.md)
+implements the first part of this contract. Its six kinds separate semantic,
+entity and temporal assertions from causal claims, support and contradiction.
+This is an engineering adaptation informed by MAGMA's distinction between graph
+views; it is not a reproduction of MAGMA's extraction, adaptive traversal or
+results. Assertions remain externally supplied claims. Typed traversal,
+relation-change consumption, graph-assisted ranking and quality comparisons are
+still required before this foundation can improve an agent's retrieval.
+
 ## Implementation and acceptance map
 
 | Capability | Current status | Required observable contract and evidence |
 | --- | --- | --- |
 | Stable general graph identity | Implemented in the 0.12.0 lifecycle feature | Restart preserves allocation; a retired name creates a fresh generation; stale handles cannot publish writes; failed preparation publishes nothing |
 | Revision-bound evidence dependencies | Available through derived memories | Existing source eligibility checks apply to reads and retrieval; changes, rejection and expiration suppress stale derived context |
-| Typed memory relations | Proposed | Exact memory IDs and revisions, relation type, authenticated reporter, extraction/model version, explicit claim or observation status, validity and reversible retirement |
+| Typed memory relations | Implemented in the unreleased 0.13.0 [relation ledger](../api/typed-memory-relations.md) | Exact eligible endpoint revisions, typed directed assertions, authenticated reporter, declared origin, extraction/model identity, validity, review and reversible retirement; atomic indexes, immutable history and crash-recoverable receipts |
 | Evidence ancestry traversal | Implemented in the 0.12.0 evidence graph API | Exact-scope outgoing `derived_from` relations, one snapshot and clock, eligible payloads, depth/node cuts, shared admission and company workspace access |
 | Semantic/entity graph traversal | Proposed | Authorize company, project, agent, mission and private subject before selecting anchors or traversing neighbors; bound nodes, edges, bytes and depth; report truncation and evidence paths |
 | Graph-assisted retrieval | Proposed | Versioned server policy, reproducible anchors and tie-breaking, exact eligible revisions, separate channel scores and observable fallback; preserve existing cosine semantics |
