@@ -186,3 +186,7 @@ The unreleased 0.13.0 [typed memory relation routes](typed-memory-relations.md)
 add durable assertions, current eligible reads, reviewer inspection and immutable
 history. Writers and reviewers have separate capabilities; relation changes use
 idempotency and expected-revision checks.
+
+The unreleased 0.13.0 [typed graph routes](typed-memory-graph.md) expose scoped
+neighborhoods and native company traversal, inspection and history. Retrieval
+slots and explicit node, edge, scan and byte bounds apply to graph reads.

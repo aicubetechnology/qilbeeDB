@@ -315,6 +315,13 @@
       "title": "Typed memory relations",
       "description": "Store revision-bound graph assertions with authenticated provenance, durable lifecycle receipts, review authority and current endpoint eligibility.",
       "order": 67
+    },
+    {
+      "source": "docs/api/typed-memory-graph.md",
+      "file": "typed-memory-graph.md",
+      "title": "Typed memory graph traversal",
+      "description": "Traverse authorized typed neighbors with exact revisions, explicit coverage, atomic adjacency integrity and native company audit.",
+      "order": 68
     }
   ]
 }

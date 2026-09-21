@@ -3,6 +3,9 @@ use super::snapshot::MemorySnapshot;
 use super::*;
 mod types;
 pub use types::*;
+mod graph;
+pub use graph::*;
+mod adjacency;
 
 // All relation values use AGENT_META; ordinary memory records remain canonical.
 const RELATION: u8 = 0x50;
@@ -89,8 +92,21 @@ fn validate_relation(relation: &MemoryRelation) -> Result<()> {
     }
     Ok(())
 }
+fn local_relation_reason(relation: &MemoryRelation, now: i64) -> RelationEligibilityReason {
+    if relation.state == RelationState::Retired {
+        RelationEligibilityReason::Retired
+    } else if !relation.indexed() {
+        RelationEligibilityReason::Rejected
+    } else if relation.input.valid_from_millis.is_some_and(|t| now < t) {
+        RelationEligibilityReason::NotYetValid
+    } else if relation.input.valid_until_millis.is_some_and(|t| now >= t) {
+        RelationEligibilityReason::Expired
+    } else {
+        RelationEligibilityReason::Eligible
+    }
+}
 impl MemorySnapshot<'_> {
-    fn relation_revision(
+    pub(super) fn relation_revision(
         &self,
         namespace: &str,
         id: Uuid,
@@ -124,6 +140,15 @@ impl MemorySnapshot<'_> {
             .transpose()
     }
     pub(super) fn relation(&self, namespace: &str, id: Uuid) -> Result<Option<MemoryRelation>> {
+        Ok(self
+            .relation_with_bytes(namespace, id)?
+            .map(|(relation, _, _)| relation))
+    }
+    fn relation_with_bytes(
+        &self,
+        namespace: &str,
+        id: Uuid,
+    ) -> Result<Option<(MemoryRelation, usize, Vec<u8>)>> {
         let cf = self.storage.cf(super::super::cf::AGENT_META)?;
         let bytes = self
             .db
@@ -173,32 +198,14 @@ impl MemorySnapshot<'_> {
                 return Err(inconsistent());
             }
         }
-        Ok(Some(relation))
+        Ok(Some((relation, bytes.len(), integrity)))
     }
     pub(super) fn relation_eligibility(
         &self,
         namespace: &str,
         relation: &MemoryRelation,
     ) -> Result<RelationEligibility> {
-        let mut reason = if relation.state == RelationState::Retired {
-            RelationEligibilityReason::Retired
-        } else if !relation.indexed() {
-            RelationEligibilityReason::Rejected
-        } else if relation
-            .input
-            .valid_from_millis
-            .is_some_and(|t| self.now < t)
-        {
-            RelationEligibilityReason::NotYetValid
-        } else if relation
-            .input
-            .valid_until_millis
-            .is_some_and(|t| self.now >= t)
-        {
-            RelationEligibilityReason::Expired
-        } else {
-            RelationEligibilityReason::Eligible
-        };
+        let mut reason = local_relation_reason(relation, self.now);
         let mut endpoint = None;
         if reason == RelationEligibilityReason::Eligible {
             if let Err(failure) = self.relation_endpoints(namespace, &relation.input)? {
@@ -468,6 +475,7 @@ impl RocksDbMemoryStorage {
             history_digest: digest(&history),
         })?;
         let mut batch = rocksdb::WriteBatch::default();
+        self.append_relation_heads(&snapshot, namespace, &relation, &integrity, &mut batch)?;
         batch.put_cf(
             cf,
             record_key(RELATION, namespace, relation.relation_id),

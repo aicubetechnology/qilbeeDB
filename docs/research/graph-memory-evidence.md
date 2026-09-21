@@ -56,9 +56,11 @@ implements the first part of this contract. Its six kinds separate semantic,
 entity and temporal assertions from causal claims, support and contradiction.
 This is an engineering adaptation informed by MAGMA's distinction between graph
 views; it is not a reproduction of MAGMA's extraction, adaptive traversal or
-results. Assertions remain externally supplied claims. Typed traversal,
-relation-change consumption, graph-assisted ranking and quality comparisons are
-still required before this foundation can improve an agent's retrieval.
+results. Assertions remain externally supplied claims. The unreleased
+[typed traversal API](../api/typed-memory-graph.md) now adds bounded incoming and
+outgoing discovery with current endpoint checks, explicit cuts and native company
+administration. Relation-change consumption, graph-assisted ranking and quality
+comparisons are still required before attributing an agent retrieval benefit.
 
 ## Implementation and acceptance map
 
@@ -68,7 +70,7 @@ still required before this foundation can improve an agent's retrieval.
 | Revision-bound evidence dependencies | Available through derived memories | Existing source eligibility checks apply to reads and retrieval; changes, rejection and expiration suppress stale derived context |
 | Typed memory relations | Implemented in the unreleased 0.13.0 [relation ledger](../api/typed-memory-relations.md) | Exact eligible endpoint revisions, typed directed assertions, authenticated reporter, declared origin, extraction/model identity, validity, review and reversible retirement; atomic indexes, immutable history and crash-recoverable receipts |
 | Evidence ancestry traversal | Implemented in the 0.12.0 evidence graph API | Exact-scope outgoing `derived_from` relations, one snapshot and clock, eligible payloads, depth/node cuts, shared admission and company workspace access |
-| Semantic/entity graph traversal | Proposed | Authorize company, project, agent, mission and private subject before selecting anchors or traversing neighbors; bound nodes, edges, bytes and depth; report truncation and evidence paths |
+| Typed memory neighborhood traversal | Implemented in the unreleased 0.13.0 typed graph API | Exact scope before incoming/outgoing discovery, canonical endpoint revalidation, direction and kind selection, bounded nodes/edges/bytes/work, explicit cuts, adjacency completeness checks and native company audit; standalone entity extraction/resolution remains unimplemented |
 | Graph-assisted retrieval | Proposed | Versioned server policy, reproducible anchors and tie-breaking, exact eligible revisions, separate channel scores and observable fallback; preserve existing cosine semantics |
 | Asynchronous consolidation | Proposed | External workers resume from checkpoints; late or duplicate work cannot publish stale relations; record partial or unknown execution without inventing completion |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |

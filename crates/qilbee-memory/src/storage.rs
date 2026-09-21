@@ -177,6 +177,7 @@ impl RocksDbMemoryStorage {
             mutation_lock: Mutex::new(()),
         };
         storage.initialize_candidates()?;
+        storage.initialize_relation_adjacency()?;
         Ok(storage)
     }
 

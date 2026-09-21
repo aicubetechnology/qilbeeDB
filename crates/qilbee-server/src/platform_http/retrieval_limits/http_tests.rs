@@ -33,6 +33,10 @@ fn query(mode: &str) -> (String, Value) {
             body = json!({"contract_version":1,"scope":scope(),"query":{"root_record_ids":[Uuid::new_v4()]}});
             "/api/v1/memory/graph"
         }
+        "typed_graph" => {
+            body = json!({"contract_version":1,"scope":scope(),"query":{"root_record_ids":[Uuid::new_v4()]}});
+            "/api/v1/memory/graph/typed"
+        }
         "semantic" => "/api/v1/memory/search",
         "hybrid" => {
             body["mode"] = "hybrid".into();
@@ -173,7 +177,14 @@ async fn dimension_and_scan_limits_match_served_schemas() {
 async fn busy_slots_preserve_authorization_precedence_and_release() {
     let f = Fixture::start().await;
     let permit = f.limits.acquire().ok().unwrap();
-    for mode in ["semantic", "lexical", "hybrid", "batch", "graph"] {
+    for mode in [
+        "semantic",
+        "lexical",
+        "hybrid",
+        "batch",
+        "graph",
+        "typed_graph",
+    ] {
         let (route, body) = query(mode);
         f.check(&route, body.clone(), 503, Some("retrieval_busy"))
             .await;
@@ -182,7 +193,14 @@ async fn busy_slots_preserve_authorization_precedence_and_release() {
         f.check(&route, wrong, 403, Some("forbidden")).await;
     }
     drop(permit);
-    for mode in ["semantic", "lexical", "hybrid", "batch", "graph"] {
+    for mode in [
+        "semantic",
+        "lexical",
+        "hybrid",
+        "batch",
+        "graph",
+        "typed_graph",
+    ] {
         let (route, body) = query(mode);
         f.check(&route, body, 200, None).await;
     }
@@ -294,6 +312,18 @@ async fn company_inventory_uses_shared_admission_after_company_authorization() {
     let reader = f.token.clone();
     let permit = f.limits.acquire().ok().unwrap();
     let queries = [
+        (
+            "/api/v1/company/memory/graph/typed",
+            json!({"contract_version":1,"workspace_id":"0".repeat(64),"query":{"root_record_ids":[Uuid::new_v4()]}}),
+        ),
+        (
+            "/api/v1/company/memory/relations/inspect",
+            json!({"contract_version":1,"workspace_id":"0".repeat(64),"relation_id":Uuid::new_v4()}),
+        ),
+        (
+            "/api/v1/company/memory/relations/revision",
+            json!({"contract_version":1,"workspace_id":"0".repeat(64),"relation_id":Uuid::new_v4(),"revision":1}),
+        ),
         (
             "/api/v1/company/memory/graph",
             json!({"contract_version":1,"workspace_id":"0".repeat(64),"query":{"root_record_ids":[Uuid::new_v4()]}}),

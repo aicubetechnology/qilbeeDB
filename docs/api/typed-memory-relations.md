@@ -3,7 +3,8 @@
 Status: **unreleased 0.13.0 contract**. Record a directed assertion between two
 current memories, retain its provenance and review history, and revalidate both
 endpoints before serving it. This API is the durable foundation for typed memory
-graphs. It does not yet expand search, enumerate neighbors or extract relations.
+graphs. It does not expand search or extract relations. Use the
+[typed graph API](typed-memory-graph.md) to enumerate a bounded neighborhood.
 
 For a graph of existing evidence dependencies, use the separate
 [memory evidence graph API](memory-evidence-graph.md). Typed assertions do not
@@ -56,7 +57,8 @@ read eligible assertions reported by another subject.
 Review authority is independent of ordinary write authority. A review-only
 credential cannot create, retire or restore a relation. A writer without review
 authority cannot inspect retained metadata or historical versions. Native
-company-administrative relation routes are not part of this initial contract.
+[company relation inspection and history](typed-memory-graph.md) use separate
+company-administrative authority, including all private subjects in the company.
 
 ## Assert a relationship
 
@@ -141,7 +143,8 @@ A successful command returns `contract_version` and `receipt`. The receipt has:
   hexadecimal integrity values. They are not signatures or evidence of truth.
 
 The canonical relation, both adjacency indexes, immutable revision, integrity
-metadata and idempotency receipt are committed in one synchronous WAL-backed
+metadata, adjacency completeness headers and idempotency receipt are committed
+in one synchronous WAL-backed
 RocksDB batch. Acknowledged state survives reopening and the tested abrupt process
 termination. Storage failures must not be interpreted as a known rejection;
 retry the identical command with the same key to resolve an uncertain outcome.
@@ -183,7 +186,8 @@ this declared assertion, not certification that it is true.
 An absent or ineligible relation returns 404 `record_not_found` without disclosing
 the reason. Current endpoint revision changes, rejected reviews, deletion,
 expiration and invalid transitive evidence suppress ordinary relation reads.
-No endpoint payload is included in a relation response.
+No endpoint payload is included in a relation response. The separate typed graph
+response includes eligible canonical endpoint records and bounded assertions.
 
 `/inspect` returns `inspection.relation` and `inspection.eligibility`. It preserves
 retired or rejected metadata for authorized reviewers. The explanation contains
@@ -262,7 +266,8 @@ the relation immediately before reuse; endpoints can change and validity can
 expire after the response. **Typed relation lifecycle changes are not yet emitted
 by the memory change feed.** A memory checkpoint cannot certify a relation cache
 as current. This release provides no relation cursor, cache synchronization feed,
-neighbor enumeration or automatic consolidation worker. Do not enable a graph
+or automatic consolidation worker. Neighbor enumeration is available through the
+separate bounded typed graph API. Do not enable a graph
 cache that assumes those capabilities exist.
 
 ## Errors and validation
