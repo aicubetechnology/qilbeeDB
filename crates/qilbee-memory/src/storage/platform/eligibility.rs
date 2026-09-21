@@ -79,6 +79,22 @@ impl Walk {
     }
 }
 impl MemorySnapshot<'_> {
+    /// Check all declared relation context in one bounded walk and dependency cache.
+    /// Context roots have the same depth origin as directly read canonical memories.
+    pub(super) fn relation_evidence_failure(
+        &self,
+        namespace: &str,
+        sources: &[MemorySourceRef],
+    ) -> Result<Option<MemoryEligibilityFailure>> {
+        let mut walk = Walk::default();
+        for source in sources {
+            if self.walk_source(namespace, source, 0, &mut walk)?.is_none() {
+                break;
+            }
+        }
+        Ok(walk.failure)
+    }
+
     fn walk_source(
         &self,
         namespace: &str,

@@ -231,6 +231,7 @@ fn typed_graph_checks_relation_and_endpoint_expiry_without_feed_events() {
         idempotency_key: "interval".into(),
         operation: MemoryRelationOperation::Assert {
             relation: MemoryRelationInput {
+                evidence_sources: Vec::new(),
                 source: MemorySourceRef {
                     record_id: a.record_id,
                     revision: 1,

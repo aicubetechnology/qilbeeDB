@@ -241,6 +241,14 @@ impl MemorySnapshot<'_> {
                     {
                         continue;
                     }
+                    // The edge may have been inferred from context other than its
+                    // endpoints. Check that context before expanding or deferring it.
+                    if self
+                        .relation_evidence_failure(namespace, &relation.input.evidence_sources)?
+                        .is_some()
+                    {
+                        continue;
+                    }
                     if !state.included.contains(&neighbor.record_id) && depth == query.max_depth {
                         state.defer(relation_id, TypedGraphStopReason::DepthLimit);
                         continue;

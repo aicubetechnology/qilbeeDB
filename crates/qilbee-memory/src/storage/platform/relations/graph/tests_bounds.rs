@@ -11,6 +11,7 @@ fn typed_graph_relation_metadata_bytes_are_bounded_across_parallel_assertions() 
         idempotency_key: "large-0".into(),
         operation: MemoryRelationOperation::Assert {
             relation: MemoryRelationInput {
+                evidence_sources: Vec::new(),
                 source: MemorySourceRef {
                     record_id: a.record_id,
                     revision: 1,

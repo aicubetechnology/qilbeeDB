@@ -19889,6 +19889,16 @@
                 "type": "null"
               }
             ]
+          },
+          "evidence_sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "maxItems": 16,
+            "uniqueItems": true,
+            "default": [],
+            "description": "Unreleased extension: additional same-scope context used to infer this assertion. At most 16 distinct record IDs, each with an exact current eligible revision, excluding both endpoint IDs. The server checks transitive eligibility on publication, restore, inspection, traversal and graph search. Empty lists are omitted when serialized, preserving legacy digests. No model inference is performed by the database."
           }
         },
         "required": [
@@ -19898,7 +19908,7 @@
           "provenance"
         ],
         "additionalProperties": false,
-        "description": "Immutable revision-bound directed assertion. Endpoints must be distinct current eligible records in the same authorized namespace. A configured validity interval is half-open and ordered. No embeddings or provider credentials are accepted."
+        "description": "Immutable revision-bound directed assertion. Endpoints must be distinct current eligible records in the same authorized namespace. A configured validity interval is half-open and ordered. No embeddings or provider credentials are accepted. Declared evidence sources must also be eligible in the same namespace; source changes invalidate serving without rewriting retained history."
       },
       "MemoryRelationOperation": {
         "oneOf": [
@@ -20289,7 +20299,8 @@
               "not_yet_valid",
               "expired",
               "endpoint_unavailable",
-              "endpoint_revision_changed"
+              "endpoint_revision_changed",
+              "evidence_unavailable"
             ]
           },
           "evaluated_at_millis": {
@@ -20308,6 +20319,10 @@
           },
           "dependency_work": {
             "$ref": "#/components/schemas/DependencyWork"
+          },
+          "evidence_failure": {
+            "$ref": "#/components/schemas/MemoryEligibilityFailure",
+            "description": "Present only for evidence_unavailable: the first failing additional context source or ancestor. Contains revision metadata, never a source payload. Local relation state and endpoint checks take precedence."
           }
         },
         "required": [
@@ -20317,7 +20332,38 @@
           "endpoint",
           "dependency_work"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "reason": {
+                  "const": "evidence_unavailable"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "evidence_failure"
+              ],
+              "properties": {
+                "eligible": {
+                  "const": false
+                },
+                "endpoint": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "evidence_failure"
+                ]
+              }
+            }
+          }
+        ]
       },
       "MemoryRelationInspection": {
         "type": "object",

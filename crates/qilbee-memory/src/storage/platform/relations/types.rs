@@ -44,10 +44,27 @@ pub struct MemoryRelationInput {
     pub provenance: RelationProvenance,
     pub valid_from_millis: Option<i64>,
     pub valid_until_millis: Option<i64>,
+    /// Additional same-scope context used to infer the assertion, beyond its endpoints.
+    /// Omission preserves the exact serialized form of pre-extension relations.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub evidence_sources: Vec<MemorySourceRef>,
 }
 impl MemoryRelationInput {
     pub(super) fn validate(&self) -> Result<()> {
         let p = &self.provenance;
+        let mut evidence_ids = std::collections::BTreeSet::new();
+        if self.evidence_sources.len() > MAX_MEMORY_SOURCES
+            || self.evidence_sources.iter().any(|reference| {
+                reference.revision == 0
+                    || reference.record_id == self.source.record_id
+                    || reference.record_id == self.target.record_id
+                    || !evidence_ids.insert(reference.record_id)
+            })
+        {
+            return Err(Error::ValidationError(
+                "Relation evidence requires at most 16 unique positive same-scope source revisions, distinct from both endpoints".into(),
+            ));
+        }
         if self.source.record_id == self.target.record_id
             || self.source.revision == 0
             || self.target.revision == 0
@@ -163,6 +180,7 @@ pub enum RelationEligibilityReason {
     Expired,
     EndpointUnavailable,
     EndpointRevisionChanged,
+    EvidenceUnavailable,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -172,6 +190,8 @@ pub struct RelationEligibility {
     pub evaluated_at_millis: i64,
     pub endpoint: Option<MemorySourceRef>,
     pub dependency_work: DependencyWork,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub evidence_failure: Option<MemoryEligibilityFailure>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
