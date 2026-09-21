@@ -58,11 +58,11 @@ credentials, as well as errors, send `Cache-Control: no-store`.
 | `GET /api/v1/credentials/{id}` | `credential_admin`; inspect a credential in the same tenant |
 | `POST /api/v1/credentials/{id}/rotate` | `credential_admin`; replace the secret at an expected revision |
 | `POST /api/v1/credentials/{id}/revoke` | `credential_admin`; revoke at an expected revision |
-| `GET /api/v1/company/memory/workspaces` | Unreleased: `credential_admin`; discover all retained company memory workspaces |
-| `POST /api/v1/company/memory/query` | Unreleased: `credential_admin`; inspect retained or eligible company records with bounded continuation |
-| `POST /api/v1/company/memory/read` | Unreleased: `credential_admin`; inspect one retained record and its eligibility |
-| `GET /api/v1/agents` | Unreleased: `credential_admin`; page through automatically registered agents in the authenticated company |
-| `POST /api/v1/credentials/{id}/scope-authority` | Unreleased: `credential_admin`; replace exact grants or a company integration policy with a before/after audit event |
+| `GET /api/v1/company/memory/workspaces` | Since 0.12.0: `credential_admin`; discover all retained company memory workspaces |
+| `POST /api/v1/company/memory/query` | Since 0.12.0: `credential_admin`; inspect retained or eligible company records with bounded continuation |
+| `POST /api/v1/company/memory/read` | Since 0.12.0: `credential_admin`; inspect one retained record and its eligibility |
+| `GET /api/v1/agents` | Since 0.12.0: `credential_admin`; page through automatically registered agents in the authenticated company |
+| `POST /api/v1/credentials/{id}/scope-authority` | Since 0.12.0: `credential_admin`; replace exact grants or a company integration policy with a before/after audit event |
 
 For issuance:
 
@@ -182,21 +182,21 @@ The 0.12.0 [memory evidence graph routes](memory-evidence-graph.md) provide
 scoped and company-administrative ancestry reads, exact revision-bound edges and
 explicit coverage under the shared retrieval admission limit.
 
-The unreleased 0.13.0 [typed memory relation routes](typed-memory-relations.md)
+The 0.13.0 [typed memory relation routes](typed-memory-relations.md)
 add durable assertions, current eligible reads, reviewer inspection and immutable
 history. Writers and reviewers have separate capabilities; relation changes use
 idempotency and expected-revision checks.
 
-The unreleased 0.13.0 [typed graph routes](typed-memory-graph.md) expose scoped
+The 0.13.0 [typed graph routes](typed-memory-graph.md) expose scoped
 neighborhoods and native company traversal, inspection and history. Retrieval
 slots and explicit node, edge, scan and byte bounds apply to graph reads.
 
-The unreleased [typed relation change routes](typed-relation-changes.md) expose a
+The [typed relation change routes](typed-relation-changes.md) expose a
 separate history-bound event stream, subject-owned checkpoints, immutable progress
 receipts and snapshot-local consumer diagnostics. Existing memory feed contracts
 remain unchanged. Graph caches must observe both streams and revalidate expiry.
 
-The unreleased [graph-assisted retrieval API](graph-assisted-retrieval.md) selects lexical, semantic
+The [graph-assisted retrieval API](graph-assisted-retrieval.md) selects lexical, semantic
 or hybrid anchors and ranks memories through exact typed paths in one snapshot.
 Four immutable experimental profiles expose separate base and graph contributions,
 coverage and provenance. Existing search scores and defaults remain unchanged;

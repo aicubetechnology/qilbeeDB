@@ -8,7 +8,7 @@ resource-authorization limitations.
 
 ## Identity and grants
 
-The unreleased [company integration contract](company-integrations.md) adds an
+The [company integration contract](company-integrations.md) adds an
 explicit `company_scopes_v1` alternative to exact grants and an audited endpoint
 for replacing scope authority. Credentials without a policy retain the exact
 grant behavior described below; an empty list never acquires wildcard authority.

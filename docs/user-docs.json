@@ -350,6 +350,13 @@
       "title": "Graph retrieval results and limitations",
       "description": "Inspect the reserved MuSiQue comparison, uncertainty, individual regressions, graph cuts and measured retrieval costs.",
       "order": 210
+    },
+    {
+      "source": "docs/releases/0.13.0.md",
+      "file": "release-0.13.0.md",
+      "title": "QilbeeDB 0.13.0 availability",
+      "description": "Adopt released typed graph contracts with scoped upgrade checks, current-state validation and measured experimental ranking limits.",
+      "order": 1
     }
   ]
 }

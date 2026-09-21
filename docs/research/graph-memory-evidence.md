@@ -51,12 +51,12 @@ and repeated copies of a source must not count as independent corroboration.
 These are QilbeeDB contract requirements inferred from the failure risks; they
 are not guarantees provided by a graph representation alone.
 
-The unreleased 0.13.0 [typed relation ledger](../api/typed-memory-relations.md)
+The 0.13.0 [typed relation ledger](../api/typed-memory-relations.md)
 implements the first part of this contract. Its six kinds separate semantic,
 entity and temporal assertions from causal claims, support and contradiction.
 This is an engineering adaptation informed by MAGMA's distinction between graph
 views; it is not a reproduction of MAGMA's extraction, adaptive traversal or
-results. Assertions remain externally supplied claims. The unreleased
+results. Assertions remain externally supplied claims. The
 [typed traversal API](../api/typed-memory-graph.md) now adds bounded incoming and
 outgoing discovery with current endpoint checks, explicit cuts and native company
 administration. The separate [relation feed](../api/typed-relation-changes.md)
@@ -73,12 +73,12 @@ agent-task benefit or admit a default ranking change.
 | --- | --- | --- |
 | Stable general graph identity | Implemented in the 0.12.0 lifecycle feature | Restart preserves allocation; a retired name creates a fresh generation; stale handles cannot publish writes; failed preparation publishes nothing |
 | Revision-bound evidence dependencies | Available through derived memories | Existing source eligibility checks apply to reads and retrieval; changes, rejection and expiration suppress stale derived context |
-| Typed memory relations | Implemented in the unreleased 0.13.0 [relation ledger](../api/typed-memory-relations.md) | Exact eligible endpoint revisions, typed directed assertions, authenticated reporter, declared origin, extraction/model identity, validity, review and reversible retirement; atomic indexes, immutable history and crash-recoverable receipts |
+| Typed memory relations | Implemented in the 0.13.0 [relation ledger](../api/typed-memory-relations.md) | Exact eligible endpoint revisions, typed directed assertions, authenticated reporter, declared origin, extraction/model identity, validity, review and reversible retirement; atomic indexes, immutable history and crash-recoverable receipts |
 | Evidence ancestry traversal | Implemented in the 0.12.0 evidence graph API | Exact-scope outgoing `derived_from` relations, one snapshot and clock, eligible payloads, depth/node cuts, shared admission and company workspace access |
-| Typed memory neighborhood traversal | Implemented in the unreleased 0.13.0 typed graph API | Exact scope before incoming/outgoing discovery, canonical endpoint revalidation, direction and kind selection, bounded nodes/edges/bytes/work, explicit cuts, adjacency completeness checks and native company audit; standalone entity extraction/resolution remains unimplemented |
-| Relation change consumption | Implemented in the unreleased 0.13.0 [relation feed](../api/typed-relation-changes.md) | Atomic lifecycle events, history-bound fenced cursors, subject-owned progress, immutable receipts, stale-writer rejection and explicit reconciliation; endpoint changes and expiry still require current-state checks |
-| Graph-assisted retrieval | Implemented in unreleased 0.13.0; experimental | Immutable server profiles, four reproducible anchors, strongest typed path, exact eligible revisions, separate score contributions and coverage; legacy cosine/hybrid contracts preserved |
-| External graph retrieval comparison | Measured in unreleased 0.13.0 | Frozen document-only graph and E5 vectors, 100 reserved public-development queries, eight methods and 2,400 requests; primary gain remains uncertain and important category regressions prevent default admission |
+| Typed memory neighborhood traversal | Implemented in the 0.13.0 typed graph API | Exact scope before incoming/outgoing discovery, canonical endpoint revalidation, direction and kind selection, bounded nodes/edges/bytes/work, explicit cuts, adjacency completeness checks and native company audit; standalone entity extraction/resolution remains unimplemented |
+| Relation change consumption | Implemented in the 0.13.0 [relation feed](../api/typed-relation-changes.md) | Atomic lifecycle events, history-bound fenced cursors, subject-owned progress, immutable receipts, stale-writer rejection and explicit reconciliation; endpoint changes and expiry still require current-state checks |
+| Graph-assisted retrieval | Implemented in 0.13.0; experimental | Immutable server profiles, four reproducible anchors, strongest typed path, exact eligible revisions, separate score contributions and coverage; legacy cosine/hybrid contracts preserved |
+| External graph retrieval comparison | Measured in 0.13.0 | Frozen document-only graph and E5 vectors, 100 reserved public-development queries, eight methods and 2,400 requests; primary gain remains uncertain and important category regressions prevent default admission |
 | Asynchronous consolidation | Proposed | External workers resume from checkpoints; late or duplicate work cannot publish stale relations; record partial or unknown execution without inventing completion |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |
 | Evidence-based policy improvement | Proposed | Reuse the existing qualification and suspension authority; freeze policy and evaluator versions; retain failure evidence and compare fresh tasks before publication |

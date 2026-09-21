@@ -7,6 +7,7 @@ generates embeddings externally and decides how retrieved evidence is used.
 
 ## Start building
 
+- [QilbeeDB 0.13.0 availability](../releases/0.13.0.md): inspect the released graph contracts, upgrade checks and experimental ranking limits.
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
 - [Automatic agent registration, 0.12.0](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
@@ -22,6 +23,7 @@ generates embeddings externally and decides how retrieved evidence is used.
 | [Lexical](../api/lexical-memory.md) | Text | BM25 | Exact words and identifiers matter, or no embedding is available |
 | [Semantic](../api/semantic-memory.md) | External vector and model identity | Cosine | Meaning should be matched through your selected embedding model |
 | [Hybrid, experimental](../api/hybrid-memory.md) | Text, external vector and ranking version | Weighted reciprocal rank fusion | You want to evaluate complementary lexical and semantic candidates |
+| [Graph-assisted, experimental](../api/graph-assisted-retrieval.md) | Lexical, semantic or hybrid seeds and a graph profile | Base ranks and the strongest eligible typed path | You want to evaluate explicit relations as an additional retrieval signal |
 
 Each mode isolates the authorized tenant, project, agent, mission and private
 subject before candidate selection. Responses distinguish ranking scores from
@@ -86,23 +88,25 @@ Use the 0.12.0 [memory evidence graph API](../api/memory-evidence-graph.md) to
 read revision-bound ancestry in a single authorized snapshot, including native
 company administration and explicit traversal coverage.
 
-The unreleased 0.13.0 [typed memory relation API](../api/typed-memory-relations.md)
+The 0.13.0 [typed memory relation API](../api/typed-memory-relations.md)
 stores semantic, entity, temporal, causal, support and contradiction assertions
 with exact endpoint revisions, declared provenance and separate review authority.
-It does not yet change retrieval or provide a relation change feed.
+Applications can consume the relation feed and explicitly select graph-assisted
+retrieval. Existing search routes do not automatically traverse these assertions.
 
-The unreleased [typed graph API](../api/typed-memory-graph.md) traverses those
+The [typed graph API](../api/typed-memory-graph.md) traverses those
 assertions in either direction, returning current eligible endpoint records and
 explicit work coverage. Company administrators can also inspect retained assertion
 state and history directly.
 
-Use the unreleased [relation change feed](../api/typed-relation-changes.md) to
+Use the [relation change feed](../api/typed-relation-changes.md) to
 invalidate graph caches and retain consumer progress across interruptions. Its
 history-bound cursors and explicit reconciliation complement the memory feed;
 current eligibility checks remain necessary before cached context is reused.
 
-The unreleased [graph-assisted retrieval API](../api/graph-assisted-retrieval.md) selects lexical, semantic
+The [graph-assisted retrieval API](../api/graph-assisted-retrieval.md) selects lexical, semantic
 or hybrid anchors and ranks memories through exact typed paths in one snapshot.
 Four immutable experimental profiles expose separate base and graph contributions,
 coverage and provenance. Existing search scores and defaults remain unchanged;
-comparative retrieval and agent-task benefits have not yet been demonstrated.
+the [reserved comparison](../research/graph-retrieval-results.md) found uncertain
+mean improvement and material regressions. Agent-task benefits remain unmeasured.
