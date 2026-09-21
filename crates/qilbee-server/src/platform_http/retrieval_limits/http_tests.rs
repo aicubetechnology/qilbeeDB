@@ -68,6 +68,7 @@ impl Fixture {
                 Capability::MemoryRead,
                 Capability::MemoryWrite,
                 Capability::MemoryReview,
+                Capability::MemoryCheckpoint,
             ]
             .into(),
             grants: vec![serde_json::from_value::<ResourceScope>(scope()).unwrap()],
@@ -365,5 +366,69 @@ async fn company_inventory_uses_shared_admission_after_company_authorization() {
     drop(permit);
     for (route, body) in queries {
         f.check(route, body, 404, Some("record_not_found")).await;
+    }
+}
+
+#[tokio::test]
+async fn relation_feed_and_checkpoint_routes_share_admission_after_authorization() {
+    let f = Fixture::start().await;
+    let prefix = "/api/v1/memory/relations";
+    let activate = format!("{prefix}/changes/activate");
+    let common = json!({"contract_version":1,"scope":scope()});
+    let baseline: Value = f
+        .client
+        .post(format!("{}{activate}", f.base))
+        .bearer_auth(&f.token)
+        .json(&common)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let requests = vec![
+        (
+            format!("{prefix}/changes"),
+            json!({"contract_version":1,"scope":scope(),"query":{"limit":1}}),
+        ),
+        (activate, common),
+        (
+            format!("{prefix}/checkpoints"),
+            json!({"scope":scope(),"command":{"contract_version":1,"idempotency_key":"initial","consumer_id":"cache","expected_revision":0,"operation":{"type":"advance","cursor":baseline["baseline"]}}}),
+        ),
+        (
+            format!("{prefix}/checkpoints/read"),
+            json!({"contract_version":1,"scope":scope(),"consumer_id":"cache"}),
+        ),
+        (
+            format!("{prefix}/checkpoints/revision"),
+            json!({"contract_version":1,"scope":scope(),"consumer_id":"cache","revision":1}),
+        ),
+        (
+            format!("{prefix}/consumers/diagnose"),
+            json!({"contract_version":1,"scope":scope(),"consumer_id":"cache"}),
+        ),
+    ];
+    let permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+        let mut unauthorized = body.clone();
+        unauthorized["scope"]["project_id"] = "outside".into();
+        f.check(route, unauthorized, 403, Some("forbidden")).await;
+    }
+    drop(permit);
+    for (route, body) in &requests {
+        f.check(route, body.clone(), 200, None).await;
+    }
+    let principal = f.identity.authenticate(&f.token).unwrap();
+    f.identity
+        .revoke(&f.admin, principal.id, principal.revision)
+        .unwrap();
+    let _permit = f.limits.acquire().ok().unwrap();
+    for (route, body) in requests {
+        f.check(&route, body, 401, Some("unauthorized")).await;
     }
 }

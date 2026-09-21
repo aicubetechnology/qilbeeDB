@@ -270,10 +270,12 @@ Scoped graph roots use root status within a 200 response instead of 404.
 Occupied retrieval slots return 503 `retrieval_busy`; use bounded backoff.
 
 The graph is a point-in-time observation, not a lease. Revalidate before reuse.
-Expiration can occur without a feed event, and **typed relation lifecycle changes
-are not yet part of the memory change feed**. A current memory checkpoint does
-not prove that a cached graph's assertions are current. This contract adds no
-automatic consolidation worker, persistent graph cursor or graph-assisted ranker.
+The separate [relation change feed](typed-relation-changes.md) now delivers
+assertion lifecycle changes. Observe both memory and relation changes when
+invalidating graph caches; a memory checkpoint alone does not certify a cached
+graph as current. Expiration can still occur without an event. Feed cursors do
+not paginate graph results or establish one atomic snapshot across both streams.
+Automatic consolidation and graph-assisted ranking remain separate work.
 
 Qualification uses controlled storage and real HTTP fixtures for direction,
 cycles, repeated claims, exact revisions, scope/role isolation, native company

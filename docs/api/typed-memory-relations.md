@@ -263,12 +263,12 @@ retrying. There is no unbounded traversal option.
 
 Reads use one snapshot and clock, but a successful read is not a lease. Re-read
 the relation immediately before reuse; endpoints can change and validity can
-expire after the response. **Typed relation lifecycle changes are not yet emitted
-by the memory change feed.** A memory checkpoint cannot certify a relation cache
-as current. This release provides no relation cursor, cache synchronization feed,
-or automatic consolidation worker. Neighbor enumeration is available through the
-separate bounded typed graph API. Do not enable a graph
-cache that assumes those capabilities exist.
+expire after the response. The [relation change feed](typed-relation-changes.md)
+now emits typed lifecycle events with history-bound cursors and subject-owned
+checkpoints. It is separate from memory changes: observe both streams and retain
+current-state validation. A memory checkpoint alone cannot certify a relation
+cache as current. Bounded neighbor enumeration is available through the typed
+graph API; automatic extraction and consolidation workers remain separate work.
 
 ## Errors and validation
 

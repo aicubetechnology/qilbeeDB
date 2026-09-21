@@ -190,3 +190,8 @@ idempotency and expected-revision checks.
 The unreleased 0.13.0 [typed graph routes](typed-memory-graph.md) expose scoped
 neighborhoods and native company traversal, inspection and history. Retrieval
 slots and explicit node, edge, scan and byte bounds apply to graph reads.
+
+The unreleased [typed relation change routes](typed-relation-changes.md) expose a
+separate history-bound event stream, subject-owned checkpoints, immutable progress
+receipts and snapshot-local consumer diagnostics. Existing memory feed contracts
+remain unchanged. Graph caches must observe both streams and revalidate expiry.

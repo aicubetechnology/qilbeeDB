@@ -165,6 +165,7 @@ nav:
     - Memory Evidence Graph API: api/memory-evidence-graph.md
     - Typed Memory Relations API: api/typed-memory-relations.md
     - Typed Memory Graph API: api/typed-memory-graph.md
+    - Typed Relation Changes API: api/typed-relation-changes.md
     - Graph Memory Evidence: research/graph-memory-evidence.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md

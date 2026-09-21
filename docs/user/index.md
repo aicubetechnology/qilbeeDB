@@ -95,3 +95,8 @@ The unreleased [typed graph API](../api/typed-memory-graph.md) traverses those
 assertions in either direction, returning current eligible endpoint records and
 explicit work coverage. Company administrators can also inspect retained assertion
 state and history directly.
+
+Use the unreleased [relation change feed](../api/typed-relation-changes.md) to
+invalidate graph caches and retain consumer progress across interruptions. Its
+history-bound cursors and explicit reconciliation complement the memory feed;
+current eligibility checks remain necessary before cached context is reused.
