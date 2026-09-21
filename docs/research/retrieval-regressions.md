@@ -137,6 +137,42 @@ ranks. Its one unanswered query returns no BM25 hits but returns ten cosine/hybr
 neighbors at threshold -1. A returned neighbor or RRF score does not establish
 evidence sufficiency; one query cannot estimate agent error or calibrate abstention.
 
+## Independent integration confirmation on 0.10.0
+
+The integration team's [0.10.0 validation report](https://github.com/aicubetechnology/qilbee-ecosystem/blob/83b80800817d5c78de2cbc9df1e7a59a84ed5bc7/docs/qilbeedb-010-validation.html)
+confirms the eight-document deletion regression is fixed on server revision
+`59bc4d502ea4c7b8d4a413cb084a23d21841896b`, image
+`sha256:95bc2a74aab0c4369efbc7274b74409b023fef63d52845c4b7f86911c0230afa`.
+After four deletions, all three methods cover the four survivors with budget four,
+return the target and need no continuation. Budget eight still examines only four
+current candidates. The frozen real-vector subset matches the earlier fixture;
+this is a coverage check, not a cross-version relevance or latency comparison.
+
+A second isolated four-document exercise records 18 search responses across
+missing embeddings, tag partitioning, direct rejection, deletion, source update
+and current-revision reembedding. Two candidates without vectors correctly spend
+a budget of two while reporting zero decoded embeddings and incomplete coverage.
+The client now retains per-response work headers separately from its closed JSON
+contract and rejects inconsistent metadata without changing retrieval methods.
+The report attributes 260 passing integration tests to its client and harness;
+these are separate from QilbeeDB's own suites.
+
+The linked [coverage evidence](https://github.com/aicubetechnology/qilbee-ecosystem/blob/83b80800817d5c78de2cbc9df1e7a59a84ed5bc7/docs/validations/2026-09-20-qilbeedb010-history-coverage.json)
+has SHA-256 `e1c1b911d346ebbbfafc95f36a2684e4df4023c1b2505da95555a53af798f41f`;
+the [retrieval-work evidence](https://github.com/aicubetechnology/qilbee-ecosystem/blob/83b80800817d5c78de2cbc9df1e7a59a84ed5bc7/docs/validations/2026-09-20-qilbeedb010-retrieval-work.json)
+has SHA-256 `74bc08c7dc9fbc7e1c9ab6863fa5257b406e7ff7a0a790f9592136dddd161d8a`.
+Their stored observations agree with those coverage and counter conclusions.
+Reviewing these artifacts does not independently replay the integration traffic.
+
+Close the small deletion reproduction as fixed. Keep the integration report's
+pending full-scale **real-vector** qualification separate from the existing
+[5,183-record synthetic capacity qualification](retrieval-history-report.md),
+which already exercises three update, reembedding, deletion and replacement
+cycles. Neither result measures 0.10.0 SciFact relevance, v2 superiority, concurrent
+capacity or downstream agent-task gains. Integration qualification of strategy
+candidates and production consumption of the verified feed/checkpoints also
+remain open; discovering routes or adding error codes does not complete them.
+
 ## Acceptance gates for subsequent changes
 
 These 300 test queries are now exposed regression data. A profile selected after

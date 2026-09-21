@@ -8776,7 +8776,7 @@
       "post": {
         "operationId": "recoverVerifiedCheckpoint",
         "summary": "Record explicit consumer checkpoint recovery",
-        "description": "Requires memory_read and memory_checkpoint. Replaces an existing subject-owned checkpoint using exact revision and digest expectations and a currently valid verified cursor. Can rewind only through this explicit recovery route. Stores immutable before/after evidence, current state and retry receipt atomically. Evidence is caller-declared, not externally verified; no external actions are undone.",
+        "description": "Requires memory_read and memory_checkpoint. Replaces an existing subject-owned checkpoint using exact revision and digest expectations and a currently valid verified cursor. Can rewind only through this explicit recovery route. Stores immutable before/after evidence, current state and retry receipt atomically. Evidence is caller-declared, not externally verified; no external actions are undone. In feature previews that expose consumer diagnostics, an intrinsically intact, subject-owned checkpoint may be reconciled even when its prior cursor is incompatible with current history. Its exact revision and digest can be obtained from consumer diagnostics. This does not bypass checkpoint integrity or target-journal verification; the immutable recovery receipt retains the previous checkpoint.",
         "tags": [
           "Memory"
         ],
@@ -9762,6 +9762,185 @@
                   "visibility": "shared"
                 },
                 "strategy_id": "receipt-recovery-v1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/memory/consumers/diagnose": {
+      "post": {
+        "operationId": "diagnoseMemoryConsumer",
+        "summary": "Inspect subject-owned consumer progress and history compatibility",
+        "description": "Requires memory_read and memory_checkpoint for the exact scope. Reads current progress, journal boundaries and an optional caller-held witness from one snapshot without advancing progress. Missing checkpoints return 200 with unknown pending positions; well-formed incompatible cursors are reported in statuses. Stored corruption returns 500 with no partial diagnostic. This bounded boundary check does not audit middle history or prove external effects. Retain an external witness to compare with restored history; restoring the witness alongside the database can hide lost work.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Scoped snapshot diagnostic; inspect checkpoint_status and witness_status before using pending_positions.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryConsumerDiagnosticsResponse"
+                },
+                "examples": {
+                  "uninitialized": {
+                    "value": {
+                      "contract_version": 2,
+                      "scope": {
+                        "project_id": "project",
+                        "mission_id": null,
+                        "agent_id": "agent",
+                        "visibility": "shared"
+                      },
+                      "diagnostics": {
+                        "consumer_id": "search-cache",
+                        "active": false,
+                        "baseline": null,
+                        "high_watermark": null,
+                        "checkpoint": null,
+                        "checkpoint_status": "missing",
+                        "pending_positions": null,
+                        "witness_status": "not_provided",
+                        "checkpoint_relative_to_witness": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryConsumerDiagnosticsRequest"
+              },
+              "example": {
+                "contract_version": 2,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "shared"
+                },
+                "consumer_id": "cache"
+              },
+              "examples": {
+                "current_state": {
+                  "value": {
+                    "contract_version": 2,
+                    "scope": {
+                      "project_id": "project",
+                      "mission_id": null,
+                      "agent_id": "agent",
+                      "visibility": "shared"
+                    },
+                    "consumer_id": "search-cache",
+                    "witness": null
+                  }
+                }
               }
             }
           }
@@ -17170,6 +17349,306 @@
             }
           }
         ]
+      },
+      "MemoryConsumerDiagnosticsRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, nonblank and without control characters; owned by the authenticated subject."
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "MemoryConsumerDiagnostics": {
+        "type": "object",
+        "properties": {
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkpoint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkpoint_status": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "compatible",
+              "history_incompatible"
+            ]
+          },
+          "pending_positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sequence distance from compatible stored checkpoint to current tip, not an audit or a count of eligible records. Null when missing or history-incompatible."
+          },
+          "witness_status": {
+            "type": "string",
+            "enum": [
+              "not_provided",
+              "compatible",
+              "history_incompatible"
+            ]
+          },
+          "checkpoint_relative_to_witness": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "before",
+              "equal",
+              "after",
+              null
+            ]
+          }
+        },
+        "required": [
+          "consumer_id",
+          "active",
+          "baseline",
+          "high_watermark",
+          "checkpoint",
+          "checkpoint_status",
+          "pending_positions",
+          "witness_status",
+          "checkpoint_relative_to_witness"
+        ],
+        "additionalProperties": false,
+        "description": "One snapshot, exact subject-owned consumer, bounded boundary checks and no writes. A well-formed incompatible witness is an observed status rather than an HTTP conflict. Encountered corruption still fails the whole request.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "active": {
+                  "const": true
+                }
+              },
+              "required": [
+                "active"
+              ]
+            },
+            "then": {
+              "properties": {
+                "baseline": {
+                  "$ref": "#/components/schemas/VerifiedMemoryCursor"
+                },
+                "high_watermark": {
+                  "$ref": "#/components/schemas/VerifiedMemoryCursor"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "baseline": {
+                  "type": "null"
+                },
+                "high_watermark": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "missing"
+                }
+              },
+              "required": [
+                "checkpoint_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "checkpoint": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "checkpoint": {
+                  "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "checkpoint_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "active": {
+                  "const": true
+                },
+                "pending_positions": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18446744073709551615
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "pending_positions": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "witness_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "witness_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "active": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {}
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "compatible"
+                },
+                "witness_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "checkpoint_status",
+                "witness_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "checkpoint_relative_to_witness": {
+                  "type": "string",
+                  "enum": [
+                    "before",
+                    "equal",
+                    "after"
+                  ]
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "checkpoint_relative_to_witness": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "MemoryConsumerDiagnosticsResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/MemoryConsumerDiagnostics"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "diagnostics"
+        ],
+        "additionalProperties": false
       }
     }
   }

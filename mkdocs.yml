@@ -131,6 +131,7 @@ nav:
       - Derived Memory: api/derived-memory.md
       - Consumer Checkpoints: api/memory-checkpoints.md
       - Verified Consumer Checkpoints: api/verified-memory-checkpoints.md
+      - Consumer diagnostics: api/consumer-diagnostics.md
       - Semantic Memory Search: api/semantic-memory.md
       - Lexical Memory Search: api/lexical-memory.md
       - Current candidates: api/retrieval-candidates.md

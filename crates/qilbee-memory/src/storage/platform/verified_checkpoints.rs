@@ -1,4 +1,5 @@
 //! Subject-owned durable change-feed progress; external effects remain caller-owned.
+use super::snapshot::MemorySnapshot;
 use super::*;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -232,10 +233,30 @@ impl RocksDbMemoryStorage {
             ));
         }
         let view = self.memory_snapshot();
-        let Some(bytes) = view
+        let Some(checkpoint) = view.stored_verified_checkpoint(namespace, subject, consumer)?
+        else {
+            return Ok(None);
+        };
+        let state = view.verified_journal(namespace)?.ok_or_else(inconsistent)?;
+        view.verify_memory_cursor(namespace, &state, &checkpoint.cursor)
+            .map_err(|_| inconsistent())?;
+        Ok(Some(checkpoint))
+    }
+}
+
+impl MemorySnapshot<'_> {
+    /// Verify intrinsic ownership and integrity without requiring a compatible journal.
+    /// Ordinary reads must additionally verify history; explicit recovery may reconcile it.
+    fn stored_verified_checkpoint(
+        &self,
+        namespace: &str,
+        subject: &str,
+        consumer: &str,
+    ) -> Result<Option<VerifiedMemoryCheckpoint>> {
+        let Some(bytes) = self
             .db
             .get_cf(
-                self.cf(super::super::cf::AGENT_META)?,
+                self.storage.cf(crate::storage::cf::AGENT_META)?,
                 checkpoint_key(0x28, namespace, subject, consumer)?,
             )
             .map_err(storage_error)?
@@ -244,12 +265,11 @@ impl RocksDbMemoryStorage {
         };
         let checkpoint: VerifiedMemoryCheckpoint = decode(&bytes)?;
         checkpoint.validate(namespace, subject, consumer)?;
-        let state = view.verified_journal(namespace)?.ok_or_else(inconsistent)?;
-        view.verify_memory_cursor(namespace, &state, &checkpoint.cursor)
-            .map_err(|_| inconsistent())?;
         Ok(Some(checkpoint))
     }
 }
 
+mod diagnostics;
+pub use diagnostics::*;
 mod recovery;
 pub use recovery::*;

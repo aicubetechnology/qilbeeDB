@@ -210,6 +210,13 @@
       "title": "Retrieval evidence and regressions",
       "description": "Audit SciFact findings, preserve fusion failures and gains, and define reproducible ranking and load acceptance gates.",
       "order": 88
+    },
+    {
+      "source": "docs/api/consumer-diagnostics.md",
+      "file": "consumer-diagnostics.md",
+      "title": "Consumer diagnostics",
+      "description": "Inspect scoped progress, pending positions and retained-history compatibility before explicit reconciliation.",
+      "order": 62
     }
   ]
 }
