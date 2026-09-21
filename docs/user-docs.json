@@ -224,6 +224,20 @@
       "title": "Python memory consumer",
       "description": "Resume verified events from durable effects, commit progress safely, and reconcile failures without overwriting checkpoints.",
       "order": 63
+    },
+    {
+      "source": "docs/api/memory-batch-read.md",
+      "file": "memory-batch-read.md",
+      "title": "Read memory batches",
+      "description": "Read current context records in one authorized snapshot and handle expiry, dependencies and bounded work.",
+      "order": 54
+    },
+    {
+      "source": "docs/research/context-consumer-qualification.md",
+      "file": "context-consumer-qualification.md",
+      "title": "Context consumer qualification",
+      "description": "Inspect attributed consumer recovery evidence and the acceptance boundaries for current context reuse.",
+      "order": 64
     }
   ]
 }

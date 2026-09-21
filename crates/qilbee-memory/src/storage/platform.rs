@@ -830,6 +830,8 @@ mod tests {
 }
 
 mod semantic;
+mod batch_read;
+pub use batch_read::*;
 #[cfg(test)]
 mod semantic_tests;
 pub use semantic::*;

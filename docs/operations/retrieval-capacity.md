@@ -17,7 +17,7 @@ ranking version or relevance threshold.
 | --- | --- | --- | --- |
 | `QILBEE_MAX_EMBEDDING_DIMENSIONS` | `32768` | `1`–`32768` | Maximum dimensions accepted by vector attachment and query endpoints |
 | `QILBEE_MAX_RETRIEVAL_SCAN_BYTES` | `67108864` (64 MiB) | `8388608`–`268435456` (8–256 MiB) | Ceiling for lexical/hybrid `scan_bytes_limit` |
-| `QILBEE_MAX_CONCURRENT_RETRIEVALS` | `2` | `1`–`64` | Shared concurrent execution slots for lexical, cosine and hybrid retrieval |
+| `QILBEE_MAX_CONCURRENT_RETRIEVALS` | `2` | `1`–`64` | Shared concurrent execution slots for lexical, cosine, hybrid retrieval and memory batch reads |
 
 Changing a ceiling does not change the request defaults. Lexical and hybrid
 requests still default to an 8 MiB scan budget and 10,000 scanned sources. A client
@@ -108,6 +108,9 @@ contract; its source coverage uses the existing embedding-count scan limit.
 | `503` | `retrieval_busy` | Retry with bounded backoff and jitter within the caller's deadline |
 
 Admission is nonblocking: no retrieval starts when its execution slot is unavailable.
+The [memory batch-read route](../api/memory-batch-read.md) uses the same admission
+pool and returns the same `retrieval_busy` error. Its fixed 8 MiB root-record
+budget is independent of `QILBEE_MAX_RETRIEVAL_SCAN_BYTES`.
 The slot remains held until the blocking retrieval finishes, even if the HTTP client
 disconnects, and is released on success or failure. This bounds simultaneous retrieval
 work; it is not a global HTTP rate limiter or a per-tenant fairness scheduler.

@@ -27,6 +27,7 @@ No JSON field can override tenant, record author, revision or storage namespace.
 | --- | --- | --- |
 | `POST /commands` | `memory_write` | 200 with durable receipt, including on replay |
 | `GET /records/{record_id}` | `memory_read` | 200 with current record and scope |
+| `POST /records/batch` | `memory_read` | One snapshot for 1–100 explicit IDs; ordered records or null entries |
 | `POST /query` | `memory_read` | 200 with filtered records and continuation |
 
 Create, update and delete share the command endpoint so the same receipt protocol
@@ -145,6 +146,11 @@ The response contains `contract_version`, `scope`, and `record`. A record contai
 `modified_at_millis`, `author` for the last mutation, and `payload` with the record
 fields above. Creation time stays fixed across updates. Expired, deleted, absent
 or differently scoped IDs return 404. A malformed UUID returns 400.
+
+Use [batch reads](memory-batch-read.md) to construct or revalidate a context from
+multiple IDs with one snapshot and one eligibility clock. Reaching a change-feed
+watermark does not establish current eligibility: expiry can occur without an
+event, and transitive source validity must also be checked.
 
 ## Update with an expected revision
 
