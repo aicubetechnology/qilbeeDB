@@ -5,6 +5,28 @@ use serde_json::Value;
 /// Parse an explicit local bootstrap command. A returned value contains secret
 /// material and must be delivered only to the invoking operator, never logged.
 pub fn bootstrap_command(args: &[String]) -> Result<Option<Value>> {
+    if matches!(
+        args.first().map(String::as_str),
+        Some("bootstrap-master" | "recover-master")
+    ) {
+        if args.len() != 3 {
+            return Err(Error::Configuration("Usage: qilbeedb bootstrap-master <data-directory> <subject-id> or recover-master <data-directory> <expected-revision>".into()));
+        }
+        let storage = qilbee_storage::StorageEngine::open(
+            qilbee_storage::StorageOptions::for_production(&args[1]),
+        )?;
+        let identity = crate::security::identity::IdentityStore::new(std::sync::Arc::new(storage));
+        let issued = if args[0] == "bootstrap-master" {
+            identity.bootstrap_master(&args[2])?
+        } else {
+            identity.recover_master(args[2].parse().map_err(|_| {
+                Error::Configuration("Expected a positive master revision".into())
+            })?)?
+        };
+        return Ok(Some(
+            serde_json::json!({"contract_version":1,"credential":issued.credential,"secret":issued.secret}),
+        ));
+    }
     if args.first().map(String::as_str) != Some("bootstrap-tenant") {
         return Ok(None);
     }
@@ -60,5 +82,37 @@ mod tests {
             bootstrap_command(&["bootstrap-tenant".into(), "data".into(), "company".into()])
                 .is_err()
         );
+    }
+
+    #[test]
+    fn operator_master_bootstrap_and_recovery_require_explicit_local_commands() {
+        let dir = TempDir::new().unwrap();
+        let path = dir.path().to_str().unwrap().to_owned();
+        let args = vec!["bootstrap-master".into(), path.clone(), "master".into()];
+        let first = bootstrap_command(&args).unwrap().unwrap();
+        assert_eq!(first["credential"]["is_master"], true);
+        assert!(bootstrap_command(&args).is_err());
+        assert!(bootstrap_command(&["bootstrap-master".into(), path.clone()]).is_err());
+        assert!(
+            bootstrap_command(&["recover-master".into(), path.clone(), "invalid".into()]).is_err()
+        );
+        assert!(bootstrap_command(&["recover-master".into(), path.clone(), "2".into()]).is_err());
+        let recovered = bootstrap_command(&["recover-master".into(), path.clone(), "1".into()])
+            .unwrap()
+            .unwrap();
+        let store = IdentityStore::new(Arc::new(
+            StorageEngine::open(StorageOptions::for_testing(dir.path())).unwrap(),
+        ));
+        assert!(
+            store
+                .authenticate_global(first["secret"].as_str().unwrap())
+                .is_err()
+        );
+        assert!(
+            store
+                .authenticate_global(recovered["secret"].as_str().unwrap())
+                .is_ok()
+        );
+        assert_eq!(recovered["credential"]["revision"], 2);
     }
 }

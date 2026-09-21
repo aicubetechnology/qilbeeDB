@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QilbeeDB Platform API",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "description": "Durable identity, scoped memory with model-bound semantic vector retrieval, evidence-driven procedural learning and learned-tool development receipts for AI agents. Scoped experience receipts record attempts and observations without automatic qualification."
   },
   "servers": [
@@ -37,6 +37,10 @@
     {
       "name": "Experiences",
       "description": "Scoped attempt registrations and immutable observations. No execution dispatch or automatic procedure qualification."
+    },
+    {
+      "name": "Administration",
+      "description": "Installation master and explicitly delegated global administration."
     }
   ],
   "paths": {
@@ -9946,6 +9950,1291 @@
           }
         }
       }
+    },
+    "/api/v1/admin/identity": {
+      "get": {
+        "operationId": "globalIdentity",
+        "summary": "Inspect the current global credential",
+        "description": "No secret or verifier is returned. Global credentials do not authenticate tenant data endpoints.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalCredentialResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/credentials": {
+      "post": {
+        "operationId": "issueGlobalCredential",
+        "summary": "Delegate global administrative capabilities",
+        "description": "Requires global_credential_admin. Capabilities must be a subset of the issuer and expiry cannot exceed the issuer. The issued credential is never the bootstrap master. Delivery is one-time, not idempotent.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedGlobalCredential"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalIssueRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/credentials/{id}": {
+      "get": {
+        "operationId": "inspectGlobalCredential",
+        "summary": "Inspect a global credential and its history",
+        "description": "Requires global_credential_admin and a capability superset of the target.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalCredentialResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/credentials/{id}/rotate": {
+      "post": {
+        "operationId": "rotateGlobalCredential",
+        "summary": "Rotate a global credential",
+        "description": "Requires expected_revision. Allowed for self or global_credential_admin with a capability superset of the target. Delegates cannot change the bootstrap master. Revocation is durable; offline master recovery is the only recovery route.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedGlobalCredential"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/credentials/{id}/revoke": {
+      "post": {
+        "operationId": "revokeGlobalCredential",
+        "summary": "Revoke a global credential",
+        "description": "Requires expected_revision. Allowed for self or global_credential_admin with a capability superset of the target. Delegates cannot change the bootstrap master. Revocation is durable; offline master recovery is the only recovery route.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalCredentialResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/tenants": {
+      "post": {
+        "operationId": "registerTenant",
+        "summary": "Register a company and its first administrator",
+        "description": "Requires tenant_create. Atomically creates tenant authority, registration receipt and initial tenant credential. Existing tenant IDs return 409; no authority is replaced. One-time secret delivery is not idempotent.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisteredTenant"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterTenantRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/tenants/{tenant}": {
+      "get": {
+        "operationId": "inspectTenant",
+        "summary": "Inspect tenant registration provenance",
+        "description": "Requires tenant_inspect. No tenant memory or secrets are returned.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantInspection"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The tenant does not exist; caller authority was checked first.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact tenant identifier, URL encoded."
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/tenants/{tenant}/admin-credentials": {
+      "post": {
+        "operationId": "issueTenantAdmin",
+        "summary": "Appoint or recover a tenant administrator",
+        "description": "Requires tenant_admin. Creates a new auditable tenant credential with credential_admin and policy_admin and no memory grants. It does not revoke existing administrators. Secret delivery is one-time.",
+        "tags": [
+          "Administration"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuedCredential"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The tenant does not exist; caller authority was checked first.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantAdminRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact tenant identifier, URL encoded."
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -9955,6 +11244,12 @@
         "scheme": "bearer",
         "bearerFormat": "qdb1 opaque credential",
         "description": "Provision through the trusted local bootstrap command and authenticated credential API."
+      },
+      "globalCredential": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "qdbg1 opaque global credential",
+        "description": "Separate global authority. Tenant keys never authorize installation administration. Bootstrap the master locally; delegate narrow service capabilities."
       }
     },
     "schemas": {
@@ -10075,7 +11370,9 @@
               "bootstrapped",
               "issued",
               "rotated",
-              "revoked"
+              "revoked",
+              "tenant_registered_by_global_authority",
+              "admin_issued_by_global_authority"
             ]
           },
           "actor_id": {
@@ -10863,7 +12160,8 @@
                   "embedding_dimension_limit",
                   "retrieval_scan_limit",
                   "retrieval_busy",
-                  "review_not_found"
+                  "review_not_found",
+                  "tenant_not_found"
                 ]
               },
               "message": {
@@ -17647,6 +18945,318 @@
           "contract_version",
           "scope",
           "diagnostics"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalCapability": {
+        "type": "string",
+        "enum": [
+          "tenant_create",
+          "tenant_inspect",
+          "tenant_admin",
+          "global_credential_admin"
+        ]
+      },
+      "GlobalCredentialSpec": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GlobalCapability"
+            },
+            "minItems": 1
+          },
+          "expires_at_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "subject_id",
+          "capabilities"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalCredential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/GlobalCredentialSpec"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "revoked_at_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GlobalCredentialEvent"
+            }
+          },
+          "is_master": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "spec",
+          "revision",
+          "revoked_at_millis",
+          "history",
+          "is_master"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalCredentialResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "credential": {
+            "$ref": "#/components/schemas/GlobalCredential"
+          }
+        },
+        "required": [
+          "contract_version",
+          "credential"
+        ],
+        "additionalProperties": false
+      },
+      "IssuedGlobalCredential": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "credential": {
+            "$ref": "#/components/schemas/GlobalCredential"
+          },
+          "secret": {
+            "type": "string",
+            "pattern": "^qdbg1_[0-9a-f]{32}_[A-Za-z0-9_-]{43}$",
+            "description": "Returned once; keep in a backend secret manager."
+          }
+        },
+        "required": [
+          "contract_version",
+          "credential",
+          "secret"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalIssueRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "spec": {
+            "$ref": "#/components/schemas/GlobalCredentialSpec"
+          }
+        },
+        "required": [
+          "contract_version",
+          "spec"
+        ],
+        "additionalProperties": false
+      },
+      "RegisterTenantRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, nonblank and without control characters; immutable identity, not a display name."
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        "required": [
+          "contract_version",
+          "tenant_id",
+          "subject_id"
+        ],
+        "additionalProperties": false
+      },
+      "TenantAdminRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        "required": [
+          "contract_version",
+          "subject_id"
+        ],
+        "additionalProperties": false
+      },
+      "TenantRegistration": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "initial_admin_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant_id",
+          "created_at_millis",
+          "created_by",
+          "initial_admin_id"
+        ],
+        "additionalProperties": false
+      },
+      "RegisteredTenant": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRegistration"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/Credential"
+          },
+          "secret": {
+            "type": "string",
+            "pattern": "^qdb1_[0-9a-f]{32}_[A-Za-z0-9_-]{43}$",
+            "description": "Returned once. Store securely; never log."
+          }
+        },
+        "required": [
+          "contract_version",
+          "tenant",
+          "credential",
+          "secret"
+        ],
+        "additionalProperties": false
+      },
+      "TenantInspection": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "registration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TenantRegistration"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a tenant created by the local bootstrap command, which has no global registration receipt."
+          }
+        },
+        "required": [
+          "contract_version",
+          "tenant_id",
+          "registration"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalCredentialEvent": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "bootstrapped",
+              "issued",
+              "rotated",
+              "revoked",
+              "recovered_by_local_operator"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "revision",
+          "action",
+          "actor_id",
+          "at_millis"
         ],
         "additionalProperties": false
       }

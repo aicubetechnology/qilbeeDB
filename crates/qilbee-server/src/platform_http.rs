@@ -21,6 +21,7 @@ mod experiences;
 mod memory;
 mod retrieval_limits;
 mod tools;
+mod administration;
 
 #[derive(Clone)]
 pub(crate) struct PlatformState {
@@ -81,6 +82,7 @@ fn create_router_with_limits(
         identity: Arc::new(IdentityStore::new(Arc::new(database.storage().clone()))),
     };
     Ok(Router::new()
+        .merge(administration::routes())
         .merge(memory::routes())
         .merge(learning::routes())
         .merge(experiences::routes())

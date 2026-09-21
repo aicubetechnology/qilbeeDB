@@ -1,5 +1,5 @@
 {
-  "release": "0.10.0",
+  "release": "0.11.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -224,6 +224,13 @@
       "title": "Python memory consumer",
       "description": "Resume verified events from durable effects, commit progress safely, and reconcile failures without overwriting checkpoints.",
       "order": 63
+    },
+    {
+      "source": "docs/security/global-administration.md",
+      "file": "global-administration.md",
+      "title": "Global administration and SaaS provisioning",
+      "description": "Bootstrap a master, delegate registration-only service keys and administer companies with separate global and tenant authority.",
+      "order": 35
     }
   ]
 }

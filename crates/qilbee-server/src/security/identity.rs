@@ -6,6 +6,12 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeSet, sync::Arc};
 use uuid::Uuid;
 
+mod master;
+pub use master::{
+    GlobalCapability, GlobalCredentialSpec, GlobalCredentialView, IssuedGlobalCredential,
+    TenantView,
+};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Capability {
