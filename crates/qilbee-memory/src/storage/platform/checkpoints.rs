@@ -53,7 +53,12 @@ impl MemoryCheckpoint {
             self.updated_at_millis,
         ))
     }
-    fn validate(&self, namespace: &str, subject: &str, consumer: &str) -> Result<()> {
+    pub(in crate::storage::platform) fn validate(
+        &self,
+        namespace: &str,
+        subject: &str,
+        consumer: &str,
+    ) -> Result<()> {
         if self.schema_version != 1
             || self.revision == 0
             || self.consumer_id != consumer

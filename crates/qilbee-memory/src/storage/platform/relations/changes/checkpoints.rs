@@ -188,7 +188,7 @@ impl MemorySnapshot<'_> {
         }
         Ok(Some(receipt))
     }
-    fn stored_relation_checkpoint(
+    pub(in crate::storage::platform) fn stored_relation_checkpoint(
         &self,
         namespace: &str,
         subject: &str,

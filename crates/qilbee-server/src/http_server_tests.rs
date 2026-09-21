@@ -292,11 +292,19 @@ pub(crate) fn wire_request(
     socket
         .set_write_timeout(Some(std::time::Duration::from_secs(10)))
         .unwrap();
-    let body = serde_json::to_vec(&body).unwrap();
+    // A bodyless GET must not leave unread bytes when the server closes the
+    // connection; some TCP stacks then report a reset instead of a clean EOF.
+    let body = if method == "GET" && body.is_null() {
+        Vec::new()
+    } else {
+        serde_json::to_vec(&body).unwrap()
+    };
     write!(socket, "{method} {path} HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nAuthorization: Bearer {token}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", body.len()).unwrap();
     socket.write_all(&body).unwrap();
     let mut response = Vec::new();
-    socket.read_to_end(&mut response).unwrap();
+    socket.read_to_end(&mut response).unwrap_or_else(|error| {
+        panic!("{method} {path}: HTTP response read failed after {} bytes: {error}", response.len())
+    });
     let boundary = response
         .windows(4)
         .position(|window| window == b"\r\n\r\n")

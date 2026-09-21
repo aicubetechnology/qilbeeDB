@@ -385,6 +385,13 @@
       "title": "Inspect learning evidence and historical outcomes",
       "description": "Discover original evaluation submissions, paired receipts, experience observations and tool development events with bounded authorized continuation.",
       "order": 213
+    },
+    {
+      "source": "docs/api/company-consumer-directory.md",
+      "file": "company-consumer-directory.md",
+      "title": "Company consumer progress",
+      "description": "Discover retained consumers and inspect verified or legacy progress without writer credentials.",
+      "order": 515
     }
   ]
 }
