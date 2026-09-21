@@ -172,6 +172,7 @@ nav:
     - Bootstrap & Initial Setup: security/bootstrap.md
     - Authentication: security/authentication.md
     - Durable Scoped Credentials: security/scoped-credentials.md
+    - Automatic Agent Registration: security/agent-registration.md
     - Company Integration Policies: security/company-integrations.md
     - Administrator login: security/human-login.md
     - Administrative directories: security/administration-directory.md

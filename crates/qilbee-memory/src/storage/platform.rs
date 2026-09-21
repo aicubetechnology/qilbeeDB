@@ -124,6 +124,27 @@ impl RocksDbMemoryStorage {
         author: &RecordAuthor,
         command: &MemoryCommand,
     ) -> Result<CommandReceipt> {
+        self.apply_memory_command_with_observation(namespace, author, command, None)
+    }
+
+    /// Atomically register the external company-agent association with the first
+    /// successful memory command, its canonical record, journal and receipt.
+    pub fn apply_observed_memory_command(
+        &self,
+        observation: &AgentObservation,
+        command: &MemoryCommand,
+    ) -> Result<CommandReceipt> {
+        observation.validate()?;
+        self.apply_memory_command_with_observation(&observation.namespace, &observation.author, command, Some(observation))
+    }
+
+    fn apply_memory_command_with_observation(
+        &self,
+        namespace: &str,
+        author: &RecordAuthor,
+        command: &MemoryCommand,
+        observation: Option<&AgentObservation>,
+    ) -> Result<CommandReceipt> {
         Self::validate_agent(namespace)?;
         if command.contract_version != 1
             || command.idempotency_key.trim().is_empty()
@@ -161,6 +182,16 @@ impl RocksDbMemoryStorage {
                 return Err(Error::ConstraintViolation(
                     "Idempotency key was already used for a different command".into(),
                 ));
+            }
+            if let Some(observation) = observation {
+                // An acknowledged command from before registration support may
+                // be the first successful observation after upgrade.
+                let mut batch = rocksdb::WriteBatch::default();
+                self.append_agent_observation(observation, AgentRegistrationTrigger::MemoryCommand { record_id: stored.receipt.record_id, revision: stored.receipt.revision, action: stored.receipt.action.clone() }, chrono::Utc::now().timestamp_millis(), &mut batch)?;
+                if batch.len() > 0 {
+                    let mut options = rocksdb::WriteOptions::default(); options.disable_wal(false); options.set_sync(true);
+                    self.db.write_opt(batch, &options).map_err(storage_error)?;
+                }
             }
             return Ok(stored.receipt);
         }
@@ -249,6 +280,9 @@ impl RocksDbMemoryStorage {
             record_digest: digest(&encoded),
         };
         let mut batch = rocksdb::WriteBatch::default();
+        if let Some(observation) = observation {
+            self.append_agent_observation(observation, AgentRegistrationTrigger::MemoryCommand { record_id: receipt.record_id, revision: receipt.revision, action: receipt.action.clone() }, now, &mut batch)?;
+        }
         self.update_candidates(namespace, &record, &mut batch)?;
         batch.put_cf(
             self.cf(super::cf::EPISODES)?,
@@ -844,6 +878,8 @@ mod candidates;
 #[cfg(test)]
 mod candidate_tests;
 pub use candidates::CANDIDATE_SELECTION_VERSION;
+mod agents;
+pub use agents::*;
 pub use lexical::*;
 mod hybrid;
 #[cfg(test)]

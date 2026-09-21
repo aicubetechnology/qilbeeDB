@@ -58,6 +58,7 @@ credentials, as well as errors, send `Cache-Control: no-store`.
 | `GET /api/v1/credentials/{id}` | `credential_admin`; inspect a credential in the same tenant |
 | `POST /api/v1/credentials/{id}/rotate` | `credential_admin`; replace the secret at an expected revision |
 | `POST /api/v1/credentials/{id}/revoke` | `credential_admin`; revoke at an expected revision |
+| `GET /api/v1/agents` | Unreleased: `credential_admin`; page through automatically registered agents in the authenticated company |
 | `POST /api/v1/credentials/{id}/scope-authority` | Unreleased: `credential_admin`; replace exact grants or a company integration policy with a before/after audit event |
 
 For issuance:

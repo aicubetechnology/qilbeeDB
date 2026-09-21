@@ -11,9 +11,10 @@ The application owns ID generation, membership, and resource lifecycle. IDs are
 opaque, case-sensitive UTF-8 strings; QilbeeDB does not normalize them or infer
 identity from display names.
 
-This feature authorizes dynamic scopes. Durable first-request agent registration,
-delegated child-key issuance, and a storage-backed company memory inventory are
-separate capabilities; this policy does not claim to implement them.
+This feature authorizes dynamic scopes. The unreleased
+[automatic agent registration](agent-registration.md) contract records an external
+agent after its first successful authorized resource request. Delegated child-key
+issuance and a storage-backed company memory inventory remain separate capabilities.
 
 ## Choose an access model
 

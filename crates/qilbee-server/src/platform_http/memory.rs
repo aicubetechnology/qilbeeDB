@@ -113,12 +113,8 @@ async fn command(
                     .map_err(ApiError::operation)?;
             }
             let receipt = memory
-                .apply_memory_command(
-                    &scope.storage_namespace,
-                    &RecordAuthor {
-                        credential_id: scope.credential_id,
-                        subject_id: scope.subject_id,
-                    },
+                .apply_observed_memory_command(
+                    &super::agents::observation(&scope, &request.scope),
                     &MemoryCommand {
                         contract_version: request.contract_version,
                         idempotency_key: request.idempotency_key,

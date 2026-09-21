@@ -17,6 +17,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 mod administration;
+mod agents;
 mod directory;
 mod experiences;
 mod learning;
@@ -39,15 +40,19 @@ impl PlatformState {
     async fn run<T, F>(&self, headers: HeaderMap, operation: F) -> ApiResult<T>
     where
         T: Send + 'static,
-        F: FnOnce(&IdentityStore, &str, CredentialView) -> ApiResult<T> + Send + 'static,
+        F: FnOnce(&agents::RequestIdentity<'_>, &str, CredentialView) -> ApiResult<T> + Send + 'static,
     {
         let token = bearer(&headers)?;
         let identity = self.identity.clone();
+        let memory = self.memory.clone();
         tokio::task::spawn_blocking(move || {
             let principal = identity
                 .authenticate(&token)
                 .map_err(ApiError::authentication)?;
-            operation(&identity, &token, principal)
+            let request_identity = agents::RequestIdentity::new(&identity);
+            let result = operation(&request_identity, &token, principal)?;
+            request_identity.record_success(&memory)?;
+            Ok(result)
         })
         .await
         .map_err(|_| ApiError::internal())?
@@ -96,6 +101,7 @@ fn create_router_with_limits(
     };
     Ok(Router::new()
         .merge(administration::routes())
+        .merge(agents::routes())
         .merge(directory::routes())
         .merge(login::routes())
         .merge(scope_authority::routes())

@@ -14332,6 +14332,183 @@
           }
         }
       }
+    },
+    "/api/v1/agents": {
+      "get": {
+        "operationId": "listObservedAgents",
+        "summary": "List automatically registered company agents",
+        "description": "Unreleased. Requires credential_admin. Company comes from the authenticated principal, never from query parameters. A first successful authorized resource request observes an unchanged external agent ID. New memory commands commit registration, memory and receipt atomically. Other resource operations register after success before returning; a registration failure can follow an already committed operation, requiring reconciliation through its existing contract. Valid empty reads can register agents. This directory starts collecting at feature activation and does not backfill historical IDs. Registration is metadata, never a grant, ownership claim or active-status assertion. Company prefix is selected before traversal; results use UTF-8 byte order with an exclusive after_agent_id cursor. Pages are live, not a snapshot: concurrent insertions before the cursor require a fresh traversal. Default 25, maximum 100 entries.",
+        "tags": [
+          "Agent registration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObservedAgentResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "contract_version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "const": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "after_agent_id",
+            "in": "query",
+            "description": "Exclusive external agent ID from next_after_agent_id. URL-encode it as a query parameter. Omit for a new traversal.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -23327,6 +23504,153 @@
             }
           }
         ]
+      },
+      "AgentRegistrationTrigger": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "successful_resource_request",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "memory_command",
+                "type": "string"
+              },
+              "record_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "created",
+                  "updated",
+                  "deleted",
+                  "derived"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "record_id",
+              "revision",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "ObservedAgent": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "registered_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "registered_by": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "first_scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/AgentRegistrationTrigger"
+          }
+        },
+        "required": [
+          "agent_id",
+          "registered_at_millis",
+          "registered_by",
+          "first_scope",
+          "private_subject_id",
+          "trigger"
+        ],
+        "additionalProperties": false
+      },
+      "ObservedAgentPage": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/ObservedAgent"
+            }
+          },
+          "next_after_agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "agents",
+          "next_after_agent_id"
+        ],
+        "additionalProperties": false
+      },
+      "ObservedAgentResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "page": {
+            "$ref": "#/components/schemas/ObservedAgentPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
+        ],
+        "additionalProperties": false
       }
     }
   }
