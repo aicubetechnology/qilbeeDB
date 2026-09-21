@@ -238,6 +238,13 @@
       "title": "Container security qualification",
       "description": "Inspect runtime package updates, scan evidence and the boundaries of container qualification.",
       "order": 27
+    },
+    {
+      "source": "docs/security/human-login.md",
+      "file": "administrator-login.md",
+      "title": "Administrator accounts and login",
+      "description": "Provision human accounts, sign in with bounded sessions and manage passwords within the correct company or global authority.",
+      "order": 38
     }
   ]
 }

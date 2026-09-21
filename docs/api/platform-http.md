@@ -158,3 +158,9 @@ arguments, one-time bootstrap and authentication after reopening the database.
 
 These tests run without model providers or permanent auxiliary services.
 They validate the implemented contracts, not completion of all P0 requirements.
+
+## Human administrator login
+
+Provisioned accounts can authenticate to short-lived sessions without receiving
+permanent API keys. See [Administrator accounts and login](../security/human-login.md)
+for the global and tenant endpoints, password lifecycle, cooldowns and exact limits.

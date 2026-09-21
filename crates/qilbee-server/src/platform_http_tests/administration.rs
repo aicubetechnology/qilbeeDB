@@ -1,14 +1,14 @@
 //! Exercise real HTTP responses, authorization boundaries and the published schema.
 use super::*;
 
-struct Client {
-    client: reqwest::Client,
-    base: String,
-    api: Value,
+pub(super) struct Client {
+    pub(super) client: reqwest::Client,
+    pub(super) base: String,
+    pub(super) api: Value,
 }
 
 impl Client {
-    async fn call(
+    pub(super) async fn call(
         &self,
         method: &str,
         path: &str,

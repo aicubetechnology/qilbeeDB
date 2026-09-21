@@ -14,6 +14,9 @@
   "security": [
     {
       "platformCredential": []
+    },
+    {
+      "loginSession": []
     }
   ],
   "tags": [
@@ -41,6 +44,10 @@
     {
       "name": "Administration",
       "description": "Installation master and explicitly delegated global administration."
+    },
+    {
+      "name": "Human login",
+      "description": "Provisioned human accounts and short-lived administrative sessions."
     }
   ],
   "paths": {
@@ -953,7 +960,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -963,7 +970,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -973,7 +980,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -8001,7 +8008,7 @@
       "post": {
         "operationId": "verifiedMemoryChanges",
         "summary": "Read prefix-anchored memory changes",
-        "description": "Requires memory_read. Validates complete version-2 cursors against the authorized scope history, including after divergent restore and sequence catch-up. The baseline bounds the verified suffix; older events are not backfilled. Limits 1–256. Fixed through fence, after exclusive. 409 requires reconciliation; no silent fallback to version 1.",
+        "description": "Requires memory_read. Validates complete version-2 cursors against the authorized scope history, including after divergent restore and sequence catch-up. The baseline bounds the verified suffix; older events are not backfilled. Limits 1\u2013256. Fixed through fence, after exclusive. 409 requires reconciliation; no silent fallback to version 1.",
         "tags": [
           "Memory"
         ],
@@ -9186,7 +9193,7 @@
       "post": {
         "operationId": "auditMemoryJournal",
         "summary": "Audit a bounded anchored journal range",
-        "description": "Requires memory_read. Checks the same scoped event digests and consecutive prefix links as the v2 feed but returns only range metadata and counts, without event or record identities. Limit 1–256. Continue with checked_through as after and preserve high_watermark as through. Complete covers only the requested range after the baseline; it is not a full-volume, legacy-history or external-evidence attestation. Inconsistency returns 500 with no partial page.",
+        "description": "Requires memory_read. Checks the same scoped event digests and consecutive prefix links as the v2 feed but returns only range metadata and counts, without event or record identities. Limit 1\u2013256. Continue with checked_through as after and preserve high_watermark as through. Complete covers only the requested range after the baseline; it is not a full-volume, legacy-history or external-evidence attestation. Inconsistency returns 500 with no partial page.",
         "tags": [
           "Memory"
         ],
@@ -9962,6 +9969,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10105,6 +10115,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10258,6 +10271,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10412,6 +10428,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10576,6 +10595,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10740,6 +10762,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -10893,6 +10918,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -11065,6 +11093,9 @@
         "security": [
           {
             "globalCredential": []
+          },
+          {
+            "loginSession": []
           }
         ],
         "responses": {
@@ -11235,6 +11266,1849 @@
           }
         ]
       }
+    },
+    "/api/v1/login": {
+      "post": {
+        "operationId": "loginTenant",
+        "summary": "Tenant username/password login",
+        "description": "Provisioned accounts only; no anonymous signup. Same 401 for unknown, incorrect, locked, disabled or revoked accounts. Five failed attempts lock an account for five minutes durably. Per process: 8 attempts per name and authority per minute, 120 total per minute, 2 concurrent password operations. A session lasts at most 15 minutes or the underlying credential expiry. At most 32 sessions per account; a new session evicts the oldest when full. No cookies or refresh tokens.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSessionResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Login rate limit reached; wait at least one minute",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantLoginRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login-accounts": {
+      "post": {
+        "operationId": "createTenantLoginAccount",
+        "summary": "create tenant login account",
+        "description": "Requires credential_admin in this tenant. Create a unique case-sensitive account bound to an active credential in this authority. Existing names return 409. The API key is never returned by login.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAccountCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/login-accounts/{id}": {
+      "get": {
+        "operationId": "inspectTenantLoginAccount",
+        "summary": "inspect tenant login account",
+        "description": "Requires credential_admin in this tenant. Return sanitized metadata and administrative history; password verifiers, failure counters and session tokens are never returned.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/login-accounts/{id}/password": {
+      "post": {
+        "operationId": "changePasswordTenantLoginAccount",
+        "summary": "changePassword tenant login account",
+        "description": "Requires credential_admin in this tenant. Replace the password using expected_revision and atomically invalidate all sessions. A disabled account cannot be reactivated. API keys remain unchanged.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPasswordChange"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/login-accounts/{id}/disable": {
+      "post": {
+        "operationId": "disableTenantLoginAccount",
+        "summary": "disable tenant login account",
+        "description": "Requires credential_admin in this tenant. Irreversibly disable username/password login and invalidate every session using expected_revision. This does not revoke independently issued API keys.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAccountDisable"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/login": {
+      "post": {
+        "operationId": "loginGlobal",
+        "summary": "Global username/password login",
+        "description": "Provisioned accounts only; no anonymous signup. Same 401 for unknown, incorrect, locked, disabled or revoked accounts. Five failed attempts lock an account for five minutes durably. Per process: 8 attempts per name and authority per minute, 120 total per minute, 2 concurrent password operations. A session lasts at most 15 minutes or the underlying credential expiry. At most 32 sessions per account; a new session evicts the oldest when full. No cookies or refresh tokens.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSessionResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Login rate limit reached; wait at least one minute",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalLoginRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/login-accounts": {
+      "post": {
+        "operationId": "createGlobalLoginAccount",
+        "summary": "create global login account",
+        "description": "Requires the installation master. Create a unique case-sensitive account bound to an active credential in this authority. Existing names return 409. The API key is never returned by login.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAccountCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/login-accounts/{id}": {
+      "get": {
+        "operationId": "inspectGlobalLoginAccount",
+        "summary": "inspect global login account",
+        "description": "Requires the installation master. Return sanitized metadata and administrative history; password verifiers, failure counters and session tokens are never returned.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/login-accounts/{id}/password": {
+      "post": {
+        "operationId": "changePasswordGlobalLoginAccount",
+        "summary": "changePassword global login account",
+        "description": "Requires the installation master. Replace the password using expected_revision and atomically invalidate all sessions. A disabled account cannot be reactivated. API keys remain unchanged.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Both password workers are occupied; retry with backoff",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPasswordChange"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/login-accounts/{id}/disable": {
+      "post": {
+        "operationId": "disableGlobalLoginAccount",
+        "summary": "disable global login account",
+        "description": "Requires the installation master. Irreversibly disable username/password login and invalidate every session using expected_revision. This does not revoke independently issued API keys.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "globalCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginAccountResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginAccountDisable"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/logout": {
+      "post": {
+        "operationId": "logoutSession",
+        "summary": "Revoke the current login session",
+        "description": "Requires a current login session. Invalid, expired, already logged-out sessions and permanent API keys return 401. Other sessions and API keys remain unchanged.",
+        "tags": [
+          "Human login"
+        ],
+        "security": [
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 8,192 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11250,6 +13124,11 @@
         "scheme": "bearer",
         "bearerFormat": "qdbg1 opaque global credential",
         "description": "Separate global authority. Tenant keys never authorize installation administration. Bootstrap the master locally; delegate narrow service capabilities."
+      },
+      "loginSession": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A qdbsg1_ global or qdbst1_ tenant login session. The endpoint still enforces its specific authority. Expires within 15 minutes."
       }
     },
     "schemas": {
@@ -11286,14 +13165,14 @@
           "project_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "mission_id": {
             "anyOf": [
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -11303,7 +13182,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "visibility": {
             "$ref": "#/components/schemas/Visibility"
@@ -11322,7 +13201,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -11402,7 +13281,7 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "spec": {
             "$ref": "#/components/schemas/CredentialSpec"
@@ -11756,7 +13635,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -11818,7 +13697,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -12161,7 +14040,10 @@
                   "retrieval_scan_limit",
                   "retrieval_busy",
                   "review_not_found",
-                  "tenant_not_found"
+                  "tenant_not_found",
+                  "invalid_login",
+                  "login_rate_limited",
+                  "login_busy"
                 ]
               },
               "message": {
@@ -14221,19 +16103,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "dimensions": {
             "type": "integer",
@@ -14264,7 +16146,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -14312,7 +16194,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -14603,7 +16485,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -14669,7 +16551,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -15497,7 +17379,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, nonblank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
           },
           "accounting_unit": {
             "type": "string",
@@ -16832,7 +18714,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -16872,7 +18754,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -17327,7 +19209,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "consumer_id": {
             "type": "string",
@@ -17362,7 +19244,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "checkpoint": {
             "$ref": "#/components/schemas/MemoryCheckpoint"
@@ -17726,7 +19608,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "consumer_id": {
             "type": "string",
@@ -17772,7 +19654,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "checkpoint": {
             "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
@@ -18662,7 +20544,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, nonblank and without control characters; owned by the authenticated subject."
+            "description": "1\u2013128 UTF-8 bytes, nonblank and without control characters; owned by the authenticated subject."
           },
           "witness": {
             "anyOf": [
@@ -18963,7 +20845,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -19103,12 +20985,12 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, nonblank and without control characters; immutable identity, not a display name."
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters; immutable identity, not a display name."
           },
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -19128,7 +21010,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -19257,6 +21139,346 @@
           "action",
           "actor_id",
           "at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "LoginAuthority": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "global",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "tenant",
+                "type": "string"
+              },
+              "tenant_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+              }
+            },
+            "required": [
+              "kind",
+              "tenant_id"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "LoginAccountEvent": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "login_account_created",
+              "login_password_changed",
+              "login_account_disabled"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "revision",
+          "action",
+          "actor_id",
+          "at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "LoginAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+          },
+          "authority": {
+            "$ref": "#/components/schemas/LoginAuthority"
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "disabled_at_millis": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "history": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/LoginAccountEvent"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "authority",
+          "credential_id",
+          "revision",
+          "disabled_at_millis",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "LoginAccountResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "account": {
+            "$ref": "#/components/schemas/LoginAccount"
+          }
+        },
+        "required": [
+          "contract_version",
+          "account"
+        ],
+        "additionalProperties": false
+      },
+      "LoginAccountCreate": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 1024,
+            "writeOnly": true,
+            "description": "8..1024 UTF-8 bytes. Never logged or returned."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "username",
+          "password",
+          "credential_id"
+        ],
+        "additionalProperties": false
+      },
+      "LoginPasswordChange": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 1024,
+            "writeOnly": true,
+            "description": "8..1024 UTF-8 bytes. Never logged or returned."
+          }
+        },
+        "required": [
+          "contract_version",
+          "expected_revision",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "LoginAccountDisable": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "TenantLoginRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1024,
+            "writeOnly": true,
+            "description": "8..1024 UTF-8 bytes. Never logged or returned."
+          }
+        },
+        "required": [
+          "contract_version",
+          "tenant_id",
+          "username",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "GlobalLoginRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Exact, case-sensitive identifier, 1..256 UTF-8 bytes; no control characters."
+          },
+          "password": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1024,
+            "writeOnly": true,
+            "description": "8..1024 UTF-8 bytes. Never logged or returned."
+          }
+        },
+        "required": [
+          "contract_version",
+          "username",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "LoginSessionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "session": {
+            "type": "object",
+            "properties": {
+              "token": {
+                "type": "string",
+                "pattern": "^qdbs[gt]1_[0-9a-f]{32}_[0-9a-f]{32}_[A-Za-z0-9_-]{43}$",
+                "description": "One-time delivery of a 15-minute bearer session. Store securely; never log."
+              },
+              "token_type": {
+                "const": "Bearer",
+                "type": "string"
+              },
+              "expires_at_millis": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "account": {
+                "$ref": "#/components/schemas/LoginAccount"
+              }
+            },
+            "required": [
+              "token",
+              "token_type",
+              "expires_at_millis",
+              "account"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "contract_version",
+          "session"
+        ],
+        "additionalProperties": false
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "logged_out": {
+            "const": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "contract_version",
+          "logged_out"
         ],
         "additionalProperties": false
       }

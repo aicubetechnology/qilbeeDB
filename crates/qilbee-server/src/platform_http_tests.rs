@@ -722,3 +722,5 @@ mod journal_audit;
 mod history_errors;
 mod strategies;
 mod administration;
+
+mod login;

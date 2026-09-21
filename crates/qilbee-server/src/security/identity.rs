@@ -9,7 +9,7 @@ use uuid::Uuid;
 mod master;
 pub use master::{
     GlobalCapability, GlobalCredentialSpec, GlobalCredentialView, IssuedGlobalCredential,
-    TenantView,
+    LoginAccountView, LoginAuthority, LoginSession, TenantView,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -172,7 +172,8 @@ impl IdentityStore {
             "issued",
         );
         let key = credential_key(id);
-        self.commit(
+        self.commit_authenticated(
+            admin,
             vec![
                 condition(&credential_key(actor.credential.id), Some(actor_bytes)),
                 condition(&key, None),
@@ -298,7 +299,7 @@ impl IdentityStore {
         } else if expected[0].expected.as_deref() != Some(actor_bytes.as_slice()) {
             return Err(conflict());
         }
-        self.commit(expected, vec![write(&key, encode(&record)?)])?;
+        self.commit_authenticated(admin, expected, vec![write(&key, encode(&record)?)])?;
         Ok((record, secret))
     }
 
@@ -317,6 +318,9 @@ impl IdentityStore {
     }
 
     fn authenticated_record(&self, token: &str, now: i64) -> Result<(StoredCredential, Vec<u8>)> {
+        if token.starts_with("qdbst1_") {
+            return self.tenant_session_record(token, now);
+        }
         use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
         use hmac::{Hmac, Mac};
         // Limit parsing work and require canonical encodings for the 256-bit secret.

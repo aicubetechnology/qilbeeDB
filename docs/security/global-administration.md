@@ -90,8 +90,9 @@ The public signup flow should work as follows:
 5. Requests from agents and users use company-specific credentials. QilbeeDB
    checks tenant, capability, scope, subject and current credential state.
 
-QilbeeDB supplies database authorization. Email verification, login sessions,
-billing, invitation acceptance, signup rate limits and account recovery for the
+QilbeeDB supplies database authorization and optional
+[provisioned administrator login](human-login.md). Email verification,
+billing, invitation acceptance, public signup limits and application account recovery for the
 SaaS application belong to the application layer. Possession of a
 `tenant_create` key allows tenant creation, so it must never be distributed as a
 public client API key.

@@ -3,6 +3,9 @@ use super::*;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use hmac::{Hmac, Mac};
 
+mod accounts;
+pub use accounts::{LoginAccountView, LoginAuthority, LoginSession};
+
 const BOOTSTRAP_KEY: &str = "identity/v1/global-bootstrap";
 const VERIFIER_DOMAIN: &[u8] = b"qilbeedb-global-credential-verifier-v1";
 
@@ -218,6 +221,9 @@ impl IdentityStore {
         token: &str,
         now: i64,
     ) -> Result<(StoredGlobalCredential, Vec<u8>)> {
+        if token.starts_with("qdbsg1_") {
+            return self.global_session_record(token, now);
+        }
         if !token.is_ascii()
             || token.len() != 82
             || !token.starts_with("qdbg1_")
@@ -294,7 +300,8 @@ impl IdentityStore {
         let (secret, verifier) = global_secret(id)?;
         let record = global_record(id, spec, verifier, actor.credential.id, now, false);
         let key = global_key(id);
-        self.commit(
+        self.commit_authenticated(
+            token,
             vec![
                 condition(&global_key(actor.credential.id), Some(previous)),
                 condition(&key, None),
@@ -354,7 +361,8 @@ impl IdentityStore {
         let tenant_key = tenant_key(tenant)?;
         let registration_key = registration_key(tenant)?;
         let key = credential_key(id);
-        self.commit(
+        self.commit_authenticated(
+            token,
             vec![
                 condition(&global_key(actor.credential.id), Some(actor_bytes)),
                 condition(&tenant_key, None),
@@ -437,7 +445,8 @@ impl IdentityStore {
             "admin_issued_by_global_authority",
         );
         let key = credential_key(id);
-        self.commit(
+        self.commit_authenticated(
+            token,
             vec![
                 condition(&global_key(actor.credential.id), Some(actor_bytes)),
                 condition(&tenant_key, Some(marker)),
@@ -530,7 +539,7 @@ impl IdentityStore {
         } else if conditions[0].expected.as_deref() != Some(actor_bytes.as_slice()) {
             return Err(conflict());
         }
-        self.commit(conditions, vec![write(&key, serialize(&target)?)])?;
+        self.commit_authenticated(token, conditions, vec![write(&key, serialize(&target)?)])?;
         Ok((target.credential, secret))
     }
 

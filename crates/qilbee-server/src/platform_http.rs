@@ -16,16 +16,18 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 use uuid::Uuid;
 
-mod learning;
+mod administration;
 mod experiences;
+mod learning;
+mod login;
 mod memory;
 mod retrieval_limits;
 mod tools;
-mod administration;
 
 #[derive(Clone)]
 pub(crate) struct PlatformState {
     identity: Arc<IdentityStore>,
+    login_limits: login::LoginLimits,
     memory: Arc<qilbee_memory::RocksDbMemoryStorage>,
     learning: Arc<qilbee_memory::learning::LearningMemory>,
     retrieval_limits: retrieval_limits::RetrievalLimits,
@@ -74,6 +76,7 @@ fn create_router_with_limits(
         },
     )?);
     let state = PlatformState {
+        login_limits: login::LoginLimits::default(),
         retrieval_limits,
         learning: Arc::new(qilbee_memory::learning::LearningMemory::open(
             database.storage().path().join("procedural-learning"),
@@ -83,6 +86,7 @@ fn create_router_with_limits(
     };
     Ok(Router::new()
         .merge(administration::routes())
+        .merge(login::routes())
         .merge(memory::routes())
         .merge(learning::routes())
         .merge(experiences::routes())
@@ -297,6 +301,7 @@ fn json_body<T>(body: Result<Json<T>, JsonRejection>) -> ApiResult<T> {
     })
 }
 pub(crate) type ApiResult<T> = Result<T, ApiError>;
+#[derive(Debug)]
 pub(crate) struct ApiError {
     status: StatusCode,
     code: &'static str,

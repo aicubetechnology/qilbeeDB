@@ -17,14 +17,18 @@ pub(super) fn routes() -> Router<PlatformState> {
         )
 }
 
-async fn run<T, F>(state: PlatformState, headers: HeaderMap, operation: F) -> ApiResult<T>
+pub(super) async fn run<T, F>(
+    state: PlatformState,
+    headers: HeaderMap,
+    operation: F,
+) -> ApiResult<T>
 where
     T: Send + 'static,
     F: FnOnce(&IdentityStore, &str) -> ApiResult<T> + Send + 'static,
 {
     let token = bearer(&headers)?;
     tokio::task::spawn_blocking(move || {
-        if token.starts_with("qdb1_") {
+        if token.starts_with("qdb1_") || token.starts_with("qdbst1_") {
             state
                 .identity
                 .authenticate(&token)

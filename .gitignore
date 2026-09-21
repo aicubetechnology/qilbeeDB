@@ -143,3 +143,6 @@ examples/output/
 # Lock files from services
 *.lock
 !Cargo.lock
+
+# Operator-delivered production secrets
+/cred-prod/
