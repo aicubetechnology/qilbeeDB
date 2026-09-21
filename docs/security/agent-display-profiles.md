@@ -17,6 +17,38 @@ immutable. Configure an [application integration](company-integrations.md) and
 let the application send its first authorized request when registration is
 needed. A profile is optional: an existing agent without one is still registered.
 
+## Complete the task in the administration console
+
+In a compatible console, sign in as a company administrator and open **Agents**.
+Search by name or external ID, select the intended agent, and edit **Display
+name**. Choose **Save name**, or leave the field blank and choose **Clear name**.
+The current name, external ID and first registration remain visible together.
+Expand **Name change history** to inspect saved changes and their authors.
+
+A failed next page must preserve the confirmed entries and their continuation.
+Use **Continue discovery** for a partial page and **Clear search** for a filter
+that finds no match. The directory's first project is registration provenance;
+it is not a complete list of the agent's projects or current access.
+
+The private console candidate preserves the exact pending name command and actor
+in session storage before sending it. If that record cannot be preserved, no
+write is sent. **Review pending change** and **Check saved change** reconcile a
+lost response against server history, then read the current profile separately.
+The record survives reload and sign-out in the same tab and is presented only
+after the same company account authenticates again. It contains the proposed
+name and identifiers, but no authentication secret. Closing the tab or clearing
+its storage loses this local recovery record without canceling a server write;
+use server history and administrative support if recovery information is lost.
+This is not a cross-device operation inbox.
+
+Name discovery in memory and graph selectors and learning-resource context keeps
+the original IDs in requests. The candidate resolves only discovered IDs, with
+at most four name reads in flight. Refresh retries unavailable names. The Agents
+screen loads up to 25 matches per page, examines up to 100 registrations per
+request and retains at most 500 matches; narrow the search at that display limit.
+A console release requires its own deployment validation; API availability alone
+does not establish that these controls are installed.
+
 ## Authorization and scope
 
 All four endpoints require a currently valid company credential or login session
