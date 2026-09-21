@@ -284,6 +284,7 @@ impl RocksDbMemoryStorage {
             self.append_agent_observation(observation, AgentRegistrationTrigger::MemoryCommand { record_id: receipt.record_id, revision: receipt.revision, action: receipt.action.clone() }, now, &mut batch)?;
         }
         self.update_candidates(namespace, &record, &mut batch)?;
+        self.append_empty_relation_heads(namespace, &record, &mut batch)?;
         batch.put_cf(
             self.cf(super::cf::EPISODES)?,
             record_key(0x10, namespace, record.record_id),

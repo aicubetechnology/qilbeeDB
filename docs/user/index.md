@@ -90,3 +90,8 @@ The unreleased 0.13.0 [typed memory relation API](../api/typed-memory-relations.
 stores semantic, entity, temporal, causal, support and contradiction assertions
 with exact endpoint revisions, declared provenance and separate review authority.
 It does not yet change retrieval or provide a relation change feed.
+
+The unreleased [typed graph API](../api/typed-memory-graph.md) traverses those
+assertions in either direction, returning current eligible endpoint records and
+explicit work coverage. Company administrators can also inspect retained assertion
+state and history directly.

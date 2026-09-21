@@ -1,7 +1,7 @@
 //! Typed assertions remain claims, even when an authorized reviewer approves them.
 use super::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MemoryRelationKind {
     SemanticRelated,

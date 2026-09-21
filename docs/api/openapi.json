@@ -16189,6 +16189,697 @@
           }
         }
       }
+    },
+    "/api/v1/memory/graph/typed": {
+      "post": {
+        "operationId": "typedMemoryGraph",
+        "summary": "Read a bounded typed memory neighborhood",
+        "description": "Unreleased 0.13.0 contract. Requires memory_read in the exact credential-derived company/private-subject scope. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
+        "tags": [
+          "Memory"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypedMemoryGraphRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "query": {
+                  "root_record_ids": [
+                    "018f0000-0000-4000-8000-000000000001"
+                  ],
+                  "direction": "both",
+                  "relation_kinds": [
+                    "supports",
+                    "contradicts",
+                    "semantic_related"
+                  ],
+                  "max_depth": 2,
+                  "node_limit": 128,
+                  "edge_limit": 256,
+                  "scan_limit": 1024
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedMemoryGraphResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, unsupported version, bounds or exhausted canonical, relation or dependency byte budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the 65536-byte body limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval slots are occupied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/graph/typed": {
+      "post": {
+        "operationId": "companyTypedMemoryGraph",
+        "summary": "Read typed neighbors in a company workspace",
+        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Traversal uses one snapshot and clock, exact eligible endpoint revisions, directed provenance-bearing assertions, explicit work and cuts, and atomic adjacency completeness checks. Filters run within the authorized namespace. No ranking, model inference, relation feed, lease or continuation cursor. Authorization precedes shared retrieval admission; responses are no-store.",
+        "tags": [
+          "Administration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyTypedMemoryGraphRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "workspace_id": "0000000000000000000000000000000000000000000000000000000000000000",
+                "query": {
+                  "root_record_ids": [
+                    "018f0000-0000-4000-8000-000000000001"
+                  ],
+                  "direction": "both"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyTypedMemoryGraphResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, unsupported version, bounds or exhausted canonical, relation or dependency byte budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the 65536-byte body limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval slots are occupied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, relation or historical revision exists in the authorized company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/relations/inspect": {
+      "post": {
+        "operationId": "inspectCompanyMemoryRelation",
+        "summary": "Inspect retained relation state in a company workspace",
+        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
+        "tags": [
+          "Administration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyMemoryRelationInspectRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "workspace_id": "0000000000000000000000000000000000000000000000000000000000000000",
+                "relation_id": "018f0000-0000-4000-8000-000000000003"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryRelationInspectResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, unsupported version, bounds or exhausted canonical, relation or dependency byte budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the 65536-byte body limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval slots are occupied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, relation or historical revision exists in the authorized company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/relations/revision": {
+      "post": {
+        "operationId": "readCompanyMemoryRelationRevision",
+        "summary": "Read immutable relation history in a company workspace",
+        "description": "Unreleased 0.13.0 contract. Requires company credential_admin; a workspace ID is not a grant. No delegated credential is created. Returns retained relation metadata under native company authority, including historical or currently ineligible assertions; no memory payloads are included. Authorization precedes shared retrieval admission; responses are no-store.",
+        "tags": [
+          "Administration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyMemoryRelationRevisionRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "workspace_id": "0000000000000000000000000000000000000000000000000000000000000000",
+                "relation_id": "018f0000-0000-4000-8000-000000000003",
+                "revision": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryRelationRevisionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, unsupported version, bounds or exhausted canonical, relation or dependency byte budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the 65536-byte body limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval slots are occupied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, relation or historical revision exists in the authorized company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -16212,6 +16903,448 @@
       }
     },
     "schemas": {
+      "TypedGraphDirection": {
+        "type": "string",
+        "enum": [
+          "outgoing",
+          "incoming",
+          "both"
+        ],
+        "description": "Choose index traversal direction; returned assertions preserve their original source-to-target direction."
+      },
+      "TypedMemoryGraphQuery": {
+        "type": "object",
+        "properties": {
+          "root_record_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true
+          },
+          "direction": {
+            "$ref": "#/components/schemas/TypedGraphDirection",
+            "default": "both"
+          },
+          "relation_kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRelationKind"
+            },
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true,
+            "default": [
+              "semantic_related",
+              "same_entity",
+              "temporal_before",
+              "causal_claim",
+              "supports",
+              "contradicts"
+            ]
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8,
+            "default": 2
+          },
+          "node_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256,
+            "default": 128
+          },
+          "edge_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1024,
+            "default": 256
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096,
+            "default": 1024
+          }
+        },
+        "required": [
+          "root_record_ids"
+        ],
+        "additionalProperties": false
+      },
+      "TypedGraphCoverage": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "stop_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "depth_limit",
+                "node_limit",
+                "edge_limit",
+                "scan_limit"
+              ]
+            },
+            "uniqueItems": true,
+            "maxItems": 4
+          },
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "adjacency_entries_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4096
+          },
+          "relations_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4096
+          },
+          "relation_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "complete",
+          "stop_reasons",
+          "records_examined",
+          "record_bytes",
+          "adjacency_entries_examined",
+          "relations_examined",
+          "relation_bytes",
+          "dependency_work"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "complete": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stop_reasons": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "stop_reasons": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ],
+        "description": "Coverage of the selected directed typed neighborhood at one snapshot and clock, not a ranking or whole-volume audit. Depth cuts can leave endpoint eligibility unexamined. Physical adjacency work includes filtered, repeated and stale assertions; valid edge limits are separate. Integrity and lookahead bytes are additional."
+      },
+      "TypedMemoryGraph": {
+        "type": "object",
+        "properties": {
+          "traversal_version": {
+            "type": "string",
+            "const": "typed_relations_v1"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/TypedGraphDirection"
+          },
+          "relation_kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRelationKind"
+            },
+            "minItems": 1,
+            "maxItems": 6,
+            "uniqueItems": true
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
+          },
+          "node_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "edge_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1024
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "roots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphRoot"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphNode"
+            },
+            "maxItems": 256
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRelation"
+            },
+            "maxItems": 1024
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/TypedGraphCoverage"
+          }
+        },
+        "required": [
+          "traversal_version",
+          "evaluated_at_millis",
+          "direction",
+          "relation_kinds",
+          "max_depth",
+          "node_limit",
+          "edge_limit",
+          "scan_limit",
+          "roots",
+          "nodes",
+          "edges",
+          "coverage"
+        ],
+        "additionalProperties": false
+      },
+      "TypedMemoryGraphRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/TypedMemoryGraphQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "TypedMemoryGraphResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/TypedMemoryGraph"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "graph"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyTypedMemoryGraphRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "query": {
+            "$ref": "#/components/schemas/TypedMemoryGraphQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyTypedMemoryGraphResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/TypedMemoryGraph"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "graph"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryRelationInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "relation_id"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryRelationRevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "relation_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryRelationInspectResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/MemoryRelationInspection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "inspection"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyMemoryRelationRevisionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "history": {
+            "$ref": "#/components/schemas/MemoryRelationRevision"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "history"
+        ],
+        "additionalProperties": false
+      },
       "MemoryRelationKind": {
         "type": "string",
         "enum": [

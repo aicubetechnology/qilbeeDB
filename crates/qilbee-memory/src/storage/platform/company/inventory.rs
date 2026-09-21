@@ -69,6 +69,21 @@ pub struct CompanyMemoryGraph {
     pub workspace: CompanyMemoryWorkspace,
     pub graph: MemoryEvidenceGraph,
 }
+#[derive(Debug, Clone)]
+pub struct CompanyTypedMemoryGraph {
+    pub workspace: CompanyMemoryWorkspace,
+    pub graph: TypedMemoryGraph,
+}
+#[derive(Debug, Clone)]
+pub struct CompanyMemoryRelationInspection {
+    pub workspace: CompanyMemoryWorkspace,
+    pub inspection: MemoryRelationInspection,
+}
+#[derive(Debug, Clone)]
+pub struct CompanyMemoryRelationRevision {
+    pub workspace: CompanyMemoryWorkspace,
+    pub history: MemoryRelationRevision,
+}
 impl CompanyMemoryQuery {
     fn validate(&self) -> Result<()> {
         if !(1..=100).contains(&self.limit) || !(1..=10_000).contains(&self.scan_limit) {
@@ -113,6 +128,78 @@ impl CompanyMemoryQuery {
     }
 }
 impl RocksDbMemoryStorage {
+    /// The caller authenticates a company administrator; workspace IDs confer no authority.
+    pub fn read_company_memory_typed_graph(
+        &self,
+        company: &str,
+        workspace_id: &str,
+        query: &TypedMemoryGraphQuery,
+    ) -> Result<Option<CompanyTypedMemoryGraph>> {
+        address::valid_id(company)?;
+        validate_workspace_id(workspace_id)?;
+        query.validate()?;
+        let snapshot = self.memory_snapshot();
+        let Some(workspace) = snapshot.company_workspace(company, workspace_id)? else {
+            return Ok(None);
+        };
+        let graph = snapshot.typed_graph(&workspace.address()?.namespace()?, query)?;
+        Ok(Some(CompanyTypedMemoryGraph { workspace, graph }))
+    }
+    /// Retained assertions remain visible to the authorized company administrator.
+    pub fn inspect_company_memory_relation(
+        &self,
+        company: &str,
+        workspace_id: &str,
+        relation_id: Uuid,
+    ) -> Result<Option<CompanyMemoryRelationInspection>> {
+        address::valid_id(company)?;
+        validate_workspace_id(workspace_id)?;
+        let snapshot = self.memory_snapshot();
+        let Some(workspace) = snapshot.company_workspace(company, workspace_id)? else {
+            return Ok(None);
+        };
+        let namespace = workspace.address()?.namespace()?;
+        let Some(relation) = snapshot.relation(&namespace, relation_id)? else {
+            return Ok(None);
+        };
+        let eligibility = snapshot.relation_eligibility(&namespace, &relation)?;
+        Ok(Some(CompanyMemoryRelationInspection {
+            workspace,
+            inspection: MemoryRelationInspection {
+                relation,
+                eligibility,
+            },
+        }))
+    }
+    /// Historical relation metadata uses the same company boundary as retained memory.
+    pub fn company_memory_relation_revision(
+        &self,
+        company: &str,
+        workspace_id: &str,
+        relation_id: Uuid,
+        revision: u64,
+    ) -> Result<Option<CompanyMemoryRelationRevision>> {
+        address::valid_id(company)?;
+        validate_workspace_id(workspace_id)?;
+        if revision == 0 {
+            return Err(Error::ValidationError(
+                "Relation revision must be positive".into(),
+            ));
+        }
+        let snapshot = self.memory_snapshot();
+        let Some(workspace) = snapshot.company_workspace(company, workspace_id)? else {
+            return Ok(None);
+        };
+        let Some(history) = snapshot.relation_revision(
+            &workspace.address()?.namespace()?,
+            relation_id,
+            revision,
+        )?
+        else {
+            return Ok(None);
+        };
+        Ok(Some(CompanyMemoryRelationRevision { workspace, history }))
+    }
     /// Resolve the company-owned workspace and eligible evidence in one snapshot.
     /// The caller must authenticate a company administrator first.
     pub fn read_company_memory_graph(

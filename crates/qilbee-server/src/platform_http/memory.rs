@@ -6,12 +6,14 @@ use qilbee_memory::storage::platform::{MemoryCommand, MemoryOperation, MemoryQue
 mod batch_read;
 mod evidence_graph;
 mod relations;
+mod typed_graph;
 
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .merge(batch_read::routes())
         .merge(evidence_graph::routes())
         .merge(relations::routes())
+        .merge(typed_graph::routes())
         .merge(reviews::routes())
         .merge(checkpoints::routes())
         .merge(verified_changes::routes())

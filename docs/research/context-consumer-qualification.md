@@ -194,7 +194,12 @@ It created no credentials and generated no new embeddings or model calls.
 The team reported 402 passing integration tests, including 77 focused tests.
 Production key revocation and eventless expiry were not repeated against live
 credentials; those cases remain client-regression evidence. Administrative UI
-acceptance is separate and remains pending. QilbeeDB context was disabled again
+acceptance was separate and pending at the time of that API report. A later
+[focused console read acceptance](https://github.com/aicubetechnology/qilbee-ecosystem/blob/262134a2ac77bfa37942b765d6e1b13b29cb3ea3/docs/qilbeedb-console-acceptance.md)
+confirmed one company's 107 eligible memories, 111 retained entries, graph roots,
+pagination and session cleanup on UI 0.3.0. Its 29 schema-validated HTTP responses
+exclude the browser-injected 503; the acceptance does not cover UI mutations,
+multiple companies or real server overload. QilbeeDB context was disabled again
 after the installation check while the remaining application migration and
 billing work continued. This report establishes a focused API integration and
 an observed latency change, not a completed memory migration or reasoning gain.
