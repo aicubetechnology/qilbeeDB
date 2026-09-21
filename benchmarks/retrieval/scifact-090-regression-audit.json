@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "scope": "Offline audit of already exposed evidence, not a new retrieval run or profile qualification",
+  "metric_pairs_checked": 1050,
+  "summary": {
+    "development": {
+      "lexical": {
+        "ndcg_at_10": 0.5660200392192345,
+        "judged_recall_at_10": 0.77,
+        "queries": 50,
+        "queries_without_judged_positive_at_10": 10,
+        "retrieval_ms": {
+          "p50": 181.7065,
+          "p95": 246.22589999999985
+        }
+      },
+      "semantic": {
+        "ndcg_at_10": 0.6828739851676484,
+        "judged_recall_at_10": 0.74,
+        "queries": 50,
+        "queries_without_judged_positive_at_10": 12,
+        "retrieval_ms": {
+          "p50": 951.426,
+          "p95": 1197.67095
+        }
+      },
+      "hybrid": {
+        "ndcg_at_10": 0.6578738445906082,
+        "judged_recall_at_10": 0.78,
+        "queries": 50,
+        "queries_without_judged_positive_at_10": 10,
+        "retrieval_ms": {
+          "p50": 1066.8935000000001,
+          "p95": 1465.9625499999997
+        }
+      }
+    },
+    "test": {
+      "lexical": {
+        "ndcg_at_10": 0.6616762967340877,
+        "judged_recall_at_10": 0.7909444444444444,
+        "queries": 300,
+        "queries_without_judged_positive_at_10": 57,
+        "retrieval_ms": {
+          "p50": 179.5165,
+          "p95": 233.5721999999999
+        }
+      },
+      "semantic": {
+        "ndcg_at_10": 0.7241541806361655,
+        "judged_recall_at_10": 0.8548888888888889,
+        "queries": 300,
+        "queries_without_judged_positive_at_10": 41,
+        "retrieval_ms": {
+          "p50": 947.249,
+          "p95": 1284.5648499999998
+        }
+      },
+      "hybrid": {
+        "ndcg_at_10": 0.7237015322812719,
+        "judged_recall_at_10": 0.8345555555555556,
+        "queries": 300,
+        "queries_without_judged_positive_at_10": 45,
+        "retrieval_ms": {
+          "p50": 1055.0655000000002,
+          "p95": 1462.9042499999998
+        }
+      }
+    }
+  },
+  "hybrid_minus_baseline": {
+    "lexical": {
+      "counts": {
+        "wins": 80,
+        "ties": 191,
+        "losses": 29,
+        "rescued": 18,
+        "lost": 6
+      },
+      "exploratory_paired_interval": {
+        "mean": 0.06202523554718412,
+        "low": 0.03606899940266853,
+        "high": 0.08848095324426056
+      }
+    },
+    "semantic": {
+      "counts": {
+        "wins": 57,
+        "ties": 194,
+        "losses": 49,
+        "rescued": 12,
+        "lost": 16
+      },
+      "exploratory_paired_interval": {
+        "mean": -0.0004526483548937545,
+        "low": -0.027109670031643742,
+        "high": 0.025132592840847352
+      }
+    }
+  },
+  "regression_cases": [
+    {
+      "query_id": "test-1088",
+      "positive_documents": [
+        "37549932"
+      ],
+      "returned_positions": {
+        "lexical": {
+          "37549932": null
+        },
+        "semantic": {
+          "37549932": 1
+        },
+        "hybrid": {
+          "37549932": null
+        }
+      },
+      "absent_position_meaning": "Outside the returned top ten; full channel rank is not established by these artifacts."
+    },
+    {
+      "query_id": "test-1241",
+      "positive_documents": [
+        "4427392"
+      ],
+      "returned_positions": {
+        "lexical": {
+          "4427392": null
+        },
+        "semantic": {
+          "4427392": 1
+        },
+        "hybrid": {
+          "4427392": null
+        }
+      },
+      "absent_position_meaning": "Outside the returned top ten; full channel rank is not established by these artifacts."
+    },
+    {
+      "query_id": "test-324",
+      "positive_documents": [
+        "2014909"
+      ],
+      "returned_positions": {
+        "lexical": {
+          "2014909": 4
+        },
+        "semantic": {
+          "2014909": null
+        },
+        "hybrid": {
+          "2014909": 1
+        }
+      },
+      "absent_position_meaning": "Outside the returned top ten; full channel rank is not established by these artifacts."
+    },
+    {
+      "query_id": "test-478",
+      "positive_documents": [
+        "14767844"
+      ],
+      "returned_positions": {
+        "lexical": {
+          "14767844": 2
+        },
+        "semantic": {
+          "14767844": 1
+        },
+        "hybrid": {
+          "14767844": 2
+        }
+      },
+      "absent_position_meaning": "Outside the returned top ten; full channel rank is not established by these artifacts."
+    },
+    {
+      "query_id": "test-800",
+      "positive_documents": [
+        "22543403"
+      ],
+      "returned_positions": {
+        "lexical": {
+          "22543403": null
+        },
+        "semantic": {
+          "22543403": 1
+        },
+        "hybrid": {
+          "22543403": null
+        }
+      },
+      "absent_position_meaning": "Outside the returned top ten; full channel rank is not established by these artifacts."
+    }
+  ],
+  "source_tie_counts_not_independently_recomputed": {
+    "queries": 44,
+    "judged_quality_sensitive": 11,
+    "reason": "The curated rows do not include every hybrid score or candidates below rank ten."
+  },
+  "new_http_calls": 0,
+  "new_provider_calls": 0,
+  "promotion_authorized": false,
+  "previous_campaign_ranking_comparison": {
+    "lexical": {
+      "changed_order_queries": [],
+      "changed_membership_queries": [],
+      "material_ndcg_changes": []
+    },
+    "semantic": {
+      "changed_order_queries": [],
+      "changed_membership_queries": [],
+      "material_ndcg_changes": []
+    },
+    "hybrid": {
+      "changed_order_queries": [
+        "test-1012",
+        "test-1019",
+        "test-1020",
+        "test-1049",
+        "test-115",
+        "test-1280",
+        "test-1363",
+        "test-171",
+        "test-198",
+        "test-237",
+        "test-279",
+        "test-437",
+        "test-507",
+        "test-551",
+        "test-597",
+        "test-659",
+        "test-660",
+        "test-716",
+        "test-75",
+        "test-922",
+        "test-94",
+        "test-967"
+      ],
+      "changed_membership_queries": [
+        "test-115",
+        "test-659",
+        "test-716"
+      ],
+      "material_ndcg_changes": [
+        {
+          "query_id": "test-1019",
+          "previous_ndcg": 1.0,
+          "current_ndcg": 0.6309297535714575,
+          "changed_only_within_previous_exact_ties": true
+        },
+        {
+          "query_id": "test-1020",
+          "previous_ndcg": 0.6309297535714575,
+          "current_ndcg": 1.0,
+          "changed_only_within_previous_exact_ties": true
+        },
+        {
+          "query_id": "test-507",
+          "previous_ndcg": 0.6309297535714575,
+          "current_ndcg": 1.0,
+          "changed_only_within_previous_exact_ties": true
+        },
+        {
+          "query_id": "test-237",
+          "previous_ndcg": 0.6309297535714575,
+          "current_ndcg": 1.0,
+          "changed_only_within_previous_exact_ties": true
+        }
+      ]
+    }
+  },
+  "input_sha256": "9ebb9ce3e76f5c1ef0a57b38319f2f4bec9dca372b9a4204222cc5f64a9e705a",
+  "previous_sha256": "5e2386f9ff9fbf48d693506ea311ec76e1e224ad652ce1a4c96ed699e291f693"
+}

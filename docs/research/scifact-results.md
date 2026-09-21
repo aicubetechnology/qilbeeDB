@@ -168,3 +168,7 @@ sufficiency, improvement at 3,072 dimensions or better agent tasks. Further prof
 selection requires new development data and an independent reserved evaluation.
 The exposed 300-query test must not become the next tuning set while retaining a
 claim of independent confirmation.
+
+## Subsequent independent integration evidence
+
+The [0.9.0 integration audit](retrieval-regressions.md) recalculates 1,050 query/method pairs and compares the same public test rankings with this campaign. It identifies exact-tie sensitivity without treating fresh record IDs as an algorithm improvement. The campaigns have different timing protocols; their performance measurements remain separate.
