@@ -14,19 +14,74 @@ __version__ = "0.2.0"
 __author__ = "AICUBE TECHNOLOGY LLC"
 __license__ = "Apache-2.0"
 
-from .client import QilbeeDB
-from .graph import Graph, Node, Relationship
-from .memory import AgentMemory, Episode, MemoryConfig, SemanticSearchResult, HybridSearchResult
-from .query import Query, QueryResult
-from .exceptions import (
-    QilbeeDBError,
-    ConnectionError,
-    AuthenticationError,
-    QueryError,
-    TransactionError,
+# Legacy graph clients load on access so the verified consumer remains stdlib-only.
+from importlib import import_module
+from .consumer import (
+    VerifiedMemoryConsumer,
+    VerifiedCursor,
+    ConsumerCheckpoint,
+    ConsumptionResult,
+    MemoryDelivery,
+    MemoryChangeSink,
+    ConsumerError,
+    ConsumerAPIError,
+    ConsumerProtocolError,
+    ConsumerTransportError,
+    ReconciliationRequired,
 )
 
+_LEGACY_EXPORTS = {
+    "QilbeeDB": "client",
+    **{name: "graph" for name in ("Graph", "Node", "Relationship")},
+    **{
+        name: "memory"
+        for name in (
+            "AgentMemory",
+            "Episode",
+            "MemoryConfig",
+            "SemanticSearchResult",
+            "HybridSearchResult",
+        )
+    },
+    **{name: "query" for name in ("Query", "QueryResult")},
+    **{
+        name: "exceptions"
+        for name in (
+            "QilbeeDBError",
+            "ConnectionError",
+            "AuthenticationError",
+            "QueryError",
+            "TransactionError",
+        )
+    },
+}
+
+
+def __getattr__(name):
+    module = _LEGACY_EXPORTS.get(name)
+    if module is None:
+        raise AttributeError("module 'qilbeedb' has no attribute " + repr(name))
+    value = getattr(import_module("." + module, __name__), name)
+    globals()[name] = value
+    return value
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))
+
+
 __all__ = [
+    "VerifiedMemoryConsumer",
+    "VerifiedCursor",
+    "ConsumerCheckpoint",
+    "ConsumptionResult",
+    "MemoryDelivery",
+    "MemoryChangeSink",
+    "ConsumerError",
+    "ConsumerAPIError",
+    "ConsumerProtocolError",
+    "ConsumerTransportError",
+    "ReconciliationRequired",
     "QilbeeDB",
     "Graph",
     "Node",

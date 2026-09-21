@@ -217,6 +217,13 @@
       "title": "Consumer diagnostics",
       "description": "Inspect scoped progress, pending positions and retained-history compatibility before explicit reconciliation.",
       "order": 62
+    },
+    {
+      "source": "docs/api/verified-memory-consumer.md",
+      "file": "verified-memory-consumer.md",
+      "title": "Python memory consumer",
+      "description": "Resume verified events from durable effects, commit progress safely, and reconcile failures without overwriting checkpoints.",
+      "order": 63
     }
   ]
 }
