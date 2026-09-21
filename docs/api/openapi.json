@@ -16880,6 +16880,1124 @@
           }
         }
       }
+    },
+    "/api/v1/memory/relations/changes": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Read a fenced suffix of typed relation changes",
+        "description": "Unreleased 0.13.0. Requires memory_read in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationChanges",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationChangesRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "query": {
+                  "after": null,
+                  "through": null,
+                  "limit": 100
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangesResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/changes/activate": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Activate a relation journal without fabricating historical events",
+        "description": "Unreleased 0.13.0. Requires memory_read and memory_write in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationChangesActivate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationChangesActivateRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangesActivateResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/checkpoints": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Advance or explicitly reconcile subject-owned relation progress",
+        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationCheckpoint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationCheckpointRequest"
+              },
+              "example": {
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "command": {
+                  "contract_version": 1,
+                  "idempotency_key": "relation-cache-initialize-1",
+                  "consumer_id": "context-cache",
+                  "expected_revision": 0,
+                  "expected_checkpoint_digest": null,
+                  "operation": {
+                    "type": "advance",
+                    "cursor": {
+                      "version": 1,
+                      "stream": "typed_memory_relations",
+                      "journal_id": "018f0000-0000-4000-8000-000000000010",
+                      "sequence": 1,
+                      "prefix_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationCheckpointResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/checkpoints/read": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Read currently history-compatible relation progress",
+        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationCheckpointRead",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationCheckpointReadRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "consumer_id": "context-cache"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationCheckpointReadResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No subject-owned checkpoint or requested immutable checkpoint revision in this authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckpointNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/checkpoints/revision": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Read an immutable subject-owned relation checkpoint receipt",
+        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationCheckpointRevision",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationCheckpointRevisionRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "consumer_id": "context-cache",
+                "revision": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationCheckpointRevisionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No subject-owned checkpoint or requested immutable checkpoint revision in this authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckpointNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/relations/consumers/diagnose": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Diagnose relation history, checkpoint and durable witness compatibility",
+        "description": "Unreleased 0.13.0. Requires memory_read and memory_checkpoint in the exact current scope. Authentication determines company and private subject. Uses shared retrieval admission through serialization and no-store responses. Relation changes are separate from memory feeds; expiry still requires current-state revalidation.",
+        "operationId": "memoryRelationConsumerDiagnose",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationConsumerDiagnoseRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "mission_id": null,
+                  "agent_id": "agent",
+                  "visibility": "private"
+                },
+                "consumer_id": "context-cache",
+                "witness": {
+                  "version": 1,
+                  "stream": "typed_memory_relations",
+                  "journal_id": "018f0000-0000-4000-8000-000000000010",
+                  "sequence": 1,
+                  "prefix_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationConsumerDiagnoseResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract version, fields, bounds, cursor structure, identity or reconciliation evidence.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "History mismatch, expected checkpoint conflict, changed idempotency content or prohibited progress regression.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationChangeConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -16903,6 +18021,1024 @@
       }
     },
     "schemas": {
+      "RelationChangeCursor": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "stream": {
+            "type": "string",
+            "const": "typed_memory_relations"
+          },
+          "journal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "prefix_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "version",
+          "stream",
+          "journal_id",
+          "sequence",
+          "prefix_digest"
+        ],
+        "additionalProperties": false,
+        "description": "A complete opaque cursor for one authorized relation journal. It is not a memory-feed cursor or authorization. The prefix digest distinguishes divergent histories even after sequence numbers catch up."
+      },
+      "RelationChange": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "asserted",
+              "retired",
+              "restored",
+              "reviewed"
+            ]
+          },
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "relation_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "source": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "relation_kind": {
+            "$ref": "#/components/schemas/MemoryRelationKind"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "relation_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "kind",
+          "relation_id",
+          "relation_revision",
+          "source",
+          "target",
+          "relation_kind",
+          "author",
+          "committed_at_millis",
+          "relation_digest",
+          "receipt_digest"
+        ],
+        "additionalProperties": false,
+        "description": "Committed assertion metadata bound to an exact immutable relation revision and receipt. Contains no memory text, vectors, model output or provenance evidence text. Endpoint mutations and clock-driven expiry do not create events in this stream."
+      },
+      "RelationChangeDelivery": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "$ref": "#/components/schemas/RelationChangeCursor"
+          },
+          "change": {
+            "$ref": "#/components/schemas/RelationChange"
+          }
+        },
+        "required": [
+          "cursor",
+          "change"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangesQuery": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "through": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangesPage": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "$ref": "#/components/schemas/RelationChangeDelivery"
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active",
+          "baseline",
+          "changes",
+          "next_cursor",
+          "high_watermark",
+          "complete"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "active": {
+                  "const": true
+                }
+              },
+              "required": [
+                "active"
+              ]
+            },
+            "then": {
+              "properties": {
+                "baseline": {
+                  "$ref": "#/components/schemas/RelationChangeCursor"
+                },
+                "next_cursor": {
+                  "$ref": "#/components/schemas/RelationChangeCursor"
+                },
+                "high_watermark": {
+                  "$ref": "#/components/schemas/RelationChangeCursor"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "baseline": {
+                  "type": "null"
+                },
+                "next_cursor": {
+                  "type": "null"
+                },
+                "high_watermark": {
+                  "type": "null"
+                },
+                "changes": {
+                  "maxItems": 0
+                },
+                "complete": {
+                  "const": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RelationCheckpoint": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/RelationChangeCursor"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "updated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkpoint_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "consumer_id",
+          "revision",
+          "cursor",
+          "author",
+          "updated_at_millis",
+          "checkpoint_digest"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "advance",
+                "type": "string"
+              },
+              "cursor": {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              }
+            },
+            "required": [
+              "type",
+              "cursor"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "reconcile",
+                "type": "string"
+              },
+              "cursor": {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+              }
+            },
+            "required": [
+              "type",
+              "cursor",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "advance initializes or moves compatible progress monotonically. reconcile explicitly replaces existing progress after caller-managed reconciliation and preserves the prior checkpoint plus declared evidence."
+      },
+      "RelationCheckpointCommand": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "expected_checkpoint_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "operation": {
+            "$ref": "#/components/schemas/RelationCheckpointOperation"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "consumer_id",
+          "expected_revision",
+          "operation"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "expected_revision": {
+                  "const": 0
+                }
+              },
+              "required": [
+                "expected_revision"
+              ]
+            },
+            "then": {
+              "properties": {
+                "expected_checkpoint_digest": {
+                  "type": "null"
+                },
+                "operation": {
+                  "properties": {
+                    "type": {
+                      "const": "advance"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "required": [
+                "expected_checkpoint_digest"
+              ],
+              "properties": {
+                "expected_checkpoint_digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RelationCheckpointReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationCheckpoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/RelationCheckpoint"
+          },
+          "reconciliation_evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "previous",
+          "checkpoint",
+          "reconciliation_evidence",
+          "receipt_digest"
+        ],
+        "additionalProperties": false,
+        "description": "Immutable command receipt. A replay can return an old revision even after progress advances or histories diverge; reread diagnostics before accepting it as current progress."
+      },
+      "RelationConsumerDiagnostics": {
+        "type": "object",
+        "properties": {
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkpoint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationCheckpoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checkpoint_status": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "compatible",
+              "history_incompatible"
+            ]
+          },
+          "pending_positions": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sequence distance from compatible stored checkpoint to current tip, not an audit or a count of eligible records. Null when missing or history-incompatible."
+          },
+          "witness_status": {
+            "type": "string",
+            "enum": [
+              "not_provided",
+              "compatible",
+              "history_incompatible"
+            ]
+          },
+          "checkpoint_relative_to_witness": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "before",
+              "equal",
+              "after",
+              null
+            ]
+          }
+        },
+        "required": [
+          "consumer_id",
+          "active",
+          "baseline",
+          "high_watermark",
+          "checkpoint",
+          "checkpoint_status",
+          "pending_positions",
+          "witness_status",
+          "checkpoint_relative_to_witness"
+        ],
+        "additionalProperties": false,
+        "description": "One scoped snapshot of relation history, subject-owned progress and an optional durable local witness. Pending positions are sequence distance, not an audit, eligible-edge count or proof of durable external effects.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "active": {
+                  "const": true
+                }
+              },
+              "required": [
+                "active"
+              ]
+            },
+            "then": {
+              "properties": {
+                "baseline": {
+                  "$ref": "#/components/schemas/RelationChangeCursor"
+                },
+                "high_watermark": {
+                  "$ref": "#/components/schemas/RelationChangeCursor"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "baseline": {
+                  "type": "null"
+                },
+                "high_watermark": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "missing"
+                }
+              },
+              "required": [
+                "checkpoint_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "checkpoint": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "checkpoint": {
+                  "$ref": "#/components/schemas/RelationCheckpoint"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "checkpoint_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "active": {
+                  "const": true
+                },
+                "pending_positions": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18446744073709551615
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "pending_positions": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "witness_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "witness_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "active": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {}
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "checkpoint_status": {
+                  "const": "compatible"
+                },
+                "witness_status": {
+                  "const": "compatible"
+                }
+              },
+              "required": [
+                "checkpoint_status",
+                "witness_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "checkpoint_relative_to_witness": {
+                  "type": "string",
+                  "enum": [
+                    "before",
+                    "equal",
+                    "after"
+                  ]
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "checkpoint_relative_to_witness": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RelationChangesRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/RelationChangesQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangesResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/RelationChangesPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangesActivateRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangesActivateResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/RelationChangeCursor"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "baseline"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointRequest": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "command": {
+            "$ref": "#/components/schemas/RelationCheckpointCommand"
+          }
+        },
+        "required": [
+          "scope",
+          "command"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/RelationCheckpointReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/RelationCheckpoint"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "checkpoint"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointRevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "RelationCheckpointRevisionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/RelationCheckpointReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "RelationConsumerDiagnoseRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "consumer_id"
+        ],
+        "additionalProperties": false
+      },
+      "RelationConsumerDiagnoseResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/RelationConsumerDiagnostics"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "diagnostics"
+        ],
+        "additionalProperties": false
+      },
+      "RelationChangeConflictError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "journal_history_conflict",
+                      "revision_conflict",
+                      "idempotency_conflict",
+                      "checkpoint_regression"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
       "TypedGraphDirection": {
         "type": "string",
         "enum": [

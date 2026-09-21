@@ -322,6 +322,13 @@
       "title": "Typed memory graph traversal",
       "description": "Traverse authorized typed neighbors with exact revisions, explicit coverage, atomic adjacency integrity and native company audit.",
       "order": 68
+    },
+    {
+      "source": "docs/api/typed-relation-changes.md",
+      "file": "typed-relation-changes.md",
+      "title": "Typed relation change consumption",
+      "description": "Consume history-bound relation events with subject-owned checkpoints, durable revisions, current diagnostics and explicit reconciliation.",
+      "order": 69
     }
   ]
 }

@@ -6,6 +6,8 @@ pub use types::*;
 mod graph;
 pub use graph::*;
 mod adjacency;
+mod changes;
+pub use changes::*;
 
 // All relation values use AGENT_META; ordinary memory records remain canonical.
 const RELATION: u8 = 0x50;
@@ -475,6 +477,7 @@ impl RocksDbMemoryStorage {
             history_digest: digest(&history),
         })?;
         let mut batch = rocksdb::WriteBatch::default();
+        self.append_relation_change(&snapshot, namespace, &relation, &receipt, &mut batch)?;
         self.append_relation_heads(&snapshot, namespace, &relation, &integrity, &mut batch)?;
         batch.put_cf(
             cf,
