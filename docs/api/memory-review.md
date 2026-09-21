@@ -119,7 +119,10 @@ review of an existing expired record records the decision but leaves it expired.
 
 Unknown fields, invalid decisions, nonpositive revisions and malformed evidence
 return 400. Invalid/revoked credentials return 401; missing capability or grant
-returns 403; absent records or review revisions return 404; stale expected
+returns 403. The state/read endpoints return 404 with `review_not_found` when
+record state or the requested immutable review revision is absent in the authorized
+scope. An existing unreviewed record has a readable state but no historical review
+receipt. Stale expected
 revisions and conflicting idempotency keys return 409. Detected integrity failure
 returns 500 without a partial result. Requests use the standard 64 KiB body limit
 and responses use `Cache-Control: no-store`.

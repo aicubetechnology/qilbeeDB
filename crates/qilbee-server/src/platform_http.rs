@@ -53,6 +53,13 @@ impl PlatformState {
 /// explicit, separate router and never supply credentials for this authority.
 pub fn create_router(database: Arc<Database>) -> qilbee_core::Result<Router> {
     let retrieval_limits = retrieval_limits::RetrievalLimits::from_env()?;
+    create_router_with_limits(database, retrieval_limits)
+}
+
+fn create_router_with_limits(
+    database: Arc<Database>,
+    retrieval_limits: retrieval_limits::RetrievalLimits,
+) -> qilbee_core::Result<Router> {
     let memory_path = database.storage().path().join("agent-memory");
     let memory_path = memory_path
         .to_str()

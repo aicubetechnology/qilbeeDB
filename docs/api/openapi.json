@@ -4143,7 +4143,7 @@
             }
           },
           "400": {
-            "description": "Invalid fields or unsupported contract version",
+            "description": "Invalid fields, vectors or unsupported contract version; embedding_dimension_limit for zero or excessive operator dimensions.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4351,7 +4351,7 @@
             }
           },
           "400": {
-            "description": "Invalid fields or unsupported contract version",
+            "description": "Invalid fields or unsupported contract version; embedding_dimension_limit for zero or excessive operator dimensions.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4481,7 +4481,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -4555,7 +4570,7 @@
             }
           },
           "400": {
-            "description": "Invalid fields or unsupported contract version",
+            "description": "Invalid fields or unsupported contract version; retrieval_scan_limit for a zero or excessive operator scan-byte budget.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4685,7 +4700,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -4778,7 +4808,7 @@
             }
           },
           "400": {
-            "description": "Invalid fields or unsupported contract version",
+            "description": "Invalid fields or unsupported contract version; embedding_dimension_limit for zero or excessive operator dimensions; retrieval_scan_limit for a zero or excessive operator scan-byte budget.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -4908,7 +4938,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
                 }
               }
             }
@@ -7116,7 +7161,7 @@
             }
           },
           "404": {
-            "description": "No current record in the authorized scope",
+            "description": "review_not_found: no record state in this authorized scope.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -7128,7 +7173,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ReviewNotFoundError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "review_not_found",
+                    "message": "The requested review state or revision was not found"
+                  }
                 }
               }
             }
@@ -7292,7 +7344,7 @@
             }
           },
           "404": {
-            "description": "No current record in the authorized scope",
+            "description": "review_not_found: the requested immutable review revision is absent in this authorized scope.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -7304,7 +7356,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ReviewNotFoundError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "review_not_found",
+                    "message": "The requested review state or revision was not found"
+                  }
                 }
               }
             }
@@ -10621,7 +10680,11 @@
                   "journal_history_conflict",
                   "checkpoint_regression",
                   "checkpoint_not_found",
-                  "recovery_not_found"
+                  "recovery_not_found",
+                  "embedding_dimension_limit",
+                  "retrieval_scan_limit",
+                  "retrieval_busy",
+                  "review_not_found"
                 ]
               },
               "message": {
@@ -17067,6 +17130,46 @@
           "receipt"
         ],
         "additionalProperties": false
+      },
+      "RetrievalBusyError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "retrieval_busy"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReviewNotFoundError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "const": "review_not_found"
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   }

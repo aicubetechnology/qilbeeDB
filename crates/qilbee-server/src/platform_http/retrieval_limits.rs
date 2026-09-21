@@ -3,6 +3,9 @@ use super::*;
 use qilbee_memory::storage::platform::{MAX_EMBEDDING_DIMENSIONS, MAX_RETRIEVAL_SCAN_BYTES};
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 
+#[cfg(test)]
+mod http_tests;
+
 pub(super) const VECTOR_BODY_BYTES: usize = 2 * 1024 * 1024;
 
 #[derive(Clone)]

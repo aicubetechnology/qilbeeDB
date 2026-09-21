@@ -107,9 +107,26 @@ Errors have this envelope:
 
 The router distinguishes unauthenticated credentials (401), missing authority
 (403), unknown routes (404), unsupported methods (405), invalid request/version
-(400), stale revisions (409), oversized bodies (413), and internal failure (500).
+(400), stale revisions (409), oversized bodies (413), unavailable retrieval capacity
+(503), and internal failure (500).
 Internal storage errors do not expose paths or credentials. Duplicate
 Authorization headers are rejected. Strict JSON contracts reject extra fields.
+
+The published error schema includes these operational outcomes. Branch on status
+and `error.code`, not message text:
+
+| Status | Code | Handling |
+| --- | --- | --- |
+| 400 | `embedding_dimension_limit` | Check the ranking catalog's operator dimension ceiling; zero is invalid. Do not resize or relabel a vector implicitly. |
+| 400 | `retrieval_scan_limit` | Check the requested byte budget against the operator ceiling. This is a rejected request, not a successful partial search. |
+| 503 | `retrieval_busy` | No retrieval started because all instance slots were occupied. Retry with bounded backoff and jitter within the caller's deadline. |
+| 404 | `review_not_found` | The authorized review state or requested immutable review revision is absent. A record can exist without that review revision. |
+
+Authentication and scope checks precede these capacity and review lookups. A busy
+server still returns 401 for a revoked credential and 403 for an ungranted scope.
+Retrieval overload is 503, not 429. Responses do not promise a `Retry-After` delay.
+The lexical, semantic and hybrid 503 schemas accept only `retrieval_busy`; review
+lookup 404 schemas accept only `review_not_found`. All use `Cache-Control: no-store`.
 
 Credential request bodies are limited to **65,536 bytes**. This is a transport
 bound, not a business quota or token count. Storage and verification operations
