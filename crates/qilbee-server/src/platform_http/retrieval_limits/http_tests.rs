@@ -33,6 +33,10 @@ fn query(mode: &str) -> (String, Value) {
             body = json!({"contract_version":1,"scope":scope(),"query":{"root_record_ids":[Uuid::new_v4()]}});
             "/api/v1/memory/graph"
         }
+        "graph_search" => {
+            body = json!({"contract_version":1,"scope":scope(),"query":{"ranking_version":"typed_path_balanced_v1","seed":{"mode":"lexical","text":"content"},"limit":10}});
+            "/api/v1/memory/search/graph"
+        }
         "typed_graph" => {
             body = json!({"contract_version":1,"scope":scope(),"query":{"root_record_ids":[Uuid::new_v4()]}});
             "/api/v1/memory/graph/typed"
@@ -161,9 +165,15 @@ async fn dimension_and_scan_limits_match_served_schemas() {
         }
     }
     for dimensions in [0, 4] {
+        let (route, mut body) = query("graph_search");
+        body["query"]["seed"] = json!({"mode":"semantic","space":{"provider":"fixture","model":"capacity","revision":"v1","dimensions":dimensions},"vector":[1,0,0]});
+        f.check(&route, body, 400, Some("embedding_dimension_limit"))
+            .await;
+    }
+    for dimensions in [0, 4] {
         f.check("/api/v1/memory/embeddings",json!({"contract_version":1,"scope":scope(),"idempotency_key":"limit","record_id":Uuid::new_v4(),"record_revision":1,"space":{"provider":"fixture","model":"capacity","revision":"v1","dimensions":dimensions},"vector":[1,0,0]}),400,Some("embedding_dimension_limit")).await;
     }
-    for mode in ["lexical", "hybrid"] {
+    for mode in ["lexical", "hybrid", "graph_search"] {
         let (route, body) = query(mode);
         for bytes in [0, 67_108_865] {
             let mut bad = body.clone();
@@ -185,6 +195,7 @@ async fn busy_slots_preserve_authorization_precedence_and_release() {
         "batch",
         "graph",
         "typed_graph",
+        "graph_search",
     ] {
         let (route, body) = query(mode);
         f.check(&route, body.clone(), 503, Some("retrieval_busy"))
@@ -201,6 +212,7 @@ async fn busy_slots_preserve_authorization_precedence_and_release() {
         "batch",
         "graph",
         "typed_graph",
+        "graph_search",
     ] {
         let (route, body) = query(mode);
         f.check(&route, body, 200, None).await;

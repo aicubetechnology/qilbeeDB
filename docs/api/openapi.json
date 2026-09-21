@@ -17998,6 +17998,255 @@
           }
         }
       }
+    },
+    "/api/v1/memory/search/graph": {
+      "post": {
+        "operationId": "searchMemoryGraph",
+        "summary": "Retrieve memory through experimental versioned typed paths",
+        "description": "Unreleased 0.13.0. Requires memory_read in the exact authorized scope. Selects up to four anchors from up to 100 lexical, external-vector or hybrid candidates, expands revision-bound typed neighbors and combines base/path ranks. One snapshot and clock, filters before expansion, no automatic relation extraction, no provider calls. Inspect coverage and proof paths. Scores are not cosine or probabilities. Hard errors fail the whole response. No continuation cursor, default promotion or measured quality gain. 2 MiB request body and shared retrieval admission. See the graph-assisted retrieval guide for immutable formulas and work accounting.",
+        "tags": [
+          "Memory"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphRetrievalRequest"
+              },
+              "example": {
+                "contract_version": 1,
+                "scope": {
+                  "project_id": "project",
+                  "agent_id": "agent",
+                  "mission_id": null,
+                  "visibility": "private"
+                },
+                "query": {
+                  "ranking_version": "typed_path_evidence_v1",
+                  "seed": {
+                    "mode": "lexical",
+                    "text": "cache invalidation"
+                  },
+                  "limit": 10
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphRetrievalResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contract, fields, bounds, text, vector, dimensions or byte budgets. Operator ceilings use embedding_dimension_limit or retrieval_scan_limit. Hard graph/dependency/affinity exhaustion returns an error, never a partial success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds the 65536-byte body limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval slots are occupied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/graph-ranking-profiles": {
+      "get": {
+        "operationId": "graphRankingProfiles",
+        "summary": "List immutable experimental typed-path ranking profiles",
+        "description": "Requires memory_read. Profiles are server-owned; requests cannot supply weights. All current versions share the documented 1/3 maximum combined score.",
+        "tags": [
+          "Memory"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful authorized response; inspect coverage, availability or historical eligibility semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphRankingProfilesResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked credential.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing capability or unauthorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Encountered canonical, relation, history, adjacency or completeness-header inconsistency.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -30074,6 +30323,1602 @@
           "company_id",
           "workspace",
           "graph"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingVersion": {
+        "type": "string",
+        "enum": [
+          "typed_path_balanced_v1",
+          "typed_path_entity_v1",
+          "typed_path_temporal_v1",
+          "typed_path_evidence_v1"
+        ]
+      },
+      "GraphRankingProfileBalancedV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_balanced_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_rrf"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.25
+          },
+          "graph_weight": {
+            "const": 0.75
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileEntityV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_entity_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_rrf"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.25
+          },
+          "graph_weight": {
+            "const": 0.75
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 0.5
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileTemporalV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_temporal_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_rrf"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.25
+          },
+          "graph_weight": {
+            "const": 0.75
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 0.25
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 0.5
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 0
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileEvidenceV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_evidence_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_rrf"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.25
+          },
+          "graph_weight": {
+            "const": 0.75
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 0.25
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 0.5
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 0.25
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 0.75
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfile": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileBalancedV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileEntityV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileTemporalV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileEvidenceV1"
+          }
+        ]
+      },
+      "GraphSeedQueryLexical": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "lexical"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes and 1-64 distinct alphanumeric terms; maxLength is an additional character bound."
+          }
+        },
+        "required": [
+          "mode",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedQuerySemantic": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "semantic"
+          },
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 32768,
+            "minItems": 1
+          },
+          "min_score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "default": -1
+          }
+        },
+        "required": [
+          "mode",
+          "space",
+          "vector"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedQueryHybrid": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "hybrid"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes and 1-64 distinct alphanumeric terms; maxLength is an additional character bound."
+          },
+          "space": {
+            "$ref": "#/components/schemas/EmbeddingSpace"
+          },
+          "vector": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 32768,
+            "minItems": 1
+          },
+          "min_score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "default": -1
+          },
+          "ranking_version": {
+            "type": "string",
+            "enum": [
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
+            ]
+          }
+        },
+        "required": [
+          "mode",
+          "text",
+          "space",
+          "vector",
+          "ranking_version"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedQuery": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GraphSeedQueryLexical"
+          },
+          {
+            "$ref": "#/components/schemas/GraphSeedQuerySemantic"
+          },
+          {
+            "$ref": "#/components/schemas/GraphSeedQueryHybrid"
+          }
+        ]
+      },
+      "GraphExpansionLimits": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "$ref": "#/components/schemas/TypedGraphDirection"
+          },
+          "max_depth": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8
+          },
+          "node_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "edge_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1024
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "embedding_bytes_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608
+          }
+        },
+        "required": [
+          "direction",
+          "max_depth",
+          "node_limit",
+          "edge_limit",
+          "scan_limit",
+          "embedding_bytes_limit"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRetrievalQuery": {
+        "type": "object",
+        "properties": {
+          "ranking_version": {
+            "$ref": "#/components/schemas/GraphRankingVersion"
+          },
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeedQuery"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 10000
+          },
+          "scan_bytes_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 268435456,
+            "default": 8388608
+          },
+          "expansion": {
+            "$ref": "#/components/schemas/GraphExpansionLimits"
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "ranking_version",
+          "seed",
+          "limit"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRetrievalRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/GraphRetrievalQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedScoreLexical": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "lexical"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "mode",
+          "score"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedScoreSemantic": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "semantic"
+          },
+          "score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "embedding": {
+            "$ref": "#/components/schemas/EmbeddingReceipt"
+          }
+        },
+        "required": [
+          "mode",
+          "score",
+          "embedding"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedScoreHybrid": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "const": "hybrid"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.3333333333333333
+          },
+          "lexical": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RankContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "semantic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RankContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "embedding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "mode",
+          "score",
+          "lexical",
+          "semantic",
+          "embedding"
+        ],
+        "additionalProperties": false
+      },
+      "GraphSeedScore": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GraphSeedScoreLexical"
+          },
+          {
+            "$ref": "#/components/schemas/GraphSeedScoreSemantic"
+          },
+          {
+            "$ref": "#/components/schemas/GraphSeedScoreHybrid"
+          }
+        ]
+      },
+      "GraphSeedMetadata": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "lexical",
+              "semantic",
+              "hybrid"
+            ]
+          },
+          "ranking_version": {
+            "type": "string",
+            "enum": [
+              "bm25_v1",
+              "cosine_exact_v1",
+              "weighted_rrf_v1",
+              "weighted_rrf_v2"
+            ]
+          },
+          "hybrid_profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HybridRankingProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "embedding_space": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingSpace"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "embedding_coverage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "complete",
+                  "partial",
+                  "missing",
+                  "empty_corpus"
+                ],
+                "description": "Current selected-space bindings among the visible scanned corpus. Missing bindings still allow lexical matches; this is not full dense coverage."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "selected_anchors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "maxItems": 4
+          },
+          "candidate_selection_version": {
+            "const": "current_records_v1"
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "scanned_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 268435456
+          },
+          "candidate_index_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "corpus_records": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lexical_matches": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "semantic_matches": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "base_candidates": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "base_candidates_truncated": {
+            "type": "boolean"
+          },
+          "channel_candidates_truncated": {
+            "type": "boolean"
+          },
+          "scan_complete": {
+            "type": "boolean"
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "mode",
+          "ranking_version",
+          "hybrid_profile",
+          "embedding_space",
+          "embedding_coverage",
+          "selected_anchors",
+          "candidate_selection_version",
+          "scanned_records",
+          "scanned_bytes",
+          "candidate_index_bytes",
+          "corpus_records",
+          "lexical_matches",
+          "semantic_matches",
+          "base_candidates",
+          "base_candidates_truncated",
+          "channel_candidates_truncated",
+          "scan_complete",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "GraphBaseContribution": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "retrieval": {
+            "$ref": "#/components/schemas/GraphSeedScore"
+          },
+          "contribution": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.08333333333333333
+          }
+        },
+        "required": [
+          "rank",
+          "retrieval",
+          "contribution"
+        ],
+        "additionalProperties": false
+      },
+      "GraphAffinity": {
+        "type": "object",
+        "properties": {
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+          },
+          "embedding": {
+            "$ref": "#/components/schemas/EmbeddingReceipt"
+          }
+        },
+        "required": [
+          "cosine",
+          "embedding"
+        ],
+        "additionalProperties": false
+      },
+      "GraphPathStep": {
+        "type": "object",
+        "properties": {
+          "relation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "relation_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "outgoing",
+              "incoming"
+            ]
+          },
+          "from": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "to": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          }
+        },
+        "required": [
+          "relation_id",
+          "relation_revision",
+          "direction",
+          "from",
+          "to"
+        ],
+        "additionalProperties": false
+      },
+      "GraphPathContribution": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 256
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.3333333333333333,
+            "description": "Maximum bounded path strength; repeated assertions are not summed."
+          },
+          "contribution": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.25
+          },
+          "anchor": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "anchor_rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphPathStep"
+            },
+            "maxItems": 8
+          },
+          "missing_affinity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "maxItems": 8
+          }
+        },
+        "required": [
+          "rank",
+          "strength",
+          "contribution",
+          "anchor",
+          "anchor_rank",
+          "steps",
+          "missing_affinity"
+        ],
+        "additionalProperties": false
+      },
+      "GraphAffinityWork": {
+        "type": "object",
+        "properties": {
+          "requested": {
+            "type": "boolean"
+          },
+          "reused_scores": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "lookups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "current_bindings": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "missing_bindings": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "stale_bindings": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "bytes_read": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "byte_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8388608
+          }
+        },
+        "required": [
+          "requested",
+          "reused_scores",
+          "lookups",
+          "current_bindings",
+          "missing_bindings",
+          "stale_bindings",
+          "bytes_read",
+          "byte_limit"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRetrievalHit": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/MemoryRecord"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.3333333333333333,
+            "description": "Versioned base/graph reciprocal rank fusion, not cosine or probability."
+          },
+          "base": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GraphBaseContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "graph": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GraphPathContribution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "affinity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GraphAffinity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "record",
+          "score",
+          "base",
+          "graph",
+          "affinity"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRetrievalCoverage": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "source_complete": {
+            "type": "boolean"
+          },
+          "candidates_complete": {
+            "type": "boolean"
+          },
+          "graph_complete": {
+            "type": "boolean"
+          },
+          "embeddings_complete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "complete",
+          "source_complete",
+          "candidates_complete",
+          "graph_complete",
+          "embeddings_complete"
+        ],
+        "additionalProperties": false,
+        "description": "Completeness within the selected immutable four-anchor profile and requested filters, not a graph-wide or relevance guarantee. True only when every constituent flag is true.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "complete": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "source_complete": {
+                  "const": true
+                },
+                "candidates_complete": {
+                  "const": true
+                },
+                "graph_complete": {
+                  "const": true
+                },
+                "embeddings_complete": {
+                  "const": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GraphRetrievalPage": {
+        "type": "object",
+        "properties": {
+          "ranking": {
+            "$ref": "#/components/schemas/GraphRankingProfile"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeedMetadata"
+          },
+          "expansion": {
+            "$ref": "#/components/schemas/GraphExpansionLimits"
+          },
+          "graph_roots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryGraphRoot"
+            },
+            "maxItems": 4
+          },
+          "graph_coverage": {
+            "$ref": "#/components/schemas/TypedGraphCoverage"
+          },
+          "affinity_work": {
+            "$ref": "#/components/schemas/GraphAffinityWork"
+          },
+          "graph_candidates": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256
+          },
+          "candidates_ranked": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 356
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/GraphRetrievalCoverage"
+          },
+          "hits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphRetrievalHit"
+            },
+            "maxItems": 100
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRelation"
+            },
+            "maxItems": 800
+          }
+        },
+        "required": [
+          "ranking",
+          "evaluated_at_millis",
+          "seed",
+          "expansion",
+          "graph_roots",
+          "graph_coverage",
+          "affinity_work",
+          "graph_candidates",
+          "candidates_ranked",
+          "coverage",
+          "hits",
+          "relations"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRetrievalResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/GraphRetrievalPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfilesResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "graph_profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphRankingProfile"
+            },
+            "maxItems": 4,
+            "minItems": 4
+          },
+          "execution_limits": {
+            "$ref": "#/components/schemas/RetrievalExecutionLimits"
+          }
+        },
+        "required": [
+          "contract_version",
+          "graph_profiles",
+          "execution_limits"
         ],
         "additionalProperties": false
       }

@@ -100,3 +100,9 @@ Use the unreleased [relation change feed](../api/typed-relation-changes.md) to
 invalidate graph caches and retain consumer progress across interruptions. Its
 history-bound cursors and explicit reconciliation complement the memory feed;
 current eligibility checks remain necessary before cached context is reused.
+
+The unreleased [graph-assisted retrieval API](../api/graph-assisted-retrieval.md) selects lexical, semantic
+or hybrid anchors and ranks memories through exact typed paths in one snapshot.
+Four immutable experimental profiles expose separate base and graph contributions,
+coverage and provenance. Existing search scores and defaults remain unchanged;
+comparative retrieval and agent-task benefits have not yet been demonstrated.

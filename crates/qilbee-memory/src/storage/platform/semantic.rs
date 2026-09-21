@@ -345,6 +345,20 @@ impl super::snapshot::MemorySnapshot<'_> {
         namespace: &str,
         query: &SemanticQuery,
     ) -> Result<SemanticPage> {
+        self.search_semantic_with_byte_limit(namespace, query, None)
+            .map(|(page, _, _)| page)
+    }
+    pub(super) fn search_semantic_with_byte_limit(
+        &self,
+        namespace: &str,
+        query: &SemanticQuery,
+        byte_limit: Option<usize>,
+    ) -> Result<(SemanticPage, usize, usize)> {
+        if byte_limit.is_some_and(|n| !(1..=MAX_RETRIEVAL_SCAN_BYTES).contains(&n)) {
+            return Err(Error::ValidationError(
+                "Invalid semantic byte budget".into(),
+            ));
+        }
         RocksDbMemoryStorage::validate_agent(namespace)?;
         query.space.validate()?;
         let query_norm = norm(&query.vector, query.space.dimensions)?;
@@ -383,6 +397,8 @@ impl super::snapshot::MemorySnapshot<'_> {
             exhaustive: query.after.is_none(),
         };
         let mut last_scanned = None;
+        let mut eligible_records = 0;
+        let mut current_bindings = 0;
         for item in self.db.iterator_cf(
             self.storage.cf(super::super::cf::EPISODE_INDEX)?,
             rocksdb::IteratorMode::From(&start, rocksdb::Direction::Forward),
@@ -401,18 +417,34 @@ impl super::snapshot::MemorySnapshot<'_> {
                 break;
             }
             let (record, record_bytes) = self.candidate_record(namespace, id, &bytes)?;
+            let eligible = self.eligible(namespace, &record)?;
+            let embedding = if eligible {
+                self.embedding(namespace, &query.space, id)?
+            } else {
+                None
+            };
+            let row_bytes = record_bytes + embedding.as_ref().map_or(0, |(_, size)| *size);
+            if byte_limit.is_some_and(|maximum| page.scanned_bytes + row_bytes > maximum) {
+                if last_scanned.is_none() {
+                    return Err(Error::ValidationError(
+                        "Semantic byte budget cannot fit the next record and embedding".into(),
+                    ));
+                }
+                page.next_after = last_scanned;
+                page.exhaustive = false;
+                break;
+            }
             page.scanned_records += 1;
             page.candidate_index_bytes += key.len() + bytes.len();
-            page.scanned_bytes += record_bytes;
+            page.scanned_bytes += row_bytes;
             last_scanned = Some(id);
-            if !self.eligible(namespace, &record)? {
-                continue;
+            if eligible {
+                eligible_records += 1;
             }
-            let Some((embedding, size)) = self.embedding(namespace, &query.space, id)? else {
+            let Some((embedding, _)) = embedding else {
                 continue;
             };
             page.scanned_embeddings += 1;
-            page.scanned_bytes += size;
             if record.revision < embedding.receipt.record_revision {
                 return Err(inconsistent());
             }
@@ -433,6 +465,7 @@ impl super::snapshot::MemorySnapshot<'_> {
             {
                 continue;
             }
+            current_bindings += 1;
             let denominator = query_norm * norm(&embedding.vector, query.space.dimensions)?;
             let dot: f64 = query
                 .vector
@@ -458,7 +491,7 @@ impl super::snapshot::MemorySnapshot<'_> {
             page.hits.truncate(query.limit);
         }
         page.dependency_work = self.dependency_work();
-        Ok(page)
+        Ok((page, eligible_records, current_bindings))
     }
 }
 #[cfg(test)]
