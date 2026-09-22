@@ -715,3 +715,35 @@ async fn knowledge_read_capacity_does_not_bypass_scope_authorization() {
         f.check(path, forbidden, 403, Some("forbidden")).await;
     }
 }
+
+#[tokio::test]
+async fn metadata_discovery_checks_live_company_authority_before_capacity() {
+    let mut f = Fixture::start().await;
+    let route = "/api/v1/learning/metadata/query";
+    let body = json!({"contract_version":1,"query":{"kind":"policy"}});
+    let permit = f.limits.acquire().ok().unwrap();
+    f.check(route, body.clone(), 403, Some("forbidden")).await;
+    let reader = f
+        .identity
+        .issue(
+            &f.admin,
+            CredentialSpec {
+                scope_policy: None,
+                subject_id: "metadata-reader".into(),
+                capabilities: [Capability::LearningMetadataRead].into(),
+                grants: vec![],
+                expires_at_millis: None,
+            },
+        )
+        .unwrap();
+    f.token = reader.secret.clone();
+    f.check(route, body.clone(), 503, Some("retrieval_busy"))
+        .await;
+    drop(permit);
+    f.check(route, body.clone(), 200, None).await;
+    f.identity
+        .revoke(&f.admin, reader.credential.id, reader.credential.revision)
+        .unwrap();
+    let _permit = f.limits.acquire().ok().unwrap();
+    f.check(route, body, 401, Some("unauthorized")).await;
+}

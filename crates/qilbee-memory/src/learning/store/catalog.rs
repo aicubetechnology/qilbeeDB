@@ -5,6 +5,8 @@ use serde::Deserialize;
 
 mod evidence;
 mod records;
+mod metadata;
+pub use metadata::*;
 pub use evidence::*;
 #[cfg(test)]
 mod tests;
@@ -256,6 +258,15 @@ impl LearningMemory {
         company: &str,
         query: &LearningCatalogQuery,
     ) -> Result<LearningCatalogPage> {
+        self.company_learning_catalog_observed(company, query, |_, _| Ok(()))
+    }
+
+    fn company_learning_catalog_observed(
+        &self,
+        company: &str,
+        query: &LearningCatalogQuery,
+        mut observe: impl FnMut(&LearningResourceDetails, &LearningCatalogEntry) -> Result<()>,
+    ) -> Result<LearningCatalogPage> {
         validate_text(company, "company", 256)?;
         if !(1..=50).contains(&query.limit) || !(1..=1000).contains(&query.max_scanned_records) {
             return Err(invalid("Catalog limit must be 1–50 and scan budget 1–1000"));
@@ -368,6 +379,7 @@ impl LearningMemory {
                         entry.title.to_lowercase().contains(v)
                             || entry.resource.id.to_lowercase().contains(v)
                     }) {
+                        observe(&details, &entry)?;
                         page.entries.push(entry);
                     }
                 }

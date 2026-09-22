@@ -385,6 +385,13 @@
       "title": "Native vector index integrity",
       "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
       "order": 1074
+    },
+    {
+      "source": "docs/api/learning-metadata-discovery.md",
+      "file": "learning-metadata-discovery.md",
+      "title": "Learning metadata discovery",
+      "description": "Find company policies and evaluation contexts with bounded, read-only discovery.",
+      "order": 1075
     }
   ]
 }

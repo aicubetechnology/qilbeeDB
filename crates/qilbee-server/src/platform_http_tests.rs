@@ -752,3 +752,5 @@ mod scope_authority;
 mod consolidation;
 mod graph_retrieval;
 mod relation_changes;
+
+mod metadata_discovery;

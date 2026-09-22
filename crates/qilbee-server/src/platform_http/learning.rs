@@ -5,10 +5,12 @@ use qilbee_memory::learning::{
     EvaluationActor, EvaluationContext, EvaluationSubmission, PolicyDefinition, RegisteredProposal,
 };
 mod strategies;
+mod metadata;
 
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .merge(strategies::routes())
+        .route("/api/v1/learning/metadata/query", post(metadata::query))
         .route("/api/v1/learning/policies", post(register_policy))
         .route("/api/v1/learning/policies/:id", get(policy))
         .route("/api/v1/learning/contexts", post(register_context))
