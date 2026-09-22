@@ -201,7 +201,7 @@
       "source": "docs/security/administration-directory.md",
       "file": "administration-directory.md",
       "title": "Administrative directories",
-      "description": "Enumerate authorized companies, credentials and human accounts with bounded pages and explicit browser-origin configuration.",
+      "description": "Discover authorized administrative records and recover safely from unconfirmed changes.",
       "order": 39
     },
     {
