@@ -207,3 +207,34 @@ criteria fixed. Compare task completion, observed effects, tool calls, tokens an
 time. Record evidence and rollback criteria before promoting a learned behavior.
 This evaluator reports that agent-task stage as `not_run`; it cannot infer better
 reasoning or autonomous improvement from retrieval metrics.
+
+
+## Hardware and resource evidence
+
+Resource snapshots include cgroup v2 CPU quota/period, usage and throttling
+counters, memory limit/current/lifetime peak, memory events and per-device block
+I/O counters when exposed. Missing controllers are listed in `unavailable_metrics`;
+unavailable never means zero. A `null` limit in an available controller means
+unlimited. Optional missing controllers do not erase available CPU evidence.
+
+Container identity and start time bracket each sample. CPU deltas are unknown
+across restarts, unverified identity or decreasing counters. Samples are
+sequential, not atomic, and include telemetry and concurrent container activity.
+Memory peak covers the container lifetime. Empty `io.stat` does not establish
+zero physical disk activity; caching, virtualization and filesystem accounting
+can affect visibility. These counters do not measure disk capacity or latency.
+
+For hardware comparisons, freeze the image, source revisions, server-assigned
+IDs, corpus, external vectors, queries, ranking profile, candidate/byte budgets,
+response size and concurrency. Record host/VM resources, container limits, volume
+type/provisioned I/O, free disk space, cache/warmup and competing workloads.
+Change one resource at a time and repeat the baseline between changes to detect
+time-dependent interference. Use an isolated disposable installation; this tool
+does not resize or restart deployments.
+
+Report latency distributions alongside coverage, failures, result identities and
+resource evidence. Truncated candidate runs are not complete ranking comparisons.
+Hardware may prevent a work/time cutoff; it does not establish better relevance
+when identical candidates are fully evaluated. Embedding generation cost and
+agent-task outcomes remain separate. An idle snapshot or the small synthetic
+contract fixture cannot establish a bottleneck or a production sizing target.

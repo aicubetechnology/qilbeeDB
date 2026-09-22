@@ -89,7 +89,7 @@
       "source": "docs/research/retrieval-evaluation.md",
       "file": "retrieval-evaluation.md",
       "title": "Evaluate retrieval",
-      "description": "Compare frozen lexical, semantic and hybrid retrieval with explicit evidence and limits.",
+      "description": "Compare frozen retrieval with explicit coverage, resource limits, restart-aware telemetry and reproducible hardware conditions.",
       "order": 110
     },
     {

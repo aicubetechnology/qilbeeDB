@@ -13,13 +13,14 @@ import random
 import statistics
 import stat
 import struct
-import subprocess
 import tempfile
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+
+from retrieval_resources import container_resources, resource_delta
 
 MODES = ("lexical", "semantic", "hybrid")
 VERSIONS = {
@@ -500,31 +501,6 @@ def verify_sources(client, fixture, state, tag):
             raise ValueError("Frozen source revision or content changed")
 
 
-def container_resources(container):
-    if not container:
-        return {"available": False, "reason": "No container supplied"}
-    try:
-        outputs = {}
-        for name in ["cpu.stat", "memory.current", "memory.peak"]:
-            result = subprocess.run(
-                ["docker", "exec", container, "cat", "/sys/fs/cgroup/" + name],
-                capture_output=True,
-                text=True,
-                timeout=10,
-                check=True,
-            )
-            outputs[name] = result.stdout.strip()
-        cpu = dict(line.split() for line in outputs["cpu.stat"].splitlines())
-        return {
-            "available": True,
-            "cpu_usage_usec": int(cpu["usage_usec"]),
-            "memory_current_bytes": int(outputs["memory.current"]),
-            "memory_peak_since_container_start_bytes": int(outputs["memory.peak"]),
-        }
-    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
-        return {"available": False, "reason": "Container cgroup v2 metrics unavailable"}
-
-
 def query_request(
     mode,
     query,
@@ -779,12 +755,7 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
                 "elapsed_seconds_including_telemetry": time.perf_counter() - started,
                 "before": start_resources,
                 "after": end_resources,
-                "cpu_usage_usec_delta": (
-                    end_resources["cpu_usage_usec"] - start_resources["cpu_usage_usec"]
-                    if start_resources.get("available")
-                    and end_resources.get("available")
-                    else None
-                ),
+                "cpu_usage_usec_delta": resource_delta(start_resources, end_resources),
             }
     try:
         verify_sources(client, fixture, state, tag)
@@ -913,11 +884,7 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
             "per_method_separate_warm_pass": resources_by_mode,
             "before": before,
             "after": after,
-            "cpu_usage_usec_delta": (
-                after["cpu_usage_usec"] - before["cpu_usage_usec"]
-                if before and before.get("available") and after.get("available")
-                else None
-            ),
+            "cpu_usage_usec_delta": resource_delta(before, after),
             "scope": "entire container including telemetry commands and any concurrent clients; memory peak is since container start, not isolated trial peak",
         },
         "embedding_measurements": {
