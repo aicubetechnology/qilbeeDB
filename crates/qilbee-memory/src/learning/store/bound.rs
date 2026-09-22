@@ -146,6 +146,7 @@ impl LearningMemory {
         request: RegisteredProposal,
         actor: &str,
     ) -> Result<ProposalReceipt> {
+        super::knowledge::reject_reserved_legacy_sources(&request.source_refs)?;
         validate_namespace(tenant, namespace)?;
         validate_text(&request.id, "procedure ID", 512)?;
         validate_text(actor, "proposal actor", 512)?;

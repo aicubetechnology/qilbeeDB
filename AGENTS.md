@@ -51,3 +51,27 @@ Do not mark a human workflow complete merely because its API calls work. An API
 catalog gap that forces routine manual IDs remains product work to implement.
 See `docs/contributing/interface-design.md` for the implementation and validation
 checklist. Keep corporate UI source, deployments, and credentials out of Git.
+
+## Mandatory capability ownership review
+
+Before implementing any new or expanded capability, critically assess its owner:
+QilbeeDB, the consuming agent/application, the company business domain, or the
+execution infrastructure. Record the user need, proposed owner, alternatives,
+why the database needs the capability, data and decision authority, security and
+lifecycle responsibilities, and the smallest necessary integration contract.
+Do not infer database ownership merely because data can be persisted there or
+because an adjacent service already implements the capability.
+
+For every decision affecting both teams, communicate this assessment through
+`/Users/kimera/projects/colab` and obtain explicit agreement from Qilbee and
+QilbeeDB before implementing the affected contract. Record the agreed boundary,
+objections resolved, acceptance criteria, and compatibility/migration impact.
+Silence is not approval. Read-only investigation and independent work may
+continue; implementation dependent on an unresolved boundary must wait.
+Reassess ownership when scope changes, including previously started work.
+
+Tool code, packages, maintenance, publication and execution belong to the agent
+application/company and its execution infrastructure. QilbeeDB may store scoped
+knowledge about tools, external version references, provenance and observed
+evidence; this does not transfer business authority or execution authorization
+to the database, or require it to store the tool's executable code.

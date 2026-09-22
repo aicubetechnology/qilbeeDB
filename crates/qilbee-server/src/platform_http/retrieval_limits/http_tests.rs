@@ -39,6 +39,10 @@ async fn company_learning_capacity_errors_follow_current_administrative_authoriz
             "/api/v1/company/learning/evidence/read",
             json!({"contract_version":1,"evidence":{"resource":{"kind":"procedure","id":"missing","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null},"kind":"evaluation_submission","id":"case"}}),
         ),
+        (
+            "/api/v1/company/learning/knowledge/inspect",
+            json!({"contract_version":2,"resource":{"kind":"knowledge","id":"missing","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null}}),
+        ),
     ];
     let administrator = f
         .identity
@@ -631,8 +635,14 @@ async fn relation_feed_and_checkpoint_routes_share_admission_after_authorization
 async fn company_consumer_capacity_errors_follow_current_administrative_authorization() {
     let mut f = Fixture::start().await;
     let requests = [
-        ("/api/v1/company/memory/consumers/query", json!({"contract_version":1,"query":{"kind":"memory_v2"}})),
-        ("/api/v1/company/memory/consumers/read", json!({"contract_version":1,"consumer":{"kind":"memory_v2","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null,"subject_id":"owner","consumer_id":"cache"}})),
+        (
+            "/api/v1/company/memory/consumers/query",
+            json!({"contract_version":1,"query":{"kind":"memory_v2"}}),
+        ),
+        (
+            "/api/v1/company/memory/consumers/read",
+            json!({"contract_version":1,"consumer":{"kind":"memory_v2","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null,"subject_id":"owner","consumer_id":"cache"}}),
+        ),
     ];
     let administrator = f
         .identity
@@ -680,5 +690,28 @@ async fn company_consumer_capacity_errors_follow_current_administrative_authoriz
     let _permit = f.limits.acquire().ok().unwrap();
     for (route, body) in requests {
         f.check(route, body, 401, Some("unauthorized")).await;
+    }
+}
+
+#[tokio::test]
+async fn knowledge_read_capacity_does_not_bypass_scope_authorization() {
+    let f = Fixture::start().await;
+    let requests = [
+        (
+            "/api/v1/learning/knowledge/inspect",
+            json!({"contract_version":2,"scope":scope(),"procedure_id":"missing"}),
+        ),
+        (
+            "/api/v1/learning/knowledge/select",
+            json!({"contract_version":2,"scope":scope(),"policy_id":"policy","context_id":"context","max_instruction_bytes":4096,"candidate_limit":10,"external_tool_identities":[]}),
+        ),
+    ];
+    let _permit = f.limits.acquire().ok().unwrap();
+    for (path, body) in requests {
+        f.check(path, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+        let mut forbidden = body;
+        forbidden["scope"]["agent_id"] = "another-agent".into();
+        f.check(path, forbidden, 403, Some("forbidden")).await;
     }
 }

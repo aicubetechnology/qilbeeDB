@@ -8,7 +8,7 @@ mod records;
 pub use evidence::*;
 #[cfg(test)]
 mod tests;
-pub use records::{LearningResourceDetails, StrategyDetails};
+pub use records::{KnowledgeDetails, LearningResourceDetails, StrategyDetails};
 
 const SCAN_BYTES: usize = 4 * 1024 * 1024;
 
@@ -17,6 +17,7 @@ const SCAN_BYTES: usize = 4 * 1024 * 1024;
 pub enum LearningResourceKind {
     Experience,
     Procedure,
+    Knowledge,
     Strategy,
     ToolArtifact,
     ToolDevelopment,
@@ -29,6 +30,7 @@ impl LearningResourceKind {
         let mut key = vec![match self {
             Self::Experience => 12,
             Self::Procedure => 6,
+            Self::Knowledge => 16,
             Self::Strategy => 15,
             Self::ToolArtifact => 8,
             Self::ToolDevelopment => 10,
@@ -401,5 +403,22 @@ impl LearningMemory {
             .lock()
             .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
         self.catalog_details(company, resource)
+    }
+}
+
+impl LearningMemory {
+    pub fn inspect_company_knowledge(
+        &self,
+        memory: &crate::RocksDbMemoryStorage,
+        company: &str,
+        resource: &LearningResourceRef,
+    ) -> Result<Option<super::knowledge::KnowledgeInspection>> {
+        if resource.kind != LearningResourceKind::Knowledge {
+            return Err(invalid("A knowledge resource reference is required"));
+        }
+        let namespace = resource
+            .namespace(company)?
+            .ok_or_else(|| invalid("Knowledge scope is required"))?;
+        self.inspect_knowledge(memory, company, &namespace, &resource.id)
     }
 }

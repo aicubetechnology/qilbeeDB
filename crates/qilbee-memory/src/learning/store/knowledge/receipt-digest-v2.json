@@ -1,0 +1,84 @@
+{
+  "description": "Serialization-only receipt vector; placeholder registry digests do not attest to a registered policy or current evidence. Original candidate fields are immutable.",
+  "receipt": {
+    "schema_version": 2,
+    "tenant": "company",
+    "namespace": "scope",
+    "request": {
+      "id": "knowledge-unicode-r1",
+      "policy_id": "policy",
+      "context_id": "context",
+      "title": "Recuperação — 検索",
+      "instructions": "Read \"source\"\nVerify before reuse.\tDo not normalize é or é.",
+      "memory_sources": [
+        {
+          "record_id": "00000000-0000-0000-0000-000000000001",
+          "revision": 3
+        },
+        {
+          "record_id": "00000000-0000-0000-0000-000000000002",
+          "revision": 18446744073709551615
+        }
+      ],
+      "external_tools": [
+        {
+          "name": "a",
+          "schema_revision": "schema:r1",
+          "implementation_revision": "code:r1",
+          "environment_revision": "env:r1",
+          "usage_contract": "Read one authorized document"
+        },
+        {
+          "name": "z",
+          "schema_revision": "schema:r1",
+          "implementation_revision": null,
+          "environment_revision": null,
+          "usage_contract": "Read one authorized document"
+        }
+      ]
+    },
+    "policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "context_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "actor": "original-author",
+    "record": {
+      "scope": {
+        "tenant": "company",
+        "agent": "scope",
+        "environment": "context"
+      },
+      "proposal": {
+        "id": "knowledge-unicode-r1",
+        "task": "lookup",
+        "baseline_revision": "baseline",
+        "instructions": "Read \"source\"\nVerify before reuse.\tDo not normalize é or é.",
+        "source_refs": [
+          "qilbee-knowledge-v2:8f3c20ea44cdb7a2bf3b9aa69b2087829acefead348774ef0745d63cb040b5b1"
+        ],
+        "policy": {
+          "qualification_trials": 32,
+          "confidence_delta": 0.5,
+          "min_improvement": 0.5,
+          "min_candidate_utility": 0.5,
+          "max_cost_units": 18446744073709551615,
+          "max_latency_ms": 60000,
+          "max_failure_streak": 3,
+          "evaluator_id": "evaluator",
+          "evaluation_contract": "rubric-v1"
+        }
+      },
+      "state": "Candidate",
+      "qualification_count": 0,
+      "mean_improvement": 0.0,
+      "mean_candidate_utility": 0.0,
+      "budget_violations": 0,
+      "lower_improvement_bound": null,
+      "monitoring_count": 0,
+      "failure_streak": 0,
+      "decisions": [],
+      "created_at_millis": 1720000000123
+    },
+    "receipt_digest": "b511c22e141ba4ec7cf94ca59e2a9c8b8cc03c9cc3d8458da4bd7d5c8ba0d75f"
+  },
+  "canonical_json": "[2,\"company\",\"scope\",{\"id\":\"knowledge-unicode-r1\",\"policy_id\":\"policy\",\"context_id\":\"context\",\"title\":\"Recuperação — 検索\",\"instructions\":\"Read \\\"source\\\"\\nVerify before reuse.\\tDo not normalize é or é.\",\"memory_sources\":[{\"record_id\":\"00000000-0000-0000-0000-000000000001\",\"revision\":3},{\"record_id\":\"00000000-0000-0000-0000-000000000002\",\"revision\":18446744073709551615}],\"external_tools\":[{\"name\":\"a\",\"schema_revision\":\"schema:r1\",\"implementation_revision\":\"code:r1\",\"environment_revision\":\"env:r1\",\"usage_contract\":\"Read one authorized document\"},{\"name\":\"z\",\"schema_revision\":\"schema:r1\",\"implementation_revision\":null,\"environment_revision\":null,\"usage_contract\":\"Read one authorized document\"}]},\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"original-author\",{\"scope\":{\"tenant\":\"company\",\"agent\":\"scope\",\"environment\":\"context\"},\"proposal\":{\"id\":\"knowledge-unicode-r1\",\"task\":\"lookup\",\"baseline_revision\":\"baseline\",\"instructions\":\"Read \\\"source\\\"\\nVerify before reuse.\\tDo not normalize é or é.\",\"source_refs\":[\"qilbee-knowledge-v2:8f3c20ea44cdb7a2bf3b9aa69b2087829acefead348774ef0745d63cb040b5b1\"],\"policy\":{\"qualification_trials\":32,\"confidence_delta\":0.5,\"min_improvement\":0.5,\"min_candidate_utility\":0.5,\"max_cost_units\":18446744073709551615,\"max_latency_ms\":60000,\"max_failure_streak\":3,\"evaluator_id\":\"evaluator\",\"evaluation_contract\":\"rubric-v1\"}},\"state\":\"Candidate\",\"qualification_count\":0,\"mean_improvement\":0.0,\"mean_candidate_utility\":0.0,\"budget_violations\":0,\"lower_improvement_bound\":null,\"monitoring_count\":0,\"failure_streak\":0,\"decisions\":[],\"created_at_millis\":1720000000123}]",
+  "sha256": "b511c22e141ba4ec7cf94ca59e2a9c8b8cc03c9cc3d8458da4bd7d5c8ba0d75f"
+}

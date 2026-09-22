@@ -1,0 +1,38 @@
+{
+  "description": "Cross-language proposal digest vector: exact unsigned revision, Unicode, escapes, explicit null identity and unordered set inputs.",
+  "input": {
+    "external_tools": [
+      {
+        "name": "z",
+        "schema_revision": "schema:r1",
+        "implementation_revision": null,
+        "environment_revision": null,
+        "usage_contract": "Read one authorized document"
+      },
+      {
+        "name": "a",
+        "schema_revision": "schema:r1",
+        "implementation_revision": "code:r1",
+        "environment_revision": "env:r1",
+        "usage_contract": "Read one authorized document"
+      }
+    ],
+    "memory_sources": [
+      {
+        "record_id": "00000000-0000-0000-0000-000000000002",
+        "revision": 18446744073709551615
+      },
+      {
+        "record_id": "00000000-0000-0000-0000-000000000001",
+        "revision": 3
+      }
+    ],
+    "instructions": "Read \"source\"\nVerify before reuse.\tDo not normalize é or é.",
+    "title": "Recuperação — 検索",
+    "context_id": "context",
+    "policy_id": "policy",
+    "id": "knowledge-unicode-r1"
+  },
+  "canonical_json": "{\"id\":\"knowledge-unicode-r1\",\"policy_id\":\"policy\",\"context_id\":\"context\",\"title\":\"Recuperação — 検索\",\"instructions\":\"Read \\\"source\\\"\\nVerify before reuse.\\tDo not normalize é or é.\",\"memory_sources\":[{\"record_id\":\"00000000-0000-0000-0000-000000000001\",\"revision\":3},{\"record_id\":\"00000000-0000-0000-0000-000000000002\",\"revision\":18446744073709551615}],\"external_tools\":[{\"name\":\"a\",\"schema_revision\":\"schema:r1\",\"implementation_revision\":\"code:r1\",\"environment_revision\":\"env:r1\",\"usage_contract\":\"Read one authorized document\"},{\"name\":\"z\",\"schema_revision\":\"schema:r1\",\"implementation_revision\":null,\"environment_revision\":null,\"usage_contract\":\"Read one authorized document\"}]}",
+  "sha256": "8f3c20ea44cdb7a2bf3b9aa69b2087829acefead348774ef0745d63cb040b5b1"
+}

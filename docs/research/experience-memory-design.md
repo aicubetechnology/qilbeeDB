@@ -48,8 +48,12 @@ The current [memory API](../api/versioned-memory.md) supplies durable, scoped,
 revisioned records; [retrieval](../api/hybrid-memory.md) supplies explicit ranking
 identities. The [learning API](../api/procedural-learning.md) owns qualification
 and selection under immutable policy/context definitions. The
-[tool API](../api/learned-tools.md) stores artifacts, executor profiles and
-development outcomes. It does not yet dispatch or sandbox executable programs.
+[tool API](../api/learned-tools.md) currently stores artifacts, executor profiles
+and development outcomes for compatibility. It does not dispatch or sandbox
+programs. Future knowledge capabilities follow the
+[external tool ownership boundary](../architecture/learned-tools.md): applications
+own code, packages and operational execution; QilbeeDB owns scoped knowledge and
+evidence. New knowledge contracts must not require code or executor registration.
 These are foundations, not an implemented reasoning-memory loop.
 
 ## Implementation map
@@ -62,7 +66,7 @@ as separate experiments.
 | Research input | Foundation already available | Remaining engineering work | Evidence required before claiming benefit |
 | --- | --- | --- | --- |
 | ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, exact cohort exports and revision-bound derived records | The 0.10.0 strategy API implements structured candidates, exact immutable observations and the existing qualification path; mutable-memory source eligibility at selection remains future work | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
-| Dream-RSI: exploration over recorded discovery history | Parent-event bindings, bounded ancestry, immutable tool artifacts and exact observation exports | Define a frozen replay manifest and an external evaluator with prefix-limited visibility, versioned policy code and explicit unsupported transitions | Repeated replay must agree on decisions and accounting; a selected policy must face fresh online trials against fixed exploration under the same compute budget |
+| Dream-RSI: exploration over recorded discovery history | Parent-event bindings, bounded ancestry, version identities and exact observation exports | Define a frozen replay manifest and an external evaluator with prefix-limited visibility, versioned policy code and explicit unsupported transitions | Repeated replay must agree on decisions and accounting; a selected policy must face fresh online trials against fixed exploration under the same compute budget |
 | ZenBrain: routing, retention and consolidation | Scoped lexical, vector and hybrid retrieval; validity, review and transitive dependency checks | Evaluate routing and retention policies separately; preserve required counterexamples when consolidating | Ablate one mechanism at a time under equal storage/context budgets; measure old-task retention, retrieval quality and downstream task outcomes separately |
 | AI Meets Brain: memory lifecycle and security | Separate memory, experience, procedure and tool contracts with scoped access | Specify lifecycle transitions and evidence obligations between those contracts | Exercise contradictory, stale, poisoned and revoked evidence; verify that a derived claim cannot silently become an authenticated observation or approved procedure |
 | Perplexity Brain: source-linked, refreshed private context | Source revisions, transitive invalidation, change feeds and consumer checkpoints | Build a resumable external consolidation consumer; define audience and origin tracking for later shared releases | Restart and retry without duplicate effects; source changes suppress stale conclusions; copied evidence does not count as independent corroboration |
@@ -94,8 +98,10 @@ map and the exported user guides as those capabilities become available.
 The [experience receipt API](../api/experiences.md) implements scoped attempts,
 immutable context and parent-event bindings, authenticated observations and
 consumption accounting. It records evidence declarations without independently
-verifying external effects. Explicit artifact bindings now verify locally stored
-tool bytes and pin exact observation identities. Generic
+verifying external effects. Existing optional artifact bindings verify locally
+stored tool bytes and pin exact observation identities; they must not become a
+prerequisite for knowledge about externally owned tools. An interface-schema
+identity is not proof of executable implementation identity. Generic
 [derived records](../api/derived-memory.md) also bind exact source revisions and
 check transitive eligibility. The [strategy API](../api/experience-strategies.md) now binds structured candidates
 to immutable experience observations. Its observations do not count as
@@ -159,8 +165,9 @@ and fresh online execution. Learning across agents needs a comparison with
 isolated agents and equal total compute. Retrieval nDCG cannot substitute for
 any of these outcomes.
 
-Experience receipts, stored tool artifact bindings and revisioned memory-source
-bindings provide the current foundation. Structured strategy candidates now bind exact experience evidence to that
+Experience receipts and revisioned memory-source bindings provide the knowledge
+foundation. Existing tool artifact records are compatibility capabilities, not a
+requirement for future external-tool knowledge. Structured strategy candidates now bind exact experience evidence to that
 qualification authority. The next step is controlled task evaluation and
 mutable-source eligibility during strategy admission and selection. Replay
 and shared release depend on those contracts. Automatic selection can operate

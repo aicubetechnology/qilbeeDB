@@ -116,6 +116,7 @@ impl LearningMemory {
     ) -> Result<ProcedureRecord> {
         scope.validate()?;
         proposal.validate()?;
+        knowledge::reject_reserved_legacy_sources(&proposal.source_refs)?;
         let _guard = self
             .inner
             .mutation_lock
@@ -310,7 +311,8 @@ impl LearningMemory {
                 break;
             }
             let record: ProcedureRecord = decode(&bytes)?;
-            if record.state != ProcedureState::Active
+            if knowledge::has_knowledge_binding_marker(&record.proposal.source_refs)
+                || record.state != ProcedureState::Active
                 || record.proposal.task != task
                 || record.proposal.baseline_revision != baseline_revision
                 || record.proposal.policy.evaluation_contract != evaluation_contract
@@ -430,10 +432,10 @@ fn new_procedure_record(scope: &LearningScope, proposal: ProcedureProposal) -> P
     }
 }
 pub mod admission;
-pub mod tools;
-pub mod executors;
 pub mod development;
+pub mod executors;
 pub mod experience;
+pub mod tools;
 
 pub mod experience_history;
 
@@ -441,6 +443,8 @@ pub mod experience_artifacts;
 
 pub mod experience_lineage;
 
+pub mod catalog;
 pub mod experience_export;
 pub mod strategies;
-pub mod catalog;
+
+pub mod knowledge;

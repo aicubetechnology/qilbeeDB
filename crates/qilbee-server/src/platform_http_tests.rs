@@ -1,7 +1,8 @@
 mod agent_profiles;
-mod company_memory;
 mod company_consumers;
 mod company_learning;
+mod company_memory;
+mod knowledge;
 mod learning_evidence;
 mod memory_graph;
 mod memory_relations;
@@ -718,36 +719,36 @@ async fn platform_http_browser_reference_is_public_and_root_redirects_to_it() {
     assert!(!html.contains("localStorage"));
 }
 
-mod tools;
-mod semantic;
-mod retrieval;
 mod experiences;
+mod retrieval;
+mod semantic;
+mod tools;
 
 mod changes;
 
-mod memory_review;
 mod derivation;
+mod memory_review;
 
 mod checkpoints;
 
 mod verified_changes;
 
-mod verified_checkpoints;
-mod consumer_diagnostics;
 mod batch_read;
+mod consumer_diagnostics;
+mod verified_checkpoints;
 
+mod administration;
+mod history_errors;
 mod hybrid_schema;
 mod journal_audit;
-mod history_errors;
 mod strategies;
-mod administration;
 
 mod login;
 
+mod agents;
 mod directory;
 mod scope_authority;
-mod agents;
 
-mod relation_changes;
-mod graph_retrieval;
 mod consolidation;
+mod graph_retrieval;
+mod relation_changes;

@@ -9,6 +9,10 @@ pub(super) fn routes() -> Router<PlatformState> {
         .route("/api/v1/company/learning/query", post(query))
         .route("/api/v1/company/learning/read", post(read))
         .route(
+            "/api/v1/company/learning/knowledge/inspect",
+            post(inspect_knowledge),
+        )
+        .route(
             "/api/v1/company/learning/evidence/query",
             post(evidence_query),
         )
@@ -121,5 +125,23 @@ async fn evidence_read(
         let _permit = limits.acquire()?;
         let details = learning.inspect_company_learning_evidence(&principal.tenant_id, &request.evidence).map_err(ApiError::operation)?.ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND,"record_not_found","No evidence exists for the selected company resource"))?;
         Ok(Json(json!({"contract_version":1,"company_id":principal.tenant_id,"evidence":request.evidence,"details":details})).into_response())
+    }).await
+}
+
+async fn inspect_knowledge(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<InspectionRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let learning = state.learning.clone();
+    let memory = state.memory.clone();
+    let limits = state.retrieval_limits.clone();
+    state.run(headers,move|_,_,principal| {
+        require_admin(&principal)?;
+        let request=json_body(body)?;
+        if request.contract_version!=2 {return Err(ApiError::new(StatusCode::BAD_REQUEST,"invalid_request","Knowledge requires contract_version 2"));}
+        let _permit=limits.acquire()?;
+        let inspection=learning.inspect_company_knowledge(&memory,&principal.tenant_id,&request.resource).map_err(ApiError::operation)?.ok_or_else(||ApiError::new(StatusCode::NOT_FOUND,"record_not_found","No knowledge proposal exists in the authorized company"))?;
+        Ok(Json(json!({"contract_version":2,"company_id":principal.tenant_id,"resource":request.resource,"inspection":inspection})))
     }).await
 }

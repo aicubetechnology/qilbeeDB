@@ -21685,6 +21685,721 @@
           }
         }
       }
+    },
+    "/api/v1/learning/knowledge/proposals": {
+      "post": {
+        "operationId": "knowledgeProposal",
+        "summary": "Create an immutable evidence-bound knowledge revision",
+        "description": "Contract version 2. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires procedure_propose and memory_read; original receipt on exact replay.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeProposalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeProposalRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/knowledge/inspect": {
+      "post": {
+        "operationId": "knowledgeInspect",
+        "summary": "Inspect current qualification and exact source evidence",
+        "description": "Contract version 2. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires memory_read; current observation, not execution authorization.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeInspectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeInspectRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/knowledge/select": {
+      "post": {
+        "operationId": "knowledgeSelect",
+        "summary": "Select compatible evidence-bound knowledge with explicit coverage",
+        "description": "Contract version 2. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires memory_read; current observation, not execution authorization.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSelectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeSelectRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/learning/knowledge/inspect": {
+      "post": {
+        "operationId": "inspectCompanyKnowledge",
+        "summary": "Inspect current source evidence for discovered company knowledge",
+        "tags": [
+          "Company learning administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires credential_admin. Company comes exclusively from current authentication. Reads all authorized private subjects, independently of original writer revocation. Uses a current memory evidence view; recorded qualification and current reuse eligibility are separate. This observation does not authorize execution or guarantee future eligibility. Errors retain the platform contract_version 1 envelope.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyKnowledgeInspectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyKnowledgeInspectResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -35416,7 +36131,8 @@
           "tool_development",
           "policy",
           "context",
-          "executor"
+          "executor",
+          "knowledge"
         ]
       },
       "LearningResourceRef": {
@@ -35869,6 +36585,22 @@
               },
               "record": {
                 "$ref": "#/components/schemas/ToolExecutor"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "knowledge"
+              },
+              "record": {
+                "$ref": "#/components/schemas/KnowledgeDetails"
               }
             },
             "required": [
@@ -38830,6 +39562,889 @@
           "company_id",
           "workspace",
           "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalToolIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "schema_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "implementation_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "schema_revision",
+          "implementation_revision",
+          "environment_revision"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "implementation_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "environment_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "environment_revision": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ExternalToolKnowledge": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "schema_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "implementation_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage_contract": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; runtime also enforces byte length."
+          }
+        },
+        "required": [
+          "name",
+          "schema_revision",
+          "implementation_revision",
+          "environment_revision",
+          "usage_contract"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "implementation_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "environment_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "environment_revision": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "KnowledgeProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768,
+            "description": "At most 32768 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "memory_sources": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "description": "Unique IDs; exact positive revisions. Canonical order is source UUID order."
+          },
+          "external_tools": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/ExternalToolKnowledge"
+            },
+            "description": "Unique names; canonical order is tool-name order."
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "title",
+          "instructions",
+          "memory_sources",
+          "external_tools"
+        ]
+      },
+      "KnowledgeReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "$ref": "#/components/schemas/KnowledgeProposal"
+          },
+          "policy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProcedureRecord"
+              },
+              {
+                "properties": {
+                  "state": {
+                    "const": "Candidate"
+                  }
+                }
+              }
+            ]
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "policy_digest",
+          "context_digest",
+          "actor",
+          "record",
+          "receipt_digest"
+        ]
+      },
+      "MemoryEvidenceEligibility": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "eligible": {
+            "type": "boolean"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first_failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryEligibilityFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "all_dependencies_checked": {
+            "type": "boolean"
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "eligible",
+          "evaluated_at_millis",
+          "first_failure",
+          "all_dependencies_checked",
+          "dependency_work"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "eligible": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "all_dependencies_checked": {
+                  "const": true
+                },
+                "first_failure": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "all_dependencies_checked": {
+                  "const": false
+                },
+                "first_failure": {
+                  "$ref": "#/components/schemas/MemoryEligibilityFailure"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "KnowledgeInspection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/KnowledgeReceipt"
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/RegisteredProcedure"
+          },
+          "qualification_active": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/MemoryEvidenceEligibility"
+          },
+          "eligible_for_knowledge_reuse": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "receipt",
+          "procedure",
+          "qualification_active",
+          "evidence",
+          "eligible_for_knowledge_reuse"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "procedure": {
+                  "properties": {
+                    "record": {
+                      "properties": {
+                        "state": {
+                          "const": "Active"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "qualification_active": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "qualification_active": {
+                  "const": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "qualification_active": {
+                  "const": true
+                },
+                "evidence": {
+                  "properties": {
+                    "eligible": {
+                      "const": true
+                    },
+                    "all_dependencies_checked": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "eligible_for_knowledge_reuse": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "eligible_for_knowledge_reuse": {
+                  "const": false
+                }
+              }
+            }
+          }
+        ]
+      },
+      "KnowledgeSelectionCoverage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "candidates_eligible": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "stop_reason": {
+            "enum": [
+              "complete",
+              "candidate_limit"
+            ]
+          }
+        },
+        "required": [
+          "records_examined",
+          "candidates_eligible",
+          "complete",
+          "stop_reason"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "complete": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "stop_reason": {
+                  "const": "complete"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "stop_reason": {
+                  "const": "candidate_limit"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "KnowledgeSelectionOutcome": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "procedure"
+              },
+              "knowledge": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/KnowledgeInspection"
+                  },
+                  {
+                    "properties": {
+                      "eligible_for_knowledge_reuse": {
+                        "const": true
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "knowledge"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "baseline"
+              },
+              "baseline_revision": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              "reason": {
+                "enum": [
+                  "selection_incomplete",
+                  "no_eligible_bound_procedure"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "baseline_revision",
+              "reason"
+            ]
+          }
+        ]
+      },
+      "KnowledgeSelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "selection": {
+            "$ref": "#/components/schemas/KnowledgeSelectionOutcome"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/KnowledgeSelectionCoverage"
+          }
+        },
+        "required": [
+          "selection",
+          "evaluated_at_millis",
+          "coverage"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "complete": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "selection": {
+                  "properties": {
+                    "type": {
+                      "const": "baseline"
+                    },
+                    "reason": {
+                      "const": "selection_incomplete"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "selection": {
+                  "not": {
+                    "properties": {
+                      "reason": {
+                        "const": "selection_incomplete"
+                      }
+                    },
+                    "required": [
+                      "reason"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "KnowledgeProposalRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/KnowledgeProposal"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "proposal"
+        ]
+      },
+      "KnowledgeInspectRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "procedure_id"
+        ]
+      },
+      "KnowledgeSelectRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "max_instruction_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65536
+          },
+          "candidate_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "external_tool_identities": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/ExternalToolIdentity"
+            },
+            "description": "Required exact identity set, order-independent; null is not a wildcard."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "max_instruction_bytes",
+          "candidate_limit",
+          "external_tool_identities"
+        ]
+      },
+      "KnowledgeProposalResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/KnowledgeReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ]
+      },
+      "KnowledgeInspectResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/KnowledgeInspection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "inspection"
+        ]
+      },
+      "KnowledgeSelectResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "result": {
+            "$ref": "#/components/schemas/KnowledgeSelection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "policy_id",
+          "context_id",
+          "result"
+        ]
+      },
+      "KnowledgeDetails": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/KnowledgeReceipt"
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/RegisteredProcedure"
+          }
+        },
+        "required": [
+          "receipt",
+          "procedure"
+        ],
+        "additionalProperties": false,
+        "description": "Historical immutable receipt and current qualification ledger state. Does not inspect current source evidence or establish reuse eligibility."
+      },
+      "CompanyKnowledgeResourceRef": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "knowledge"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; must not be blank."
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Scope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "Selection returned by the company catalog; it confers no authority. Scoped kinds require a scope. Private scopes require a subject, shared scopes prohibit one. Policy, context and executor selections require null/omitted scope and subject. The company is always derived from current authentication."
+      },
+      "CompanyKnowledgeInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "resource": {
+            "$ref": "#/components/schemas/CompanyKnowledgeResourceRef"
+          }
+        },
+        "required": [
+          "contract_version",
+          "resource"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyKnowledgeInspectResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/CompanyKnowledgeResourceRef"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/KnowledgeInspection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "resource",
+          "inspection"
         ],
         "additionalProperties": false
       }

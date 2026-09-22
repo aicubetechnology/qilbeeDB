@@ -13,6 +13,15 @@ fields and share the 65536-byte transport limit. Successful commands and reads
 return **200**, including non-successful worker outcomes. Check the returned
 `state` and `reason`, not only HTTP status. Responses carry `Cache-Control: no-store`.
 
+## Ownership and compatibility
+
+These existing routes document artifact and development records; they do not
+assign ownership of tool code or execution to QilbeeDB. Applications retain that
+responsibility. New knowledge integrations should follow the
+[external tool knowledge boundary](../architecture/learned-tools.md), without
+requiring code or executor registration. No endpoint removal or data migration
+is introduced by this clarification.
+
 ## Credentials and routes
 
 Use `Authorization: Bearer <credential>`. The credential administrator issues
