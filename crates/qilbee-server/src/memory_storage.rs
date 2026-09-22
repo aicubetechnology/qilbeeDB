@@ -3,7 +3,9 @@
 use async_trait::async_trait;
 use qilbee_core::{Error, Result};
 use qilbee_memory::{
-    Episode, MemoryStorage, MemoryStorageConfig, RocksDbMemoryStorage, episode::EpisodeId,
+    Episode, MemoryStorage, MemoryStorageConfig, RocksDbMemoryStorage,
+    episode::EpisodeId,
+    relevance_accounting::{RelevanceChange, RelevanceUpdate},
 };
 use std::{future::Future, path::Path, sync::Arc};
 
@@ -90,6 +92,25 @@ impl MemoryStorage for HttpMemoryStorage {
 
     async fn update_episode(&self, agent_id: &str, episode: &Episode) -> Result<()> {
         self.store_episode(agent_id, episode).await
+    }
+
+    async fn apply_relevance_change(
+        &self,
+        agent_id: &str,
+        id: EpisodeId,
+        change: RelevanceChange,
+    ) -> Result<Option<RelevanceUpdate>> {
+        let agent = agent_id.to_owned();
+        self.run(
+            move |storage| async move { storage.apply_relevance_change(&agent, id, change).await },
+        )
+        .await
+    }
+
+    async fn invalidate_current_episode(&self, agent_id: &str, id: EpisodeId) -> Result<bool> {
+        let agent = agent_id.to_owned();
+        self.run(move |storage| async move { storage.invalidate_current_episode(&agent, id).await })
+            .await
     }
 
     async fn flush(&self) -> Result<()> {

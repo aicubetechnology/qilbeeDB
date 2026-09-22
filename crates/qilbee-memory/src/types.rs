@@ -141,60 +141,23 @@ impl MemoryConfig {
     }
 }
 
-/// Relevance score for a memory
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct Relevance {
-    /// Current relevance score (0.0 - 1.0)
-    pub score: f64,
-
-    /// Number of times this memory has been accessed
-    pub access_count: u32,
-
-    /// Timestamp of last access (millis since epoch)
-    pub last_accessed: i64,
-}
-
-impl Default for Relevance {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Relevance {
-    /// Create a new relevance with full score
-    pub fn new() -> Self {
-        Self {
-            score: 1.0,
-            access_count: 0,
-            last_accessed: chrono::Utc::now().timestamp_millis(),
-        }
-    }
-
-    /// Record an access, boosting relevance
-    pub fn access(&mut self) {
-        self.access_count += 1;
-        self.last_accessed = chrono::Utc::now().timestamp_millis();
-        // Boost score on access, max 1.0
-        self.score = (self.score + 0.1).min(1.0);
-    }
-
-    /// Apply decay based on time and decay rate
-    pub fn decay(&mut self, decay_rate: f64) {
-        let now = chrono::Utc::now().timestamp_millis();
-        let elapsed_hours = (now - self.last_accessed) as f64 / (1000.0 * 60.0 * 60.0);
-        let decay = (-decay_rate * elapsed_hours).exp();
-        self.score *= decay;
-    }
-
-    /// Check if this memory should be forgotten
-    pub fn should_forget(&self, min_relevance: f64) -> bool {
-        self.score < min_relevance
-    }
-}
+/// Relevance with explicit temporal accounting. Native struct construction now
+/// requires accounting state; deserialize old stored episodes via the storage adapter.
+pub use crate::relevance_accounting::AccountedRelevance as Relevance;
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn repeated_maintenance_does_not_charge_the_same_elapsed_day_twice() {
+        let mut relevance = Relevance::new_at(0);
+        relevance.decay_at(86_400_000, 0.1).unwrap();
+        let after_first = relevance;
+        relevance.decay_at(86_400_000, 0.1).unwrap();
+        assert_eq!(relevance, after_first);
+    }
+
 
     #[test]
     fn test_memory_type_defaults() {
@@ -220,7 +183,7 @@ mod tests {
         let mut rel = Relevance::new();
         let initial_score = rel.score;
 
-        rel.access();
+        rel.access().unwrap();
 
         assert!(rel.access_count == 1);
         assert!(rel.score >= initial_score);

@@ -53,3 +53,5 @@ pub use llm::{
 pub use storage::{InMemoryStorage, MemoryStorage, MemoryStorageConfig, RocksDbMemoryStorage};
 pub use types::{MemoryConfig, MemoryType};
 pub use vector_index::{HnswConfig, HnswError, HnswIndex, HnswResult, SearchResult};
+
+pub mod relevance_accounting;

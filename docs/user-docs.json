@@ -448,6 +448,13 @@
       "title": "Backup and recovery",
       "description": "Create consistent offline backups and validate recovery without discarding newer writes.",
       "order": 135
+    },
+    {
+      "source": "docs/agent-memory/relevance-accounting.md",
+      "file": "native-relevance-accounting.md",
+      "title": "Native relevance accounting",
+      "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
+      "order": 1024
     }
   ]
 }
