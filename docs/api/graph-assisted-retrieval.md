@@ -256,3 +256,24 @@ retrieval admission, covering seed selection, traversal, affinities and ranking.
 It excludes JSON serialization, network transport and external embedding generation.
 Measure complete client latency separately and preserve query-embedding timing
 when estimating end-to-end costs; the header is elapsed wall time, not CPU time.
+
+### Validate ranking evidence before comparing methods
+
+**Availability: source preview.** These additional comparison-runner checks are
+being qualified and do not change the deployed retrieval API.
+
+The graph comparison runner rejects a response when its returned scores are
+nonfinite, outside the method's range, or inconsistent with the documented
+ordering. Scores descend; equal scores use ascending record UUIDs. The validator
+preserves the server's floating-point ordering of positive and negative zero.
+It does not sort a malformed response to make the experiment pass.
+
+Cosine scores must be within [-1, 1], lexical scores must be nonnegative, and
+hybrid scores must respect the selected immutable profile's maximum. Graph
+scores also retain their profile and contribution checks. Numeric-looking
+strings, booleans and nonfinite numbers are not valid score evidence.
+
+These checks apply before the runner accepts ranked IDs for relevance metrics.
+They establish response consistency, not that every lexical score or omitted
+candidate has been independently recomputed. A valid ordering alone does not
+prove retrieval quality or improved agent reasoning.
