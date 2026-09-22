@@ -47,7 +47,16 @@ async fn request(
         .await
         .unwrap();
     let status = response.status();
-    let bytes = to_bytes(response.into_body(), 1024 * 1024).await.unwrap();
+    // The published catalog grows with additive contracts. Bound its test read
+    // by the exact embedded artifact rather than relaxing ordinary API reads.
+    let response_limit = if path == "/openapi.json" {
+        include_bytes!("../../../docs/api/openapi.json").len()
+    } else {
+        1024 * 1024
+    };
+    let bytes = to_bytes(response.into_body(), response_limit)
+        .await
+        .unwrap();
     (
         status,
         serde_json::from_slice(&bytes).unwrap_or(Value::Null),
@@ -741,3 +750,4 @@ mod agents;
 
 mod relation_changes;
 mod graph_retrieval;
+mod consolidation;

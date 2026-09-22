@@ -3,6 +3,7 @@ use super::*;
 use axum::extract::{Query, rejection::QueryRejection};
 use qilbee_memory::storage::platform::CompanyMemoryQuery;
 use qilbee_memory::storage::platform::MemoryGraphQuery;
+mod consolidation;
 mod relations;
 mod consumers;
 
@@ -10,6 +11,7 @@ pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .merge(relations::routes())
         .merge(consumers::routes())
+        .merge(consolidation::routes())
         .route("/api/v1/company/memory/workspaces", get(workspaces))
         .route("/api/v1/company/memory/query", post(query))
         .route("/api/v1/company/memory/read", post(read))

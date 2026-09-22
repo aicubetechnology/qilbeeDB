@@ -50,7 +50,7 @@ pub struct MemoryRelationInput {
     pub evidence_sources: Vec<MemorySourceRef>,
 }
 impl MemoryRelationInput {
-    pub(super) fn validate(&self) -> Result<()> {
+    pub(in crate::storage::platform) fn validate(&self) -> Result<()> {
         let p = &self.provenance;
         let mut evidence_ids = std::collections::BTreeSet::new();
         if self.evidence_sources.len() > MAX_MEMORY_SOURCES

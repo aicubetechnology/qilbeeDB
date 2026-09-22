@@ -4,6 +4,7 @@ use crate::security::identity::{ResourceScope, Visibility};
 use axum::extract::{Query, rejection::QueryRejection};
 use qilbee_memory::storage::platform::{MemoryCommand, MemoryOperation, MemoryQuery, RecordAuthor};
 mod batch_read;
+mod consolidation;
 mod evidence_graph;
 mod graph_retrieval;
 mod relation_changes;
@@ -13,6 +14,7 @@ mod typed_graph;
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .merge(batch_read::routes())
+        .merge(consolidation::routes())
         .merge(evidence_graph::routes())
         .merge(relations::routes())
         .merge(relation_changes::routes())

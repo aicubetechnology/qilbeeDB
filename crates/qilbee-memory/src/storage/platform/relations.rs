@@ -7,6 +7,7 @@ mod graph;
 pub use graph::*;
 mod adjacency;
 mod changes;
+mod publication;
 pub use changes::*;
 
 // All relation values use AGENT_META; ordinary memory records remain canonical.

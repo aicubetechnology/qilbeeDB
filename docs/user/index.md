@@ -126,3 +126,8 @@ projects and private owners, then inspect progress without a writer's key. Legac
 sequence estimates remain explicitly unverified, and saved checkpoints do not
 prove worker liveness. The console supports selection, continuation, safe retry,
 and keyboard return without requiring manual consumer identifiers.
+
+The unreleased [external graph consolidation contract](../api/graph-consolidation.md)
+coordinates durable external extraction, exact source revisions and fenced atomic
+relation publication. Its worker and administrative workflows require qualification
+before release; inferred relations do not establish an agent-quality gain.
