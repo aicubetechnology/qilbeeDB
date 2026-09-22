@@ -133,7 +133,7 @@ async fn login(
     }
     state.login_limits.attempt(&authority, &username)?;
     let permit = state.login_limits.work()?;
-    tokio::task::spawn_blocking(move || {
+    crate::http_work::spawn_blocking(move || {
         let _permit = permit;
         let session = state
             .identity
@@ -177,7 +177,7 @@ async fn global_login(
 }
 async fn logout(State(state): State<PlatformState>, headers: HeaderMap) -> ApiResult<Json<Value>> {
     let token = bearer(&headers)?;
-    tokio::task::spawn_blocking(move || {
+    crate::http_work::spawn_blocking(move || {
         state
             .identity
             .logout(&token)

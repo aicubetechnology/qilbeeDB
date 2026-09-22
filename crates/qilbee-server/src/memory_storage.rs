@@ -33,7 +33,7 @@ impl HttpMemoryStorage {
     {
         let storage = self.0.clone();
         let runtime = tokio::runtime::Handle::current();
-        tokio::task::spawn_blocking(move || runtime.block_on(operation(storage)))
+        crate::http_work::spawn_blocking(move || runtime.block_on(operation(storage)))
             .await
             .map_err(|error| Error::Storage(format!("Memory worker failed: {error}")))?
     }
