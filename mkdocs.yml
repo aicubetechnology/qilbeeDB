@@ -184,6 +184,7 @@ nav:
     - Authentication: security/authentication.md
     - Durable Scoped Credentials: security/scoped-credentials.md
     - Automatic Agent Registration: security/agent-registration.md
+    - Agent Display Names: security/agent-display-profiles.md
     - Company Integration Policies: security/company-integrations.md
     - Company Memory Administration: security/company-memory-administration.md
     - Administrator login: security/human-login.md

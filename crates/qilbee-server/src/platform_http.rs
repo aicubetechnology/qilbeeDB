@@ -18,6 +18,7 @@ use uuid::Uuid;
 
 mod administration;
 mod agents;
+mod agent_profiles;
 mod company_memory;
 mod company_learning;
 mod directory;
@@ -104,6 +105,7 @@ fn create_router_with_limits(
     Ok(Router::new()
         .merge(administration::routes())
         .merge(agents::routes())
+        .merge(agent_profiles::routes())
         .merge(company_memory::routes())
         .merge(company_learning::routes())
         .merge(directory::routes())

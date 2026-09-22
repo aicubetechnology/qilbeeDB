@@ -76,6 +76,61 @@ async fn company_learning_capacity_errors_follow_current_administrative_authoriz
         f.check(route, body, 401, Some("unauthorized")).await;
     }
 }
+#[tokio::test]
+async fn agent_profile_read_admission_follows_current_company_authorization() {
+    let mut f = Fixture::start().await;
+    let requests = [
+        (
+            "/api/v1/company/agents/query",
+            json!({"contract_version":1,"query":{}}),
+        ),
+        (
+            "/api/v1/company/agents/read",
+            json!({"contract_version":1,"agent_id":"missing"}),
+        ),
+        (
+            "/api/v1/company/agents/history",
+            json!({"contract_version":1,"agent_id":"missing"}),
+        ),
+    ];
+    let key = f
+        .identity
+        .issue(
+            &f.admin,
+            CredentialSpec {
+                subject_id: "profile-reader".into(),
+                capabilities: [Capability::CredentialAdmin].into(),
+                grants: vec![],
+                scope_policy: None,
+                expires_at_millis: None,
+            },
+        )
+        .unwrap();
+    let permit = f.limits.acquire().ok().unwrap();
+    for (path, body) in &requests {
+        f.check(path, body.clone(), 403, Some("forbidden")).await;
+    }
+    f.token = key.secret;
+    for (path, body) in &requests {
+        f.check(path, body.clone(), 503, Some("retrieval_busy"))
+            .await;
+    }
+    f.check("/api/v1/company/agents/commands",json!({"contract_version":1,"command":{"agent_id":"missing","expected_revision":0,"display_name":"Name","idempotency_key":"attempt"}}),404,Some("record_not_found")).await;
+    drop(permit);
+    f.check(requests[0].0, requests[0].1.clone(), 200, None)
+        .await;
+    for (path, body) in &requests[1..] {
+        f.check(path, body.clone(), 404, Some("record_not_found"))
+            .await;
+    }
+    f.identity
+        .revoke(&f.admin, key.credential.id, key.credential.revision)
+        .unwrap();
+    let _permit = f.limits.acquire().ok().unwrap();
+    for (path, body) in requests {
+        f.check(path, body, 401, Some("unauthorized")).await;
+    }
+}
 fn scope() -> Value {
     json!({"project_id":"project","mission_id":null,"agent_id":"agent","visibility":"shared"})
 }
