@@ -33,6 +33,8 @@ pub enum Capability {
     ToolDevelop,
     ToolReport,
     ToolAdmin,
+    /// Read company-wide policy/context definitions; memory grants do not narrow this authority.
+    LearningMetadataRead,
     PolicyAdmin,
     CredentialAdmin,
 }
