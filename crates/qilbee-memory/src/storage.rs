@@ -129,6 +129,8 @@ pub struct RocksDbMemoryStorage {
     config: MemoryStorageConfig,
     // Serialize index read/modify/write operations, including timestamp moves.
     mutation_lock: Mutex<()>,
+    // A restarted or restored storage process cannot accept a previous worker lease.
+    consolidation_incarnation: uuid::Uuid,
 }
 
 impl RocksDbMemoryStorage {
@@ -175,6 +177,7 @@ impl RocksDbMemoryStorage {
             db: Arc::new(db),
             config,
             mutation_lock: Mutex::new(()),
+            consolidation_incarnation: uuid::Uuid::new_v4(),
         };
         storage.initialize_candidates()?;
         storage.initialize_relation_adjacency()?;

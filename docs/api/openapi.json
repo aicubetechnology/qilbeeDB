@@ -20029,6 +20029,1662 @@
           }
         }
       }
+    },
+    "/api/v1/memory/consolidation/commands": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Consolidation commands",
+        "description": "Unreleased. External inference workers use a durable, scoped, authenticated-subject-owned job ledger. Requires memory_read and memory_write. Atomic synchronous WAL publication, current source checks, bounded work and no-store responses. The database does not call a model provider or store provider credentials.",
+        "operationId": "memoryConsolidationCommands",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationCommandsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationCommandsResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No job or immutable revision is available in the authorized scope and authenticated subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/consolidation/inspect": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Consolidation inspect",
+        "description": "Unreleased. External inference workers use a durable, scoped, authenticated-subject-owned job ledger. Requires memory_read. Atomic synchronous WAL publication, current source checks, bounded work and no-store responses. The database does not call a model provider or store provider credentials.",
+        "operationId": "memoryConsolidationInspect",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationInspectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationInspectResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No job or immutable revision is available in the authorized scope and authenticated subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/consolidation/revision": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Consolidation revision",
+        "description": "Unreleased. External inference workers use a durable, scoped, authenticated-subject-owned job ledger. Requires memory_read. Atomic synchronous WAL publication, current source checks, bounded work and no-store responses. The database does not call a model provider or store provider credentials.",
+        "operationId": "memoryConsolidationRevision",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationRevisionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No job or immutable revision is available in the authorized scope and authenticated subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/consolidation/query": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Consolidation query",
+        "description": "Unreleased. External inference workers use a durable, scoped, authenticated-subject-owned job ledger. Requires memory_read. Atomic synchronous WAL publication, current source checks, bounded work and no-store responses. The database does not call a model provider or store provider credentials.",
+        "operationId": "memoryConsolidationQuery",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationQueryResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No job or immutable revision is available in the authorized scope and authenticated subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memory/consolidation/context": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Consolidation context",
+        "description": "Unreleased. External inference workers use a durable, scoped, authenticated-subject-owned job ledger. Requires memory_read and memory_write. Atomic synchronous WAL publication, current source checks, bounded work and no-store responses. The database does not call a model provider or store provider credentials.",
+        "operationId": "memoryConsolidationContext",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsolidationContextRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsolidationContextResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No job or immutable revision is available in the authorized scope and authenticated subject.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/consolidation/query": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Company consolidation query",
+        "description": "Unreleased. Native company administration of retained workspace jobs across owners. Requires company administration; the tenant comes from the authenticated credential. Cancellation records the actual administrator, fences publication and does not assert that external inference stopped. List cursors traverse encoded owner/UUID keys, not a snapshot.",
+        "operationId": "companyConsolidationQuery",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsolidationQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsolidationQueryResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, job or revision in the authenticated company and selected owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/consolidation/inspect": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Company consolidation inspect",
+        "description": "Unreleased. Native company administration of retained workspace jobs across owners. Requires company administration; the tenant comes from the authenticated credential. Cancellation records the actual administrator, fences publication and does not assert that external inference stopped. List cursors traverse encoded owner/UUID keys, not a snapshot.",
+        "operationId": "companyConsolidationInspect",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsolidationInspectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsolidationInspectResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, job or revision in the authenticated company and selected owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/consolidation/revision": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Company consolidation revision",
+        "description": "Unreleased. Native company administration of retained workspace jobs across owners. Requires company administration; the tenant comes from the authenticated credential. Cancellation records the actual administrator, fences publication and does not assert that external inference stopped. List cursors traverse encoded owner/UUID keys, not a snapshot.",
+        "operationId": "companyConsolidationRevision",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsolidationRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsolidationRevisionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, job or revision in the authenticated company and selected owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/consolidation/cancel": {
+      "post": {
+        "tags": [
+          "Memory"
+        ],
+        "summary": "Company consolidation cancel",
+        "description": "Unreleased. Native company administration of retained workspace jobs across owners. Requires company administration; the tenant comes from the authenticated credential. Cancellation records the actual administrator, fences publication and does not assert that external inference stopped. List cursors traverse encoded owner/UUID keys, not a snapshot.",
+        "operationId": "companyConsolidationCancel",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminConsolidationCancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation; inspect explicit state, eligibility or receipt semantics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsolidationCancelResponse"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields, manifest/output bounds, lifecycle transition or hard work/byte limits.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked authority.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing operation capability or authorized scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No retained workspace, job or revision in the authenticated company and selected owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationNotFoundError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65536 bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Storage or integrity failure; no successful partial result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Shared retrieval capacity is occupied; retry later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, source eligibility, lease/credential/incarnation or idempotency conflict. Identical command retries return the original receipt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemoryRelationConflictError"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -35656,6 +37312,1524 @@
           "company_id",
           "consumer",
           "details"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationSpec": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemorySourceRef"
+            },
+            "maxItems": 16,
+            "minItems": 2,
+            "uniqueItems": true
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Nonblank, no control characters; server additionally enforces at most 4096 UTF-8 bytes."
+          },
+          "policy_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+          },
+          "extractor": {
+            "$ref": "#/components/schemas/RelationProvenance"
+          },
+          "max_relations": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "max_attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32
+          },
+          "lease_millis": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 900000
+          },
+          "max_attempt_millis": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 86400000
+          }
+        },
+        "required": [
+          "sources",
+          "objective",
+          "policy_ref",
+          "extractor",
+          "max_relations",
+          "max_attempts",
+          "lease_millis",
+          "max_attempt_millis"
+        ],
+        "additionalProperties": false,
+        "description": "Immutable owner-scoped job manifest. Source IDs must be distinct, current and eligible in the exact namespace. The combined source walk has depth 8 / 64 records; source payloads must fit 8 MiB. max_attempt_millis must be at least lease_millis. Policy/extractor references are caller declarations, not an independently verified approval."
+      },
+      "ConsolidationUsage": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "unknown"
+              }
+            },
+            "required": [
+              "status"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "reported"
+              },
+              "model_calls": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              "input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              "output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              "cost_microusd": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 18446744073709551615
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "model_calls",
+              "input_tokens",
+              "output_tokens"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "Unknown is not zero. Reported counts are caller-supplied observations; missing/null cost remains unknown. Values are exact unsigned 64-bit integers."
+      },
+      "ConsolidationStatus": {
+        "type": "string",
+        "enum": [
+          "ready",
+          "running",
+          "published",
+          "cancelled",
+          "exhausted"
+        ]
+      },
+      "ConsolidationOutcome": {
+        "type": "string",
+        "enum": [
+          "running",
+          "published",
+          "failed",
+          "unknown"
+        ]
+      },
+      "ConsolidationAction": {
+        "type": "string",
+        "enum": [
+          "created",
+          "claimed",
+          "renewed",
+          "published",
+          "failed",
+          "recovered",
+          "cancelled",
+          "usage_reconciled"
+        ]
+      },
+      "ConsolidationAttempt": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 32
+          },
+          "worker_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Nonblank, no control characters; server additionally enforces at most 256 UTF-8 bytes."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fence": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "storage_incarnation": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expires_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ended_at_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/ConsolidationOutcome"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ConsolidationUsage"
+          },
+          "evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage_evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "number",
+          "worker_id",
+          "credential_id",
+          "fence",
+          "storage_incarnation",
+          "claimed_at_millis",
+          "expires_at_millis",
+          "ended_at_millis",
+          "outcome",
+          "usage",
+          "evidence_ref",
+          "usage_evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationAssertion": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/MemorySourceRef"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MemoryRelationKind"
+          },
+          "valid_from_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valid_until_millis": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "kind",
+          "evidence_ref"
+        ],
+        "additionalProperties": false,
+        "description": "Both endpoints must be exact references in the job manifest. The server pins all other manifest sources as evidence_sources and derives provenance from the job extractor. A batch either publishes all assertions or none."
+      },
+      "ConsolidationJob": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modified_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/ConsolidationSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConsolidationStatus"
+          },
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsolidationAttempt"
+            },
+            "maxItems": 32
+          },
+          "output_receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRelationReceipt"
+            },
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "schema_version",
+          "job_id",
+          "revision",
+          "created_by",
+          "created_at_millis",
+          "modified_at_millis",
+          "spec",
+          "status",
+          "attempts",
+          "output_receipts"
+        ],
+        "additionalProperties": false,
+        "description": "Retained job state, not a current eligibility guarantee for published relations. Current record is bounded to 512 KiB; each history record to 1 MiB."
+      },
+      "ConsolidationOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "create"
+              },
+              "spec": {
+                "$ref": "#/components/schemas/ConsolidationSpec"
+              }
+            },
+            "required": [
+              "type",
+              "spec"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "claim"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "worker_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "Nonblank, no control characters; server additionally enforces at most 256 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "worker_id"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "renew"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "fence": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "fence"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "publish"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "fence": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "assertions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ConsolidationAssertion"
+                },
+                "maxItems": 16
+              },
+              "usage": {
+                "$ref": "#/components/schemas/ConsolidationUsage"
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "fence",
+              "assertions",
+              "usage",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "fail"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "fence": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "usage": {
+                "$ref": "#/components/schemas/ConsolidationUsage"
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "fence",
+              "usage",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "recover_expired"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "cancel"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "reconcile_usage"
+              },
+              "job_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "expected_revision": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              "attempt_number": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "usage": {
+                "$ref": "#/components/schemas/ConsolidationUsage"
+              },
+              "evidence_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "Nonblank, no control characters; server additionally enforces at most 2048 UTF-8 bytes."
+              }
+            },
+            "required": [
+              "type",
+              "job_id",
+              "expected_revision",
+              "attempt_number",
+              "usage",
+              "evidence_ref"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "Every mutation is idempotent and revision-checked. Claim/renew/context/publish/fail require the current lease and credential as applicable. Restart invalidates previous storage incarnations. Recovery and cancellation fence publication without asserting that external execution stopped. Reconcile_usage accepts only reported usage for a closed attempt and preserves older reports in history."
+      },
+      "ConsolidationReceipt": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Nonblank, no control characters; server additionally enforces at most 256 UTF-8 bytes."
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "action": {
+            "$ref": "#/components/schemas/ConsolidationAction"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "job_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "command_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "contract_version",
+          "idempotency_key",
+          "job_id",
+          "revision",
+          "action",
+          "author",
+          "committed_at_millis",
+          "job_digest",
+          "command_digest",
+          "receipt_digest"
+        ],
+        "additionalProperties": false,
+        "description": "Immutable historical receipt. Administrative cancellation preserves the actual administrator as author; the job creator remains its owner. Digests are opaque integrity identifiers, not signatures or authorization grants."
+      },
+      "ConsolidationRevision": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ConsolidationJob"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ConsolidationReceipt"
+          }
+        },
+        "required": [
+          "job",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationInspection": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ConsolidationJob"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lease_active": {
+            "type": "boolean"
+          },
+          "recoverable": {
+            "type": "boolean"
+          },
+          "source_failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryEligibilityFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "job",
+          "evaluated_at_millis",
+          "lease_active",
+          "recoverable",
+          "source_failure",
+          "dependency_work"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsolidationStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "limit",
+          "scan_limit"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationSummary": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConsolidationStatus"
+          },
+          "created_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "modified_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 32
+          },
+          "lease_active": {
+            "type": "boolean"
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "job_id",
+          "revision",
+          "status",
+          "created_at_millis",
+          "modified_at_millis",
+          "attempts",
+          "lease_active",
+          "recoverable"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationPage": {
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsolidationSummary"
+            },
+            "maxItems": 100
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "jobs",
+          "next_after",
+          "records_examined",
+          "record_bytes",
+          "evaluated_at_millis"
+        ],
+        "additionalProperties": false,
+        "description": "Ordered current jobs in one authorized owner partition. after resumes scanned UUIDs, including filtered rows; it is not a snapshot across requests. Rescan from the beginning to discover newly inserted or changed jobs. record_bytes covers canonical job bytes; integrity/history/output verification reads are additional."
+      },
+      "ConsolidationContext": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "job_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "fence": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemoryRecord"
+            },
+            "maxItems": 16
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          }
+        },
+        "required": [
+          "job_id",
+          "job_revision",
+          "fence",
+          "records",
+          "evaluated_at_millis",
+          "record_bytes",
+          "dependency_work"
+        ],
+        "additionalProperties": false,
+        "description": "Exact eligible source payloads in manifest order, checked with the current credential-bound lease in one snapshot and clock. Publication rechecks their revisions and eligibility."
+      },
+      "ConsolidationCommandsRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Nonblank, no control characters; server additionally enforces at most 256 UTF-8 bytes."
+          },
+          "operation": {
+            "$ref": "#/components/schemas/ConsolidationOperation"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "idempotency_key",
+          "operation"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationCommandsResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ConsolidationReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationInspectResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/ConsolidationInspection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "inspection"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationRevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "job_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationRevisionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "history": {
+            "$ref": "#/components/schemas/ConsolidationRevision"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "query": {
+            "$ref": "#/components/schemas/ConsolidationQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "page": {
+            "$ref": "#/components/schemas/ConsolidationPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationContextRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "fence": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "job_id",
+          "expected_revision",
+          "fence"
+        ],
+        "additionalProperties": false
+      },
+      "ConsolidationContextResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "context": {
+            "$ref": "#/components/schemas/ConsolidationContext"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "context"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationCursor": {
+        "type": "object",
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "owner_id",
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationQuery": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminConsolidationCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConsolidationStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "limit",
+          "scan_limit"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationEntry": {
+        "type": "object",
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ConsolidationSummary"
+          }
+        },
+        "required": [
+          "owner_id",
+          "summary"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationPage": {
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminConsolidationEntry"
+            },
+            "maxItems": 100
+          },
+          "next_after": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminConsolidationCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "jobs",
+          "next_after",
+          "records_examined",
+          "record_bytes",
+          "evaluated_at_millis"
+        ],
+        "additionalProperties": false,
+        "description": "Ordered current jobs in one authorized owner partition. after resumes scanned UUIDs, including filtered rows; it is not a snapshot across requests. Rescan from the beginning to discover newly inserted or changed jobs. record_bytes covers canonical job bytes; integrity/history/output verification reads are additional."
+      },
+      "AdminConsolidationQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "query": {
+            "$ref": "#/components/schemas/AdminConsolidationQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "page": {
+            "$ref": "#/components/schemas/AdminConsolidationPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "owner_id",
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationInspectResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/ConsolidationInspection"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "inspection"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationRevisionRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "owner_id",
+          "job_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationRevisionResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "history": {
+            "$ref": "#/components/schemas/ConsolidationRevision"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "history"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationCancelRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "workspace_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "contract_version",
+          "workspace_id",
+          "owner_id",
+          "job_id",
+          "expected_revision",
+          "idempotency_key",
+          "evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "AdminConsolidationCancelResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ConsolidationReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "workspace",
+          "receipt"
         ],
         "additionalProperties": false
       }

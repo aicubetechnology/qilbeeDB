@@ -37,6 +37,14 @@ from .relation_consumer import (
     RelationDelivery,
     RelationChangeSink,
 )
+from .consolidation import (
+    ConsolidationClient,
+    ConsolidationInput,
+    ConsolidationResult,
+    ConsolidationStopped,
+    ExternalConsolidationWorker,
+    SQLiteConsolidationJournal,
+)
 
 _LEGACY_EXPORTS = {
     "QilbeeDB": "client",
@@ -79,6 +87,12 @@ def __dir__():
 
 
 __all__ = [
+    "ConsolidationClient",
+    "ConsolidationInput",
+    "ConsolidationResult",
+    "ConsolidationStopped",
+    "ExternalConsolidationWorker",
+    "SQLiteConsolidationJournal",
     "VerifiedRelationConsumer",
     "RelationCursor",
     "RelationCheckpoint",

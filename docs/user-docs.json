@@ -392,6 +392,13 @@
       "title": "Company consumer progress",
       "description": "Discover retained consumers and inspect verified or legacy progress without writer credentials.",
       "order": 515
+    },
+    {
+      "source": "docs/api/graph-consolidation.md",
+      "file": "graph-consolidation.md",
+      "title": "External graph consolidation",
+      "description": "Coordinate external inference with exact evidence manifests, durable attempts, worker fences and atomic graph publication.",
+      "order": 69.5
     }
   ]
 }

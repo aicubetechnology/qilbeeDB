@@ -118,41 +118,58 @@ impl RocksDbMemoryStorage {
         integrity: &[u8],
         batch: &mut rocksdb::WriteBatch,
     ) -> Result<()> {
+        self.append_relation_head_batch(snapshot, namespace, &[(relation, integrity)], batch)
+    }
+    pub(super) fn append_relation_head_batch(
+        &self,
+        snapshot: &MemorySnapshot<'_>,
+        namespace: &str,
+        revisions: &[(&MemoryRelation, &[u8])],
+        batch: &mut rocksdb::WriteBatch,
+    ) -> Result<()> {
         let cf = self.cf(super::super::super::cf::AGENT_META)?;
-        let old = snapshot.relation(namespace, relation.relation_id)?;
-        let old_integrity = if old.is_some() {
-            Some(
-                snapshot
-                    .db
-                    .get_cf(cf, record_key(INTEGRITY, namespace, relation.relation_id))
-                    .map_err(storage_error)?
-                    .ok_or_else(inconsistent)?,
-            )
-        } else {
-            None
-        };
-        for (kind, endpoint) in [
-            (OUTGOING, &relation.input.source),
-            (INCOMING, &relation.input.target),
-        ] {
-            let prefix = prefix(kind, namespace, endpoint);
-            let key = adjacency_key(kind, namespace, endpoint, relation.relation_id);
-            let mut head = snapshot.adjacency_head(&prefix)?;
-            if old.as_ref().is_some_and(MemoryRelation::indexed) {
-                head.count = head.count.checked_sub(1).ok_or_else(inconsistent)?;
-                accumulate(
-                    &mut head.entries_digest,
-                    &key,
-                    old_integrity.as_ref().unwrap(),
-                );
+        let mut heads = BTreeMap::<Vec<u8>, AdjacencyHead>::new();
+        for (relation, integrity) in revisions {
+            let old = snapshot.relation(namespace, relation.relation_id)?;
+            let old_integrity = if old.is_some() {
+                Some(
+                    snapshot
+                        .db
+                        .get_cf(cf, record_key(INTEGRITY, namespace, relation.relation_id))
+                        .map_err(storage_error)?
+                        .ok_or_else(inconsistent)?,
+                )
+            } else {
+                None
+            };
+            for (kind, endpoint) in [
+                (OUTGOING, &relation.input.source),
+                (INCOMING, &relation.input.target),
+            ] {
+                let prefix = prefix(kind, namespace, endpoint);
+                if !heads.contains_key(&prefix) {
+                    heads.insert(prefix.clone(), snapshot.adjacency_head(&prefix)?);
+                }
+                let head = heads.get_mut(&prefix).unwrap();
+                let key = adjacency_key(kind, namespace, endpoint, relation.relation_id);
+                if old.as_ref().is_some_and(MemoryRelation::indexed) {
+                    head.count = head.count.checked_sub(1).ok_or_else(inconsistent)?;
+                    accumulate(
+                        &mut head.entries_digest,
+                        &key,
+                        old_integrity.as_ref().unwrap(),
+                    );
+                }
+                if relation.indexed() {
+                    head.count = head.count.checked_add(1).ok_or_else(inconsistent)?;
+                    accumulate(&mut head.entries_digest, &key, integrity);
+                }
+                if head.count == 0 && head.entries_digest != [0; 32] {
+                    return Err(inconsistent());
+                }
             }
-            if relation.indexed() {
-                head.count = head.count.checked_add(1).ok_or_else(inconsistent)?;
-                accumulate(&mut head.entries_digest, &key, integrity);
-            }
-            if head.count == 0 && head.entries_digest != [0; 32] {
-                return Err(inconsistent());
-            }
+        }
+        for (prefix, head) in heads {
             batch.put_cf(cf, head_key(&prefix), encode(&head)?);
         }
         Ok(())

@@ -936,3 +936,6 @@ pub use verified_checkpoints::*;
 mod verified_checkpoint_tests;
 mod graph_retrieval;
 pub use graph_retrieval::*;
+
+mod consolidation;
+pub use consolidation::*;

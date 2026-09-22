@@ -247,33 +247,46 @@ impl RocksDbMemoryStorage {
         receipt: &MemoryRelationReceipt,
         batch: &mut rocksdb::WriteBatch,
     ) -> Result<()> {
+        self.append_relation_change_batch(view, namespace, &[(relation, receipt)], batch)
+    }
+    pub(super) fn append_relation_change_batch(
+        &self,
+        view: &MemorySnapshot<'_>,
+        namespace: &str,
+        revisions: &[(&MemoryRelation, &MemoryRelationReceipt)],
+        batch: &mut rocksdb::WriteBatch,
+    ) -> Result<()> {
+        if revisions.is_empty() {
+            return Ok(());
+        }
         let mut state = match view.relation_journal(namespace)? {
             Some(state) => state,
             None => RelationJournal::new(namespace)?,
         };
-        let sequence =
-            state.tip.sequence.checked_add(1).ok_or_else(|| {
+        let cf = self.cf(crate::storage::cf::AGENT_META)?;
+        for (relation, receipt) in revisions {
+            let sequence = state.tip.sequence.checked_add(1).ok_or_else(|| {
                 Error::ValidationError("Relation journal sequence exhausted".into())
             })?;
-        let mut node = StoredChange {
-            cursor: RelationChangeCursor {
-                sequence,
-                ..state.tip.clone()
-            },
-            previous_digest: state.tip.prefix_digest.clone(),
-            nonce: Uuid::new_v4(),
-            change: RelationChange::from_revision(relation, receipt),
-        };
-        node.cursor.prefix_digest = node.digest(namespace)?;
-        let bytes = encode(&node)?;
-        if bytes.len() > MAX_CHANGE_BYTES {
-            return Err(Error::ValidationError(
-                "Relation journal entry exceeds 4 KiB".into(),
-            ));
+            let mut node = StoredChange {
+                cursor: RelationChangeCursor {
+                    sequence,
+                    ..state.tip.clone()
+                },
+                previous_digest: state.tip.prefix_digest.clone(),
+                nonce: Uuid::new_v4(),
+                change: RelationChange::from_revision(relation, receipt),
+            };
+            node.cursor.prefix_digest = node.digest(namespace)?;
+            let bytes = encode(&node)?;
+            if bytes.len() > MAX_CHANGE_BYTES {
+                return Err(Error::ValidationError(
+                    "Relation journal entry exceeds 4 KiB".into(),
+                ));
+            }
+            state.tip = node.cursor.clone();
+            batch.put_cf(cf, event_key(namespace, sequence), bytes);
         }
-        state.tip = node.cursor.clone();
-        let cf = self.cf(crate::storage::cf::AGENT_META)?;
-        batch.put_cf(cf, event_key(namespace, sequence), bytes);
         batch.put_cf(cf, record_prefix(JOURNAL, namespace), encode(&state)?);
         Ok(())
     }

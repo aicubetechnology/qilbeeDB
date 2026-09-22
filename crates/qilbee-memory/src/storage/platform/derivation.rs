@@ -33,6 +33,7 @@ pub(super) struct DependencyState {
 }
 #[derive(Clone)]
 pub(super) struct DependencyRecord {
+    pub record_bytes: usize,
     pub revision: u64,
     pub reason: MemoryEligibilityReason,
     pub derivation: Option<MemoryDerivation>,
@@ -98,6 +99,7 @@ impl MemorySnapshot<'_> {
             )
             .map_err(storage_error)?;
         let record = decode_record_pair(id, bytes, index)?.map(|r| DependencyRecord {
+            record_bytes: len,
             revision: r.revision,
             reason: super::eligibility::record_reason(&r, self.now),
             derivation: r.derivation,
