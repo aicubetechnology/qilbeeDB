@@ -221,6 +221,7 @@ nav:
       - Property Index Upgrades: architecture/property-index.md
       - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
       - Native Index Reconstruction: architecture/native-index-rebuild.md
+      - Native Vector Sources: architecture/native-vector-source.md
       - Native Vector Integrity: architecture/native-vector-integrity.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md

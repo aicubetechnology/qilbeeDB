@@ -443,32 +443,39 @@
       "order": 1024
     },
     {
-      "source": "docs/architecture/native-vector-integrity.md",
-      "file": "native-vector-integrity.md",
-      "title": "Native vector index integrity",
-      "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
+      "source": "docs/architecture/native-vector-source.md",
+      "file": "native-vector-source.md",
+      "title": "Native vector source integrity",
+      "description": "Resolve native ANN results against matching episode sources and inspect discarded candidates.",
       "order": 1034
-    },
-    {
-      "source": "docs/operations/graceful-shutdown.md",
-      "file": "graceful-shutdown.md",
-      "title": "Graceful server shutdown",
-      "description": "Close HTTP admission, drain accepted work and reconcile uncertain write outcomes.",
-      "order": 1044
-    },
-    {
-      "source": "docs/operations/backup.md",
-      "file": "backup-and-recovery.md",
-      "title": "Backup and recovery",
-      "description": "Create consistent offline backups and validate recovery without discarding newer writes.",
-      "order": 1054
     },
     {
       "source": "docs/agent-memory/relevance-accounting.md",
       "file": "native-relevance-accounting.md",
       "title": "Native relevance accounting",
       "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
+      "order": 1044
+    },
+    {
+      "source": "docs/operations/graceful-shutdown.md",
+      "file": "graceful-shutdown.md",
+      "title": "Graceful server shutdown",
+      "description": "Close HTTP admission, drain accepted work and reconcile uncertain write outcomes.",
+      "order": 1054
+    },
+    {
+      "source": "docs/operations/backup.md",
+      "file": "backup-and-recovery.md",
+      "title": "Backup and recovery",
+      "description": "Create consistent offline backups and validate recovery without discarding newer writes.",
       "order": 1064
+    },
+    {
+      "source": "docs/architecture/native-vector-integrity.md",
+      "file": "native-vector-integrity.md",
+      "title": "Native vector index integrity",
+      "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
+      "order": 1074
     }
   ]
 }

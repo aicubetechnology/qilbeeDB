@@ -31,7 +31,7 @@ pub mod vector_index;
 
 pub use agent::{
     AgentMemory, HybridSearchResult, MemoryStatistics, PersistentAgentMemory, SemanticSearchConfig,
-    SemanticSearchResult,
+    SemanticSearchResult, NativeSemanticSearchReport,
 };
 pub use consolidation::{
     ConsolidationConfig, ConsolidationResult, ConsolidationService, ConsolidationStrategy,
