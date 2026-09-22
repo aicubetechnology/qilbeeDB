@@ -5,9 +5,23 @@ learning records. QilbeeDB stores evidence and retrieves it under explicit
 identity and revision contracts. Your application chooses the language model,
 generates embeddings externally and decides how retrieved evidence is used.
 
+## Choose how to use QilbeeDB
+
+| | QilbeeDB platform | Self-hosted installation |
+| --- | --- | --- |
+| Connect | Use your company’s API credentials with `https://api.qilbeedb.io` | Use the base URL and credentials from your installation administrator |
+| Manage your company | Use the [administration console](https://admin.qilbeedb.io) and authorized administration APIs | Use the administration capabilities available in your installation |
+| Operate the service | Infrastructure and server updates are managed by the platform | Your organization manages hosting, storage, TLS, backups and server updates |
+| Build an application | Follow the [quickstart](quickstart.md) | [Install QilbeeDB](deployment.md), then follow the same quickstart |
+
+Both options use the same memory and authorization contracts for the server
+version they run. Your organization controls its application credentials and
+access policies in either option. Model selection, external embeddings and agent
+execution remain responsibilities of your application.
+
 ## Start building
 
-- [QilbeeDB 0.13.0 availability](../releases/0.13.0.md): inspect the released graph contracts, upgrade checks and experimental ranking limits.
+- [What’s new in 0.14.0](../releases/0.14.0.md): review available capabilities, compatibility and upgrade requirements.
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
 - [Automatic agent registration, 0.12.0](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.

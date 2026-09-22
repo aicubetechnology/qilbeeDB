@@ -195,7 +195,7 @@ responses against the OpenAPI document served by the same process.
 
 The design follows least privilege, default denial and authorization on every
 request as described in the [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html).
-For AWS deployments, use the access control and rotation guidance in
-[AWS Secrets Manager best practices](https://docs.aws.amazon.com/secretsmanager/latest/userguide/best-practices.html).
+Store administrative credentials in your organization’s secret manager and
+apply its access-control, audit and rotation policies.
 These implementation tests are not an external penetration test or a compliance
 certification.

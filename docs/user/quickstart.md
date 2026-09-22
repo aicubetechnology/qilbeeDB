@@ -6,8 +6,14 @@ using your own embedding service.
 
 ## Before you begin
 
-Run the [local Docker service](deployment.md), or obtain the base URL of a running
-QilbeeDB deployment. An operator must issue a platform credential with
+Choose your connection:
+
+- **QilbeeDB platform:** use `https://api.qilbeedb.io` and an application API key
+  issued for your company. You do not need to install Docker or bootstrap a server.
+- **Self-hosted:** [install QilbeeDB](deployment.md), or obtain your server’s base
+  URL and an application API key from its administrator.
+
+Your application credential needs
 `memory_write` and `memory_read`, granting this exact scope:
 
 ```json
@@ -20,10 +26,21 @@ credential. Examples below use Bash, `curl`, and the `QILBEE_TOKEN` environment
 variable containing that application's credential. Requests to a remote service
 should use its HTTPS URL.
 
+Set the base URL for your connection. Store `QILBEE_TOKEN` securely; do not commit
+it or paste it into shared logs.
+
+```bash
+# QilbeeDB platform
+export QILBEE_BASE_URL="https://api.qilbeedb.io"
+
+# For a local self-hosted installation, use instead:
+# export QILBEE_BASE_URL="http://localhost:7474"
+```
+
 ## 1. Check the service
 
 ```bash
-curl --fail --silent --show-error http://localhost:7474/health
+curl --fail --silent --show-error "${QILBEE_BASE_URL}/health"
 ```
 
 Check the returned server version. Lexical and hybrid retrieval are available
@@ -35,7 +52,7 @@ and external vectors through 32768 dimensions, including 3072.
 
 ```bash
 curl --fail --silent --show-error \
-  http://localhost:7474/api/v1/memory/commands \
+  "${QILBEE_BASE_URL}/api/v1/memory/commands" \
   --header "Authorization: Bearer $QILBEE_TOKEN" \
   --header 'Content-Type: application/json' \
   --data '{
@@ -64,7 +81,7 @@ that key for a different command returns 409. Use a new key for a new operation.
 
 ```bash
 curl --fail --silent --show-error \
-  http://localhost:7474/api/v1/memory/search/lexical \
+  "${QILBEE_BASE_URL}/api/v1/memory/search/lexical" \
   --header "Authorization: Bearer $QILBEE_TOKEN" \
   --header 'Content-Type: application/json' \
   --data '{

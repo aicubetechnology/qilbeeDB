@@ -81,10 +81,10 @@ nav:
   - Home: index.md
   - Platform User Guides:
     - Overview: user/index.md
-    - Release 0.14.0 candidate: releases/0.14.0.md
+    - Release 0.14.0: releases/0.14.0.md
     - Release 0.13.0: releases/0.13.0.md
     - Memory Quickstart: user/quickstart.md
-    - Local Docker: user/deployment.md
+    - Self-hosted installation: user/deployment.md
     - Global administration: security/global-administration.md
     - Container security: security/container-security.md
     - Retrieval Evaluation: research/retrieval-evaluation.md

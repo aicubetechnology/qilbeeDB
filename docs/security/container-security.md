@@ -1,77 +1,49 @@
-# Container security qualification
+# Secure a QilbeeDB container deployment
 
-An image release needs both functional qualification and a current assessment of
-its runtime dependencies. Pin deployments to an immutable image digest and retain
-the Git revision, package inventory, scan timestamp and acceptance evidence.
+Use a supported QilbeeDB image, persistent storage and credentials with only the
+permissions your application needs. A healthy process does not establish that an
+installation is secure or that its backups can be restored.
 
-## Runtime update for the first AWS deployment
+## Choose and update an image
 
-The initial 0.11.0 candidate passed its API and recovery tests, but Amazon ECR's
-scan reported four critical and fourteen high findings in its Debian Bookworm
-runtime source packages. Updating the Bookworm package index still offered
-OpenSSL `3.0.20-1~deb12u2` and Perl `5.36.0-7+deb12u3`.
+Pin production deployments to an immutable image digest. Record the version and
+review its release notes before upgrading. Scan the exact image you intend to
+run, including its operating-system packages, and assess findings against your
+organization's security policy. Recheck images as vendor advisories change.
 
-Debian's security tracker identifies fixed Trixie packages for
-[CVE-2026-75803](https://security-tracker.debian.org/tracker/CVE-2026-75803),
-[CVE-2026-13221](https://security-tracker.debian.org/tracker/CVE-2026-13221),
-[CVE-2026-57433](https://security-tracker.debian.org/tracker/CVE-2026-57433)
-and [CVE-2026-12087](https://security-tracker.debian.org/tracker/CVE-2026-12087).
-The runtime therefore moves to the official Debian Trixie image, pinned at
-`sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a`,
-and applies available package upgrades during the build.
+Do not treat passing API tests as proof that system libraries are patched. If a
+finding affects your deployment, apply an available supported update or mitigation
+and repeat your integration and recovery checks. Retain package metadata so your
+scanner can identify installed dependencies.
 
-The Rust build stage remains pinned to Rust 1.93.1 on Bookworm. The server binary
-must run correctly with the newer runtime libraries; that compatibility is
-qualified through the complete disposable-container acceptance suite, including
-credential lifecycle and crash recovery. The update does not change API scores,
-retrieval defaults or embedding generation.
+## Limit runtime privileges
 
-## Built-in health probe
+Run the server as a non-root user. Keep the root filesystem read-only, drop
+unneeded Linux capabilities and disable privilege escalation. Store persistent
+data on the volume mounted at `/data`; use temporary storage for `/tmp`.
 
-The container no longer installs curl or its optional protocol libraries solely for health checks. `qilbeedb health-check` connects only to `127.0.0.1:7474`, bounds its response to 8 KiB, uses socket timeouts, refuses redirects and requires the current server version with a healthy status. Docker applies a three-second overall probe timeout. The probe validates process health, not scoped write readiness or storage recovery.
+Expose the API only to intended clients. Network-facing deployments need TLS,
+authentication and scoped authorization. Keep operator keys outside images,
+source control and application logs. Separate global administration from routine
+application credentials, and revoke credentials that are no longer needed.
 
-The first Trixie scan also flagged curl. Removing this unused general-purpose client reduces the runtime dependency surface; package metadata remains intact for scanning.
+## Understand the health check
 
-## Release evidence
+The native `qilbeedb health-check` command checks the local HTTP service at
+`127.0.0.1:7474`. It requires a healthy response with the expected server version,
+uses timeouts, bounds the response size and refuses redirects.
 
-Record the candidate's exact image digest and package versions after building.
-Run the integration and recovery tests against that image, then review its scan
-before deploying it to a customer-facing endpoint. An older qualified image must
-not silently substitute for the candidate if a build or scan fails.
+Use health checks for process availability. Verify authenticated operations and
+storage recovery separately; a successful probe does not prove that a particular
+credential can read or write its intended scope.
 
-Scanners can report source-package findings for optional components or versions
-that are not reachable through this service. Investigate such findings using the
-maintainer's advisory, the installed binary package inventory and the actual
-runtime configuration. Keep the finding and assessment visible; do not remove
-package metadata or suppress a finding merely to obtain a clean dashboard.
+## Verify recovery before upgrading
 
-This process does not establish that the software has no vulnerabilities. A
-current scan is a time-bounded observation, and functional acceptance is separate
-from independent penetration testing. Reassess future releases and rebuild when
-maintainer security updates become available.
+Keep an application-consistent backup and test restoration to separate storage.
+Check the target release's storage compatibility before opening existing data
+with a new binary. Do not reopen an upgraded data directory with an older binary
+unless that downgrade is explicitly supported.
 
-## Qualified candidate and remaining findings
-
-The ARM64 candidate at source revision `6da42e216d588df70a85ddd62570abd861acd2f2`
-passed 541 Rust tests, 51 disposable-container acceptance tests, 13 existing route
-smokes, 20 global-authority HTTP checks and the native health probe. Its ECR digest
-is `sha256:a741f8bdd3972628c284d62a3c995e50899cef8fdf0e3f52b7961079c4610e1f`.
-The completed scan reported **zero critical, one high and one undefined-severity
-finding**. These are observations for this candidate, not a vulnerability-free claim.
-
-- **CVE-2026-85091 (high):** the installed zlib package remains flagged and the
-  [Debian tracker](https://security-tracker.debian.org/tracker/CVE-2026-85091) does
-  not provide a fixed Trixie package at qualification time. The advisory concerns
-  nonblocking gzip file writes followed by `gzprintf`/`gzvprintf`. The platform
-  exposes JSON contracts and does not offer gzip file-writing or arbitrary-code
-  execution endpoints. zlib remains a transitive shared-library dependency; this
-  limited exposure assessment does not prove every native call path unreachable.
-  Keep the finding open and rebuild when a vendor fix is available.
-- **CVE-2026-82560 (undefined):** the scanner attributes a POD text-formatting
-  exhaustion issue to the Perl source package. The runtime contains `perl-base`,
-  but the affected `Pod::Text` module is absent. The server does not process POD
-  documents. Retain the scan finding and package inventory for reassessment.
-
-These findings describe the first 0.11.0 candidate, not a scan of later releases.
-Every later image needs its own package assessment, functional checks and recovery
-qualification before deployment. Functional tests do not replace a penetration test.
+After writes resume, restoring an earlier backup can discard newer changes.
+Reconcile those writes before any rollback. See [backup and recovery](../operations/backup.md)
+and the [release notes](../releases/0.14.0.md) for applicable limits.
