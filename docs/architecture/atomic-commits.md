@@ -29,12 +29,36 @@ arbitrary metadata writes are not part of an entity transaction.
 
 ## Isolation and recovery limits
 
-Atomic publication is not serializable isolation. Transaction reads cache each
-entity independently and do not share a database snapshot. Concurrent readers
-making separate calls can observe different committed versions. Transactions
-do not detect stale reads or conflicting updates: later writes can overwrite
-earlier decisions. The shared writer mutex serializes publication, not the
-application's entire read/modify/write sequence.
+Transactions now validate every observed node and relationship before commit.
+The first read or mutation captures the exact stored bytes, including absence.
+Pending writes have a separate cache, so reading your own writes does not replace
+the original observation. Under the shared writer mutex, commit validates graph
+generation and every observation before publishing the atomic entity/index batch.
+A changed observation returns `Error::TransactionAborted` and publishes nothing.
+This also protects negative reads, read-only transactions and blind writes whose
+stored state changes after the first mutation. Changes to unobserved entities do
+not cause conflicts.
+
+This is a behavior change for Rust callers: commits that previously silently
+overwrote concurrent changes can fail. `Transaction::new`, `Transaction::for_graph`,
+`StorageEngine::begin_transaction` and `Graph::begin_transaction` use this same
+contract. Method signatures and on-disk formats are unchanged. This does not
+change the platform HTTP memory revision contract or combine separate requests
+into a transaction.
+
+After a conflict, discard decisions derived from the rejected transaction. If
+appropriate for the application, start a new transaction, read current state and
+recompute the intended database change. The database does not retry business
+logic or replay external effects. A conflict is not evidence that an external
+operation failed or is safe to repeat.
+
+Point-read validation does not provide a historical snapshot at transaction
+start, predicate/range locking, or isolation for reads performed outside the
+transaction interface. Separate reads may observe different versions before
+commit; callers must not treat tentative values as committed decisions.
+Byte-identical restoration is accepted: the guard checks current value equality,
+not whether any intervening history exists. The shared writer mutex covers
+validation and publication, not the application's entire lifetime.
 
 Low-level transactions do not add endpoint existence, uniqueness or cascade constraints.
 The managed graph methods separately guard endpoint checks and detach deletion
@@ -65,6 +89,17 @@ internal snapshot API; it does not introduce a public snapshot transaction API.
 ```bash
 cargo test -p qilbee-storage atomic_ --locked
 cargo test --workspace --all-targets --locked
+```
+
+Eight additional conflict tests cover stale read/modify/write, negative-read
+write dependencies, concurrent relationship deletion, blind writes, simultaneous
+commit winners, read-only dependencies, independent entities/read-your-writes,
+and preservation of entity, label, property and adjacency state after rejection
+and reopen. Existing named-graph retirement and corrupt-record atomicity tests
+remain part of the storage/graph regression suites.
+
+```bash
+cargo test -p qilbee-storage -p qilbee-graph --locked
 ```
 
 See the [research roadmap](../research/agent-memory-evolution.md) for isolation,

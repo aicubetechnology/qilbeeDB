@@ -420,6 +420,13 @@
       "title": "QilbeeDB 0.14.0 release candidate",
       "description": "Review the unreleased knowledge, administration and consolidation contracts and their upgrade acceptance requirements.",
       "order": 1014
+    },
+    {
+      "source": "docs/architecture/atomic-commits.md",
+      "file": "atomic-graph-commits.md",
+      "title": "Atomic graph transactions",
+      "description": "Handle optimistic point-read conflicts, preserve atomic entity and index writes, and understand retry and recovery limits.",
+      "order": 132
     }
   ]
 }

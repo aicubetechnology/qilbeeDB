@@ -26,7 +26,7 @@ database for agents, or that the hypotheses below are previously undiscovered.
 | P0 | Baseline HTTP routes use a volatile episode map | HTTP memories disappear on restart | Versioned scoped HTTP commands, atomic receipts and process-kill recovery implemented |
 | P0 | Baseline router: fixed development JWT secret and administrator | Startup is unsuitable for production | Replaced by explicit durable bootstrap in the default platform router; explicit legacy mode retains limitations |
 | P0 | `/graphs` routes lack `require_auth`; `/memory` authenticates without binding agents to owners | Missing resource/tenant authorization in the inspected paths | Legacy routes excluded by default; platform identity and memory enforce authenticated tenant/subject/resource grants |
-| P0 | Baseline `transaction.rs::commit` applies operations sequentially | Intermediate failure can leave a partial commit | Atomic entity/index batch implemented; snapshot isolation and conflict detection remain open |
+| P0 | Baseline `transaction.rs::commit` applies operations sequentially | Intermediate failure can leave a partial commit | Atomic entity/index batch and optimistic point-read conflict validation implemented; historical snapshots remain open |
 | P0 | `storage.rs`: global UUID index without owner verification on deletion | Another agent could break an episode's lookup | Fixed in the persistent backend |
 | P0 | Episode keys include event time, but updates did not remove the previous key | Duplicate records and inconsistent reads | Fixed with a write batch and mutual exclusion |
 | P0 | Bincode over `serde_json::Value` | Stored structured payloads could not be read back | New versioned format; legacy records without JSON remain readable |
@@ -159,7 +159,7 @@ numbers.
 | F1 | Episode integrity, legacy reads, JSON, concurrent mutations and reopen tests | Implemented and tested in the persistent backend |
 | F2 | Immutable proposals, idempotent paired outcomes, promotion, monitoring and suspension with atomic persistence | Implemented in the Rust library; offline demonstration |
 | F3 | Secure bootstrap, resource ownership, persistent HTTP memory and separate evaluator authorization | Identity, scoped memory and procedural evaluator/policy HTTP implemented; external evidence verification and policy retirement remain pending |
-| F4 | Atomic transactions with consistent indexes, documented conflicts and fault-injection recovery tests | Atomic entity/index writes implemented; isolation, canonical map-property indexes and fault injection remain open |
+| F4 | Atomic transactions with consistent indexes, documented conflicts and fault-injection recovery tests | Atomic entity/index writes and point-read conflict validation implemented; historical snapshots, canonical map-property indexes and fault injection remain open |
 | F5 | Resolvable provenance, bitemporal revisions and transitive invalidation/deletion | Planned |
 | F6 | Persisted/versioned embeddings, rebuildable index, ranked text search, deterministic hybrid retrieval and tokenizer budgets | BM25 and deterministic rank fusion implemented; remaining work planned |
 | F7 | Benchmark adapters, published baselines and learning-loop ablations | Planned |
