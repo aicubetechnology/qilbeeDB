@@ -74,9 +74,16 @@
     {
       "source": "docs/api/learned-tools.md",
       "file": "learned-tools.md",
-      "title": "Learned tool development",
-      "description": "Manage immutable tool artifacts, executor profiles and development outcomes.",
+      "title": "Tool records API",
+      "description": "Existing artifact and development records, permissions, outcomes and compatibility boundaries.",
       "order": 100
+    },
+    {
+      "source": "docs/architecture/learned-tools.md",
+      "file": "external-tool-knowledge.md",
+      "title": "Knowledge about external tools",
+      "description": "Understand application ownership of tools and database responsibility for knowledge, provenance and evaluation.",
+      "order": 105
     },
     {
       "source": "docs/research/retrieval-evaluation.md",
@@ -399,6 +406,13 @@
       "title": "External graph consolidation",
       "description": "Coordinate external inference with exact evidence manifests, durable attempts, worker fences and atomic graph publication.",
       "order": 69.5
+    },
+    {
+      "source": "docs/agent-memory/evidence-bound-knowledge.md",
+      "file": "evidence-bound-knowledge.md",
+      "title": "Evidence-bound knowledge",
+      "description": "Propose scoped knowledge, inspect current source evidence and select qualified procedures with explicit external tool identities.",
+      "order": 106
     }
   ]
 }

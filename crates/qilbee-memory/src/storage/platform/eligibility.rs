@@ -38,6 +38,68 @@ pub struct MemoryEligibility {
     pub all_dependencies_checked: bool,
     pub dependency_work: DependencyWork,
 }
+/// Current evidence observation for exact knowledge source revisions.
+/// No payloads are returned. Failure short-circuits; success checks every root.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MemoryEvidenceEligibility {
+    pub eligible: bool,
+    pub evaluated_at_millis: i64,
+    pub first_failure: Option<MemoryEligibilityFailure>,
+    pub all_dependencies_checked: bool,
+    pub dependency_work: DependencyWork,
+}
+
+pub(crate) struct MemoryEvidenceView<'a> {
+    snapshot: MemorySnapshot<'a>,
+}
+impl RocksDbMemoryStorage {
+    pub(crate) fn evidence_view(&self) -> MemoryEvidenceView<'_> {
+        MemoryEvidenceView {
+            snapshot: self.memory_snapshot(),
+        }
+    }
+    /// Inspect exact sources in one authorized namespace and one request snapshot.
+    pub fn inspect_memory_evidence(
+        &self,
+        namespace: &str,
+        sources: &[MemorySourceRef],
+    ) -> Result<MemoryEvidenceEligibility> {
+        self.evidence_view().inspect(namespace, sources)
+    }
+}
+impl MemoryEvidenceView<'_> {
+    pub(crate) fn observed_at_millis(&self) -> i64 {
+        self.snapshot.now
+    }
+    pub(crate) fn inspect(
+        &self,
+        namespace: &str,
+        sources: &[MemorySourceRef],
+    ) -> Result<MemoryEvidenceEligibility> {
+        RocksDbMemoryStorage::validate_agent(namespace)?;
+        let ids: BTreeSet<_> = sources.iter().map(|source| source.record_id).collect();
+        if sources.is_empty()
+            || sources.len() > MAX_MEMORY_SOURCES
+            || ids.len() != sources.len()
+            || sources.iter().any(|s| s.revision == 0)
+        {
+            return Err(Error::ValidationError(
+                "Evidence requires 1-16 unique positive memory source revisions".into(),
+            ));
+        }
+        let snapshot = &self.snapshot;
+        let first_failure = snapshot.relation_evidence_failure(namespace, sources)?;
+        Ok(MemoryEvidenceEligibility {
+            eligible: first_failure.is_none(),
+            evaluated_at_millis: snapshot.now,
+            all_dependencies_checked: first_failure.is_none(),
+            first_failure,
+            dependency_work: snapshot.dependency_work(),
+        })
+    }
+}
+
 pub(super) fn record_reason(record: &MemoryRecord, now: i64) -> MemoryEligibilityReason {
     if record.payload.is_none() {
         MemoryEligibilityReason::Deleted

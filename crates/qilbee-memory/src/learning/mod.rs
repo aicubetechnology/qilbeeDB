@@ -14,10 +14,10 @@ pub use store::registry::*;
 
 #[cfg(test)]
 mod tool_tests;
-pub use store::tools::*;
-pub use store::executors::*;
 pub use store::development::*;
+pub use store::executors::*;
 pub use store::experience::*;
+pub use store::tools::*;
 
 #[cfg(test)]
 mod experience_tests;
@@ -28,6 +28,8 @@ pub use store::experience_artifacts::*;
 
 pub use store::experience_lineage::*;
 
+pub use store::catalog::*;
 pub use store::experience_export::*;
 pub use store::strategies::*;
-pub use store::catalog::*;
+
+pub use store::knowledge::*;

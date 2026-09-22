@@ -17,12 +17,13 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 mod administration;
-mod agents;
 mod agent_profiles;
-mod company_memory;
+mod agents;
 mod company_learning;
+mod company_memory;
 mod directory;
 mod experiences;
+mod knowledge;
 mod learning;
 mod login;
 mod memory;
@@ -43,7 +44,9 @@ impl PlatformState {
     async fn run<T, F>(&self, headers: HeaderMap, operation: F) -> ApiResult<T>
     where
         T: Send + 'static,
-        F: FnOnce(&agents::RequestIdentity<'_>, &str, CredentialView) -> ApiResult<T> + Send + 'static,
+        F: FnOnce(&agents::RequestIdentity<'_>, &str, CredentialView) -> ApiResult<T>
+            + Send
+            + 'static,
     {
         let token = bearer(&headers)?;
         let identity = self.identity.clone();
@@ -113,6 +116,7 @@ fn create_router_with_limits(
         .merge(scope_authority::routes())
         .merge(memory::routes())
         .merge(learning::routes())
+        .merge(knowledge::routes())
         .merge(experiences::routes())
         .merge(tools::routes())
         .route(

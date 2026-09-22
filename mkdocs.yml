@@ -218,7 +218,8 @@ nav:
       - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
-      - Learned Tool Services: architecture/learned-tools.md
+      - External Tool Knowledge: architecture/learned-tools.md
+      - Evidence-bound Knowledge: agent-memory/evidence-bound-knowledge.md
       - Bi-Temporal Model: architecture/bi-temporal.md
     - Contributing:
       - Development Setup: contributing/setup.md

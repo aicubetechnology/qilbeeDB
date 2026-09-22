@@ -297,3 +297,229 @@ fn eligibility_explains_current_visibility_missing_sources_and_cycles_without_pa
         MemoryEligibilityReason::SourceMissing
     );
 }
+
+#[test]
+fn knowledge_evidence_checks_all_roots_and_transitive_revisions_in_one_scope() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let a = create(&db, "scope", "evidence-a");
+    let b = create(&db, "scope", "evidence-b");
+    let derived = derive(&db, "evidence-derived", &[a.clone()]).unwrap();
+    let refs = vec![
+        MemorySourceRef {
+            record_id: derived.record_id,
+            revision: 1,
+        },
+        MemorySourceRef {
+            record_id: b.record_id,
+            revision: 1,
+        },
+    ];
+    let initial = db.inspect_memory_evidence("scope", &refs).unwrap();
+    assert!(initial.eligible && initial.all_dependencies_checked);
+    assert_eq!(initial.dependency_work.records_examined, 3);
+    let denied = db
+        .inspect_memory_evidence("another-private-subject", &refs)
+        .unwrap();
+    assert!(!denied.eligible && !denied.all_dependencies_checked);
+    assert_eq!(
+        denied.first_failure.unwrap().reason,
+        MemoryEligibilityReason::SourceMissing
+    );
+    db.apply_memory_command(
+        "scope",
+        &actor(),
+        &MemoryCommand {
+            contract_version: 1,
+            idempotency_key: "correct-evidence-ancestor".into(),
+            operation: MemoryOperation::Update {
+                record_id: a.record_id,
+                expected_revision: 1,
+                record: input("correction"),
+            },
+        },
+    )
+    .unwrap();
+    let changed = db.inspect_memory_evidence("scope", &refs).unwrap();
+    let failure = changed.first_failure.unwrap();
+    assert!(!changed.eligible && !changed.all_dependencies_checked);
+    assert_eq!(failure.record_id, a.record_id);
+    assert_eq!(
+        failure.reason,
+        MemoryEligibilityReason::SourceRevisionChanged
+    );
+    assert_eq!(failure.actual_revision, Some(2));
+    assert!(db.inspect_memory_evidence("scope", &[]).is_err());
+    assert!(
+        db.inspect_memory_evidence("scope", &[refs[0].clone(), refs[0].clone()])
+            .is_err()
+    );
+}
+
+#[test]
+fn knowledge_evidence_rechecks_expiry_without_a_feed_event() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let mut record = input("already expired evidence");
+    record.valid_until_millis = Some(1);
+    let expired = db
+        .apply_memory_command(
+            "scope",
+            &actor(),
+            &MemoryCommand {
+                contract_version: 1,
+                idempotency_key: "expired-tool-source".into(),
+                operation: MemoryOperation::Create { record },
+            },
+        )
+        .unwrap();
+    let info = db
+        .inspect_memory_evidence(
+            "scope",
+            &[MemorySourceRef {
+                record_id: expired.record_id,
+                revision: 1,
+            }],
+        )
+        .unwrap();
+    assert!(!info.eligible);
+    assert_eq!(
+        info.first_failure.as_ref().unwrap().reason,
+        MemoryEligibilityReason::Expired
+    );
+    let bytes = serde_json::to_string(&info).unwrap();
+    assert!(!bytes.contains("already expired evidence"));
+}
+
+#[test]
+fn knowledge_evidence_checks_root_revision_even_when_cached_as_an_ancestor() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let source = create(&db, "scope", "private knowledge payload");
+    let derived = derive(&db, "knowledge-with-source", &[source.clone()]).unwrap();
+    // The first root caches source revision 1 during ancestor traversal. The
+    // second root must still enforce its different declared revision.
+    let sources = [
+        MemorySourceRef {
+            record_id: derived.record_id,
+            revision: 1,
+        },
+        MemorySourceRef {
+            record_id: source.record_id,
+            revision: 2,
+        },
+    ];
+    let result = db.inspect_memory_evidence("scope", &sources).unwrap();
+    assert!(!result.eligible);
+    assert!(!result.all_dependencies_checked);
+    let failure = result.first_failure.as_ref().unwrap();
+    assert_eq!(failure.record_id, source.record_id);
+    assert_eq!(failure.expected_revision, Some(2));
+    assert_eq!(failure.actual_revision, Some(1));
+    assert_eq!(
+        failure.reason,
+        MemoryEligibilityReason::SourceRevisionChanged
+    );
+    assert!(
+        !serde_json::to_string(&result)
+            .unwrap()
+            .contains("private knowledge payload")
+    );
+    let reversed = db
+        .inspect_memory_evidence("scope", &[sources[1].clone(), sources[0].clone()])
+        .unwrap();
+    assert!(!reversed.eligible);
+    assert_eq!(reversed.first_failure, result.first_failure);
+}
+
+#[test]
+fn knowledge_evidence_shares_node_budget_across_individually_valid_roots() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let leaves: Vec<_> = (0..49)
+        .map(|n| create(&db, "scope", &format!("knowledge-leaf-{n}")))
+        .collect();
+    let roots: Vec<_> = (0..16)
+        .map(|n| {
+            derive(
+                &db,
+                &format!("knowledge-root-{n}"),
+                &leaves[n * 3..n * 3 + 3],
+            )
+            .unwrap()
+        })
+        .collect();
+    let mut sources: Vec<_> = roots
+        .iter()
+        .map(|r| MemorySourceRef {
+            record_id: r.record_id,
+            revision: r.revision,
+        })
+        .collect();
+    let complete = db.inspect_memory_evidence("scope", &sources).unwrap();
+    assert!(complete.eligible && complete.all_dependencies_checked);
+    assert_eq!(complete.dependency_work.records_examined, 64);
+
+    // Every root is individually valid. Their combined evidence graph exceeds
+    // the shared budget by one node; a per-root reset would wrongly accept it.
+    let wider = derive(&db, "knowledge-wider-root", &leaves[45..49]).unwrap();
+    assert!(
+        db.explain_memory_eligibility("scope", wider.record_id)
+            .unwrap()
+            .unwrap()
+            .eligible
+    );
+    sources[15] = MemorySourceRef {
+        record_id: wider.record_id,
+        revision: wider.revision,
+    };
+    let incomplete = db.inspect_memory_evidence("scope", &sources).unwrap();
+    assert!(!incomplete.eligible && !incomplete.all_dependencies_checked);
+    assert_eq!(
+        incomplete.first_failure.as_ref().unwrap().reason,
+        MemoryEligibilityReason::NodeLimit
+    );
+    assert_eq!(incomplete.dependency_work.records_examined, 64);
+    sources.reverse();
+    let reversed = db.inspect_memory_evidence("scope", &sources).unwrap();
+    assert!(!reversed.eligible && !reversed.all_dependencies_checked);
+    assert_eq!(
+        reversed.first_failure.unwrap().reason,
+        MemoryEligibilityReason::NodeLimit
+    );
+    assert_eq!(reversed.dependency_work.records_examined, 64);
+}
+
+#[test]
+fn knowledge_evidence_never_downgrades_corruption_or_byte_exhaustion_to_success() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let good = create(&db, "scope", "valid first source");
+    let bad = create(&db, "scope", "damaged second source");
+    let refs: Vec<_> = [good, bad.clone()]
+        .iter()
+        .map(|r| MemorySourceRef {
+            record_id: r.record_id,
+            revision: r.revision,
+        })
+        .collect();
+    let cf = db.cf(super::super::cf::EPISODES).unwrap();
+    let key = record_key(0x10, "scope", bad.record_id);
+    db.db.put_cf(cf, &key, b"corrupted source").unwrap();
+    assert!(matches!(
+        db.inspect_memory_evidence("scope", &refs),
+        Err(Error::DataCorruption(_))
+    ));
+    // A damaged oversized record must exhaust work before decoding. Neither
+    // failure is a missing record or a successful partial evidence observation.
+    db.db
+        .put_cf(
+            cf,
+            &key,
+            vec![b'x'; super::derivation::MAX_DEPENDENCY_BYTES + 1],
+        )
+        .unwrap();
+    assert!(
+        matches!(db.inspect_memory_evidence("scope", &refs), Err(Error::ValidationError(message)) if message.contains("Dependency byte budget exhausted"))
+    );
+}

@@ -16,6 +16,7 @@ use crate::learning::{
 pub enum LearningResourceDetails {
     Experience(ExperienceRecord),
     Procedure(RegisteredProcedure),
+    Knowledge(KnowledgeDetails),
     Strategy(StrategyDetails),
     ToolArtifact(ToolArtifact),
     ToolDevelopment(ToolDevelopment),
@@ -27,6 +28,13 @@ pub enum LearningResourceDetails {
 #[serde(deny_unknown_fields)]
 pub struct StrategyDetails {
     pub candidate: StrategyCandidateReceipt,
+    pub procedure: RegisteredProcedure,
+}
+/// Recorded qualification and original receipt, without current source inspection.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct KnowledgeDetails {
+    pub receipt: crate::learning::KnowledgeReceipt,
     pub procedure: RegisteredProcedure,
 }
 fn status(value: impl Serialize) -> String {
@@ -54,6 +62,12 @@ impl LearningResourceDetails {
                 r.outcome.map(status).unwrap_or_else(|| "unreported".into()),
                 Some(r.revision),
                 r.receipt.recorded_at_millis,
+            ),
+            Self::Knowledge(r) => (
+                &r.receipt.request.title,
+                status(r.procedure.record.state),
+                None,
+                r.procedure.record.created_at_millis,
             ),
             Self::Procedure(r) => (
                 &r.record.proposal.task,
@@ -131,6 +145,17 @@ impl LearningMemory {
             LearningResourceKind::Experience => self
                 .experience(company, namespace, id)?
                 .map(LearningResourceDetails::Experience),
+            LearningResourceKind::Knowledge => {
+                match self.knowledge_receipt(company, namespace, id)? {
+                    Some(receipt) => Some(LearningResourceDetails::Knowledge(KnowledgeDetails {
+                        receipt,
+                        procedure: self
+                            .registered_procedure(company, namespace, id)?
+                            .ok_or_else(corrupt)?,
+                    })),
+                    None => None,
+                }
+            }
             LearningResourceKind::Procedure => self
                 .registered_procedure(company, namespace, id)?
                 .map(LearningResourceDetails::Procedure),

@@ -1,109 +1,88 @@
-# Learned tools as platform services
+# Knowledge about externally owned tools
 
-## Accepted architecture
+## Responsibility boundary
 
-QilbeeDB will own the service contracts for developing, repairing, versioning,
-evaluating, publishing, discovering and invoking learned tools. Executors remain
-isolated on servers and are reached through the platform. User devices keep a
-light client for authentication, requests, status and results. QMN and other
-applications consume the same platform contracts.
+Tools belong to the application and the company whose tasks they serve. The
+application owns their code, packages, dependencies, maintenance, release
+selection, business permissions and operational lifecycle. Its infrastructure
+runs tools with appropriate isolation. A lightweight agent client need not host
+a compiler, container runtime or execution server.
 
-Artifact storage, administrative executor profiles and development/repair
-receipts are implemented in the [Learned Tool API](../api/learned-tools.md).
-Generation workers, isolated invocation transport and tool publication gates
-remain planned. The complete current HTTP surface is listed in
-[OpenAPI](../api/openapi.json). Local Docker is the
-integration environment requested for validation; production placement can use
-remote database and executor servers without moving execution onto user devices.
+QilbeeDB stores knowledge about tools: purpose, applicability, instructions,
+preconditions, limitations, examples, observed outcomes and provenance. External
+version references associate knowledge with the implementation that produced an
+observation. They do not transfer ownership of that implementation to the bank.
 
-## Service boundaries
+| Responsibility | Owner |
+| --- | --- |
+| Create, repair, package and publish executable tools | Agent application and company |
+| Select a tool for a business task and authorize its execution | Agent application under company policy |
+| Dispatch, cancel, recover and account for execution | Application execution infrastructure |
+| Persist and retrieve scoped knowledge and its source history | QilbeeDB |
+| Evaluate recorded knowledge under an explicit evidence policy | QilbeeDB, with observations and evaluation context supplied externally |
+| Determine whether an external version is available and permitted now | Agent application and execution infrastructure |
 
-| Component | Responsibility | Durable authority |
-| --- | --- | --- |
-| QilbeeDB artifact service | Store source, schemas, dependencies, content digest and parent/repair provenance | Immutable artifact revision and lineage |
-| QilbeeDB development service | Receive development/repair requests; coordinate configured generation and testing services | Request, candidate, captured failure and cancellation history |
-| QilbeeDB evaluation/publication service | Register comparisons, validate context/evidence, decide releases and rollback | One policy-versioned decision and exact approved artifact |
-| QilbeeDB execution gateway | Authorize invocation, reserve idempotent identity, dispatch, query and cancel | Durable invocation receipt and current known state |
-| Remote isolated executors | Run an exact artifact under configured permissions and resource limits | Execution evidence returned under authenticated worker identity |
-| Client SDK or QMN adapter | Propose, discover, invoke and render status/results | No independent publication decision or hidden execution authority |
+Persisting evidence does not make the database the owner of the business process.
+A knowledge qualification decision is not permission to publish or execute code.
 
-The database process does not import learned Python modules, spawn arbitrary
-learned programs, or share its filesystem/credentials with their runtime. A
-gateway and development worker can be independently deployed server services
-under the QilbeeDB API and authority. Absorption does not require running every
-service in the same process or container.
+## Existing capabilities and compatibility
 
-## Artifact and evidence contracts
+The [Learned Tool API](../api/learned-tools.md) currently exposes source-text
+artifacts, executor profiles and development outcome records. These existing
+interfaces remain documented for compatibility. They are not prerequisites for
+ordinary memory or procedural knowledge, and their existence does not establish
+the intended ownership of future capabilities. They do not dispatch programs or
+publish executable releases.
 
-Every candidate must identify tenant, authorized scope, immutable source digest,
-input/output schemas, runtime/dependency identity, originating request, parent
-revision and applicable policy. A repair creates a new artifact and preserves
-its failure evidence; it never silently edits a published version.
+The previous architecture that assigned development, packaging and an execution
+gateway to QilbeeDB is superseded. Any migration or removal of existing interfaces
+requires usage assessment, an explicit compatibility plan and agreement with
+affected consumers. This document does not remove endpoints or migrate records.
 
-Evaluation binds the exact baseline, candidate, tasks, model/provider, tools,
-environment, evaluator/harness, permissions and executor image. Reject unknown
-policy versions and mismatched references. Incomplete, rejected, cancelled and
-unknown-consumption outcomes remain distinguishable records. Unknown token or
-resource use cannot become zero cost or positive efficacy evidence.
+The [Procedural Learning API](../api/procedural-learning.md) already supports
+instructions, source references and immutable evaluation contexts. Contexts can
+identify external tool revisions without storing executable code. An exact
+revision string is a declared identity, not independent proof of an external
+artifact's existence, integrity or current availability. A schema or catalog
+revision identifies an offered interface; it must not be presented as an
+executable implementation revision.
 
-A published tool references exactly one accepted decision under a supported
-policy. A rollback changes the release pointer to a specific previously approved
-revision and preserves history. Proposing, evaluating, publishing, administering
-policy and invoking are separately authorized actions. The current API separately authorizes artifact/development writes, worker
-reports, reads and executor administration. Publication and invocation
-capabilities will accompany their implementations and tests.
+## Evidence and current observations
 
-## Invocation and uncertainty
+Useful knowledge should identify its originating observations and applicable
+context. Comparisons must distinguish the baseline, candidate instructions,
+model, tools, dataset, harness, environment and permissions. A standalone tool
+comparison and an entire agent-task comparison answer different questions; do
+not silently substitute one identity or claim for the other.
 
-An invocation binds tenant, scope, caller, invocation ID, exact release revision,
-artifact digest, input digest and execution policy. The gateway persists its
-reservation before dispatch. Identical retries return the same operation state;
-a changed request under the same invocation ID conflicts.
+A historical receipt records what was accepted at that time. A current read must
+distinguish qualification state from the current validity of source memories.
+Updated, rejected, deleted or expired evidence can invalidate reuse. Expiry may
+occur without a change-feed event. Incomplete traversal, missing evidence and
+unknown resource consumption must remain explicit, never counted as success.
 
-A network timeout or gateway restart can leave execution outcome unknown. In
-that case the API must expose `pending_or_unknown` or an equally explicit state,
-keep resource use unknown when unverified, and avoid automatic redispatch that
-could duplicate external effects. Reconciliation queries the original worker
-operation. A cancellation request is not proof that execution stopped; terminal
-cancellation requires evidence from the executor or an explicit policy outcome.
+The additional generic contract binding procedural knowledge to exact memory
+source revisions is under cross-team review. Its fields and endpoints are not
+available contracts. The unpublished artifact-dependent candidate design is
+suspended; no code registration or executor profile should be required by its
+replacement.
 
-Composition binds exact component artifacts and records each child receipt and
-failure. Unknown or cancelled child execution cannot silently become aggregate
-success. Tool availability and efficacy do not grant execution permissions.
+Knowledge inspection does not reserve execution or eliminate the race between
+inspection and use. Current business authorization and execution recovery remain
+application responsibilities. The database must not fetch arbitrary external
+locations or invoke code merely to inspect a knowledge reference.
 
-## Reference evidence from QMN
+## Ownership review before implementation
 
-Read-only inspection at `qilbee-ecosystem` revision
-`66cf421f68fa380aeffccb8fa84d8cfbeca3f5c6` found these concrete contracts:
+Before adding a capability, identify the user need, existing owner, alternatives,
+data and decision authority, security boundaries and lifecycle responsibilities.
+Database persistence alone is not sufficient justification for database ownership.
 
-- The [program gateway](https://github.com/aicubetechnology/qilbee-ecosystem/blob/66cf421f68fa380aeffccb8fa84d8cfbeca3f5c6/services/qmn/services/shared/program_gateway.py)
-  binds tenant/project/invocation identity to an expected release and artifact,
-  persists reservation and exposes unknown state without automatic redispatch.
-- The [worker transport](https://github.com/aicubetechnology/qilbee-ecosystem/blob/66cf421f68fa380aeffccb8fa84d8cfbeca3f5c6/services/qmn/services/shared/program_transport.py)
-  keeps worker credentials server-side, validates private credential files,
-  constrains requests/responses and represents uncertain execution explicitly.
-- The [program evidence gate](https://github.com/aicubetechnology/qilbee-ecosystem/blob/66cf421f68fa380aeffccb8fa84d8cfbeca3f5c6/services/qmn/services/shared/program_experiments.py)
-  rejects invalid program/composition evidence and clears efficacy statistics
-  when the required execution proof is missing.
+When the change affects a shared boundary, both teams must explicitly agree on
+ownership, the integration contract, acceptance evidence and compatibility impact
+before implementing the dependent change. Silence is not agreement. Independent
+investigation and internal work may continue. Reopen the review when scope changes.
 
-These are source observations, not a claim that the complete QMN suite was run.
-Migration must preserve the observable contracts through QilbeeDB-owned tests,
-without retaining a mandatory QMN service or database connection.
-
-## Delivery and validation sequence
-
-1. Expose the procedural evaluation/publication contract with exact compatibility
-   and one decision authority, including rejected and incomplete evidence.
-2. Add the immutable artifact registry and development/repair receipts, with
-   provenance and separate credentials for development services.
-3. Add remote executor registration and invocation/status/cancel contracts.
-4. Validate paired program evidence, composition, publication and rollback.
-5. Run end-to-end tests from a lightweight client against the local Docker
-   platform and an independently isolated test executor.
-
-Acceptance includes cross-tenant denial, duplicate invocation prevention,
-changed-input conflicts, wrong-artifact and wrong-environment rejection,
-executor failure, gateway crash after dispatch, cancellation races, unavailable
-accounting, replay after restart, and rollback to an exact artifact. The client
-must remain usable without a compiler, local model, container daemon or local
-executor. The platform must start and serve its supported APIs with QMN absent.
+Validate source integrity, tenant and private-subject isolation, current state,
+recovery and bounded work independently of retrieval quality. Claims of better
+tool selection or agent capability additionally require comparative task evidence.
