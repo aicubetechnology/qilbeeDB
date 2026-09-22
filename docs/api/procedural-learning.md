@@ -34,9 +34,9 @@ proposal. Credential capability names grant no implicit additional permissions.
 | Method and endpoint | Capability | Result envelope |
 | --- | --- | --- |
 | `POST /api/v1/learning/policies` | `policy_admin` | `entry`: immutable policy registration |
-| `GET /api/v1/learning/policies/{id}` | `policy_admin` | `entry`: registered policy |
+| `GET /api/v1/learning/policies/{id}` | `learning_metadata_read` or `policy_admin` | `entry`: registered policy |
 | `POST /api/v1/learning/contexts` | `policy_admin` | `entry`: immutable context registration |
-| `GET /api/v1/learning/contexts/{id}` | `policy_admin` | `entry`: registered context |
+| `GET /api/v1/learning/contexts/{id}` | `learning_metadata_read` or `policy_admin` | `entry`: registered context |
 | `POST /api/v1/learning/proposals` | `procedure_propose` plus scope grant | `receipt`: original candidate registration |
 | `POST /api/v1/learning/procedures/read` | `memory_read` plus scope grant | `procedure`: original receipt and current record |
 | `POST /api/v1/learning/evaluations` | `procedure_evaluate` plus scope grant and policy evaluator subject | `receipt`: durable admission outcome |
@@ -250,3 +250,7 @@ request may finish during concurrent credential revocation. Unsupported schema
 or inconsistent binding/evaluation data fails explicitly. Deletion of procedural
 history, policy retirement, external trace verification and remote execution are
 separate capabilities outside this contract.
+
+Metadata reads are company-wide, unlike scoped memory reads.
+`learning_metadata_read` does not authorize registration, evaluation or memory
+mutation. It must be granted explicitly; existing credentials are unchanged.

@@ -34,6 +34,22 @@ an executor, or holding a tool-administration capability, is not a prerequisite.
 Inspection and selection share retrieval admission after authorization. Responses
 use `Cache-Control: no-store`.
 
+## Read-only client configuration
+
+A client that reads policy and evaluation-context definitions before selection
+needs `learning_metadata_read` in addition to `memory_read` with exact memory
+resource grants. The metadata capability permits GET policy/context reads for
+its authenticated company. **It is company-wide**: project, agent, mission and
+private-subject memory grants do not restrict these registry definitions.
+Grant it only when this visibility is intended, such as an isolated benchmark
+company. A product requiring project-isolated metadata needs a separate contract.
+
+This capability does not permit policy/context registration, proposals,
+evaluations, memory writes, reviews or credential administration. Existing
+`policy_admin` credentials retain their read behavior; existing credentials do
+not gain the new capability automatically. Do not add `policy_admin` to a
+read-only evaluator as a workaround. Revocation and expiry still apply.
+
 ## Immutable proposal
 
 Supply `id`, `policy_id`, `context_id`, `title`, `instructions`, `memory_sources`

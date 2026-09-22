@@ -32,6 +32,7 @@ Capabilities are independent; names do not imply other permissions:
 | `experience_read` | Read current attempts and immutable observation receipts in a granted scope |
 | `experience_write` | Register attempts with an immutable reporter binding in a granted scope |
 | `experience_report` | Record observations as the bound reporter subject in a granted scope |
+| `learning_metadata_read` | Read company-wide immutable policy/context definitions; memory scope grants do not narrow this authority |
 | `policy_admin` | Register and read immutable tenant policy/context contracts |
 | `tool_read` | Read artifacts and development records in a granted scope |
 | `tool_develop` | Register artifacts, request development and request cancellation in a granted scope |

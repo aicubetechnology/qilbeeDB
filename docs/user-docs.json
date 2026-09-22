@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Propose scoped knowledge, inspect current source evidence and select qualified procedures with explicit external tool identities.",
+      "description": "Select evidence-bound knowledge with exact source revisions, compatible tool identities and explicit read-only metadata authority.",
       "order": 106
     },
     {
