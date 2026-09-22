@@ -277,3 +277,11 @@ These checks apply before the runner accepts ranked IDs for relevance metrics.
 They establish response consistency, not that every lexical score or omitted
 candidate has been independently recomputed. A valid ordering alone does not
 prove retrieval quality or improved agent reasoning.
+
+The source-preview comparison tools also verify each returned semantic baseline
+score and hybrid semantic-channel score against the frozen external vectors,
+after float32 conversion. A contributing semantic channel must carry its exact
+frozen embedding receipt; a hybrid result without a semantic contribution must
+not attach one. See [semantic evidence verification](semantic-memory.md#verify-semantic-evidence-in-retrieval-comparisons)
+for tolerances and limits. This additional check does not establish global
+optimality of the ranking or validate omitted candidates.

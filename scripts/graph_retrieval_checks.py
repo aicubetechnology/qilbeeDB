@@ -17,6 +17,7 @@ from graph_evaluation_contract import (
     prepare_relations,
     relation_input,
     validate_page,
+    validate_ranking,
     verify_fixture_graph,
     verify_relations,
 )
@@ -393,13 +394,17 @@ class GraphPipelineChecks(unittest.TestCase):
             check(ascending)
         descending = copy.deepcopy(ascending)
         descending["page"]["hits"].reverse()
-        self.assertEqual(len(check(descending)), 2)
+        with self.assertRaises(ValueError):
+            check(descending)
+        validate_ranking(descending["page"]["hits"], "semantic", 1)
         for method, maximum in [("lexical", None), ("weighted_rrf_v1", 1 / 61), ("weighted_rrf_v2", 1 / 3)]:
             candidate = copy.deepcopy(result)
             candidate["ranking_version"] = "bm25_v1" if method == "lexical" else method
             candidate["page"].update(corpus_records=2, embedding_coverage="complete")
             if method in PROFILES:
                 candidate["page"]["ranking"] = PROFILES[method]
+                for hit in candidate["page"]["hits"]:
+                    hit["semantic"] = {"rank": 1, "score": 1.0, "contribution": maximum}
             for hit in candidate["page"]["hits"]:
                 hit["score"] = maximum if maximum is not None else 1.0
             def check_method(page):
@@ -416,7 +421,9 @@ class GraphPipelineChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             check(signed_zero)
         signed_zero["page"]["hits"].reverse()
-        self.assertEqual(len(check(signed_zero)), 2)
+        validate_ranking(signed_zero["page"]["hits"], "semantic", 1)
+        with self.assertRaises(ValueError):
+            check(signed_zero)
 
     def test_score_verifier_rejects_nonfinite_and_wrong_values(self):
         for bad in [float("nan"), float("inf"), None, "0.5", True, 0.7]:

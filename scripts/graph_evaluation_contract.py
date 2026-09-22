@@ -10,6 +10,7 @@ from evaluate_retrieval import (
     source_payload,
     validate_fixture,
 )
+from semantic_evidence import validate_semantic_evidence
 from import_musique_graph import document_graph
 
 
@@ -325,6 +326,9 @@ def validate_page(result, fixture, state, query, method, protocol):
         if embedding is not None and embedding != binding["embedding"]:
             raise ValueError("Embedding receipt differs from frozen binding")
         if not graph_mode:
+            validate_semantic_evidence(
+                hit, method, binding, query["vector"], documents[alias]["vector"]
+            )
             continue
         base, path = hit["base"], hit["graph"]
         if not base and not path:

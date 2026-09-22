@@ -20,6 +20,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
+from semantic_evidence import validate_semantic_evidence
 from retrieval_resources import container_resources, resource_delta
 
 MODES = ("lexical", "semantic", "hybrid")
@@ -582,6 +583,7 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
     ]
     state, tag = prepare(client, fixture, scope, state_path)
     verify_sources(client, fixture, state, tag)
+    documents_by_id = {d["id"]: d for d in fixture["documents"]}
     frozen = {
         entry["record_id"]: (alias, entry)
         for alias, entry in state["documents"].items()
@@ -663,6 +665,9 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
                     if hit.get("embedding") and hit["embedding"] != entry["embedding"]:
                         violations["stale_revision"] += 1
                         raise ValueError("Embedding evidence changed")
+                    validate_semantic_evidence(
+                        hit, mode, entry, query["vector"], documents_by_id[alias]["vector"]
+                    )
                 if repetition < 0:
                     continue
                 aliases = [frozen[id][0] for id in ids]
