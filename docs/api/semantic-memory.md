@@ -168,3 +168,29 @@ additional source reads in `dependency_work`; these are separate from candidate
 scan budgets. Exceeding the documented dependency limits fails the request.
 
 See [current retrieval candidates](retrieval-candidates.md) for the `current_records_v1` candidate plan, HTTP work headers, migration and remaining limits. Cosine scores remain unchanged.
+
+## Verify semantic evidence in retrieval comparisons
+
+**Availability: source preview for the comparison tools.** The HTTP cosine
+contract is unchanged. Updated comparison runners check returned cosine evidence
+against the frozen external vectors before accepting a query into a comparison.
+
+For every semantic hit, the embedding receipt must match the frozen receipt,
+including its model-space and source-revision binding. For a hybrid hit, a
+receipt is required exactly when a semantic contribution is present. The
+semantic channel score is cosine; the combined hybrid score is not.
+
+The check converts both external vectors to IEEE 754 float32, as the API does,
+and accumulates their dot product and norms in float64. It compares the reported
+cosine with relative tolerance `2e-6` and absolute tolerance `1e-9`. Missing or
+altered receipts, invalid vectors, nonnumeric scores, nonfinite scores and
+inconsistent cosines invalidate the comparison. The runner does not repair the
+response or silently discard invalid evidence to report a successful trial.
+
+These checks apply to the returned semantic hits and hybrid semantic channels
+in `scripts/evaluate_retrieval.py` and the corresponding baselines in
+`scripts/evaluate_graph_retrieval.py`. They do not reconstruct BM25 statistics,
+prove that every omitted candidate was ranked correctly, or establish agent
+reasoning improvements. Keep full-scan coverage, isolation, frozen-corpus
+verification and separate task evaluation as independent requirements. No
+embedding generation or provider credentials are required for these checks.
