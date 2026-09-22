@@ -2,10 +2,12 @@
 
 use crate::config::ServerConfig;
 use crate::http_server;
-use crate::security::{UserService, BootstrapService};
+use crate::http_work::HttpWork;
+use crate::security::{BootstrapService, UserService};
 use qilbee_core::{Error, Result};
 use qilbee_graph::Database;
 use std::sync::Arc;
+use tokio::sync::{Mutex, oneshot};
 use tokio::task::JoinHandle;
 use tracing::{info, warn};
 
@@ -20,8 +22,17 @@ pub struct Server {
     /// Running state
     running: std::sync::atomic::AtomicBool,
 
-    /// HTTP server handle
-    http_handle: std::sync::Mutex<Option<JoinHandle<()>>>,
+    /// Retained across cancellation of a caller waiting for stop.
+    lifecycle: Mutex<Option<Runtime>>,
+}
+
+struct Runtime {
+    shutdown: Option<oneshot::Sender<()>>,
+    http: Option<JoinHandle<std::io::Result<()>>>,
+    work: Arc<HttpWork>,
+    failure: Option<String>,
+    #[cfg(test)]
+    address: Option<std::net::SocketAddr>,
 }
 
 impl Server {
@@ -33,10 +44,7 @@ impl Server {
         if config.enable_legacy_http && config.auth_enabled {
             info!("Authentication is enabled, checking bootstrap status...");
             let user_service = Arc::new(UserService::new());
-            let bootstrap = BootstrapService::new(
-                config.data_dir.clone(),
-                user_service.clone(),
-            );
+            let bootstrap = BootstrapService::new(config.data_dir.clone(), user_service.clone());
 
             // Run bootstrap if needed
             if bootstrap.is_bootstrap_required()? {
@@ -51,7 +59,7 @@ impl Server {
             config,
             database: Arc::new(database),
             running: std::sync::atomic::AtomicBool::new(false),
-            http_handle: std::sync::Mutex::new(None),
+            lifecycle: Mutex::new(None),
         })
     }
 
@@ -70,69 +78,106 @@ impl Server {
         self.running.load(std::sync::atomic::Ordering::SeqCst)
     }
 
-    /// Start the server
+    /// Start the server. A draining or failed lifecycle cannot be restarted.
     pub async fn start(&self) -> Result<()> {
-        if self.is_running() {
-            return Err(Error::Configuration("Server already running".to_string()));
+        self.start_inner(None).await
+    }
+
+    async fn start_inner(&self, router_override: Option<axum::Router>) -> Result<()> {
+        let mut lifecycle = self.lifecycle.lock().await;
+        if lifecycle.is_some() {
+            return Err(Error::Configuration(
+                "Server is running or shutdown is incomplete".into(),
+            ));
         }
-
-        info!("Starting QilbeeDB server...");
-        info!("Data directory: {:?}", self.config.data_dir);
-
-        if self.config.enable_bolt {
-            info!("Bolt protocol enabled on port {}", self.config.bolt_port);
-            // TODO: Start Bolt listener
-        }
-
+        let work = Arc::new(HttpWork::default());
+        let mut runtime = Runtime {
+            shutdown: None,
+            http: None,
+            work: work.clone(),
+            failure: None,
+            #[cfg(test)]
+            address: None,
+        };
         if self.config.enable_http {
-            info!("HTTP API enabled on port {}", self.config.http_port);
-
-            // Start HTTP server
-            let router = if self.config.enable_legacy_http {
+            let router = if let Some(router) = router_override {
+                router
+            } else if self.config.enable_legacy_http {
                 warn!("Legacy HTTP mode enabled; platform credential and scope guarantees do not apply");
-                http_server::create_legacy_router(Arc::clone(&self.database))?
+                http_server::create_legacy_router(self.database.clone())?
             } else {
-                http_server::create_router(Arc::clone(&self.database))?
-            };
-            let addr = format!("0.0.0.0:{}", self.config.http_port);
-            let listener = tokio::net::TcpListener::bind(&addr)
+                http_server::create_router(self.database.clone())?
+            }.layer(axum::middleware::from_fn_with_state(work, crate::http_work::track));
+            let listener = tokio::net::TcpListener::bind(("0.0.0.0", self.config.http_port))
                 .await
-                .map_err(|e| Error::Io(e))?;
-
-            info!("HTTP server listening on {}", addr);
-
-            // Spawn HTTP server task
-            let handle = tokio::spawn(async move {
-                if let Err(e) = axum::serve(listener, router).await {
-                    warn!("HTTP server error: {}", e);
-                }
-            });
-
-            *self.http_handle.lock().unwrap() = Some(handle);
+                .map_err(Error::Io)?;
+            let address = listener.local_addr().map_err(Error::Io)?;
+            info!("HTTP server listening on {}", address);
+            let (shutdown, signal) = oneshot::channel();
+            runtime.shutdown = Some(shutdown);
+            runtime.http = Some(tokio::spawn(async move {
+                axum::serve(listener, router)
+                    .with_graceful_shutdown(async {
+                        let _ = signal.await;
+                    })
+                    .await
+            }));
+            #[cfg(test)]
+            {
+                runtime.address = Some(address);
+            }
         }
-
+        *lifecycle = Some(runtime);
         self.running
             .store(true, std::sync::atomic::Ordering::SeqCst);
-
         info!("QilbeeDB server started successfully");
         Ok(())
     }
 
-    /// Stop the server
+    /// Close HTTP admission, await accepted requests and blocking work, then flush.
+    /// There is no internal forced-abort deadline. Cancelling this waiter retains
+    /// the draining lifecycle so another stop call can finish it safely.
     pub async fn stop(&self) -> Result<()> {
-        if !self.is_running() {
-            return Err(Error::Configuration("Server not running".to_string()));
-        }
+        self.stop_with_flush(Database::flush).await
+    }
 
-        info!("Stopping QilbeeDB server...");
-
-        // Flush data
-        self.database.flush()?;
-
+    async fn stop_with_flush(&self, flush: impl FnOnce(&Database) -> Result<()>) -> Result<()> {
+        let mut lifecycle = self.lifecycle.lock().await;
+        let runtime = lifecycle
+            .as_mut()
+            .ok_or_else(|| Error::Configuration("Server not running".into()))?;
         self.running
             .store(false, std::sync::atomic::Ordering::SeqCst);
-
-        info!("QilbeeDB server stopped");
+        if let Some(shutdown) = runtime.shutdown.take() {
+            info!("Closing HTTP admission and waiting for accepted work");
+            let _ = shutdown.send(());
+        }
+        if let Some(http) = runtime.http.as_mut() {
+            let result = http.await;
+            // Retain the handle until it finishes. Dropping a stop waiter must
+            // neither detach drainage nor poll a completed handle a second time.
+            runtime.http = None;
+            runtime.failure = match result {
+                Ok(Ok(())) => None,
+                Ok(Err(error)) => Some(format!("HTTP shutdown failed: {error}")),
+                Err(error) => Some(format!("HTTP task failed: {error}")),
+            };
+        }
+        if let Some(failure) = &runtime.failure {
+            return Err(Error::Internal(failure.clone()));
+        }
+        runtime.work.wait_idle().await;
+        if runtime.work.panicked() {
+            let failure =
+                "An HTTP request or blocking worker panicked during this lifecycle".to_string();
+            runtime.failure = Some(failure.clone());
+            return Err(Error::Internal(failure));
+        }
+        // A flush failure retains the stopped-admission lifecycle for a retry;
+        // restart is permitted only after the complete stop succeeds.
+        flush(&self.database)?;
+        *lifecycle = None;
+        info!("QilbeeDB server stopped after HTTP drainage and flush");
         Ok(())
     }
 
@@ -142,6 +187,28 @@ impl Server {
     }
 }
 
+/// Wait for the operating system's normal termination signals.
+pub async fn shutdown_signal() -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        let mut terminate =
+            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+        tokio::select! {
+            result = tokio::signal::ctrl_c() => result,
+            signal = terminate.recv() => signal.ok_or_else(||
+                std::io::Error::other("Termination signal stream closed")),
+        }
+    }
+    #[cfg(not(unix))]
+    {
+        tokio::signal::ctrl_c().await
+    }
+}
+
+#[cfg(test)]
+#[path = "server_drain_tests.rs"]
+mod drain_tests;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -149,7 +216,7 @@ mod tests {
 
     fn create_test_server() -> (Server, TempDir) {
         let temp_dir = TempDir::new().unwrap();
-        let config = ServerConfig::for_development(temp_dir.path());
+        let config = ServerConfig::for_development(temp_dir.path()).http_port(0);
         let server = Server::new(config).unwrap();
         (server, temp_dir)
     }
