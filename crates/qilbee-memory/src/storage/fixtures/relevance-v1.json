@@ -1,0 +1,55 @@
+{
+  "raw_expected": {
+    "agent_id": "legacy-owner",
+    "consolidated": false,
+    "content": {
+      "context": null,
+      "data": null,
+      "embedding": null,
+      "primary": "Legacy relevance fixture",
+      "secondary": null
+    },
+    "episode_type": "Observation",
+    "event_time": "2023-11-14T22:13:20Z",
+    "id": "00000000-0000-0000-0000-00000000002a",
+    "invalidated_at": null,
+    "metadata": {
+      "inner": {}
+    },
+    "relevance": {
+      "access_count": 7,
+      "last_accessed": 1700000000200,
+      "score": 0.42
+    },
+    "transaction_time": "2023-11-14T22:13:20.100Z"
+  },
+  "raw_hex": "10000000000000000000000000000000000000000000002a0c000000000000006c65676163792d6f776e6572020000001400000000000000323032332d31312d31345432323a31333a32305a1800000000000000323032332d31312d31345432323a31333a32302e3130305a18000000000000004c65676163792072656c6576616e63652066697874757265000000000000000000000000e17a14ae47e1da3f07000000c868e5cf8b0100000000",
+  "source_revision": "35d0841cd0e54d7f0cad858448e74472a67a5336",
+  "v1_expected": {
+    "agent_id": "legacy-owner",
+    "consolidated": false,
+    "content": {
+      "context": null,
+      "data": {
+        "source": "synthetic fixture"
+      },
+      "embedding": null,
+      "primary": "Legacy relevance fixture",
+      "secondary": null
+    },
+    "episode_type": "Observation",
+    "event_time": "2023-11-14T22:13:20Z",
+    "id": "00000000-0000-0000-0000-00000000002a",
+    "invalidated_at": null,
+    "metadata": {
+      "inner": {}
+    },
+    "relevance": {
+      "access_count": 7,
+      "last_accessed": 1700000000200,
+      "score": 0.42
+    },
+    "transaction_time": "2023-11-14T22:13:20.100Z"
+  },
+  "v1_hex": "514d4550000110000000000000000000000000000000000000000000002a0c000000000000006c65676163792d6f776e6572020000001400000000000000323032332d31312d31345432323a31333a32305a1800000000000000323032332d31312d31345432323a31333a32302e3130305a18000000000000004c65676163792072656c6576616e63652066697874757265000000000000000000000000e17a14ae47e1da3f07000000c868e5cf8b0100000000011e000000000000007b22736f75726365223a2273796e7468657469632066697874757265227d"
+}
