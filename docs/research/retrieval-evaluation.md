@@ -238,3 +238,59 @@ Hardware may prevent a work/time cutoff; it does not establish better relevance
 when identical candidates are fully evaluated. Embedding generation cost and
 agent-task outcomes remain separate. An idle snapshot or the small synthetic
 contract fixture cannot establish a bottleneck or a production sizing target.
+
+
+### Compare two hardware conditions
+
+After collecting two complete reports on the same frozen corpus, use
+`scripts/compare_retrieval_hardware.py` to reject mismatched evidence before
+summarizing latency. Create one environment declaration per report:
+
+```json
+{
+  "schema_version": 1,
+  "report_sha256": "CANONICAL_REPORT_SHA256",
+  "image_digest": "sha256:IMMUTABLE_IMAGE_SHA256",
+  "environment_id": "isolated-host-and-vm-identity",
+  "background_workload": "declared concurrent workload",
+  "storage": "unchanged volume type, capacity and provisioned I/O",
+  "cpu": {"quota_usec": 200000, "period_usec": 100000},
+  "memory": 2147483648
+}
+```
+
+Replace placeholders with actual identities. `report_sha256` is the evaluator's
+canonical JSON digest (`evaluate_retrieval.digest`), not the digest of a
+pretty-printed file. Obtain CPU/memory values from the observed cgroup limits;
+`null` represents an unlimited memory quota. The CPU quota may also be `null`
+inside its quota/period object. Image, host, background workload and storage are
+operator declarations, not remote attestation. Preserve supporting deployment
+and hardware evidence separately.
+
+```bash
+python3 scripts/compare_retrieval_hardware.py \
+  --before /secure/path/before.json \
+  --after /secure/path/after.json \
+  --before-environment /secure/path/before-environment.json \
+  --after-environment /secure/path/after-environment.json \
+  --report /secure/path/hardware-comparison.json
+```
+
+The comparator requires the same corpus manifest, source revisions, scope,
+embedding space, server health/version, trial plan, conditions and metric
+semantics. Every query and method must retain its ranking, evidence, coverage
+counts and response payload digest (excluding only the top-level timing field).
+Raw response sizes remain recorded; a changed number of digits in a timing
+measurement must not be confused with changed content. Reports generated before
+this payload digest was added must be collected again; do not infer a missing
+digest from row-level summaries. It checks each sampled CPU/memory limit against the
+declaration and rejects container restarts, missing samples, invalid timings
+and duplicate rows. Exactly one of CPU, memory or declared storage may change;
+the image, environment and background-workload declarations must remain fixed.
+
+The output includes per-query p50/p95 retrieval and HTTP timings and report
+digests. These are descriptive matched samples, not a significance test or
+causal conclusion. Small repetition counts cannot estimate tail latency
+reliably. Use repeated interleaved baselines and a preregistered experiment for
+performance claims; this tool alone does not prove stable external workload,
+physical disk behavior, production capacity or improved agent performance.
