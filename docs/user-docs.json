@@ -441,6 +441,13 @@
       "title": "Native index reconstruction",
       "description": "Preserve the published native memory index across rebuild failures and cancellation.",
       "order": 1024
+    },
+    {
+      "source": "docs/architecture/native-vector-source.md",
+      "file": "native-vector-source.md",
+      "title": "Native vector source integrity",
+      "description": "Resolve native ANN results against matching episode sources and inspect discarded candidates.",
+      "order": 1034
     }
   ]
 }

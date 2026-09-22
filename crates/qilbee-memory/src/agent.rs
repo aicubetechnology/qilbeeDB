@@ -24,6 +24,24 @@ fn validate_episode_write(config: &MemoryConfig, episode: &Episode) -> Result<()
     Ok(())
 }
 
+/// Compare source identity and payload without treating access accounting as
+/// a content revision. NaN-bearing values fail equality conservatively.
+fn same_vector_source(indexed: &Episode, current: &Episode) -> bool {
+    indexed.id == current.id
+        && indexed.agent_id == current.agent_id
+        && indexed.episode_type == current.episode_type
+        && indexed.event_time == current.event_time
+        && indexed.transaction_time == current.transaction_time
+        && indexed.content.primary == current.content.primary
+        && indexed.content.secondary == current.content.secondary
+        && indexed.content.context == current.content.context
+        && indexed.content.data == current.content.data
+        && indexed.content.embedding == current.content.embedding
+        && indexed.metadata == current.metadata
+        && indexed.consolidated == current.consolidated
+        && indexed.invalidated_at == current.invalidated_at
+}
+
 /// Statistics about agent memory
 #[derive(Debug, Clone)]
 pub struct MemoryStatistics {
@@ -402,6 +420,22 @@ pub struct SemanticSearchResult {
     pub score: f32,
 }
 
+/// Native ANN candidate resolution accounting, not an exhaustive corpus scan.
+#[derive(Debug, Clone)]
+pub struct NativeSemanticSearchReport {
+    pub results: Vec<SemanticSearchResult>,
+    /// Records present in the index when candidate selection started.
+    pub indexed_records: usize,
+    /// ANN hits selected, before source resolution. Not graph nodes examined.
+    pub candidates_selected: usize,
+    pub unbound_candidates: usize,
+    pub missing_sources: usize,
+    pub invalid_sources: usize,
+    pub mismatched_sources: usize,
+    /// Always false: HNSW and post-selection validation are not exhaustive.
+    pub exhaustive: bool,
+}
+
 /// Hybrid search result containing episode and combined score
 #[derive(Debug, Clone)]
 pub struct HybridSearchResult {
@@ -477,6 +511,8 @@ pub struct PersistentAgentMemory {
 
     /// Serializes native index preparation and publication across clones.
     index_mutation: Arc<tokio::sync::Mutex<()>>,
+    /// Sources are read/written while holding the index lock first.
+    vector_sources: Arc<RwLock<HashMap<String, Arc<Episode>>>>,
 
     /// Semantic search configuration
     semantic_config: Option<SemanticSearchConfig>,
@@ -502,6 +538,7 @@ impl PersistentAgentMemory {
             embedding_provider: None,
             vector_index: None,
             index_mutation: Arc::new(tokio::sync::Mutex::new(())),
+            vector_sources: Arc::new(RwLock::new(HashMap::new())),
             semantic_config: None,
         })
     }
@@ -518,6 +555,7 @@ impl PersistentAgentMemory {
             embedding_provider: None,
             vector_index: None,
             index_mutation: Arc::new(tokio::sync::Mutex::new(())),
+            vector_sources: Arc::new(RwLock::new(HashMap::new())),
             semantic_config: None,
         }
     }
@@ -534,6 +572,7 @@ impl PersistentAgentMemory {
             embedding_provider: None,
             vector_index: None,
             index_mutation: Arc::new(tokio::sync::Mutex::new(())),
+            vector_sources: Arc::new(RwLock::new(HashMap::new())),
             semantic_config: None,
         }
     }
@@ -553,6 +592,7 @@ impl PersistentAgentMemory {
 
         self.embedding_provider = Some(provider);
         self.vector_index = Some(Arc::new(RwLock::new(index)));
+        self.vector_sources = Arc::new(RwLock::new(HashMap::new()));
         self.semantic_config = Some(semantic_config);
 
         Ok(self)
@@ -899,6 +939,9 @@ impl PersistentAgentMemory {
     /// Index an episode in the vector index
     pub async fn index_episode(&self, episode: &Episode) -> Result<()> {
         let _mutation = self.index_mutation.lock().await;
+        if episode.agent_id != self.config.agent_id || !episode.is_valid() {
+            return Err(Error::ValidationError("Only valid episodes owned by this agent may be indexed".into()));
+        }
         let index = self.vector_index.as_ref().ok_or_else(|| {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
@@ -920,6 +963,10 @@ impl PersistentAgentMemory {
             Error::Internal(format!("Failed to insert into vector index: {}", e))
         })?;
 
+        self.vector_sources.write().map_err(|_| {
+            Error::Internal("Failed to acquire vector source lock".into())
+        })?.insert(episode.id.to_string(), Arc::new(episode.clone()));
+
         debug!(
             "Indexed episode {} for agent {}",
             episode.id, self.config.agent_id
@@ -939,9 +986,13 @@ impl PersistentAgentMemory {
             Error::Internal("Failed to acquire vector index lock".to_string())
         })?;
 
-        index_guard.remove(&episode_id.to_string()).map_err(|e| {
+        let removed = index_guard.remove(&episode_id.to_string()).map_err(|e| {
             Error::Internal(format!("Failed to remove from vector index: {}", e))
-        })
+        })?;
+        self.vector_sources.write().map_err(|_| {
+            Error::Internal("Failed to acquire vector source lock".into())
+        })?.remove(&episode_id.to_string());
+        Ok(removed)
     }
 
     /// Search for semantically similar episodes using a text query
@@ -965,23 +1016,49 @@ impl PersistentAgentMemory {
         embedding: &[f32],
         limit: usize,
     ) -> Result<Vec<SemanticSearchResult>> {
+        Ok(self.search_by_embedding_report(embedding, limit).await?.results)
+    }
+
+    /// Search with explicit accounting for candidates rejected at resolution.
+    pub async fn search_by_embedding_report(
+        &self,
+        embedding: &[f32],
+        limit: usize,
+    ) -> Result<NativeSemanticSearchReport> {
         let index = self.vector_index.as_ref().ok_or_else(|| {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
 
-        // Release the synchronous index lock before awaiting storage reads.
-        let search_results = {
+        // Capture vector/source pairs from the same index observation, then
+        // release synchronous guards before resolving authoritative storage.
+        let (indexed_records, search_results) = {
             let index_guard = index.read().map_err(|_| {
-                Error::Internal("Failed to acquire vector index lock".to_string())
+                Error::Internal("Failed to acquire vector index lock".into())
             })?;
-            index_guard.search(embedding, limit).map_err(|e| {
+            let ranked = index_guard.search(embedding, limit).map_err(|e| {
                 Error::Internal(format!("Failed to search vector index: {}", e))
-            })?
+            })?;
+            let sources = self.vector_sources.read().map_err(|_| {
+                Error::Internal("Failed to acquire vector source lock".into())
+            })?;
+            let pairs = ranked.into_iter().map(|hit| {
+                let source = sources.get(&hit.id).map(Arc::clone);
+                (hit, source)
+            }).collect::<Vec<_>>();
+            (index_guard.len(), pairs)
         };
 
-        // Convert search results to SemanticSearchResult
-        let mut results = Vec::new();
-        for result in search_results {
+        let mut report = NativeSemanticSearchReport {
+            results: Vec::new(), indexed_records,
+            candidates_selected: search_results.len(), unbound_candidates: 0,
+            missing_sources: 0, invalid_sources: 0, mismatched_sources: 0,
+            exhaustive: false,
+        };
+        for (result, indexed_source) in search_results {
+            let Some(indexed_source) = indexed_source else {
+                report.unbound_candidates += 1;
+                continue;
+            };
             // Parse episode ID from the stored key (it's stored as a UUID string)
             let uuid = uuid::Uuid::parse_str(&result.id).map_err(|_| {
                 Error::Internal(format!("Invalid episode ID in vector index: {}", result.id))
@@ -995,16 +1072,22 @@ impl PersistentAgentMemory {
                 .await
                 .map_err(|e| Error::Storage(format!("Failed to get episode: {}", e)))?
             {
-                if episode.is_valid() {
+                if !episode.is_valid() || episode.agent_id != self.config.agent_id {
+                    report.invalid_sources += 1;
+                } else if !same_vector_source(&indexed_source, &episode) {
+                    report.mismatched_sources += 1;
+                } else {
                     // Convert distance to similarity score
                     // For cosine distance: distance = 1 - similarity, so similarity = 1 - distance
                     let score = 1.0 - result.distance;
-                    results.push(SemanticSearchResult { episode, score });
+                    report.results.push(SemanticSearchResult { episode, score });
                 }
+            } else {
+                report.missing_sources += 1;
             }
         }
 
-        Ok(results)
+        Ok(report)
     }
 
     /// Find episodes similar to a given episode
@@ -1048,22 +1131,34 @@ impl PersistentAgentMemory {
             Error::Internal("Failed to acquire vector index lock".into())
         })?.config().clone();
         let mut candidate = HnswIndex::new(config);
+        let mut candidate_sources = HashMap::new();
         let episodes = self.get_all_episodes().await?;
         let mut indexed_count = 0;
         for episode in episodes {
+            if episode.agent_id != self.config.agent_id || !episode.is_valid() {
+                return Err(Error::ValidationError("Rebuild source must belong to this agent and be valid".into()));
+            }
             let text = format!("{} {}", episode.content.primary,
                 episode.content.secondary.as_deref().unwrap_or(""));
             let embedding = self.generate_embedding(&text).await?;
             candidate.insert(episode.id.to_string(), embedding).map_err(|e| {
                 Error::Internal(format!("Failed to prepare rebuilt vector index: {}", e))
             })?;
+            candidate_sources.insert(episode.id.to_string(), Arc::new(episode));
             indexed_count += 1;
         }
         // No await between replacement and return: cancellation before this
         // point drops only the unpublished candidate and releases the gate.
-        *index.write().map_err(|_| {
-            Error::Internal("Failed to acquire vector index lock".into())
-        })? = candidate;
+        {
+            let mut published = index.write().map_err(|_| {
+                Error::Internal("Failed to acquire vector index lock".into())
+            })?;
+            let mut sources = self.vector_sources.write().map_err(|_| {
+                Error::Internal("Failed to acquire vector source lock".into())
+            })?;
+            *published = candidate;
+            *sources = candidate_sources;
+        }
 
         info!(
             "Rebuilt vector index for agent {}: {} episodes indexed",
@@ -1234,6 +1329,7 @@ impl Clone for PersistentAgentMemory {
             embedding_provider: self.embedding_provider.as_ref().map(Arc::clone),
             vector_index: self.vector_index.as_ref().map(Arc::clone),
             index_mutation: Arc::clone(&self.index_mutation),
+            vector_sources: Arc::clone(&self.vector_sources),
             semantic_config: self.semantic_config.clone(),
         }
     }
@@ -1906,12 +2002,14 @@ mod tests {
         memory.index_episode(&episode).await.unwrap();
         let entered = Arc::new(tokio::sync::Notify::new());
         memory.embedding_provider = Some(Arc::new(PausedRebuildProvider { entered: entered.clone() }));
+        let previous_source = Arc::clone(&memory.vector_sources.read().unwrap()[&episode.id.to_string()]);
         let mut rebuild = Box::pin(memory.rebuild_vector_index());
         tokio::select! {
             result = &mut rebuild => panic!("Rebuild unexpectedly completed: {result:?}"),
             _ = entered.notified() => {},
         }
         drop(rebuild);
+        assert!(Arc::ptr_eq(&previous_source, &memory.vector_sources.read().unwrap()[&episode.id.to_string()]));
         assert_eq!(memory.vector_index_size().unwrap(), 1, "Cancellation must retain the published index");
         assert!(tokio::time::timeout(std::time::Duration::from_secs(2),
             memory.unindex_episode(episode.id)).await.unwrap().unwrap());
@@ -1989,6 +2087,7 @@ mod tests {
             memory.store_episode(episode.clone()).await.unwrap();
             memory.index_episode(&episode).await.unwrap();
         }
+        let source_before = memory.vector_sources.read().unwrap().clone();
         let before = memory.vector_index.as_ref().unwrap().read().unwrap().to_bytes().unwrap();
         let provider = Arc::new(PartialInvalidRebuildProvider(std::sync::atomic::AtomicUsize::new(0)));
         memory.embedding_provider = Some(provider.clone());
@@ -1996,6 +2095,11 @@ mod tests {
         assert_eq!(provider.0.load(std::sync::atomic::Ordering::SeqCst), 4);
         let after = memory.vector_index.as_ref().unwrap().read().unwrap().to_bytes().unwrap();
         assert_eq!(before, after);
+        let source_after = memory.vector_sources.read().unwrap();
+        assert_eq!(source_before.len(), source_after.len());
+        for (id, source) in source_before {
+            assert!(Arc::ptr_eq(&source, &source_after[&id]));
+        }
     }
 
     #[tokio::test]
@@ -2050,6 +2154,128 @@ mod tests {
         assert_eq!(first.await.unwrap().unwrap(), 1);
         assert_eq!(second.await.unwrap(), 0);
         assert_eq!(memory.vector_index_size().unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn native_search_does_not_attach_old_vector_score_to_replaced_content() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("source-agent"))
+            .with_mock_semantic_search(8).unwrap();
+        let mut episode = Episode::conversation("source-agent", "old source", "old answer");
+        memory.store_episode(episode.clone()).await.unwrap();
+        memory.index_episode(&episode).await.unwrap();
+        let query = memory.generate_embedding("old source old answer").await.unwrap();
+        assert_eq!(memory.search_by_embedding(&query, 1).await.unwrap().len(), 1);
+        episode.content.primary = "unrelated replacement".into();
+        memory.storage().update_episode("source-agent", &episode).await.unwrap();
+        assert!(memory.search_by_embedding(&query, 1).await.unwrap().is_empty(),
+            "A vector from old content must not rank the replacement as its source");
+    }
+
+    #[tokio::test]
+    async fn native_index_rejects_foreign_agent_episode_before_insertion() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("owner-agent"))
+            .with_mock_semantic_search(8).unwrap();
+        let foreign = Episode::conversation("other-agent", "foreign source", "answer");
+        assert!(memory.index_episode(&foreign).await.is_err());
+        assert_eq!(memory.vector_index_size().unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn native_source_binding_tracks_provenance_but_not_access_counters() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("binding-agent"))
+            .with_mock_semantic_search(8).unwrap();
+        let original = Episode::conversation("binding-agent", "source", "answer");
+        memory.store_episode(original.clone()).await.unwrap();
+        memory.index_episode(&original).await.unwrap();
+        let query = memory.generate_embedding("source answer").await.unwrap();
+        memory.get_episode(original.id).await.unwrap();
+        assert_eq!(memory.search_by_embedding(&query, 1).await.unwrap().len(), 1);
+        for case in 0..5 {
+            let mut changed = original.clone();
+            match case {
+                0 => changed.content.secondary = Some("new answer".into()),
+                1 => changed.content.context = Some("new context".into()),
+                2 => changed.set_metadata("origin", "another source"),
+                3 => changed.consolidated = true,
+                _ => changed.content.data = Some(serde_json::json!({"origin": "changed"})),
+            }
+            memory.storage().update_episode("binding-agent", &changed).await.unwrap();
+            assert!(memory.search_by_embedding(&query, 1).await.unwrap().is_empty(), "case {case}");
+            memory.index_episode(&changed).await.unwrap();
+            assert_eq!(memory.search_by_embedding(&query, 1).await.unwrap().len(), 1);
+            memory.storage().update_episode("binding-agent", &original).await.unwrap();
+            memory.index_episode(&original).await.unwrap();
+        }
+        let mut invalid = original.clone();
+        invalid.invalidate();
+        assert!(memory.index_episode(&invalid).await.is_err());
+        memory.storage().update_episode("binding-agent", &invalid).await.unwrap();
+        assert!(memory.search_by_embedding(&query, 1).await.unwrap().is_empty());
+        memory.storage().delete_episode("binding-agent", original.id).await.unwrap();
+        assert!(memory.search_by_embedding(&query, 1).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn native_source_report_accounts_for_every_selected_candidate() {
+        let memory = PersistentAgentMemory::in_memory(MemoryConfig::new("report-agent"))
+            .with_mock_semantic_search(8).unwrap();
+        let mut episodes = Vec::new();
+        for _ in 0..5 {
+            let ep = Episode::conversation("report-agent", "same source", "same answer");
+            memory.store_episode(ep.clone()).await.unwrap();
+            memory.index_episode(&ep).await.unwrap();
+            episodes.push(ep);
+        }
+        memory.storage().delete_episode("report-agent", episodes[1].id).await.unwrap();
+        episodes[2].invalidate();
+        memory.storage().update_episode("report-agent", &episodes[2]).await.unwrap();
+        episodes[3].content.primary = "changed".into();
+        memory.storage().update_episode("report-agent", &episodes[3]).await.unwrap();
+        memory.vector_sources.write().unwrap().remove(&episodes[4].id.to_string());
+        let query = memory.generate_embedding("same source same answer").await.unwrap();
+        let report = memory.search_by_embedding_report(&query, 5).await.unwrap();
+        assert_eq!(report.indexed_records, 5);
+        assert_eq!(report.candidates_selected, 5);
+        assert_eq!(report.results.len(), 1);
+        assert_eq!(report.results[0].episode.id, episodes[0].id);
+        assert_eq!(report.unbound_candidates, 1);
+        assert_eq!(report.missing_sources, 1);
+        assert_eq!(report.invalid_sources, 1);
+        assert_eq!(report.mismatched_sources, 1);
+        assert!(!report.exhaustive);
+        assert_eq!(report.candidates_selected, report.results.len() + report.unbound_candidates
+            + report.missing_sources + report.invalid_sources + report.mismatched_sources);
+    }
+
+    #[tokio::test]
+    async fn native_rebuild_binds_loaded_source_without_claiming_publication_snapshot() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("racing-source"))
+            .with_mock_semantic_search(2).unwrap();
+        let mut episode = Episode::conversation("racing-source", "original", "answer");
+        memory.store_episode(episode.clone()).await.unwrap();
+        memory.index_episode(&episode).await.unwrap();
+        let updater = memory.clone();
+        let entered = Arc::new(tokio::sync::Notify::new());
+        let release = Arc::new(tokio::sync::Semaphore::new(0));
+        memory.embedding_provider = Some(Arc::new(ControlledRebuildProvider {
+            entered: entered.clone(), release: release.clone(),
+        }));
+        let builder = memory.clone();
+        let rebuild = tokio::spawn(async move { builder.rebuild_vector_index().await });
+        tokio::time::timeout(std::time::Duration::from_secs(2), entered.notified()).await.unwrap();
+        episode.content.primary = "changed during preparation".into();
+        updater.storage().update_episode("racing-source", &episode).await.unwrap();
+        release.add_permits(1);
+        assert_eq!(rebuild.await.unwrap().unwrap(), 1);
+        let report = memory.search_by_embedding_report(&[1.0, 0.0], 1).await.unwrap();
+        assert_eq!(report.candidates_selected, 1);
+        assert_eq!(report.mismatched_sources, 1);
+        assert_eq!(report.unbound_candidates, 0);
+        assert!(report.results.is_empty());
+        updater.index_episode(&episode).await.unwrap();
+        let report = memory.search_by_embedding_report(&[1.0, 0.0], 1).await.unwrap();
+        assert_eq!(report.results.len(), 1);
+        assert_eq!(report.mismatched_sources, 0);
     }
 
 }
