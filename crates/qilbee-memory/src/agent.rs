@@ -537,7 +537,8 @@ impl PersistentAgentMemory {
         let provider = create_provider(semantic_config.embedding_config.clone())
             .map_err(|e| Error::Internal(format!("Failed to create embedding provider: {}", e)))?;
 
-        let index = HnswIndex::new(semantic_config.hnsw_config.clone());
+        let index = HnswIndex::try_new(semantic_config.hnsw_config.clone())
+            .map_err(|e| Error::MemoryOperation(format!("Invalid vector index configuration: {}", e)))?;
 
         info!(
             "Enabled semantic search for agent '{}' with {} dimensions",

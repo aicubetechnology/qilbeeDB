@@ -434,6 +434,13 @@
       "title": "Property index equality and upgrades",
       "description": "Migrate graph property indexes with canonical equality, interruption recovery and explicit rollback requirements.",
       "order": 133
+    },
+    {
+      "source": "docs/architecture/native-vector-integrity.md",
+      "file": "native-vector-integrity.md",
+      "title": "Native vector index integrity",
+      "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
+      "order": 1024
     }
   ]
 }
