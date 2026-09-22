@@ -450,10 +450,10 @@
       "order": 1034
     },
     {
-      "source": "docs/architecture/native-vector-integrity.md",
-      "file": "native-vector-integrity.md",
-      "title": "Native vector index integrity",
-      "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
+      "source": "docs/agent-memory/relevance-accounting.md",
+      "file": "native-relevance-accounting.md",
+      "title": "Native relevance accounting",
+      "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
       "order": 1044
     },
     {
@@ -471,10 +471,10 @@
       "order": 1064
     },
     {
-      "source": "docs/agent-memory/relevance-accounting.md",
-      "file": "native-relevance-accounting.md",
-      "title": "Native relevance accounting",
-      "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
+      "source": "docs/architecture/native-vector-integrity.md",
+      "file": "native-vector-integrity.md",
+      "title": "Native vector index integrity",
+      "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
       "order": 1074
     }
   ]
