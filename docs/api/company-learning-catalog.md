@@ -179,8 +179,9 @@ Keep raw identifiers and exact contract JSON in advanced details. Show loading,
 empty-filtered, incomplete, failed and successful states distinctly, and provide
 keyboard operation, predictable focus and a path back to the list.
 
-This inventory covers the eight kinds above. It does not yet enumerate evaluation
-cases, experience history events, or memory consumer checkpoints. Their existing
-contracts remain available, but their routine human discovery remains product
-work. The private console's complete journey must be validated against the
-deployed endpoints before claiming that its management screens are complete.
+This inventory covers the eight parent resource kinds above. The unreleased
+[learning evidence history](learning-evidence-history.md) adds bounded discovery
+of evaluation submissions, paired comparisons, experience observations and
+development events for a selected parent. Memory consumer checkpoint discovery
+remains separate product work. Qualify each private console journey against the
+exact deployed endpoints before claiming that its management screens are complete.

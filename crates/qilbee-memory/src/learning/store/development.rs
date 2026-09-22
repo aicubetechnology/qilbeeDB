@@ -285,10 +285,116 @@ impl LearningMemory {
                         "Development event identity or revision mismatch".into(),
                     ));
                 }
-                self.verify_development(tenant, namespace, id, &receipt.record)?;
+                let executor = self.verify_development(tenant, namespace, id, &receipt.record)?;
+                self.verify_development_event(tenant, namespace, id, &receipt, &executor)?;
                 Ok(receipt)
             })
             .transpose()
+    }
+    fn verify_development_event(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        event: &ToolDevelopmentEvent,
+        executor: &ToolExecutor,
+    ) -> Result<()> {
+        let corrupt = || {
+            Error::DataCorruption(
+                "Development command, actor or recorded outcome is inconsistent".into(),
+            )
+        };
+        event.actor.validate().map_err(|_| corrupt())?;
+        if event.command.expected_revision == 0 {
+            return Err(corrupt());
+        }
+        let r = &event.record;
+        let expected = match &event.command.action {
+            ToolDevelopmentAction::RequestCancellation { reason } => {
+                validate_text(reason, "cancellation reason", 2048).map_err(|_| corrupt())?;
+                if event.actor.subject_id != r.receipt.actor.subject_id {
+                    return Err(corrupt());
+                }
+                (
+                    ToolDevelopmentState::CancellationRequested,
+                    "cancellation_requested",
+                )
+            }
+            ToolDevelopmentAction::Report { report } => {
+                validate_text(&report.evidence_ref, "worker evidence", 2048)
+                    .map_err(|_| corrupt())?;
+                if let Some(detail) = &report.detail {
+                    validate_text(detail, "worker detail", 8192).map_err(|_| corrupt())?;
+                }
+                if event.actor.subject_id != executor.profile.subject_id
+                    || report.executor_profile_digest != executor.profile_digest
+                    || report.cost_units != r.cost_units
+                    || report.latency_ms != r.latency_ms
+                    || report
+                        .cost_units
+                        .is_some_and(|v| Some(v) != r.observed_cost_units)
+                    || report
+                        .latency_ms
+                        .is_some_and(|v| Some(v) != r.observed_latency_ms)
+                    || (report.outcome != ToolReportOutcome::Succeeded && report.artifact.is_some())
+                {
+                    return Err(corrupt());
+                }
+                let pending = if r.state == ToolDevelopmentState::CancellationRequested {
+                    ToolDevelopmentState::CancellationRequested
+                } else {
+                    ToolDevelopmentState::PendingOrUnknown
+                };
+                match report.outcome {
+                    ToolReportOutcome::Failed => {
+                        (ToolDevelopmentState::Failed, "worker_reported_failure")
+                    }
+                    ToolReportOutcome::Cancelled => (
+                        ToolDevelopmentState::Cancelled,
+                        "worker_confirmed_cancellation",
+                    ),
+                    ToolReportOutcome::PendingOrUnknown => (pending, "worker_outcome_unknown"),
+                    ToolReportOutcome::Succeeded => {
+                        let proposal = report.artifact.as_ref().ok_or_else(corrupt)?;
+                        proposal.validate().map_err(|_| corrupt())?;
+                        if proposal.runtime_image_digest != executor.profile.runtime_image_digest
+                            || proposal.parent_artifact_id != r.receipt.request.parent_artifact_id
+                            || proposal.repair_evidence_ref != r.receipt.request.repair_evidence_ref
+                            || !proposal.source_refs.contains(&format!("development:{id}"))
+                        {
+                            return Err(corrupt());
+                        }
+                        if report
+                            .cost_units
+                            .is_some_and(|v| v > executor.profile.max_cost_units)
+                            || report
+                                .latency_ms
+                                .is_some_and(|v| v > executor.profile.max_latency_ms)
+                        {
+                            (ToolDevelopmentState::Failed, "resource_limit_exceeded")
+                        } else if report.cost_units.is_none() || report.latency_ms.is_none() {
+                            (pending, "unknown_consumption")
+                        } else {
+                            let stored = self
+                                .tool_artifact(tenant, namespace, &proposal.id)?
+                                .ok_or_else(corrupt)?;
+                            if &stored.proposal != proposal
+                                || r.artifact_id.as_deref() != Some(&proposal.id)
+                            {
+                                return Err(corrupt());
+                            }
+                            (ToolDevelopmentState::Succeeded, "worker_reported_success")
+                        }
+                    }
+                }
+            }
+        };
+        if (r.state, r.reason.as_str()) != expected {
+            return Err(corrupt());
+        }
+        // This checks the local receipt and its immutable bindings, not every
+        // preceding transition or effects on an external execution server.
+        Ok(())
     }
     /// Persist one command and its resulting state in the same synchronous batch.
     pub fn apply_tool_development(

@@ -19323,6 +19323,368 @@
           }
         }
       }
+    },
+    "/api/v1/company/learning/evidence/query": {
+      "post": {
+        "operationId": "companyLearningEvidenceQuery",
+        "summary": "Discover historical evidence for a company learning resource",
+        "tags": [
+          "Company learning administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority, derived from the bearer credential. Select a canonical resource from the company learning catalog; no delegated writer credential is issued. Procedure and strategy selections support evaluation_submission and paired_evaluation; experiences support experience_event; development requests support tool_development_event. A historical outcome is not current approval or an independently verified success. Requests have the 65,536-byte body limit; responses are not cached. Bounded live pages in storage-key order, not chronological order, a snapshot, a journal or a restore witness. The exact cursor binds company, full parent selection, evidence kind and text. Empty filtered pages may continue. Limits are 50 entries, 1000 primary records and 4 MiB of primary keys/values; dependency verification is excluded from primary counters. Text matches displayed title, evidence ID or status case-insensitively. Missing parent is 404; integrity failures fail the whole request.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyLearningEvidenceQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Discover historical evidence for a company learning resource",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyLearningEvidenceQueryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/learning/evidence/read": {
+      "post": {
+        "operationId": "companyLearningEvidenceRead",
+        "summary": "Inspect an exact historical learning receipt",
+        "tags": [
+          "Company learning administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin authority, derived from the bearer credential. Select a canonical resource from the company learning catalog; no delegated writer credential is issued. Procedure and strategy selections support evaluation_submission and paired_evaluation; experiences support experience_event; development requests support tool_development_event. A historical outcome is not current approval or an independently verified success. Requests have the 65,536-byte body limit; responses are not cached.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyLearningEvidenceReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Inspect an exact historical learning receipt",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyLearningEvidenceReadResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -34098,6 +34460,330 @@
           "company_id",
           "agent_id",
           "page"
+        ],
+        "additionalProperties": false
+      },
+      "LearningEvidenceKind": {
+        "type": "string",
+        "enum": [
+          "evaluation_submission",
+          "paired_evaluation",
+          "experience_event",
+          "tool_development_event"
+        ]
+      },
+      "LearningEvidenceRef": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/LearningResourceRef"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/LearningEvidenceKind"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "resource",
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "LearningEvidenceQuery": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/LearningResourceRef"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/LearningEvidenceKind"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 25
+          },
+          "max_scanned_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearningCatalogCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "resource",
+          "kind"
+        ],
+        "additionalProperties": false
+      },
+      "LearningEvidenceDetails": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "evaluation_submission"
+              },
+              "record": {
+                "$ref": "#/components/schemas/AdmissionReceipt"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "paired_evaluation"
+              },
+              "record": {
+                "$ref": "#/components/schemas/EvaluationReceipt"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "experience_event"
+              },
+              "record": {
+                "$ref": "#/components/schemas/ExperienceEvent"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "tool_development_event"
+              },
+              "record": {
+                "$ref": "#/components/schemas/ToolDevelopmentEvent"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "Historical recorded evidence, not current lifecycle state or independently verified experimental truth. Paired receipts do not add an authenticated credential author that their source format never recorded."
+      },
+      "LearningEvidenceEntry": {
+        "type": "object",
+        "properties": {
+          "evidence": {
+            "$ref": "#/components/schemas/LearningEvidenceRef"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "status": {
+            "type": "string"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "evidence",
+          "title",
+          "status",
+          "revision",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "LearningEvidencePage": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningEvidenceEntry"
+            },
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearningCatalogCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_reason": {
+            "enum": [
+              "exhausted",
+              "entry_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "scanned_record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "observed_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "entries",
+          "next_cursor",
+          "stop_reason",
+          "scanned_records",
+          "scanned_record_bytes",
+          "observed_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyLearningEvidenceQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/LearningEvidenceQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyLearningEvidenceReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/LearningEvidenceRef"
+          }
+        },
+        "required": [
+          "contract_version",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyLearningEvidenceQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "page": {
+            "$ref": "#/components/schemas/LearningEvidencePage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyLearningEvidenceReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/LearningEvidenceRef"
+          },
+          "details": {
+            "$ref": "#/components/schemas/LearningEvidenceDetails"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "evidence",
+          "details"
         ],
         "additionalProperties": false
       }

@@ -256,7 +256,84 @@ impl LearningMemory {
                 "Admission identity, version or evaluation mismatch".into(),
             ));
         }
+        receipt.verify_contract(&bound)?;
         Ok(Some(receipt))
+    }
+}
+impl AdmissionReceipt {
+    fn verify_contract(&self, bound: &bound::RegisteredProcedure) -> Result<()> {
+        let corrupt = || {
+            Error::DataCorruption(
+                "Admission actor, submission or historical outcome is inconsistent".into(),
+            )
+        };
+        self.submission.validate().map_err(|_| corrupt())?;
+        validate_text(&self.actor.subject_id, "evaluator subject", 512).map_err(|_| corrupt())?;
+        validate_text(&self.actor.credential_id, "evaluator credential", 512)
+            .map_err(|_| corrupt())?;
+        if self.actor.subject_id != bound.record.proposal.policy.evaluator_id {
+            return Err(corrupt());
+        }
+        let s = &self.submission;
+        let expected = if s.policy_id != bound.receipt.request.policy_id
+            || s.context_id != bound.receipt.request.context_id
+            || s.baseline_revision != bound.record.proposal.baseline_revision
+        {
+            (AdmissionOutcome::Rejected, "contract_mismatch")
+        } else {
+            match s.status {
+                SubmissionStatus::Rejected => (AdmissionOutcome::Rejected, "evaluator_rejected"),
+                SubmissionStatus::Incomplete => {
+                    (AdmissionOutcome::Incomplete, "incomplete_evidence")
+                }
+                SubmissionStatus::Cancelled => {
+                    (AdmissionOutcome::Cancelled, "evaluator_reported_cancelled")
+                }
+                SubmissionStatus::PendingOrUnknown => {
+                    (AdmissionOutcome::PendingOrUnknown, "outcome_unknown")
+                }
+                SubmissionStatus::Complete
+                    if s.candidate_cost_units.is_none() || s.candidate_latency_ms.is_none() =>
+                {
+                    (AdmissionOutcome::UnknownConsumption, "consumption_unknown")
+                }
+                SubmissionStatus::Complete
+                    if s.baseline_utility.is_none() || s.candidate_utility.is_none() =>
+                {
+                    (AdmissionOutcome::Incomplete, "utility_unknown")
+                }
+                SubmissionStatus::Complete if self.evaluation.is_some() => {
+                    (AdmissionOutcome::Accepted, "accepted")
+                }
+                SubmissionStatus::Complete => {
+                    (AdmissionOutcome::Rejected, "evidence_or_phase_rejected")
+                }
+            }
+        };
+        if (self.outcome, self.reason.as_str()) != expected {
+            return Err(corrupt());
+        }
+        if let Some(e) = &self.evaluation {
+            e.evaluation.validate().map_err(|_| corrupt())?;
+            let p = &e.evaluation;
+            if s.status != SubmissionStatus::Complete
+                || self.state_after != e.state_after
+                || p.case_id != s.case_id
+                || p.phase != s.phase
+                || p.evaluator_id != self.actor.subject_id
+                || p.evaluation_contract != bound.record.proposal.policy.evaluation_contract
+                || p.evidence_ref != s.evidence_ref
+                || Some(p.baseline_utility) != s.baseline_utility
+                || Some(p.candidate_utility) != s.candidate_utility
+                || Some(p.candidate_cost_units) != s.candidate_cost_units
+                || Some(p.candidate_latency_ms) != s.candidate_latency_ms
+            {
+                return Err(corrupt());
+            }
+        }
+        // A rejected submission has no paired transition receipt. Its historical
+        // state must not be compared with the procedure's later current state.
+        Ok(())
     }
 }
 

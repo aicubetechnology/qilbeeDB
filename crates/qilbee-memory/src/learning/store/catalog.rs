@@ -3,7 +3,9 @@ use super::*;
 use crate::storage::platform::{CompanyMemoryAddress, MemoryResourceScope, MemoryVisibility};
 use serde::Deserialize;
 
+mod evidence;
 mod records;
+pub use evidence::*;
 #[cfg(test)]
 mod tests;
 pub use records::{LearningResourceDetails, StrategyDetails};

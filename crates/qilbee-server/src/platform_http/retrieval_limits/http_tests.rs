@@ -31,6 +31,14 @@ async fn company_learning_capacity_errors_follow_current_administrative_authoriz
             "/api/v1/company/learning/read",
             json!({"contract_version":1,"resource":{"kind":"policy","id":"missing"}}),
         ),
+        (
+            "/api/v1/company/learning/evidence/query",
+            json!({"contract_version":1,"query":{"resource":{"kind":"procedure","id":"missing","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null},"kind":"evaluation_submission"}}),
+        ),
+        (
+            "/api/v1/company/learning/evidence/read",
+            json!({"contract_version":1,"evidence":{"resource":{"kind":"procedure","id":"missing","scope":{"project_id":"project","agent_id":"agent","mission_id":null,"visibility":"shared"},"private_subject_id":null},"kind":"evaluation_submission","id":"case"}}),
+        ),
     ];
     let administrator = f
         .identity
@@ -64,6 +72,10 @@ async fn company_learning_capacity_errors_follow_current_administrative_authoriz
         Some("record_not_found"),
     )
     .await;
+    for (route, body) in &requests[2..] {
+        f.check(route, body.clone(), 404, Some("record_not_found"))
+            .await;
+    }
     f.identity
         .revoke(
             &f.admin,
