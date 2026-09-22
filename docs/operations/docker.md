@@ -2,7 +2,7 @@
 
 Run the standalone QilbeeDB platform in the local Docker engine for integration
 testing. The repository supplies a multi-stage `Dockerfile`, `compose.yaml`, and
-an optional `compose.qmn.yaml` network attachment. No QMN services are required by
+optional network configuration. No additional application services are required by
 the default deployment.
 
 ## Build from source
@@ -70,32 +70,15 @@ The health check reports process availability. Successful scoped writes and
 reads are separate integration checks. Only HTTP is exposed; this deployment
 does not advertise an implemented Bolt listener.
 
-## Optional Qilbee/QMN network
+## Connect application containers
 
-The local QMN installation uses an existing Docker network. Attach QilbeeDB as
-an additional service without recreating QMN containers:
+Use a Docker network shared by the application and database containers. Docker
+service names resolve inside that network; a browser on the host should use the
+published host address, such as `http://localhost:7474`.
 
-```bash
-QMN_DOCKER_NETWORK=qilbee-mycelial-network_qmn-network \
-  docker compose -f compose.yaml -f compose.qmn.yaml up -d
-```
-
-Containers attached to that network can use this internal Docker DNS name
-(the host browser cannot resolve it):
-
-```text
-http://qilbeedb-local:7474
-```
-
-In the browser on the Docker host, use `http://localhost:7474/health` or
-`http://localhost:7474/openapi.json`. A `DNS_PROBE_FINISHED_NXDOMAIN` error for
-`qilbeedb-local` in the host browser means the internal container hostname was
-used outside its Docker network.
-
-Network clients still need QilbeeDB platform credentials and explicit resource grants.
-Attaching a network does not migrate QMN data, change QMN's decision authority,
-or configure its applications automatically. Other applications can use the same
-API. The standalone Compose file has no dependency on this external network.
+Network access does not grant API permissions. Applications still need an API key
+with the appropriate capabilities and scope. Configure the network according to
+your application's deployment, without recreating unrelated services.
 
 ## Configure the Compose deployment
 
@@ -105,7 +88,6 @@ API. The standalone Compose file has no dependency on this external network.
 | `QILBEE_REVISION` | `unknown` | OCI image revision label during build |
 | `QILBEE_HTTP_PORT` | `7474` | Host loopback port mapped to container port 7474 |
 | `RUST_LOG` | `info` | Server tracing filter |
-| `QMN_DOCKER_NETWORK` | `qilbee-mycelial-network_qmn-network` | Optional external network used only with the QMN override |
 
 These are actual Compose controls. The server does not currently read the older
 illustrative `QILBEE_DATA_PATH`, `QILBEE_BOLT_PORT` or mounted `config.toml` examples.
@@ -159,86 +141,3 @@ workers, isolated invocation transport and tool publication gates remain
 subsequent features under the [accepted architecture](../architecture/learned-tools.md).
 This development deployment does not establish distributed availability,
 hardware power-loss behavior or comparative performance leadership.
-
-## Recorded local acceptance
-
-The 0.2.0 platform increment was validated on Docker Desktop Linux ARM64 with
-the following results:
-
-- Standalone startup and scoped API operation without the QMN network attached.
-- Authentication, restricted capabilities, tenant/private-subject isolation,
-  create/read/update/query/delete, stale revisions and idempotency conflicts.
-- Five acknowledged records and their original receipts survived `SIGKILL` and
-  container restart on the persistent volume. Retrying a deleted create did
-  not resurrect its record.
-- Live response bodies validated against the served OpenAPI 3.1 schemas.
-- The optional QMN network attachment served the health endpoint to a separate
-  client container. Existing QMN containers were not reconfigured.
-- The full Rust workspace passed 355 tests; two subprocess fixtures are marked
-  ignored for direct discovery and invoked by their parent recovery tests.
-
-The local smoke suite does not establish power-loss durability, distributed
-availability, execution isolation for future learned tools, or compatibility
-with unmodified QMN applications. The PR records the tested revision.
-
-## Procedural release acceptance (0.3.0)
-
-The expanded release passed 373 Rust workspace tests and four local Docker
-acceptance tests. The procedural Docker cycle validated all request/response
-bodies against the served schemas, administrative denial, eight simultaneous
-retries counting as one case, 32 accepted paired cases, explicit unknown
-accounting, model-version fallback and private-subject denial. After SIGKILL,
-the active procedure, original proposal and all 32 evaluation receipts were
-recovered. Subsequent negative monitoring suspended the procedure and selected
-the exact baseline. Temporary evaluator credentials were revoked.
-
-The browser reference at `/docs` loaded version 0.3.0 with 22 operations; endpoint
-filtering and layout were checked in a browser. The page loads its script and
-OpenAPI document from the same server and does not collect credentials.
-
-These are synthetic contract and process-recovery tests. They do not execute a
-model, verify external evidence truth or demonstrate improvement on an agent
-benchmark. The earlier memory/isolation/crash tests also passed on this image.
-
-## Tools and semantic release acceptance (0.4.0)
-
-The 0.4.0 release passed 403 Rust workspace tests and six Docker acceptance tests
-on Linux ARM64. The candidate image was first tested in a separate container with
-its own disposable volume and explicit loopback port. The same suites are used
-to validate the merged image on the persistent local deployment.
-
-The new suites validate worker/developer/admin separation, immutable artifacts,
-unknown development consumption, eight concurrent identical reports producing
-one event, atomic successful artifact registration, scoped repair requests and
-executor-confirmed cancellation. A process kill preserves the original request,
-unknown and successful events, and exact artifact digest. All temporary worker
-and administrator credentials are revoked after validation.
-
-Semantic acceptance supplies three synthetic vectors with expected cosine
-scores 1, 0 and -1, validates response schemas, tenant/capability denial and
-partial-scan disclosure, then kills/restarts the container and replays the
-original embedding receipts. Source updates immediately exclude stale vectors;
-deleting the source excludes all its bindings. The browser contract now exposes
-32 operations and 94 schemas, including model identities and scan coverage.
-
-These tests establish transport, ranking, authority and process-recovery
-contracts. They do not measure semantic quality on a language dataset or verify
-external generation/test evidence. Embeddings come from an external model
-service. Artifact source is not executed by the database; configured development
-workers, isolated invocation transport and publication gates remain separate
-integration work. Exact bounded retrieval is not an ANN performance claim.
-
-## Retrieval validation in 0.5.0
-
-The 0.5.0 release preserves cosine search and adds explicit lexical and
-experimental server-versioned hybrid endpoints. Its isolated Docker acceptance
-covers authorization, scoped lifecycle, OpenAPI response schemas, process-crash
-recovery and replay of a frozen 40-record retrieval fixture. The synthetic
-comparison did not qualify hybrid relevance; see the
-[report and limits](../research/retrieval-contract-report.md).
-
-English Markdown user-guide sources are exported into the sibling
-`qilbee-site/app/src/doc/qilbeedb` directory. The exporter and PR documentation
-workflow are described in the repository's `CONTRIBUTING.md`. After a validated
-release, the site export uses `--status released`; the hybrid ranking profile
-continues to report `experimental: true`.

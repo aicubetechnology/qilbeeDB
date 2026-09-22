@@ -1,6 +1,6 @@
 # Typed memory relations
 
-Status: **0.13.0 base contract with an unreleased context extension**.
+Status: **0.13.0 base contract with the 0.14.0 context extension**.
 Record a directed assertion between two
 current memories, retain its provenance and review history, and revalidate both
 endpoints before serving it. This API is the durable foundation for typed memory
@@ -134,7 +134,7 @@ Timestamp validity does not replace endpoint checks.
 
 ## Bind the context used for inference
 
-**Unreleased source extension.** The deployed 0.13.0 contract does not accept
+**Available in 0.14.0.** The 0.13.0 contract does not accept
 `evidence_sources`; use this field only after upgrading the server and its schema.
 It is optional for existing assertions. Omission means no additional context was
 declared, not that the server verified the completeness of the extractor's input.
@@ -309,7 +309,7 @@ integer range rather than rounding through a floating-point number.
 | Relation metadata | Canonical value and each immutable history value are independently bounded to 16 KiB |
 | Endpoint records | At most 8 MiB combined serialized canonical record bytes |
 | Endpoint eligibility | Existing transitive depth 8 and 64-source-node rules apply independently to each endpoint; the relation adds no derivation depth |
-| Additional inference context (unreleased) | 0–16 references; one combined walk bounded to 64 records and depth 8; repeated context shares the request cache |
+| Additional inference context (0.14.0) | 0–16 references; one combined walk bounded to 64 records and depth 8; repeated context shares the request cache |
 | Shared dependency work | At most 4096 distinct dependency lookups and 16 MiB per request; reported by inspection |
 | Admission | All routes use the shared retrieval slots after authorization, through response serialization |
 

@@ -1,7 +1,7 @@
 # Native relevance accounting
 
-Status: **unreleased**. This native Rust library
-change is separate from the qualified 0.14.0 server image. It does not change
+Status: **available in the 0.14.0 Rust source**. This native library capability
+does not introduce an HTTP endpoint. It does not change
 HTTP cosine scores, hybrid ranking versions or procedural qualification.
 
 ## Purpose and ownership

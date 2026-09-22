@@ -1,8 +1,7 @@
 # Inspect learning evidence and historical outcomes
 
-**Availability: unreleased.** These endpoints are under qualification and are
-not installed in the deployed 0.13.0 API. Check the running server's OpenAPI
-before integrating them.
+**Availability: 0.14.0.** Check the running server’s `/openapi.json` before
+integrating these endpoints; older installations require an upgrade.
 
 Start with a procedure, strategy, experience or development request discovered
 in the [company learning catalog](company-learning-catalog.md). Its recorded

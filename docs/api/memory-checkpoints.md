@@ -130,10 +130,8 @@ stored values; they are not signatures or evidence that external effects occurre
 
 Checkpoints and retry receipts are retained without automatic pruning. There are
 no consumer leases, automatic retries, background workers or cross-region
-replication implied by this contract. The local acceptance suite uses ten
-independent consumer subjects, durable reconnects, concurrent checkpoint writes
-and forced process termination; it is a correctness test, not a throughput or
-high-availability qualification.
+replication implied by this contract. Size your consumers for your workload and
+verify recovery with your own storage and deployment configuration.
 
 ## Verified progress in version 2
 

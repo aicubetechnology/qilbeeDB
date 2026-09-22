@@ -153,7 +153,7 @@ stale assertions and invalid derived-memory sources cannot serve as bridges.
 and neighbors **before inclusion or expansion**. Examining an excluded neighbor
 can still consume bounded work. Queries do not cross the authorized namespace.
 
-The unreleased [relation context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
+The 0.14.0 [relation context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
 requires every declared additional source and its ancestry to remain current and
 eligible before an edge can contribute a path. Invalid context removes that path,
 not an independently eligible lexical or vector candidate. This does not change

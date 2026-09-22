@@ -1,8 +1,9 @@
 # Stop the server without losing track of accepted work
 
-Status: **unreleased**. These lifecycle guarantees
-require a build containing this feature. They do not apply retroactively to the
-existing 0.13 deployment or the previously qualified 0.14 image.
+Status: **available in the released 0.14.0 image**, from revision
+`06a77efe8b7be8c5940b4c28d918dda72d23f40d`. Earlier 0.13 builds and preliminary
+0.14 candidates do not acquire these guarantees from their version string alone.
+Pin the qualified image digest when deploying.
 
 ## Shutdown sequence
 

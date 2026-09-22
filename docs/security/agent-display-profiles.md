@@ -1,7 +1,7 @@
 # Name registered agents for human navigation
 
-**Availability: unreleased.** These endpoints are under qualification. They are
-not available in the deployed 0.13.0 API. The existing
+**Availability: 0.14.0.** Confirm the routes in your server’s `/openapi.json`
+before integration; older installations require an upgrade. The existing
 [`GET /api/v1/agents`](agent-registration.md) response remains unchanged.
 
 An agent's ID belongs to the application or company that operates it. A display

@@ -1,6 +1,6 @@
 # External graph consolidation
 
-Status: **unreleased implementation**. The production 0.13.0 API does not expose
+Status: **available in 0.14.0**. Older servers require an upgrade before using
 these routes. Consolidation runs model inference in your application or worker;
 QilbeeDB coordinates durable jobs, exact source revisions and atomic publication.
 The database does not generate embeddings, call a model provider or accept its

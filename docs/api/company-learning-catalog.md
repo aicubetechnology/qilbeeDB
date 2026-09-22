@@ -1,8 +1,7 @@
 # Discover company learning resources
 
-**Availability: unreleased.** These endpoints are being qualified for the next
-release. They are not part of the deployed 0.13.0 API. Check the running server's
-`/openapi.json` before using them.
+**Availability: 0.14.0.** Check the running server’s `/openapi.json` before
+using these endpoints; older installations require an upgrade.
 
 Company administrators can discover retained experiences, procedures, strategies,
 tool artifacts, development requests, policies, evaluation contexts and executor
@@ -179,7 +178,7 @@ Keep raw identifiers and exact contract JSON in advanced details. Show loading,
 empty-filtered, incomplete, failed and successful states distinctly, and provide
 keyboard operation, predictable focus and a path back to the list.
 
-This inventory covers the eight parent resource kinds above. The unreleased
+This inventory covers the eight parent resource kinds above. The 0.14.0
 [learning evidence history](learning-evidence-history.md) adds bounded discovery
 of evaluation submissions, paired comparisons, experience observations and
 development events for a selected parent. Memory consumer checkpoint discovery

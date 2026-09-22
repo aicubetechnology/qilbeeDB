@@ -28,37 +28,14 @@ Applications embedding the router must handle that error before serving traffic.
   or zero statistics without requiring a process-local registry.
 - `DELETE /memory/{agent}` removes that agent's stored episodes durably.
 
-This is a persistence foundation for the [P0 contract](../research/delivery-acceptance.md),
-not completion of that contract. The legacy POST still assigns a new episode ID
-per call: callers must not treat retries as idempotent yet. Versioned conditional
-updates, stable receipts, authenticated tenant/sharing scopes and procedural
-HTTP operations remain subsequent features. Existing data held only in an old
-process's RAM cannot be recovered after that process exits.
+For authenticated tenant scopes, conditional updates and stable retry receipts,
+use the [versioned memory API](versioned-memory.md). The legacy POST assigns a
+new episode ID on each call; do not retry it as though it were idempotent. Data
+held only in a terminated process's RAM cannot be recovered by enabling durable
+storage afterward.
 
-The existing legacy semantic endpoints still require a separate contract fix;
-their synthetic rank scores do not establish semantic similarity. Production
-credential/bootstrap and resource authorization gaps also remain. Do not infer
-production readiness from the persistence change.
+## Recovery limits
 
-## Validation and fault model
-
-Five HTTP reproductions failed before implementation. Seven tests now cover
-reopen, old-ID lookup, malformed IDs, durable clear, structured content and
-metadata, mismatched agent input, storage-open failure and abrupt restart.
-
-The abrupt-restart test starts a child process serving real HTTP on an ephemeral
-loopback port, acknowledges 20 writes, kills the process without a graceful
-shutdown, restarts it, and checks every ID and structured value plus the total
-count. The subprocess fixture is ignored in ordinary test enumeration and is
-invoked explicitly by its parent test. All children and data are temporary.
-
-This tests process termination on the local filesystem. It does not establish
-hardware power-loss, filesystem corruption, disk exhaustion or backup guarantees.
-
-```sh
-cargo test --workspace --all-targets --locked
-```
-
-At this feature snapshot: **328 tests passed**, with one intentionally ignored
-subprocess fixture. No paid model calls, external agent benchmarks or QMN runtime
-services are required.
+Persistence does not by itself guarantee recovery from host power loss, filesystem
+corruption or disk exhaustion. Maintain backups and validate recovery with the
+storage and deployment configuration you operate. See [backup and recovery](../operations/backup.md).

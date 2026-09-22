@@ -1,9 +1,9 @@
 # Evidence-bound procedural knowledge
 
-Status: **unreleased candidate**. The shared core and administrative contracts
-are agreed and implemented. Local qualification covers real HTTP contracts,
-recovery, bounded selection and the corporate console journey. This guide does
-not announce a production deployment or completion of release-stage checks.
+Status: **API and core available in 0.14.0**. Qualification covers real HTTP
+contracts, recovery and bounded selection. The corporate console candidate has a
+separate publication lifecycle. Functional qualification does not demonstrate
+better agent reasoning or transfer execution authority to the database.
 
 ## Purpose and responsibility
 

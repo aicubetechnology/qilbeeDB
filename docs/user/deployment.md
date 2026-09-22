@@ -1,6 +1,10 @@
-# Run QilbeeDB locally with Docker
+# Install QilbeeDB with Docker
 
-Run a standalone QilbeeDB service to test application integration. The server
+This guide is for **self-hosted installations**. If you use the QilbeeDB
+platform, go directly to the [quickstart](quickstart.md); you do not need these
+installation or bootstrap steps.
+
+Run a standalone QilbeeDB service to develop your application integration. The server
 container stores durable platform data in a named volume and exposes HTTP on the
 local machine. It does not generate embeddings or execute learned tool code.
 
@@ -68,6 +72,10 @@ See [configure retrieval capacity](../operations/retrieval-capacity.md) for supp
 through 32,768 dimensions, including 3,072, explicit scan-byte budgets and bounded
 concurrent retrieval. The ranking catalog reports the active operator settings.
 
-## Production image qualification
+## Prepare for production
 
-The production runtime uses a digest-pinned Debian Trixie base with package updates applied during the build. Validate both API behavior and the image vulnerability scan before release; a passing functional test suite does not establish that system libraries are patched. See [container security qualification](../security/container-security.md) for the recorded image and limits.
+Pin the image you deploy, review its release notes and vulnerability findings,
+and validate your application against it before allowing production traffic.
+A passing functional test does not establish that every system dependency is
+patched. See [container security](../security/container-security.md) for runtime,
+network and recovery guidance.

@@ -93,3 +93,33 @@ A console should keep login sessions in memory, clear them on logout or expiry,
 show one-time API keys only after explicit issuance or rotation, and handle a lost
 write response as potentially committed. Inspect current metadata before retrying
 an administrative write with a stale revision.
+
+## Recover when a change cannot be confirmed
+
+A connection failure does not prove that an administrative write failed. The
+server may have committed the change before its response was lost. Do not repeat
+an issuance, rotation, password change or revocation just because the client did
+not receive confirmation.
+
+1. Refresh the authorized credential or account directory. Continue through its
+   pages when the relevant record is not on the first page; a filter over loaded
+   rows is not a search of every record.
+2. Inspect the affected identity, status and revision. A matching display name
+   alone does not establish that two credentials are the same. If the result is
+   still unclear, retain the uncertainty and investigate before another write.
+3. If a key was issued but its secret was not delivered, revoke that specific
+   credential and confirm its revoked state before issuing a replacement. The
+   directory cannot recover the original secret. If several credentials could
+   match the operation, reconcile their identities before revoking anything.
+4. Deliver the replacement secret securely and verify its intended access. Keep
+   the replacement distinct from the revoked credential in your records.
+
+For revision-checked operations, inspect the latest revision before deciding on
+another request. Do not silently replace an expected revision after a conflict:
+that can overwrite a change made by another administrator. A browser button that
+prevents resubmission is a useful safeguard, but it is not durable idempotency
+across reloads, other clients or concurrent administrators.
+
+A confirmed permission denial has a different recovery path: correct the missing
+authority before retrying. An expired or revoked login requires authentication
+again. Neither response means that the company directory is empty.

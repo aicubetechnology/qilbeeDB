@@ -86,34 +86,6 @@
       "order": 105
     },
     {
-      "source": "docs/research/retrieval-evaluation.md",
-      "file": "retrieval-evaluation.md",
-      "title": "Evaluate retrieval",
-      "description": "Evaluate frozen retrieval and reject confounded hardware comparisons with explicit coverage and resource evidence.",
-      "order": 110
-    },
-    {
-      "source": "docs/research/retrieval-contract-report.md",
-      "file": "retrieval-report.md",
-      "title": "Synthetic retrieval report",
-      "description": "Inspect the recorded hybrid regressions, uncertainty and limits of the 0.5.0 contract trial.",
-      "order": 120
-    },
-    {
-      "source": "docs/research/external-embedding-evaluation.md",
-      "file": "external-embeddings.md",
-      "title": "External evaluation embeddings",
-      "description": "Generate and identify external model embeddings with reproducible preprocessing and separate timing evidence.",
-      "order": 125
-    },
-    {
-      "source": "docs/research/scifact-evaluation.md",
-      "file": "scifact-evaluation.md",
-      "title": "SciFact retrieval evaluation",
-      "description": "Compare scoped retrieval with external relevance judgments and development-only ranking selection.",
-      "order": 130
-    },
-    {
       "source": "docs/operations/retrieval-capacity.md",
       "file": "retrieval-capacity.md",
       "title": "Retrieval capacity and large vectors",
@@ -121,32 +93,11 @@
       "order": 135
     },
     {
-      "source": "docs/research/scifact-results.md",
-      "file": "scifact-results.md",
-      "title": "Real-embedding retrieval results",
-      "description": "Inspect the 300-query SciFact comparison, uncertainty, regressions and capacity evidence for release 0.6.0.",
-      "order": 140
-    },
-    {
-      "source": "docs/research/experience-memory-design.md",
-      "file": "experience-memory-design.md",
-      "title": "Experience-driven memory research",
-      "description": "Trace supplied memory research to implemented foundations, planned learning capabilities and acceptance evidence.",
-      "order": 150
-    },
-    {
       "source": "docs/api/experiences.md",
       "file": "experiences.md",
       "title": "Experience receipts",
       "description": "Record scoped execution attempts, immutable observations and unknown consumption without automatically qualifying procedures.",
       "order": 95
-    },
-    {
-      "source": "docs/research/experience-evaluation.md",
-      "file": "experience-evaluation.md",
-      "title": "Evaluate experience evidence",
-      "description": "Freeze exact observation cohorts and interpret outcomes, unknown consumption and evaluation limits.",
-      "order": 155
     },
     {
       "source": "docs/api/memory-changes.md",
@@ -205,20 +156,6 @@
       "order": 86
     },
     {
-      "source": "docs/research/retrieval-history-report.md",
-      "file": "retrieval-history-report.md",
-      "title": "Retrieval history qualification",
-      "description": "Review coverage, migration, resource measurements and limits after deletion history.",
-      "order": 87
-    },
-    {
-      "source": "docs/research/retrieval-regressions.md",
-      "file": "retrieval-regressions.md",
-      "title": "Retrieval evidence and regressions",
-      "description": "Audit SciFact findings, preserve fusion failures and gains, and define reproducible ranking and load acceptance gates.",
-      "order": 88
-    },
-    {
       "source": "docs/api/consumer-diagnostics.md",
       "file": "consumer-diagnostics.md",
       "title": "Consumer diagnostics",
@@ -249,8 +186,8 @@
     {
       "source": "docs/security/container-security.md",
       "file": "container-security.md",
-      "title": "Container security qualification",
-      "description": "Inspect runtime package updates, scan evidence and the boundaries of container qualification.",
+      "title": "Container security",
+      "description": "Protect your container runtime, credentials, network access and persistent data.",
       "order": 27
     },
     {
@@ -264,7 +201,7 @@
       "source": "docs/security/administration-directory.md",
       "file": "administration-directory.md",
       "title": "Administrative directories",
-      "description": "Enumerate authorized companies, credentials and human accounts with bounded pages and explicit browser-origin configuration.",
+      "description": "Discover authorized administrative records and recover safely from unconfirmed changes.",
       "order": 39
     },
     {
@@ -273,13 +210,6 @@
       "title": "Read memory batches",
       "description": "Read current context records in one authorized snapshot and handle expiry, dependencies and bounded work.",
       "order": 54
-    },
-    {
-      "source": "docs/research/context-consumer-qualification.md",
-      "file": "context-consumer-qualification.md",
-      "title": "Context consumer qualification",
-      "description": "Inspect attributed consumer recovery evidence and the acceptance boundaries for current context reuse.",
-      "order": 64
     },
     {
       "source": "docs/security/company-integrations.md",
@@ -308,13 +238,6 @@
       "title": "Durable graph lifecycle",
       "description": "Preserve graph generations and entity allocation across restarts, retire names safely, and understand migration and transaction limits.",
       "order": 130
-    },
-    {
-      "source": "docs/research/graph-memory-evidence.md",
-      "file": "graph-memory-evidence.md",
-      "title": "Graph memory evidence",
-      "description": "Connect the supplied graph memory research to implemented foundations, proposed contracts and reproducible evaluation requirements.",
-      "order": 131
     },
     {
       "source": "docs/api/memory-evidence-graph.md",
@@ -350,20 +273,6 @@
       "title": "Experimental graph-assisted retrieval",
       "description": "Retrieve revision-bound memories through explicit typed paths, immutable profiles and observable work limits.",
       "order": 208
-    },
-    {
-      "source": "docs/research/graph-retrieval-evaluation.md",
-      "file": "graph-retrieval-evaluation.md",
-      "title": "Evaluate graph-assisted retrieval",
-      "description": "Freeze document-only graph construction, external embeddings, support judgments and bounded retrieval comparisons with auditable failure evidence.",
-      "order": 209
-    },
-    {
-      "source": "docs/research/graph-retrieval-results.md",
-      "file": "graph-retrieval-results.md",
-      "title": "Graph retrieval results and limitations",
-      "description": "Inspect the reserved MuSiQue comparison, uncertainty, individual regressions, graph cuts and measured retrieval costs.",
-      "order": 210
     },
     {
       "source": "docs/releases/0.13.0.md",
@@ -418,7 +327,7 @@
       "source": "docs/releases/0.14.0.md",
       "file": "release-0.14.0.md",
       "title": "QilbeeDB 0.14.0 release candidate",
-      "description": "Review the unreleased knowledge, administration and consolidation contracts and their upgrade acceptance requirements.",
+      "description": "Learn what changes in 0.14.0, how to upgrade and which compatibility limits apply.",
       "order": 1014
     },
     {

@@ -47,3 +47,29 @@ apply to every new or changed interface. Validate the person's complete task,
 including accessibility, errors, and recovery, before publishing. Record the
 journey and its evidence with the change; a successful API response alone is not
 acceptance of the user experience.
+
+## Public user documentation audience
+
+Public user guides serve customers using the managed QilbeeDB platform or running
+their own installation. State which path a task applies to; do not require local
+installation or bootstrap for platform users. Share API examples through a
+configurable base URL and explain credentials without exposing operator secrets.
+
+Keep internal deployment inventories, cloud account or instance details, image
+qualification diaries, test-suite counts, team coordination and candidate scan
+transcripts out of user guides. Preserve operational evidence in private project
+records. Public research reports may document reproducible methodology and limits,
+but are separate from the user-guide export. Keep user-relevant compatibility,
+recovery limits and security guidance; removing an internal scan transcript does
+not justify claiming an image is vulnerability-free.
+
+## Website ownership boundary
+
+The QilbeeDB team maintains product documentation sources, the user-guide
+manifest and the agreed Markdown export. The website team owns site navigation,
+rendering, visual assets, build/synchronization code, hosting and publication.
+Changes to product documentation do not authorize modifying or deploying the
+website. Propose shared-boundary changes through the collaboration protocol and
+obtain explicit agreement from the responsible teams before implementation.
+Do not revert or redeploy another team's site to correct a prior boundary breach;
+preserve the observed state and provide a factual handoff.
