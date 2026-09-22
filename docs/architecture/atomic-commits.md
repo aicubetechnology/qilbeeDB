@@ -68,38 +68,7 @@ format, including map and signed-zero values. See [property index upgrades](prop
 for readiness, interruption recovery and mandatory rollback precautions. Transaction
 atomicity alone does not repair arbitrary index corruption.
 
-The original atomic commit tests exercise preparation failure, concurrent writers,
-database snapshots and graceful reopen. The lifecycle tests additionally kill a
-process after acknowledged managed writes and verify recovery. Neither suite
-simulates power loss, disk exhaustion, termination at every point during a write
-or corrupted WAL recovery.
-
-## Validation
-
-Four reproductions failed before implementation: a partial commit after a
-corrupt-record error, stale indexes after repeated node operations, stale indexes
-after a direct replacement, and stale relationship adjacency entries.
-
-Seven regression tests now cover those cases, concurrent cloned writers, paired
-node visibility through RocksDB snapshots and entity/index recovery after a
-synchronous-WAL commit and graceful reopen. The snapshot test uses RocksDB's
-internal snapshot API; it does not introduce a public snapshot transaction API.
-
-```bash
-cargo test -p qilbee-storage atomic_ --locked
-cargo test --workspace --all-targets --locked
-```
-
-Eight additional conflict tests cover stale read/modify/write, negative-read
-write dependencies, concurrent relationship deletion, blind writes, simultaneous
-commit winners, read-only dependencies, independent entities/read-your-writes,
-and preservation of entity, label, property and adjacency state after rejection
-and reopen. Existing named-graph retirement and corrupt-record atomicity tests
-remain part of the storage/graph regression suites.
-
-```bash
-cargo test -p qilbee-storage -p qilbee-graph --locked
-```
-
-See the [research roadmap](../research/agent-memory-evolution.md) for isolation,
-fault injection and production readiness work still required.
+Process-restart recovery does not establish behavior under power loss, disk
+exhaustion or corrupted WAL recovery. Validate those failure modes for your
+storage configuration and retain an application-consistent backup. Internal
+storage snapshots do not introduce a public snapshot transaction API.
