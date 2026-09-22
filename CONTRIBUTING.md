@@ -62,3 +62,14 @@ records. Public research reports may document reproducible methodology and limit
 but are separate from the user-guide export. Keep user-relevant compatibility,
 recovery limits and security guidance; removing an internal scan transcript does
 not justify claiming an image is vulnerability-free.
+
+## Website ownership boundary
+
+The QilbeeDB team maintains product documentation sources, the user-guide
+manifest and the agreed Markdown export. The website team owns site navigation,
+rendering, visual assets, build/synchronization code, hosting and publication.
+Changes to product documentation do not authorize modifying or deploying the
+website. Propose shared-boundary changes through the collaboration protocol and
+obtain explicit agreement from the responsible teams before implementation.
+Do not revert or redeploy another team's site to correct a prior boundary breach;
+preserve the observed state and provide a factual handoff.
