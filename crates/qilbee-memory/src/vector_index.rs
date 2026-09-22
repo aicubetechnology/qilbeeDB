@@ -15,7 +15,7 @@
 //! - Malkov, Y. A., & Yashunin, D. A. (2018). Efficient and robust approximate nearest neighbor
 //!   search using Hierarchical Navigable Small World graphs.
 
-use crate::embeddings::{cosine_similarity, dot_product, euclidean_distance, SimilarityMetric};
+use crate::embeddings::SimilarityMetric;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
@@ -92,6 +92,23 @@ impl Default for HnswConfig {
 }
 
 impl HnswConfig {
+    fn validate(&self) -> HnswResult<()> {
+        if self.m < 2
+            || self.m.checked_mul(2).is_none()
+            || self.ef_search == 0
+            || self.ef_construction == 0
+            || self.max_level >= usize::BITS as usize
+            || !self.ml.is_finite()
+            || self.ml <= 0.0
+            || self.dimension == Some(0)
+        {
+            return Err(HnswError::InvalidParameter(
+                "Invalid HNSW construction/search configuration".into(),
+            ));
+        }
+        Ok(())
+    }
+
     /// Create configuration for small datasets (< 10,000 vectors)
     pub fn small() -> Self {
         Self {
@@ -279,6 +296,12 @@ impl HnswIndex {
         }
     }
 
+    /// Validate configuration before constructing a new index.
+    pub fn try_new(config: HnswConfig) -> HnswResult<Self> {
+        config.validate()?;
+        Ok(Self::new(config))
+    }
+
     /// Create a new HNSW index with default configuration
     pub fn with_defaults() -> Self {
         Self::new(HnswConfig::default())
@@ -304,14 +327,59 @@ impl HnswIndex {
         match self.config.metric {
             SimilarityMetric::Cosine => {
                 // Convert similarity to distance (1 - similarity)
-                1.0 - cosine_similarity(a, b)
+                // Finite f32 products and their norms can overflow in f32.
+                // Accumulate in f64; cosine itself is bounded and representable.
+                let dot: f64 = a
+                    .iter()
+                    .zip(b)
+                    .map(|(&x, &y)| f64::from(x) * f64::from(y))
+                    .sum();
+                let norm_a: f64 = a.iter().map(|&x| f64::from(x).powi(2)).sum();
+                let norm_b: f64 = b.iter().map(|&x| f64::from(x).powi(2)).sum();
+                (1.0 - (dot / (norm_a.sqrt() * norm_b.sqrt())).clamp(-1.0, 1.0)) as f32
             }
             SimilarityMetric::DotProduct => {
                 // For dot product, higher is better, so negate
-                -dot_product(a, b)
+                -a.iter()
+                    .zip(b)
+                    .map(|(&x, &y)| f64::from(x) * f64::from(y))
+                    .sum::<f64>() as f32
             }
-            SimilarityMetric::Euclidean => euclidean_distance(a, b),
+            SimilarityMetric::Euclidean => a
+                .iter()
+                .zip(b)
+                .map(|(&x, &y)| (f64::from(x) - f64::from(y)).powi(2))
+                .sum::<f64>()
+                .sqrt() as f32,
         }
+    }
+
+    fn validate_vector(&self, vector: &[f32]) -> HnswResult<()> {
+        self.config.validate()?;
+        if vector.is_empty() || vector.iter().any(|value| !value.is_finite()) {
+            return Err(HnswError::InvalidParameter(
+                "Vectors must be nonempty and finite".into(),
+            ));
+        }
+        if self.config.metric == SimilarityMetric::Cosine
+            && vector.iter().all(|&value| value == 0.0)
+        {
+            return Err(HnswError::InvalidParameter(
+                "Cosine requires a nonzero vector".into(),
+            ));
+        }
+        let norm_squared: f64 = vector.iter().map(|&x| f64::from(x).powi(2)).sum();
+        let limit = match self.config.metric {
+            SimilarityMetric::Cosine => f64::INFINITY,
+            SimilarityMetric::DotProduct => f64::from(f32::MAX),
+            SimilarityMetric::Euclidean => (f64::from(f32::MAX) / 2.0).powi(2),
+        };
+        if norm_squared > limit {
+            return Err(HnswError::InvalidParameter(
+                "Vector norm exceeds the finite f32 distance range for this metric".into(),
+            ));
+        }
+        Ok(())
     }
 
     /// Generate a random level for a new node
@@ -328,6 +396,7 @@ impl HnswIndex {
 
     /// Insert a vector into the index
     pub fn insert(&mut self, id: String, vector: Vec<f32>) -> HnswResult<()> {
+        self.validate_vector(vector.as_slice())?;
         // Validate dimension
         if let Some(dim) = self.config.dimension {
             if vector.len() != dim {
@@ -341,24 +410,27 @@ impl HnswIndex {
             self.config.dimension = Some(vector.len());
         }
 
-        let node_level = self.random_level();
+        // Replacements preserve the existing topology while refreshing neighbors.
+        let node_level = self
+            .nodes
+            .read()
+            .map_err(|e| HnswError::LockError(e.to_string()))?
+            .get(&id)
+            .map(|node| node.level)
+            .unwrap_or_else(|| self.random_level());
 
         // Check if this is the first node
         let entry_point = {
-            let entry = self.entry_point.read().map_err(|e| {
-                HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-            })?;
+            let entry = self
+                .entry_point
+                .read()
+                .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
             entry.clone()
         };
 
         if entry_point.is_none() {
             // First node - just insert it
-            let new_node = HnswNode::new(
-                id.clone(),
-                vector,
-                node_level,
-                self.config.max_level,
-            );
+            let new_node = HnswNode::new(id.clone(), vector, node_level, self.config.max_level);
 
             {
                 let mut nodes = self.nodes.write().map_err(|e| {
@@ -388,9 +460,10 @@ impl HnswIndex {
 
         // Get current max level
         let current_max = {
-            let max_level = self.current_max_level.read().map_err(|e| {
-                HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-            })?;
+            let max_level = self
+                .current_max_level
+                .read()
+                .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
             *max_level
         };
 
@@ -407,7 +480,11 @@ impl HnswIndex {
             let mut nodes = self.nodes.write().map_err(|e| {
                 HnswError::LockError(format!("Failed to acquire write lock: {}", e))
             })?;
-            nodes.insert(id.clone(), new_node);
+            if let Some(existing) = nodes.get_mut(&id) {
+                existing.vector = vector.clone();
+            } else {
+                nodes.insert(id.clone(), new_node);
+            }
         }
 
         // Phase 1: Search for entry point at layers above node_level
@@ -421,8 +498,7 @@ impl HnswIndex {
 
         // Phase 2: Insert at layers 0 to node_level
         for level in (0..=node_level.min(current_max)).rev() {
-            let neighbors =
-                self.search_layer(&vector, &ep, self.config.ef_construction, level)?;
+            let neighbors = self.search_layer(&vector, &ep, self.config.ef_construction, level)?;
 
             // Select M best neighbors
             let m = if level == 0 {
@@ -430,7 +506,12 @@ impl HnswIndex {
             } else {
                 self.config.m
             };
-            let selected: Vec<String> = neighbors.iter().take(m).map(|c| c.id.clone()).collect();
+            let selected: Vec<String> = neighbors
+                .iter()
+                .filter(|c| c.id != id)
+                .take(m)
+                .map(|c| c.id.clone())
+                .collect();
 
             // Add bidirectional connections
             self.add_connections(&id, &selected, level)?;
@@ -462,6 +543,7 @@ impl HnswIndex {
 
     /// Search for the k nearest neighbors of a query vector
     pub fn search(&self, query: &[f32], k: usize) -> HnswResult<Vec<SearchResult>> {
+        self.validate_vector(query)?;
         // Validate dimension
         if let Some(dim) = self.config.dimension {
             if query.len() != dim {
@@ -474,9 +556,10 @@ impl HnswIndex {
 
         // Get entry point
         let entry_point = {
-            let entry = self.entry_point.read().map_err(|e| {
-                HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-            })?;
+            let entry = self
+                .entry_point
+                .read()
+                .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
             entry.clone()
         };
 
@@ -486,9 +569,10 @@ impl HnswIndex {
 
         // Get current max level
         let current_max = {
-            let max_level = self.current_max_level.read().map_err(|e| {
-                HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-            })?;
+            let max_level = self
+                .current_max_level
+                .read()
+                .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
             *max_level
         };
 
@@ -502,7 +586,7 @@ impl HnswIndex {
         }
 
         // Phase 2: Search at layer 0 with ef_search
-        let candidates = self.search_layer(query, &ep, self.config.ef_search, 0)?;
+        let candidates = self.search_layer(query, &ep, self.config.ef_search.max(k), 0)?;
 
         // Return top k results
         Ok(candidates
@@ -523,13 +607,14 @@ impl HnswIndex {
         ef: usize,
         level: usize,
     ) -> HnswResult<Vec<Candidate>> {
-        let nodes = self.nodes.read().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let nodes = self
+            .nodes
+            .read()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
 
-        let entry_node = nodes.get(entry_point).ok_or_else(|| {
-            HnswError::NodeNotFound(entry_point.to_string())
-        })?;
+        let entry_node = nodes
+            .get(entry_point)
+            .ok_or_else(|| HnswError::NodeNotFound(entry_point.to_string()))?;
 
         let entry_dist = self.distance(query, &entry_node.vector);
 
@@ -610,16 +695,26 @@ impl HnswIndex {
             })
             .collect();
 
-        result_vec.sort_by(|a, b| a.distance.partial_cmp(&b.distance).unwrap_or(Ordering::Equal));
+        result_vec.sort_by(|a, b| {
+            a.distance
+                .partial_cmp(&b.distance)
+                .unwrap_or(Ordering::Equal)
+        });
 
         Ok(result_vec)
     }
 
     /// Add bidirectional connections between a node and its neighbors
-    fn add_connections(&mut self, node_id: &str, neighbors: &[String], level: usize) -> HnswResult<()> {
-        let mut nodes = self.nodes.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+    fn add_connections(
+        &mut self,
+        node_id: &str,
+        neighbors: &[String],
+        level: usize,
+    ) -> HnswResult<()> {
+        let mut nodes = self
+            .nodes
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
 
         // Add neighbors to node
         if let Some(node) = nodes.get_mut(node_id) {
@@ -663,14 +758,16 @@ impl HnswIndex {
                             .iter()
                             .filter_map(|conn_id| {
                                 nodes.get(conn_id).map(|conn_node| {
-                                    (conn_id.clone(), self.distance(&neighbor_vec, &conn_node.vector))
+                                    (
+                                        conn_id.clone(),
+                                        self.distance(&neighbor_vec, &conn_node.vector),
+                                    )
                                 })
                             })
                             .collect();
 
-                        connection_distances.sort_by(|a, b| {
-                            a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal)
-                        });
+                        connection_distances
+                            .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
 
                         // Keep only m best connections
                         if let Some(neighbor) = nodes.get_mut(neighbor_id) {
@@ -699,9 +796,8 @@ impl HnswIndex {
                     })
                     .collect();
 
-                connection_distances.sort_by(|a, b| {
-                    a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal)
-                });
+                connection_distances
+                    .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(Ordering::Equal));
 
                 if let Some(node) = nodes.get_mut(node_id) {
                     node.neighbors[level] = connection_distances
@@ -718,43 +814,40 @@ impl HnswIndex {
 
     /// Remove a node from the index
     pub fn remove(&mut self, id: &str) -> HnswResult<bool> {
-        let mut nodes = self.nodes.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut nodes = self
+            .nodes
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
 
         // Check if node exists
-        let Some(node) = nodes.remove(id) else {
+        let Some(_node) = nodes.remove(id) else {
             return Ok(false);
         };
 
-        // Remove connections from neighbors
-        for level in 0..node.neighbors.len() {
-            for neighbor_id in &node.neighbors[level] {
-                if let Some(neighbor) = nodes.get_mut(neighbor_id) {
-                    if level < neighbor.neighbors.len() {
-                        neighbor.neighbors[level].retain(|n| n != id);
-                    }
-                }
+        // Pruning can leave directed links, so outgoing neighbors are not a
+        // complete inventory of references to the removed node.
+        for neighbor in nodes.values_mut() {
+            for layer in &mut neighbor.neighbors {
+                layer.retain(|target| target != id);
             }
         }
 
         drop(nodes);
 
         // Update entry point if needed
-        let mut entry = self.entry_point.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut entry = self
+            .entry_point
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
 
         if entry.as_ref() == Some(&id.to_string()) {
-            let nodes = self.nodes.read().map_err(|e| {
-                HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-            })?;
+            let nodes = self
+                .nodes
+                .read()
+                .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
 
             // Find new entry point (highest level node)
-            let new_entry = nodes
-                .values()
-                .max_by_key(|n| n.level)
-                .map(|n| n.id.clone());
+            let new_entry = nodes.values().max_by_key(|n| n.level).map(|n| n.id.clone());
 
             *entry = new_entry;
 
@@ -766,6 +859,11 @@ impl HnswIndex {
                     })?;
                     *max_level = new_entry_node.level;
                 }
+            } else {
+                *self
+                    .current_max_level
+                    .write()
+                    .map_err(|e| HnswError::LockError(e.to_string()))? = 0;
             }
         }
 
@@ -774,20 +872,23 @@ impl HnswIndex {
 
     /// Clear all nodes from the index
     pub fn clear(&mut self) -> HnswResult<()> {
-        let mut nodes = self.nodes.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut nodes = self
+            .nodes
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
         nodes.clear();
         drop(nodes);
 
-        let mut entry = self.entry_point.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut entry = self
+            .entry_point
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
         *entry = None;
 
-        let mut max_level = self.current_max_level.write().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut max_level = self
+            .current_max_level
+            .write()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire write lock: {}", e)))?;
         *max_level = 0;
 
         Ok(())
@@ -817,17 +918,20 @@ impl HnswIndex {
 
     /// Serialize the index to bytes
     pub fn to_bytes(&self) -> HnswResult<Vec<u8>> {
-        let nodes = self.nodes.read().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let nodes = self
+            .nodes
+            .read()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
 
-        let entry_point = self.entry_point.read().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let entry_point = self
+            .entry_point
+            .read()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
 
-        let current_max_level = self.current_max_level.read().map_err(|e| {
-            HnswError::LockError(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let current_max_level = self
+            .current_max_level
+            .read()
+            .map_err(|e| HnswError::LockError(format!("Failed to acquire read lock: {}", e)))?;
 
         let data = SerializedHnswIndex {
             config: self.config.clone(),
@@ -836,15 +940,20 @@ impl HnswIndex {
             current_max_level: *current_max_level,
         };
 
-        bincode::serialize(&data)
-            .map_err(|e| HnswError::SerializationError(e.to_string()))
+        data.validate()?;
+        bincode::serialize(&data).map_err(|e| HnswError::SerializationError(e.to_string()))
     }
 
     /// Deserialize an index from bytes
     pub fn from_bytes(bytes: &[u8]) -> HnswResult<Self> {
-        let data: SerializedHnswIndex = bincode::deserialize(bytes)
+        use bincode::Options;
+        let data: SerializedHnswIndex = bincode::DefaultOptions::new()
+            .with_fixint_encoding()
+            .with_limit(bytes.len() as u64)
+            .reject_trailing_bytes()
+            .deserialize(bytes)
             .map_err(|e| HnswError::SerializationError(e.to_string()))?;
-
+        data.validate()?;
         Ok(Self {
             config: data.config,
             nodes: Arc::new(RwLock::new(data.nodes)),
@@ -861,6 +970,62 @@ struct SerializedHnswIndex {
     nodes: HashMap<String, HnswNode>,
     entry_point: Option<String>,
     current_max_level: usize,
+}
+
+impl SerializedHnswIndex {
+    fn validate(&self) -> HnswResult<()> {
+        self.config.validate()?;
+        let invalid = |message: &str| HnswError::SerializationError(message.into());
+        if self.nodes.is_empty() {
+            if self.entry_point.is_some() || self.current_max_level != 0 {
+                return Err(invalid("Empty snapshot has a live entry point or level"));
+            }
+            return Ok(());
+        }
+        let dimension = self
+            .config
+            .dimension
+            .ok_or_else(|| invalid("Nonempty snapshot lacks dimensions"))?;
+        let entry = self
+            .entry_point
+            .as_ref()
+            .and_then(|id| self.nodes.get(id))
+            .ok_or_else(|| invalid("Snapshot entry point does not exist"))?;
+        let highest = self.nodes.values().map(|node| node.level).max().unwrap();
+        if self.current_max_level != highest
+            || entry.level != highest
+            || highest > self.config.max_level
+        {
+            return Err(invalid("Snapshot maximum level disagrees with its nodes"));
+        }
+        let validator = HnswIndex::new(self.config.clone());
+        for (id, node) in &self.nodes {
+            if id != &node.id
+                || node.vector.len() != dimension
+                || node.level > self.config.max_level
+                || node.neighbors.len() != node.level + 1
+            {
+                return Err(invalid(
+                    "Snapshot node identity, dimension or layer shape is invalid",
+                ));
+            }
+            validator.validate_vector(&node.vector)?;
+            for (level, neighbors) in node.neighbors.iter().enumerate() {
+                for neighbor in neighbors {
+                    if !self
+                        .nodes
+                        .get(neighbor)
+                        .is_some_and(|target| target.level >= level)
+                    {
+                        return Err(invalid(
+                            "Snapshot neighbor does not exist at the referenced layer",
+                        ));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Simple pseudo-random number generator for level selection
@@ -880,10 +1045,7 @@ fn rand_float() -> f32 {
 
     STATE.with(|state| {
         // LCG parameters (same as glibc)
-        let next = state
-            .get()
-            .wrapping_mul(1103515245)
-            .wrapping_add(12345);
+        let next = state.get().wrapping_mul(1103515245).wrapping_add(12345);
         state.set(next);
         // Extract bits and convert to float in [0, 1)
         ((next >> 16) & 0x7FFF) as f32 / 32768.0
@@ -893,6 +1055,51 @@ fn rand_float() -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn contract_requested_count_is_not_silently_capped_by_ef_search() {
+        let mut index = HnswIndex::new(HnswConfig {
+            ef_search: 1,
+            max_level: 0,
+            ..Default::default()
+        });
+        for (id, vector) in [
+            ("a", vec![1.0, 0.0]),
+            ("b", vec![0.8, 0.2]),
+            ("c", vec![0.0, 1.0]),
+        ] {
+            index.insert(id.into(), vector).unwrap();
+        }
+        assert_eq!(index.search(&[1.0, 0.0], 3).unwrap().len(), 3);
+    }
+
+    #[test]
+    fn contract_nonfinite_insert_is_rejected_without_claiming_dimensions() {
+        let mut index = HnswIndex::with_defaults();
+        assert!(index.insert("invalid".into(), vec![f32::NAN, 1.0]).is_err());
+        assert!(index.is_empty());
+        assert_eq!(index.config().dimension, None);
+    }
+
+    #[test]
+    fn contract_large_finite_cosine_vectors_have_finite_self_distance() {
+        let mut index = HnswIndex::with_defaults();
+        let vector = vec![f32::MAX; 3072];
+        index.insert("large".into(), vector.clone()).unwrap();
+        let result = index.search(&vector, 1).unwrap();
+        assert!(result[0].distance.is_finite());
+        assert!(result[0].distance.abs() < 1e-6);
+    }
+
+    #[test]
+    fn contract_nonempty_snapshot_cannot_lose_its_entry_point() {
+        let mut index = HnswIndex::with_defaults();
+        index.insert("a".into(), vec![1.0, 0.0]).unwrap();
+        let mut persisted: SerializedHnswIndex =
+            bincode::deserialize(&index.to_bytes().unwrap()).unwrap();
+        persisted.entry_point = None;
+        assert!(HnswIndex::from_bytes(&bincode::serialize(&persisted).unwrap()).is_err());
+    }
 
     fn create_test_vectors() -> Vec<(String, Vec<f32>)> {
         vec![
@@ -1099,6 +1306,161 @@ mod tests {
         // Top results should have small distances
         for result in results.iter().take(5) {
             assert!(result.distance < 0.1);
+        }
+    }
+    #[test]
+    fn replacement_preserves_entry_topology_and_snapshot() {
+        let mut index = HnswIndex::new(HnswConfig::small());
+        for (id, vector) in [
+            ("a", vec![1.0, 0.0]),
+            ("b", vec![0.0, 1.0]),
+            ("c", vec![-1.0, 0.0]),
+        ] {
+            index.insert(id.into(), vector).unwrap();
+        }
+        let entry = index.entry_point.read().unwrap().clone().unwrap();
+        let old_level = index.nodes.read().unwrap()[&entry].level;
+        for _ in 0..20 {
+            index.insert(entry.clone(), vec![0.5, 0.5]).unwrap();
+            assert_eq!(index.nodes.read().unwrap()[&entry].level, old_level);
+            let restored = HnswIndex::from_bytes(&index.to_bytes().unwrap()).unwrap();
+            assert_eq!(restored.search(&[0.5, 0.5], 3).unwrap().len(), 3);
+            for node in restored.nodes.read().unwrap().values() {
+                assert!(node.neighbors.iter().flatten().all(|id| id != &node.id));
+            }
+        }
+        assert!(index.insert(entry.clone(), vec![f32::NAN, 0.0]).is_err());
+        assert_eq!(index.nodes.read().unwrap()[&entry].vector, vec![0.5, 0.5]);
+    }
+
+    #[test]
+    fn extreme_cosine_dimensions_remain_finite() {
+        for dimension in [3072, 32768] {
+            for value in [f32::MAX, f32::from_bits(1)] {
+                let mut index = HnswIndex::new(HnswConfig::small());
+                index.insert("x".into(), vec![value; dimension]).unwrap();
+                let opposite = vec![-value; dimension];
+                assert_eq!(index.search(&opposite, 1).unwrap()[0].distance, 2.0);
+                HnswIndex::from_bytes(&index.to_bytes().unwrap()).unwrap();
+            }
+        }
+    }
+
+    #[test]
+    fn rejects_structurally_corrupt_snapshots() {
+        let mut index = HnswIndex::new(HnswConfig::small());
+        index.insert("a".into(), vec![1.0, 0.0]).unwrap();
+        index.insert("b".into(), vec![0.0, 1.0]).unwrap();
+        let bytes = index.to_bytes().unwrap();
+        for case in 0..7 {
+            let mut data: SerializedHnswIndex = bincode::deserialize(&bytes).unwrap();
+            match case {
+                0 => data.config.dimension = Some(3),
+                1 => data.nodes.get_mut("a").unwrap().neighbors[0].push("missing".into()),
+                2 => data.nodes.get_mut("a").unwrap().neighbors.clear(),
+                3 => data.current_max_level += 1,
+                4 => data.nodes.get_mut("a").unwrap().vector[0] = f32::INFINITY,
+                5 => data.config.ef_search = 0,
+                _ => data.nodes.get_mut("a").unwrap().id = "other".into(),
+            }
+            assert!(
+                HnswIndex::from_bytes(&bincode::serialize(&data).unwrap()).is_err(),
+                "case {case}"
+            );
+        }
+        let mut trailing = bytes;
+        trailing.push(0);
+        assert!(HnswIndex::from_bytes(&trailing).is_err());
+    }
+
+    #[test]
+    fn removal_cleans_asymmetric_incoming_links_and_empty_snapshot() {
+        let mut index = HnswIndex::new(HnswConfig::small());
+        index.insert("a".into(), vec![1.0, 0.0]).unwrap();
+        index.insert("b".into(), vec![0.0, 1.0]).unwrap();
+        {
+            let mut nodes = index.nodes.write().unwrap();
+            nodes.get_mut("a").unwrap().neighbors[0].clear();
+            nodes.get_mut("b").unwrap().neighbors[0] = vec!["a".into()];
+        }
+        index.remove("a").unwrap();
+        let restored = HnswIndex::from_bytes(&index.to_bytes().unwrap()).unwrap();
+        assert_eq!(restored.search(&[0.0, 1.0], 1).unwrap()[0].id, "b");
+        index.remove("b").unwrap();
+        assert!(HnswIndex::from_bytes(&index.to_bytes().unwrap())
+            .unwrap()
+            .is_empty());
+    }
+
+    #[test]
+    fn unrepresentable_metric_norms_fail_before_dimension_is_claimed() {
+        for metric in [SimilarityMetric::DotProduct, SimilarityMetric::Euclidean] {
+            let mut index = HnswIndex::new(HnswConfig::small().with_metric(metric));
+            assert!(index.insert("invalid".into(), vec![f32::MAX; 2]).is_err());
+            assert!(index.config.dimension.is_none());
+            assert!(index.is_empty());
+            index.insert("valid".into(), vec![1.0e15, 1.0e15]).unwrap();
+            assert!(index.search(&[-1.0e15, -1.0e15], 1).unwrap()[0]
+                .distance
+                .is_finite());
+            assert!(index.search(&[f32::MAX; 2], 1).is_err());
+        }
+    }
+
+    #[test]
+    fn reads_original_fixed_width_snapshot_layout() {
+        // Original bincode layout, assembled without current Serialize impls.
+        fn integer(bytes: &mut Vec<u8>, value: u64) {
+            bytes.extend(value.to_le_bytes());
+        }
+        fn text(bytes: &mut Vec<u8>, value: &str) {
+            integer(bytes, value.len() as u64);
+            bytes.extend(value.as_bytes());
+        }
+        let mut bytes = Vec::new();
+        for value in [8, 100, 30, 10] {
+            integer(&mut bytes, value);
+        }
+        bytes.push(1); // Some dimension
+        integer(&mut bytes, 2);
+        bytes.extend(0u32.to_le_bytes()); // Cosine enum
+        bytes.extend((1.0 / 8.0_f32.ln()).to_le_bytes());
+        integer(&mut bytes, 1); // map size
+        text(&mut bytes, "legacy");
+        text(&mut bytes, "legacy");
+        integer(&mut bytes, 2);
+        bytes.extend(1.0_f32.to_le_bytes());
+        bytes.extend(0.0_f32.to_le_bytes());
+        integer(&mut bytes, 0); // node level
+        integer(&mut bytes, 1); // one layer
+        integer(&mut bytes, 0); // no neighbors
+        bytes.push(1);
+        text(&mut bytes, "legacy"); // entry point
+        integer(&mut bytes, 0); // maximum level
+        let restored = HnswIndex::from_bytes(&bytes).unwrap();
+        assert_eq!(restored.search(&[1.0, 0.0], 1).unwrap()[0].id, "legacy");
+        assert_eq!(restored.to_bytes().unwrap(), bytes);
+    }
+    #[test]
+    fn invalid_configuration_is_rejected_by_constructor_and_operations() {
+        for case in 0..8 {
+            let mut config = HnswConfig::small();
+            match case {
+                0 => config.m = 1,
+                1 => config.m = usize::MAX,
+                2 => config.ef_search = 0,
+                3 => config.ef_construction = 0,
+                4 => config.max_level = usize::MAX,
+                5 => config.ml = f32::NAN,
+                6 => config.ml = 0.0,
+                _ => config.dimension = Some(0),
+            }
+            assert!(HnswIndex::try_new(config.clone()).is_err());
+            let mut unchecked = HnswIndex::new(config);
+            assert!(unchecked.insert("a".into(), vec![1.0]).is_err());
+            assert!(unchecked.search(&[1.0], 1).is_err());
+            assert!(unchecked.to_bytes().is_err());
+            assert!(unchecked.is_empty());
         }
     }
 }

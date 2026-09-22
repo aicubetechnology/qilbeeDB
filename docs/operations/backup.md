@@ -1,151 +1,57 @@
-# Backup & Recovery
+# Backup and recovery
 
-Backup and restore QilbeeDB data.
+Preserve a recoverable copy of the complete database and the deployment context
+needed to open it. The current platform does not provide the previously described
+`/admin/snapshot` or `/admin/snapshots` HTTP endpoints. Use a qualified operator
+procedure for the deployed version.
 
-## Snapshots
+## Create an offline backup
 
-### Create Snapshot
+1. Coordinate the maintenance window and stop admitting new work. Account for
+   every client and direct writer, including administrators and background jobs.
+2. Stop the server and verify its exit status and logs. For versions containing
+   the new lifecycle feature, follow [graceful shutdown](graceful-shutdown.md).
+   A deadline or force-kill is not a successful drain.
+3. Confirm no process can mutate the data volume. Copy or snapshot the complete
+   data directory and its required deployment configuration. Preserve ownership,
+   permissions and all database subdirectories. Do not copy selected live RocksDB
+   files or assume that separate copies of active stores form one consistent set.
+4. Record the deployed image digest, schema/storage versions, snapshot identity,
+   capture time and integrity manifest. Keep the retained source unchanged.
+5. Restore a copy to an isolated directory or volume and open it with the exact
+   compatible binary. Verify authorized inventories, revisions, receipts and
+   representative reads before considering the backup usable.
 
-```bash
-# HTTP API
-curl -X POST http://localhost:7474/admin/snapshot
-```
+Cloud volume snapshot consistency and freeze/unfreeze handling belong to the
+operator procedure. Snapshot completion alone does not verify restore semantics.
+This guide does not introduce a cloud backup service or an online snapshot API.
 
-Response:
-```json
-{
-  "snapshot_id": "20240115-103000",
-  "path": "/data/snapshots/20240115-103000",
-  "size_bytes": 1073741824
-}
-```
+## Restore or roll back
 
-### List Snapshots
+Restore into a separate location first. Validate identity and authorization,
+retained memory, graph state and dependent learning evidence. Confirm the intended
+service version and actual data mounts before routing traffic to the restored
+instance. Preserve the failed or newer data for reconciliation.
 
-```bash
-curl http://localhost:7474/admin/snapshots
-```
+A backup from before an upgrade may omit later acknowledged writes. Restoring it
+over the current directory can discard those writes; reconcile them before any
+cutover. Never open a migrated storage format using an older incompatible binary.
+Use the release's documented downgrade constraints and a verified pre-upgrade
+copy rather than changing only the container image.
 
-### Restore Snapshot
+For an interrupted shutdown, inspect the recovered database and reconcile unknown
+request outcomes using the original operation identities where supported. Do not
+infer that all interrupted requests failed or that every returned response was
+delivered to its client.
 
-```bash
-# Stop database
-docker stop qilbeedb
+## Set and measure recovery objectives
 
-# Restore snapshot
-cp -r /data/snapshots/20240115-103000/* /data/
+The company owns retention, recovery-point and recovery-time objectives. Record
+measured restore duration, the actual snapshot boundary, any unreconciled writes,
+and validation failures. No fixed recovery-time or recovery-point guarantee is
+established by the examples or by a successful health check.
 
-# Start database
-docker start qilbeedb
-```
-
-## File System Backup
-
-### Backup Data Directory
-
-```bash
-# Stop database
-docker stop qilbeedb
-
-# Backup data
-tar -czf qilbeedb-backup-$(date +%Y%m%d).tar.gz /data/qilbeedb/
-
-# Start database
-docker start qilbeedb
-```
-
-### Restore from Backup
-
-```bash
-# Stop database
-docker stop qilbeedb
-
-# Restore data
-tar -xzf qilbeedb-backup-20240115.tar.gz -C /
-
-# Start database
-docker start qilbeedb
-```
-
-## Online Backups
-
-For minimal downtime, use snapshots:
-
-```bash
-# Create snapshot (database stays online)
-curl -X POST http://localhost:7474/admin/snapshot
-
-# Backup snapshot directory
-cp -r /data/snapshots/latest /backup/
-```
-
-## Automated Backups
-
-### Cron Job
-
-```bash
-# Add to crontab
-0 2 * * * /usr/local/bin/qilbee-backup.sh
-
-# qilbee-backup.sh
-#!/bin/bash
-BACKUP_DIR="/backup/qilbeedb"
-DATE=$(date +%Y%m%d)
-
-# Create snapshot
-curl -X POST http://localhost:7474/admin/snapshot
-
-# Backup to S3
-aws s3 sync /data/snapshots/latest s3://my-backups/qilbeedb/$DATE/
-```
-
-## Backup Strategy
-
-### Daily Backups
-- Automated snapshots
-- Retain for 7 days
-
-### Weekly Backups
-- Full file system backup
-- Retain for 4 weeks
-
-### Monthly Backups
-- Archive to cold storage
-- Retain for 12 months
-
-## Disaster Recovery
-
-### Recovery Time Objective (RTO)
-Target: < 1 hour
-
-### Recovery Point Objective (RPO)
-Target: < 24 hours (daily backups)
-
-### Recovery Steps
-
-1. Provision new instance
-2. Restore latest backup
-3. Verify data integrity
-4. Update DNS/load balancer
-5. Resume operations
-
-## Verification
-
-Test restore procedures regularly:
-
-```bash
-# Restore to test instance
-docker run -d --name qilbeedb-test \
-  -v /backup/latest:/data \
-  qilbeedb/qilbeedb:latest
-
-# Verify data
-curl http://localhost:7475/health
-curl http://localhost:7475/admin/stats
-```
-
-## Next Steps
-
-- Configure [Deployment](deployment.md)
-- Set up [Monitoring](monitoring.md)
-- Optimize [Performance](performance.md)
+Rehearse restoration with realistic data and permissions. Protect backup access
+as database access, and include credentials/configuration needed for recovery in
+the approved private operational storage. Keep deployment secrets out of source
+repositories and user-facing evidence reports.

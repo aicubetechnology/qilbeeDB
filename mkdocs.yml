@@ -154,6 +154,7 @@ nav:
   - Agent Memory:
     - Overview: agent-memory/overview.md
     - Episodes: agent-memory/episodes.md
+    - Native Relevance Accounting: agent-memory/relevance-accounting.md
     - Episode Lifecycle: agent-memory/episode-lifecycle.md
     - Memory Types: agent-memory/memory-types.md
     - Semantic Search: agent-memory/semantic-search.md
@@ -203,6 +204,7 @@ nav:
     - Docker: operations/docker.md
     - Retrieval capacity: operations/retrieval-capacity.md
     - Monitoring: operations/monitoring.md
+    - Graceful Shutdown: operations/graceful-shutdown.md
     - Backup & Recovery: operations/backup.md
     - Performance Tuning: operations/performance.md
   - Learn More:
@@ -220,6 +222,7 @@ nav:
       - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
       - Native Index Reconstruction: architecture/native-index-rebuild.md
       - Native Vector Sources: architecture/native-vector-source.md
+      - Native Vector Integrity: architecture/native-vector-integrity.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
       - External Tool Knowledge: architecture/learned-tools.md

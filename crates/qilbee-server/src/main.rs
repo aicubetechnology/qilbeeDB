@@ -63,19 +63,25 @@ async fn main() {
     // Wait for shutdown signal
     info!("Press Ctrl+C to stop the server");
 
-    match tokio::signal::ctrl_c().await {
+    let signal_failed = match qilbee_server::server::shutdown_signal().await {
         Ok(()) => {
             info!("Received shutdown signal");
+            false
         }
         Err(e) => {
             error!("Failed to listen for shutdown signal: {}", e);
+            true
         }
-    }
+    };
 
     // Stop server
     if let Err(e) = server.stop().await {
         error!("Error during shutdown: {}", e);
+        std::process::exit(1);
     }
 
+    if signal_failed {
+        std::process::exit(1);
+    }
     info!("Goodbye!");
 }
