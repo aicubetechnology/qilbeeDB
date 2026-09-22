@@ -1,5 +1,6 @@
 mod agent_profiles;
 mod company_memory;
+mod company_consumers;
 mod company_learning;
 mod learning_evidence;
 mod memory_graph;

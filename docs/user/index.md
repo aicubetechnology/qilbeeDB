@@ -119,3 +119,10 @@ mean improvement and material regressions. Agent-task benefits remain unmeasured
 The unreleased [learning evidence history](../api/learning-evidence-history.md)
 lets administrators inspect original evaluation submissions and retained events
 from a selected learning resource, with explicit historical states and recovery.
+
+The unreleased [company consumer directory](../api/company-consumer-directory.md)
+lets administrators discover retained memory and graph consumers across company
+projects and private owners, then inspect progress without a writer's key. Legacy
+sequence estimates remain explicitly unverified, and saved checkpoints do not
+prove worker liveness. The console supports selection, continuation, safe retry,
+and keyboard return without requiring manual consumer identifiers.

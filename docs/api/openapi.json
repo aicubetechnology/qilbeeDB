@@ -19685,6 +19685,350 @@
           }
         }
       }
+    },
+    "/api/v1/company/memory/consumers/query": {
+      "post": {
+        "operationId": "queryCompanyConsumers",
+        "summary": "Discover retained company consumers",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin; company is derived from authentication before retrieval admission. Read-only, includes private owners and revoked writers, never issues credentials or changes checkpoints. Discovery traverses canonical checkpoint primary keys within the authorized company, including checkpoint-only workspaces. Limits: 50 entries, 1000 primaries, 4 MiB primary key/value bytes; companion integrity reads are not included in byte accounting. Pages are live key-order observations, not snapshots across requests. A retained checkpoint or initialized journal does not prove worker liveness. Legacy progress provides only a sequence-range estimate; verified diagnostics preserve incompatible history rather than hiding it. Consumer ownership is independent of the private memory owner.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyConsumerQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyConsumerQueryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/consumers/read": {
+      "post": {
+        "operationId": "readCompanyConsumer",
+        "summary": "Inspect retained company consumer progress",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires current company credential_admin; company is derived from authentication before retrieval admission. Read-only, includes private owners and revoked writers, never issues credentials or changes checkpoints. Discovery traverses canonical checkpoint primary keys within the authorized company, including checkpoint-only workspaces. Limits: 50 entries, 1000 primaries, 4 MiB primary key/value bytes; companion integrity reads are not included in byte accounting. Pages are live key-order observations, not snapshots across requests. A retained checkpoint or initialized journal does not prove worker liveness. Legacy progress provides only a sequence-range estimate; verified diagnostics preserve incompatible history rather than hiding it. Consumer ownership is independent of the private memory owner.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyConsumerReadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyConsumerReadResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource matches this selection in the authenticated company.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -34783,6 +35127,534 @@
           "contract_version",
           "company_id",
           "evidence",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerKind": {
+        "type": "string",
+        "enum": [
+          "memory_v1",
+          "memory_v2",
+          "relations_v1"
+        ]
+      },
+      "CompanyConsumerRef": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CompanyConsumerKind"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+          },
+          "consumer_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "At most 128 UTF-8 bytes, nonblank, without control characters."
+          }
+        },
+        "required": [
+          "kind",
+          "scope",
+          "private_subject_id",
+          "subject_id",
+          "consumer_id"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "scope": {
+                  "properties": {
+                    "visibility": {
+                      "const": "private"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "private_subject_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "private_subject_id": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CompanyConsumerCursor": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+          },
+          "filter_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "position": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 32768,
+            "pattern": "^(?:[a-f0-9]{2})+$"
+          }
+        },
+        "required": [
+          "version",
+          "company_id",
+          "filter_digest",
+          "position"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerQuery": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CompanyConsumerKind"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 25
+          },
+          "max_scanned_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyConsumerCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerEntry": {
+        "type": "object",
+        "properties": {
+          "consumer": {
+            "$ref": "#/components/schemas/CompanyConsumerRef"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "updated_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "consumer",
+          "revision",
+          "sequence",
+          "updated_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerPage": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/CompanyConsumerEntry"
+            }
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyConsumerCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "exhausted",
+              "entry_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "scanned_record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "observed_at_millis": {
+            "type": "integer",
+            "minimum": -9223372036854775808,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "entries",
+          "next_cursor",
+          "stop_reason",
+          "scanned_records",
+          "scanned_record_bytes",
+          "observed_at_millis"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "stop_reason": {
+                  "const": "exhausted"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "next_cursor": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "next_cursor": {
+                  "$ref": "#/components/schemas/CompanyConsumerCursor"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CompanyConsumerWitness": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "memory_v2"
+              },
+              "cursor": {
+                "$ref": "#/components/schemas/VerifiedMemoryCursor"
+              }
+            },
+            "required": [
+              "kind",
+              "cursor"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "relations_v1"
+              },
+              "cursor": {
+                "$ref": "#/components/schemas/RelationChangeCursor"
+              }
+            },
+            "required": [
+              "kind",
+              "cursor"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "LegacyConsumerObservation": {
+        "type": "object",
+        "properties": {
+          "checkpoint": {
+            "$ref": "#/components/schemas/MemoryCheckpoint"
+          },
+          "high_watermark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MemoryChangeCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "position_in_range": {
+            "type": "boolean"
+          },
+          "sequence_distance_estimate": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "checkpoint",
+          "high_watermark",
+          "position_in_range",
+          "sequence_distance_estimate"
+        ],
+        "additionalProperties": false,
+        "description": "Journal identity and sequence bounds only; legacy progress cannot prove branch compatibility.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "position_in_range": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "sequence_distance_estimate": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18446744073709551615
+                },
+                "high_watermark": {
+                  "$ref": "#/components/schemas/MemoryChangeCursor"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "sequence_distance_estimate": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CompanyConsumerDetails": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "memory_v1"
+              },
+              "observation": {
+                "$ref": "#/components/schemas/LegacyConsumerObservation"
+              }
+            },
+            "required": [
+              "kind",
+              "observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "memory_v2"
+              },
+              "observation": {
+                "$ref": "#/components/schemas/MemoryConsumerDiagnostics"
+              }
+            },
+            "required": [
+              "kind",
+              "observation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "relations_v1"
+              },
+              "observation": {
+                "$ref": "#/components/schemas/RelationConsumerDiagnostics"
+              }
+            },
+            "required": [
+              "kind",
+              "observation"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "CompanyConsumerQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/CompanyConsumerQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+          },
+          "page": {
+            "$ref": "#/components/schemas/CompanyConsumerPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerReadRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "consumer": {
+            "$ref": "#/components/schemas/CompanyConsumerRef"
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyConsumerWitness"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "consumer"
+        ],
+        "additionalProperties": false
+      },
+      "CompanyConsumerReadResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank, without control characters."
+          },
+          "consumer": {
+            "$ref": "#/components/schemas/CompanyConsumerRef"
+          },
+          "details": {
+            "$ref": "#/components/schemas/CompanyConsumerDetails"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "consumer",
           "details"
         ],
         "additionalProperties": false

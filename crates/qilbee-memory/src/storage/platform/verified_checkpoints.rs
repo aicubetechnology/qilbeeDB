@@ -247,7 +247,7 @@ impl RocksDbMemoryStorage {
 impl MemorySnapshot<'_> {
     /// Verify intrinsic ownership and integrity without requiring a compatible journal.
     /// Ordinary reads must additionally verify history; explicit recovery may reconcile it.
-    fn stored_verified_checkpoint(
+    pub(in crate::storage::platform) fn stored_verified_checkpoint(
         &self,
         namespace: &str,
         subject: &str,

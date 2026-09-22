@@ -913,6 +913,9 @@ pub use eligibility::*;
 #[cfg(test)]
 mod eligibility_tests;
 
+mod consumer_catalog;
+pub use consumer_catalog::*;
+
 mod checkpoints;
 pub use checkpoints::*;
 #[cfg(test)]
