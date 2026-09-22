@@ -427,6 +427,13 @@
       "title": "Atomic graph transactions",
       "description": "Handle optimistic point-read conflicts, preserve atomic entity and index writes, and understand retry and recovery limits.",
       "order": 132
+    },
+    {
+      "source": "docs/architecture/property-index.md",
+      "file": "property-index-upgrades.md",
+      "title": "Property index equality and upgrades",
+      "description": "Migrate graph property indexes with canonical equality, interruption recovery and explicit rollback requirements.",
+      "order": 133
     }
   ]
 }
