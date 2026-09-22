@@ -117,7 +117,7 @@ invalid assertion intervals, changed endpoint revisions, deleted/expired/rejecte
 memories and invalid transitive evidence are excluded. Complete memory eligibility
 checks apply even when the memory's evidence sources lie beyond the display depth.
 
-The unreleased [additional context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
+The 0.14.0 [additional context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
 also checks each assertion's declared `evidence_sources` before expanding or
 deferring an edge. Invalid context cannot create a misleading depth cut. Context
 IDs and revisions remain in the returned assertion; their payloads are not added

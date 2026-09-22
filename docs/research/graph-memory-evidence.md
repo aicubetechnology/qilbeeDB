@@ -77,7 +77,7 @@ work. Neither description establishes the storage validity contract below.
 
 **Engineering inference:** a relation inferred from several memories must depend
 on all declared supporting context, not just the two graph endpoints. The
-unreleased [relation evidence extension](../api/typed-memory-relations.md#bind-the-context-used-for-inference)
+0.14.0 [relation evidence extension](../api/typed-memory-relations.md#bind-the-context-used-for-inference)
 adds exact same-scope context references, bounded transitive checks, stale-source
 publication rejection and invalidation at traversal and retrieval. Immutable
 history survives invalidation. This is a prerequisite for an external consolidator;
@@ -97,7 +97,7 @@ unknown-outcome accounting and comparative evaluation remain required.
 | Relation change consumption | Implemented in the 0.13.0 [relation feed](../api/typed-relation-changes.md) | Atomic lifecycle events, history-bound fenced cursors, subject-owned progress, immutable receipts, stale-writer rejection and explicit reconciliation; endpoint changes and expiry still require current-state checks |
 | Graph-assisted retrieval | Implemented in 0.13.0; experimental | Immutable server profiles, four reproducible anchors, strongest typed path, exact eligible revisions, separate score contributions and coverage; legacy cosine/hybrid contracts preserved |
 | External graph retrieval comparison | Measured in 0.13.0 | Frozen document-only graph and E5 vectors, 100 reserved public-development queries, eight methods and 2,400 requests; primary gain remains uncertain and important category regressions prevent default admission |
-| Additional relation evidence | Implemented in unreleased source | Non-endpoint context binds exact revisions and digest; invalidation affects reads, traversal and graph search; history, scope and work bounds remain enforced |
+| Additional relation evidence | Available in 0.14.0 | Non-endpoint context binds exact revisions and digest; invalidation affects reads, traversal and graph search; history, scope and work bounds remain enforced |
 | Asynchronous consolidation | Unreleased implementation; native worker recovery qualified, extraction quality unmeasured | [Durable owner-scoped jobs](../api/graph-consolidation.md), immutable context manifests, credential and incarnation fences, bounded retries, atomic relation batches and explicit unknown consumption; no published quality improvement |
 | Graph-backed learned-tool reuse | Proposed | Exact immutable artifact and executor identity, verified environment applicability, cancellation, idempotency and isolated execution; a matching graph node alone cannot authorize execution |
 | Evidence-based policy improvement | Proposed | Reuse the existing qualification and suspension authority; freeze policy and evaluator versions; retain failure evidence and compare fresh tasks before publication |

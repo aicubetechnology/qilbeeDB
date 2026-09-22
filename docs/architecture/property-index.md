@@ -1,6 +1,6 @@
 # Property index equality and upgrades
 
-Status: unreleased 0.14.0 candidate. This is a Rust graph storage contract, not
+Status: available in 0.14.0. This is a Rust graph storage contract, not
 an additional HTTP search mode. It does not change embedding, cosine or hybrid
 ranking semantics.
 

@@ -13,7 +13,7 @@ without a provider dependency.
 The relation stream is separate from the existing memory feeds. Existing memory
 clients keep their event kinds and cursor semantics. A graph cache must also
 observe memory changes and revalidate eligibility before reuse: changing or
-expiring an endpoint does not create a relation event. The unreleased
+expiring an endpoint does not create a relation event. The 0.14.0
 [additional context extension](typed-memory-relations.md#bind-the-context-used-for-inference)
 has the same rule for declared evidence sources and their ancestors. A feed
 checkpoint proves delivery progress, not current relation eligibility.

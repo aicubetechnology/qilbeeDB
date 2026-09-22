@@ -11,7 +11,7 @@ generates embeddings externally and decides how retrieved evidence is used.
 - [Quickstart](quickstart.md): create a memory and retrieve it with a scoped credential.
 - [Authentication and scopes](../security/scoped-credentials.md): understand tenants, resource grants and private subjects.
 - [Automatic agent registration, 0.12.0](../security/agent-registration.md): register external IDs on successful authorized requests and inspect the company directory.
-- [Agent display names, unreleased](../security/agent-display-profiles.md): recognize external agent IDs and preserve revisioned name changes.
+- [Agent display names (0.14.0)](../security/agent-display-profiles.md): recognize external agent IDs and preserve revisioned name changes.
 - [Company integrations, 0.12.0](../security/company-integrations.md): authorize external project and agent IDs through a versioned policy and change access without replacing keys.
 - [Company memory administration, 0.12.0](../security/company-memory-administration.md): discover retained workspaces and inspect company records independently of credential grants.
 - [Memory API](../api/versioned-memory.md): create, update and delete records with durable receipts and revision checks.
@@ -49,7 +49,7 @@ execute tool development outside the database process. These contracts make
 outcomes observable; they do not guarantee that every learned procedure improves
 an agent or that a generated program is safe merely because it was recorded.
 
-The unreleased [company learning catalog](../api/company-learning-catalog.md) adds
+The 0.14.0 [company learning catalog](../api/company-learning-catalog.md) adds
 company-wide discovery and inspection of retained experiences, procedures,
 strategies and tools, without requiring a memory record or an active writer key.
 
@@ -116,18 +116,18 @@ coverage and provenance. Existing search scores and defaults remain unchanged;
 the [reserved comparison](../research/graph-retrieval-results.md) found uncertain
 mean improvement and material regressions. Agent-task benefits remain unmeasured.
 
-The unreleased [learning evidence history](../api/learning-evidence-history.md)
+The 0.14.0 [learning evidence history](../api/learning-evidence-history.md)
 lets administrators inspect original evaluation submissions and retained events
 from a selected learning resource, with explicit historical states and recovery.
 
-The unreleased [company consumer directory](../api/company-consumer-directory.md)
+The 0.14.0 [company consumer directory](../api/company-consumer-directory.md)
 lets administrators discover retained memory and graph consumers across company
 projects and private owners, then inspect progress without a writer's key. Legacy
 sequence estimates remain explicitly unverified, and saved checkpoints do not
 prove worker liveness. The console supports selection, continuation, safe retry,
 and keyboard return without requiring manual consumer identifiers.
 
-The unreleased [external graph consolidation contract](../api/graph-consolidation.md)
+The 0.14.0 [external graph consolidation contract](../api/graph-consolidation.md)
 coordinates durable external extraction, exact source revisions and fenced atomic
 relation publication. Its worker and administrative workflows require qualification
 before release; inferred relations do not establish an agent-quality gain.
