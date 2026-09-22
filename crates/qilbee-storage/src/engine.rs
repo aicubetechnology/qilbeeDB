@@ -702,6 +702,67 @@ impl StorageEngine {
 
     // ========== Transaction Operations ==========
 
+    pub(crate) fn transaction_node_bytes(
+        &self,
+        graph: GraphId,
+        id: NodeId,
+    ) -> Result<Option<Vec<u8>>> {
+        self.db
+            .get_cf(self.cf(cf::NODES)?, KeyBuilder::node(graph, id))
+            .map_err(|e| Error::Storage(e.to_string()))
+    }
+
+    pub(crate) fn transaction_relationship_bytes(
+        &self,
+        graph: GraphId,
+        id: RelationshipId,
+    ) -> Result<Option<Vec<u8>>> {
+        self.db
+            .get_cf(
+                self.cf(cf::RELATIONSHIPS)?,
+                KeyBuilder::relationship(graph, id),
+            )
+            .map_err(|e| Error::Storage(e.to_string()))
+    }
+
+    /// Validate point observations and publish the complete batch under one lock.
+    pub(crate) fn apply_observed_transaction(
+        &self,
+        graph: GraphId,
+        identity: Option<&GraphIdentity>,
+        operations: &[TransactionOperation],
+        nodes: &HashMap<NodeId, Option<Vec<u8>>>,
+        relationships: &HashMap<RelationshipId, Option<Vec<u8>>>,
+    ) -> Result<()> {
+        let _guard = self
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Storage mutation lock poisoned".into()))?;
+        if let Some(identity) = identity {
+            self.validate_graph_identity(identity)?;
+            if identity.id() != graph {
+                return Err(Error::InvalidGraphOperation(
+                    "Transaction graph identity mismatch".into(),
+                ));
+            }
+        }
+        for (id, observed) in nodes {
+            if self.transaction_node_bytes(graph, *id)? != *observed {
+                return Err(Error::TransactionAborted(
+                    "A node observed by the transaction changed".into(),
+                ));
+            }
+        }
+        for (id, observed) in relationships {
+            if self.transaction_relationship_bytes(graph, *id)? != *observed {
+                return Err(Error::TransactionAborted(
+                    "A relationship observed by the transaction changed".into(),
+                ));
+            }
+        }
+        self.apply_operations_locked(graph, operations)
+    }
+
     pub(crate) fn apply_operations(
         &self,
         graph_id: GraphId,
