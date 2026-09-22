@@ -1,5 +1,5 @@
 {
-  "release": "0.13.0",
+  "release": "0.14.0",
   "pages": [
     {
       "source": "docs/user/index.md",
@@ -413,6 +413,13 @@
       "title": "Evidence-bound knowledge",
       "description": "Propose scoped knowledge, inspect current source evidence and select qualified procedures with explicit external tool identities.",
       "order": 106
+    },
+    {
+      "source": "docs/releases/0.14.0.md",
+      "file": "release-0.14.0.md",
+      "title": "QilbeeDB 0.14.0 release candidate",
+      "description": "Review the unreleased knowledge, administration and consolidation contracts and their upgrade acceptance requirements.",
+      "order": 1014
     }
   ]
 }
