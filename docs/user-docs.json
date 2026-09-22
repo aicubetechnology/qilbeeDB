@@ -436,32 +436,39 @@
       "order": 133
     },
     {
+      "source": "docs/architecture/native-index-rebuild.md",
+      "file": "native-index-rebuild.md",
+      "title": "Native index reconstruction",
+      "description": "Preserve the published native memory index across rebuild failures and cancellation.",
+      "order": 1024
+    },
+    {
       "source": "docs/architecture/native-vector-integrity.md",
       "file": "native-vector-integrity.md",
       "title": "Native vector index integrity",
       "description": "Validate native vectors, replace indexed records and recover compatible snapshots.",
-      "order": 1024
+      "order": 1034
     },
     {
       "source": "docs/operations/graceful-shutdown.md",
       "file": "graceful-shutdown.md",
       "title": "Graceful server shutdown",
       "description": "Close HTTP admission, drain accepted work and reconcile uncertain write outcomes.",
-      "order": 1034
+      "order": 1044
     },
     {
       "source": "docs/operations/backup.md",
       "file": "backup-and-recovery.md",
       "title": "Backup and recovery",
       "description": "Create consistent offline backups and validate recovery without discarding newer writes.",
-      "order": 1044
+      "order": 1054
     },
     {
       "source": "docs/agent-memory/relevance-accounting.md",
       "file": "native-relevance-accounting.md",
       "title": "Native relevance accounting",
       "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
-      "order": 1054
+      "order": 1064
     }
   ]
 }

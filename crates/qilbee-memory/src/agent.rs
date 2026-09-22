@@ -12,7 +12,7 @@ use qilbee_core::temporal::{EventTime, TemporalRange};
 use qilbee_core::{Error, Result};
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 fn validate_episode_write(config: &MemoryConfig, episode: &Episode) -> Result<()> {
     if config.agent_id.is_empty() || episode.agent_id != config.agent_id {
@@ -475,6 +475,9 @@ pub struct PersistentAgentMemory {
     /// HNSW vector index (optional, for semantic search)
     vector_index: Option<Arc<RwLock<HnswIndex>>>,
 
+    /// Serializes native index preparation and publication across clones.
+    index_mutation: Arc<tokio::sync::Mutex<()>>,
+
     /// Semantic search configuration
     semantic_config: Option<SemanticSearchConfig>,
 }
@@ -498,6 +501,7 @@ impl PersistentAgentMemory {
             storage: Arc::new(storage),
             embedding_provider: None,
             vector_index: None,
+            index_mutation: Arc::new(tokio::sync::Mutex::new(())),
             semantic_config: None,
         })
     }
@@ -513,6 +517,7 @@ impl PersistentAgentMemory {
             storage,
             embedding_provider: None,
             vector_index: None,
+            index_mutation: Arc::new(tokio::sync::Mutex::new(())),
             semantic_config: None,
         }
     }
@@ -528,6 +533,7 @@ impl PersistentAgentMemory {
             storage: Arc::new(InMemoryStorage::new()),
             embedding_provider: None,
             vector_index: None,
+            index_mutation: Arc::new(tokio::sync::Mutex::new(())),
             semantic_config: None,
         }
     }
@@ -864,6 +870,7 @@ impl PersistentAgentMemory {
 
     /// Index an episode in the vector index
     pub async fn index_episode(&self, episode: &Episode) -> Result<()> {
+        let _mutation = self.index_mutation.lock().await;
         let index = self.vector_index.as_ref().ok_or_else(|| {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
@@ -895,6 +902,7 @@ impl PersistentAgentMemory {
 
     /// Remove an episode from the vector index
     pub async fn unindex_episode(&self, episode_id: EpisodeId) -> Result<bool> {
+        let _mutation = self.index_mutation.lock().await;
         let index = self.vector_index.as_ref().ok_or_else(|| {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
@@ -933,14 +941,15 @@ impl PersistentAgentMemory {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
 
-        // Search the HNSW index
-        let index_guard = index.read().map_err(|_| {
-            Error::Internal("Failed to acquire vector index lock".to_string())
-        })?;
-
-        let search_results = index_guard.search(embedding, limit).map_err(|e| {
-            Error::Internal(format!("Failed to search vector index: {}", e))
-        })?;
+        // Release the synchronous index lock before awaiting storage reads.
+        let search_results = {
+            let index_guard = index.read().map_err(|_| {
+                Error::Internal("Failed to acquire vector index lock".to_string())
+            })?;
+            index_guard.search(embedding, limit).map_err(|e| {
+                Error::Internal(format!("Failed to search vector index: {}", e))
+            })?
+        };
 
         // Convert search results to SemanticSearchResult
         let mut results = Vec::new();
@@ -1006,31 +1015,27 @@ impl PersistentAgentMemory {
             Error::MemoryOperation("Semantic search is not enabled".to_string())
         })?;
 
-        // Clear existing index
-        {
-            let mut index_guard = index.write().map_err(|_| {
-                Error::Internal("Failed to acquire vector index lock".to_string())
-            })?;
-            index_guard.clear().map_err(|e| {
-                Error::Internal(format!("Failed to clear vector index: {}", e))
-            })?;
-        }
-
-        // Get all episodes
+        let _mutation = self.index_mutation.lock().await;
+        let config = index.read().map_err(|_| {
+            Error::Internal("Failed to acquire vector index lock".into())
+        })?.config().clone();
+        let mut candidate = HnswIndex::new(config);
         let episodes = self.get_all_episodes().await?;
         let mut indexed_count = 0;
-
-        // Index each episode
         for episode in episodes {
-            if let Err(e) = self.index_episode(&episode).await {
-                warn!(
-                    "Failed to index episode {} during rebuild: {}",
-                    episode.id, e
-                );
-            } else {
-                indexed_count += 1;
-            }
+            let text = format!("{} {}", episode.content.primary,
+                episode.content.secondary.as_deref().unwrap_or(""));
+            let embedding = self.generate_embedding(&text).await?;
+            candidate.insert(episode.id.to_string(), embedding).map_err(|e| {
+                Error::Internal(format!("Failed to prepare rebuilt vector index: {}", e))
+            })?;
+            indexed_count += 1;
         }
+        // No await between replacement and return: cancellation before this
+        // point drops only the unpublished candidate and releases the gate.
+        *index.write().map_err(|_| {
+            Error::Internal("Failed to acquire vector index lock".into())
+        })? = candidate;
 
         info!(
             "Rebuilt vector index for agent {}: {} episodes indexed",
@@ -1200,6 +1205,7 @@ impl Clone for PersistentAgentMemory {
             storage: Arc::clone(&self.storage),
             embedding_provider: self.embedding_provider.as_ref().map(Arc::clone),
             vector_index: self.vector_index.as_ref().map(Arc::clone),
+            index_mutation: Arc::clone(&self.index_mutation),
             semantic_config: self.semantic_config.clone(),
         }
     }
@@ -1819,4 +1825,203 @@ mod tests {
         memory.clear().unwrap();
         assert_eq!(memory.episode_count().unwrap(), 0);
     }
+    struct RebuildFailureProvider;
+
+    #[async_trait::async_trait]
+    impl EmbeddingProvider for RebuildFailureProvider {
+        fn dimensions(&self) -> usize { 2 }
+        fn model_name(&self) -> &str { "controlled-rebuild-failure" }
+        async fn embed(&self, _: &str) -> crate::embeddings::EmbeddingResult<Vec<f32>> {
+            Err(crate::embeddings::EmbeddingError::Network("controlled failure".into()))
+        }
+        async fn embed_batch(&self, _: &[String]) -> crate::embeddings::EmbeddingResult<Vec<Vec<f32>>> {
+            Err(crate::embeddings::EmbeddingError::Network("controlled failure".into()))
+        }
+    }
+
+    #[tokio::test]
+    async fn rebuild_failure_reports_error_and_preserves_live_index() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("rebuild-agent"))
+            .with_mock_semantic_search(2).unwrap();
+        let episode = Episode::conversation("rebuild-agent", "retained source", "retained answer");
+        memory.store_episode(episode.clone()).await.unwrap();
+        memory.index_episode(&episode).await.unwrap();
+        memory.embedding_provider = Some(Arc::new(RebuildFailureProvider));
+        let result = memory.rebuild_vector_index().await;
+        assert!(result.is_err(), "A failed rebuild must not report successful partial coverage");
+        assert_eq!(memory.vector_index_size().unwrap(), 1);
+    }
+
+    struct PausedRebuildProvider {
+        entered: Arc<tokio::sync::Notify>,
+    }
+
+    #[async_trait::async_trait]
+    impl EmbeddingProvider for PausedRebuildProvider {
+        fn dimensions(&self) -> usize { 2 }
+        fn model_name(&self) -> &str { "controlled-paused-rebuild" }
+        async fn embed(&self, _: &str) -> crate::embeddings::EmbeddingResult<Vec<f32>> {
+            self.entered.notify_one();
+            std::future::pending().await
+        }
+        async fn embed_batch(&self, _: &[String]) -> crate::embeddings::EmbeddingResult<Vec<Vec<f32>>> {
+            unreachable!("Rebuild uses individual embedding requests")
+        }
+    }
+
+    #[tokio::test]
+    async fn cancelled_rebuild_preserves_published_index() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("cancel-agent"))
+            .with_mock_semantic_search(2).unwrap();
+        let episode = Episode::conversation("cancel-agent", "retained source", "retained answer");
+        memory.store_episode(episode.clone()).await.unwrap();
+        memory.index_episode(&episode).await.unwrap();
+        let entered = Arc::new(tokio::sync::Notify::new());
+        memory.embedding_provider = Some(Arc::new(PausedRebuildProvider { entered: entered.clone() }));
+        let mut rebuild = Box::pin(memory.rebuild_vector_index());
+        tokio::select! {
+            result = &mut rebuild => panic!("Rebuild unexpectedly completed: {result:?}"),
+            _ = entered.notified() => {},
+        }
+        drop(rebuild);
+        assert_eq!(memory.vector_index_size().unwrap(), 1, "Cancellation must retain the published index");
+        assert!(tokio::time::timeout(std::time::Duration::from_secs(2),
+            memory.unindex_episode(episode.id)).await.unwrap().unwrap());
+    }
+
+    struct ControlledRebuildProvider {
+        entered: Arc<tokio::sync::Notify>,
+        release: Arc<tokio::sync::Semaphore>,
+    }
+
+    #[async_trait::async_trait]
+    impl EmbeddingProvider for ControlledRebuildProvider {
+        fn dimensions(&self) -> usize { 2 }
+        fn model_name(&self) -> &str { "controlled-rebuild" }
+        async fn embed(&self, _: &str) -> crate::embeddings::EmbeddingResult<Vec<f32>> {
+            self.entered.notify_one();
+            self.release.acquire().await.unwrap().forget();
+            Ok(vec![1.0, 0.0])
+        }
+        async fn embed_batch(&self, _: &[String]) -> crate::embeddings::EmbeddingResult<Vec<Vec<f32>>> {
+            unreachable!()
+        }
+    }
+
+    #[tokio::test]
+    async fn rebuild_keeps_readers_available_and_orders_clone_removal_after_publish() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("concurrent-agent"))
+            .with_mock_semantic_search(2).unwrap();
+        let episode = Episode::conversation("concurrent-agent", "retained source", "retained answer");
+        memory.store_episode(episode.clone()).await.unwrap();
+        memory.index_episode(&episode).await.unwrap();
+        let entered = Arc::new(tokio::sync::Notify::new());
+        let release = Arc::new(tokio::sync::Semaphore::new(0));
+        memory.embedding_provider = Some(Arc::new(ControlledRebuildProvider {
+            entered: entered.clone(), release: release.clone(),
+        }));
+        let builder = memory.clone();
+        let rebuild = tokio::spawn(async move { builder.rebuild_vector_index().await });
+        tokio::time::timeout(std::time::Duration::from_secs(2), entered.notified()).await.unwrap();
+        let reader = memory.clone();
+        let results = tokio::spawn(async move { reader.search_by_embedding(&[1.0, 0.0], 1).await })
+            .await.unwrap().unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].episode.id, episode.id);
+        let remover = memory.clone();
+        let mut removal = Box::pin(remover.unindex_episode(episode.id));
+        assert!(tokio::time::timeout(std::time::Duration::from_millis(20), &mut removal).await.is_err());
+        release.add_permits(1);
+        assert_eq!(rebuild.await.unwrap().unwrap(), 1);
+        assert!(removal.await.unwrap());
+        assert_eq!(memory.vector_index_size().unwrap(), 0);
+    }
+
+    struct PartialInvalidRebuildProvider(std::sync::atomic::AtomicUsize);
+
+    #[async_trait::async_trait]
+    impl EmbeddingProvider for PartialInvalidRebuildProvider {
+        fn dimensions(&self) -> usize { 2 }
+        fn model_name(&self) -> &str { "controlled-partial-rebuild" }
+        async fn embed(&self, _: &str) -> crate::embeddings::EmbeddingResult<Vec<f32>> {
+            let call = self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            Ok(if call < 3 { vec![1.0, 0.0] } else { vec![1.0, 0.0, 0.0] })
+        }
+        async fn embed_batch(&self, _: &[String]) -> crate::embeddings::EmbeddingResult<Vec<Vec<f32>>> {
+            unreachable!()
+        }
+    }
+
+    #[tokio::test]
+    async fn invalid_later_embedding_never_publishes_partial_rebuild() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("partial-agent"))
+            .with_mock_semantic_search(2).unwrap();
+        for text in ["first source", "second source", "third source", "fourth source"] {
+            let episode = Episode::conversation("partial-agent", text, "answer");
+            memory.store_episode(episode.clone()).await.unwrap();
+            memory.index_episode(&episode).await.unwrap();
+        }
+        let before = memory.vector_index.as_ref().unwrap().read().unwrap().to_bytes().unwrap();
+        let provider = Arc::new(PartialInvalidRebuildProvider(std::sync::atomic::AtomicUsize::new(0)));
+        memory.embedding_provider = Some(provider.clone());
+        assert!(memory.rebuild_vector_index().await.is_err());
+        assert_eq!(provider.0.load(std::sync::atomic::Ordering::SeqCst), 4);
+        let after = memory.vector_index.as_ref().unwrap().read().unwrap().to_bytes().unwrap();
+        assert_eq!(before, after);
+    }
+
+    #[tokio::test]
+    async fn rebuild_serializes_with_clone_insert_and_preserves_its_result() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("insert-agent"))
+            .with_mock_semantic_search(2).unwrap();
+        let old = Episode::conversation("insert-agent", "old source", "answer");
+        memory.store_episode(old.clone()).await.unwrap();
+        memory.index_episode(&old).await.unwrap();
+        let inserter = memory.clone();
+        let entered = Arc::new(tokio::sync::Notify::new());
+        let release = Arc::new(tokio::sync::Semaphore::new(0));
+        memory.embedding_provider = Some(Arc::new(ControlledRebuildProvider {
+            entered: entered.clone(), release: release.clone(),
+        }));
+        let builder = memory.clone();
+        let rebuild = tokio::spawn(async move { builder.rebuild_vector_index().await });
+        tokio::time::timeout(std::time::Duration::from_secs(2), entered.notified()).await.unwrap();
+        let new = Episode::conversation("insert-agent", "new source", "answer");
+        inserter.store_episode(new.clone()).await.unwrap();
+        let mut insert = Box::pin(inserter.index_episode(&new));
+        assert!(tokio::time::timeout(std::time::Duration::from_millis(20), &mut insert).await.is_err());
+        release.add_permits(1);
+        assert_eq!(rebuild.await.unwrap().unwrap(), 1);
+        insert.await.unwrap();
+        assert_eq!(memory.vector_index_size().unwrap(), 2);
+        assert!(memory.vector_index.as_ref().unwrap().read().unwrap().get(&new.id.to_string()).is_some());
+    }
+
+    #[tokio::test]
+    async fn competing_rebuilds_serialize_preparation_and_allow_empty_publication() {
+        let mut memory = PersistentAgentMemory::in_memory(MemoryConfig::new("two-builders"))
+            .with_mock_semantic_search(2).unwrap();
+        let old = Episode::conversation("two-builders", "source", "answer");
+        memory.store_episode(old.clone()).await.unwrap();
+        memory.index_episode(&old).await.unwrap();
+        let entered = Arc::new(tokio::sync::Notify::new());
+        let release = Arc::new(tokio::sync::Semaphore::new(0));
+        memory.embedding_provider = Some(Arc::new(ControlledRebuildProvider {
+            entered: entered.clone(), release: release.clone(),
+        }));
+        let builder = memory.clone();
+        let first = tokio::spawn(async move { builder.rebuild_vector_index().await });
+        tokio::time::timeout(std::time::Duration::from_secs(2), entered.notified()).await.unwrap();
+        let second_builder = memory.clone();
+        let mut second = Box::pin(second_builder.rebuild_vector_index());
+        assert!(tokio::time::timeout(std::time::Duration::from_millis(20), &mut second).await.is_err());
+        // Change the source while first preparation is paused. Its count refers
+        // to its loaded inputs; the queued rebuild must load the newer source.
+        memory.clear().await.unwrap();
+        release.add_permits(1);
+        assert_eq!(first.await.unwrap().unwrap(), 1);
+        assert_eq!(second.await.unwrap(), 0);
+        assert_eq!(memory.vector_index_size().unwrap(), 0);
+    }
+
 }
