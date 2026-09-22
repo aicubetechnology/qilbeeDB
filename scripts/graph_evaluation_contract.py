@@ -196,6 +196,29 @@ def cosine(a, b):
     )
 
 
+def validate_ranking(hits, method, maximum=None):
+    """Reject malformed ranking evidence without repairing or sorting the response."""
+    previous = None
+    for hit in hits:
+        score = hit.get("score")
+        try:
+            finite = type(score) in (int, float) and math.isfinite(score)
+        except OverflowError:
+            finite = False
+        if not finite:
+            raise ValueError("Retrieval score must be a finite number")
+        minimum = -1 if method == "semantic" else 0
+        if score < minimum or (maximum is not None and score > maximum):
+            raise ValueError("Retrieval score exceeds its method range")
+        # Rust total_cmp orders positive zero before negative zero in descending
+        # order. Preserve that distinction before applying the UUID tie-break.
+        negative_zero = score == 0 and math.copysign(1.0, score) < 0
+        order = (-score, negative_zero, hit["record"]["record_id"])
+        if previous is not None and order < previous:
+            raise ValueError("Retrieved hits violate score order or UUID tie-break")
+        previous = order
+
+
 def validate_page(result, fixture, state, query, method, protocol):
     if result.get("scope") != state["scope"] or result.get("contract_version") != 1:
         raise ValueError("Response scope or contract mismatch")
@@ -268,6 +291,17 @@ def validate_page(result, fixture, state, query, method, protocol):
         or not set(ids) <= aliases.keys()
     ):
         raise ValueError("Invalid, duplicate or foreign retrieved record")
+    maximum = None
+    if graph_mode:
+        maximum = profile["maximum_score"]
+    elif method == "semantic":
+        maximum = 1
+    elif method in PROFILES:
+        ranking = PROFILES[method]
+        maximum = (ranking["lexical_weight"] + ranking["semantic_weight"]) / (
+            ranking["rank_constant"] + 1
+        )
+    validate_ranking(page["hits"], method, maximum)
     tag = "retrieval-fixture-" + state["fixture_sha256"]
     expected_relations = {
         r["relation_id"]: r

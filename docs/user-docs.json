@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Retrieve revision-bound memories through explicit typed paths, immutable profiles and observable work limits.",
+      "description": "Retrieve scoped memory through typed paths and validate ranking evidence before comparison.",
       "order": 208
     },
     {

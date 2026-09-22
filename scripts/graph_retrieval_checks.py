@@ -7,7 +7,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from evaluate_retrieval import digest, metrics, source_payload
+from evaluate_retrieval import PROFILES, digest, metrics, source_payload
 from evaluate_graph_retrieval import request_for, summary, verify_protocol
 from export_graph_evaluation import export
 from graph_evaluation_contract import (
@@ -359,6 +359,64 @@ class GraphPipelineChecks(unittest.TestCase):
             self.assertEqual(
                 body["query"]["tag"], "retrieval-fixture-" + state["fixture_sha256"]
             )
+
+    def test_baseline_rejects_invalid_scores_and_out_of_order_evidence(self):
+        value, _, state, protocol, _ = proof_fixture()
+        hits = []
+        for document in value["documents"]:
+            binding = state["documents"][document["id"]]
+            hits.append({
+                "record": dict(record_id=binding["record_id"], revision=binding["revision"],
+                    payload=source_payload(document, "retrieval-fixture-" + state["fixture_sha256"], state["fixture_sha256"])),
+                "embedding": binding["embedding"], "score": 1.0,
+            })
+        hits.sort(key=lambda hit: hit["record"]["record_id"])
+        result = {"contract_version": 1, "scope": state["scope"],
+            "ranking_version": "cosine_exact_v1", "page": {"hits": hits,
+                "exhaustive": True, "next_after": None, "matched_records": 2}}
+        def check(candidate):
+            return validate_page(candidate, value, state, value["queries"][1], "semantic", protocol)
+        self.assertEqual(len(check(result)), 2)
+        for bad in [float("nan"), float("inf"), -float("inf"), True, "1", None, 10**1000, -1.01, 1.01]:
+            altered = copy.deepcopy(result)
+            altered["page"]["hits"][0]["score"] = bad
+            with self.subTest(score=type(bad).__name__), self.assertRaises(ValueError):
+                check(altered)
+        reversed_tie = copy.deepcopy(result)
+        reversed_tie["page"]["hits"].reverse()
+        with self.assertRaises(ValueError):
+            check(reversed_tie)
+        ascending = copy.deepcopy(result)
+        ascending["page"]["hits"][0]["score"] = 0.1
+        ascending["page"]["hits"][1]["score"] = 0.9
+        with self.assertRaises(ValueError):
+            check(ascending)
+        descending = copy.deepcopy(ascending)
+        descending["page"]["hits"].reverse()
+        self.assertEqual(len(check(descending)), 2)
+        for method, maximum in [("lexical", None), ("weighted_rrf_v1", 1 / 61), ("weighted_rrf_v2", 1 / 3)]:
+            candidate = copy.deepcopy(result)
+            candidate["ranking_version"] = "bm25_v1" if method == "lexical" else method
+            candidate["page"].update(corpus_records=2, embedding_coverage="complete")
+            if method in PROFILES:
+                candidate["page"]["ranking"] = PROFILES[method]
+            for hit in candidate["page"]["hits"]:
+                hit["score"] = maximum if maximum is not None else 1.0
+            def check_method(page):
+                return validate_page(page, value, state, value["queries"][1], method, protocol)
+            self.assertEqual(len(check_method(candidate)), 2)
+            for invalid in [-0.1, float("nan"), True] + ([maximum + 0.001] if maximum is not None else []):
+                bad = copy.deepcopy(candidate)
+                bad["page"]["hits"][0]["score"] = invalid
+                with self.subTest(method=method), self.assertRaises(ValueError):
+                    check_method(bad)
+        signed_zero = copy.deepcopy(result)
+        signed_zero["page"]["hits"][0]["score"] = -0.0
+        signed_zero["page"]["hits"][1]["score"] = 0.0
+        with self.assertRaises(ValueError):
+            check(signed_zero)
+        signed_zero["page"]["hits"].reverse()
+        self.assertEqual(len(check(signed_zero)), 2)
 
     def test_score_verifier_rejects_nonfinite_and_wrong_values(self):
         for bad in [float("nan"), float("inf"), None, "0.5", True, 0.7]:
