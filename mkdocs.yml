@@ -203,6 +203,7 @@ nav:
     - Docker: operations/docker.md
     - Retrieval capacity: operations/retrieval-capacity.md
     - Monitoring: operations/monitoring.md
+    - Graceful Shutdown: operations/graceful-shutdown.md
     - Backup & Recovery: operations/backup.md
     - Performance Tuning: operations/performance.md
   - Learn More:

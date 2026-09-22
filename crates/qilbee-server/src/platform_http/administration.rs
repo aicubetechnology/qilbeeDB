@@ -27,7 +27,7 @@ where
     F: FnOnce(&IdentityStore, &str) -> ApiResult<T> + Send + 'static,
 {
     let token = bearer(&headers)?;
-    tokio::task::spawn_blocking(move || {
+    crate::http_work::spawn_blocking(move || {
         if token.starts_with("qdb1_") || token.starts_with("qdbst1_") {
             state
                 .identity

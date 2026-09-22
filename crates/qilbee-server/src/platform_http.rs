@@ -51,7 +51,7 @@ impl PlatformState {
         let token = bearer(&headers)?;
         let identity = self.identity.clone();
         let memory = self.memory.clone();
-        tokio::task::spawn_blocking(move || {
+        crate::http_work::spawn_blocking(move || {
             let principal = identity
                 .authenticate(&token)
                 .map_err(ApiError::authentication)?;

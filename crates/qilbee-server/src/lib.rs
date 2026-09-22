@@ -15,6 +15,7 @@ pub mod server;
 pub mod http_server;
 pub mod security;
 mod memory_storage;
+mod http_work;
 
 #[cfg(test)]
 mod http_server_tests;

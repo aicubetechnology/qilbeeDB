@@ -434,6 +434,20 @@
       "title": "Property index equality and upgrades",
       "description": "Migrate graph property indexes with canonical equality, interruption recovery and explicit rollback requirements.",
       "order": 133
+    },
+    {
+      "source": "docs/operations/graceful-shutdown.md",
+      "file": "graceful-shutdown.md",
+      "title": "Graceful server shutdown",
+      "description": "Close HTTP admission, drain accepted work and reconcile uncertain write outcomes.",
+      "order": 134
+    },
+    {
+      "source": "docs/operations/backup.md",
+      "file": "backup-and-recovery.md",
+      "title": "Backup and recovery",
+      "description": "Create consistent offline backups and validate recovery without discarding newer writes.",
+      "order": 135
     }
   ]
 }
