@@ -62,7 +62,9 @@ async fn request(
     assert_eq!(response.headers()["cache-control"], "no-store");
     let value: Value = response.json().await.unwrap();
     if status.is_success() {
-        let mut request_schema = http.api["paths"][path][method.to_ascii_lowercase()]["requestBody"]["content"]["application/json"]["schema"].clone();
+        let mut request_schema = http.api["paths"][path][method.to_ascii_lowercase()]
+            ["requestBody"]["content"]["application/json"]["schema"]
+            .clone();
         request_schema["components"] = http.api["components"].clone();
         jsonschema::draft202012::options()
             .should_validate_formats(true)
@@ -598,4 +600,98 @@ async fn knowledge_real_http_company_discovery_survives_writer_revocation() {
     assert_eq!(subjects, vec!["alice", "bob"]);
     let (_, other) = request(&http, "POST", query_path, &foreign.secret, query).await;
     assert!(other["page"]["entries"].as_array().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn metadata_read_is_company_wide_read_only_and_explicit() {
+    let dir = TempDir::new().unwrap();
+    let (router, identity) = app(dir.path());
+    let admin = identity
+        .bootstrap_tenant("metadata-company", "owner")
+        .unwrap();
+    let other = identity.bootstrap_tenant("other-company", "owner").unwrap();
+    let http = ContractHttp::new(router).await;
+    for (path, body) in [
+        ("/api/v1/learning/policies", policy()),
+        ("/api/v1/learning/contexts", context()),
+    ] {
+        assert_eq!(
+            request(&http, "POST", path, &admin.secret, body).await.0,
+            StatusCode::OK
+        );
+    }
+    let mut reader_spec = spec();
+    reader_spec.capabilities = [Capability::LearningMetadataRead].into();
+    reader_spec.grants.clear(); // Registry reads are explicitly company-wide.
+    let reader = identity.issue(&admin.secret, reader_spec.clone()).unwrap();
+    let foreign = identity.issue(&other.secret, reader_spec.clone()).unwrap();
+    let mut memory_spec = reader_spec.clone();
+    memory_spec.capabilities = [Capability::MemoryRead].into();
+    let memory_only = identity.issue(&admin.secret, memory_spec).unwrap();
+    async fn get(http: &ContractHttp, template: &str, id: &str, token: &str, expected: StatusCode) {
+        let path = template.replace("{id}", id);
+        let response = http
+            .client
+            .get(format!("{}{path}", http.base))
+            .bearer_auth(token)
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(response.status(), expected);
+        assert_eq!(response.headers()["cache-control"], "no-store");
+        let value: Value = response.json().await.unwrap();
+        let mut schema = http.api["paths"][template]["get"]["responses"][expected.as_str()]
+            ["content"]["application/json"]["schema"]
+            .clone();
+        assert!(!schema.is_null());
+        schema["components"] = http.api["components"].clone();
+        jsonschema::draft202012::new(&schema)
+            .unwrap()
+            .validate(&value)
+            .unwrap();
+    }
+    for (route, id) in [
+        ("/api/v1/learning/policies/{id}", "policy-v1"),
+        ("/api/v1/learning/contexts/{id}", "context-v1"),
+    ] {
+        get(&http, route, id, &reader.secret, StatusCode::OK).await;
+        get(&http, route, id, &admin.secret, StatusCode::OK).await;
+        get(&http, route, id, &memory_only.secret, StatusCode::FORBIDDEN).await;
+        get(&http, route, id, &foreign.secret, StatusCode::NOT_FOUND).await;
+    }
+    for (path, body) in [
+        ("/api/v1/learning/policies", policy()),
+        ("/api/v1/learning/contexts", context()),
+    ] {
+        assert_eq!(
+            request(&http, "POST", path, &reader.secret, body).await.0,
+            StatusCode::FORBIDDEN
+        );
+    }
+    identity
+        .revoke(
+            &admin.secret,
+            reader.credential.id,
+            reader.credential.revision,
+        )
+        .unwrap();
+    get(
+        &http,
+        "/api/v1/learning/policies/{id}",
+        "policy-v1",
+        &reader.secret,
+        StatusCode::UNAUTHORIZED,
+    )
+    .await;
+    reader_spec.expires_at_millis = Some(chrono::Utc::now().timestamp_millis() + 100);
+    let expiring = identity.issue(&admin.secret, reader_spec).unwrap();
+    tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+    get(
+        &http,
+        "/api/v1/learning/contexts/{id}",
+        "context-v1",
+        &expiring.secret,
+        StatusCode::UNAUTHORIZED,
+    )
+    .await;
 }

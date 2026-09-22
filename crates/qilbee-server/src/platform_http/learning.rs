@@ -83,6 +83,19 @@ fn require_policy_admin(actor: &CredentialView) -> ApiResult<()> {
         ))
     }
 }
+fn require_metadata_read(actor: &CredentialView) -> ApiResult<()> {
+    if actor.spec.capabilities.contains(&Capability::LearningMetadataRead)
+        || actor.spec.capabilities.contains(&Capability::PolicyAdmin)
+    {
+        Ok(())
+    } else {
+        Err(ApiError::new(
+            StatusCode::FORBIDDEN,
+            "forbidden",
+            "Learning metadata read capability is required",
+        ))
+    }
+}
 fn author(actor: &CredentialView) -> String {
     format!("{}:{}", actor.id, actor.spec.subject_id)
 }
@@ -147,7 +160,7 @@ async fn policy(
     let learning = state.learning.clone();
     state
         .run(headers, move |_, _, actor| {
-            require_policy_admin(&actor)?;
+            require_metadata_read(&actor)?;
             let entry = learning
                 .policy(&actor.tenant_id, &id)
                 .map_err(ApiError::operation)?
@@ -164,7 +177,7 @@ async fn context(
     let learning = state.learning.clone();
     state
         .run(headers, move |_, _, actor| {
-            require_policy_admin(&actor)?;
+            require_metadata_read(&actor)?;
             let entry = learning
                 .context(&actor.tenant_id, &id)
                 .map_err(ApiError::operation)?
