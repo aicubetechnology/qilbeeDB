@@ -116,7 +116,7 @@ impl AgentMemory {
 
         if let Some(episode) = episodes.get_mut(&id) {
             if !episode.is_valid() { return Ok(None); }
-            episode.access();
+            episode.access()?;
             Ok(Some(episode.clone()))
         } else {
             Ok(None)
@@ -229,7 +229,7 @@ impl AgentMemory {
         })?;
 
         for episode in episodes.values_mut() {
-            episode.relevance.decay(decay_rate);
+            episode.relevance.decay(decay_rate)?;
         }
 
         debug!(
@@ -620,22 +620,13 @@ impl PersistentAgentMemory {
 
     /// Get an episode by ID
     pub async fn get_episode(&self, id: EpisodeId) -> Result<Option<Episode>> {
-        let mut episode = self
-            .storage
-            .get_episode(&self.config.agent_id, id)
-            .await
-            .map_err(|e| Error::Storage(format!("Failed to get episode: {}", e)))?;
-
-        if let Some(ref mut ep) = episode {
-            if !ep.is_valid() { return Ok(None); }
-            ep.access();
-            self.storage
-                .update_episode(&self.config.agent_id, ep)
-                .await
-                .map_err(|e| Error::Storage(format!("Failed to update episode access time: {}", e)))?;
-        }
-
-        Ok(episode)
+        let result = self.storage.apply_relevance_change(&self.config.agent_id, id,
+            crate::relevance_accounting::RelevanceChange::AccessNow {
+                // Preserve the historical get_episode access boost. Direct
+                // storage callers can supply their own explicit boost.
+                boost: 0.1,
+            }).await?;
+        Ok(result.map(|update| update.episode))
     }
 
     /// Get episodes by type
@@ -707,29 +698,10 @@ impl PersistentAgentMemory {
             .collect())
     }
 
-    /// Invalidate an episode
+    /// Invalidate the current episode without overwriting concurrent relevance updates.
     pub async fn invalidate_episode(&self, id: EpisodeId) -> Result<bool> {
-        let episode = self
-            .storage
-            .get_episode(&self.config.agent_id, id)
-            .await
-            .map_err(|e| Error::Storage(format!("Failed to get episode: {}", e)))?;
-
-        if let Some(mut ep) = episode {
-            ep.invalidate();
-            self.storage
-                .update_episode(&self.config.agent_id, &ep)
-                .await
-                .map_err(|e| Error::Storage(format!("Failed to update episode: {}", e)))?;
-
-            debug!(
-                "Invalidated episode {} for agent {}",
-                id, self.config.agent_id
-            );
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+        self.storage.invalidate_current_episode(&self.config.agent_id, id).await
+            .map_err(|e| Error::Storage(format!("Failed to invalidate episode: {}", e)))
     }
 
     /// Get episode count
@@ -757,12 +729,11 @@ impl PersistentAgentMemory {
             .await
             .map_err(|e| Error::Storage(format!("Failed to get episodes: {}", e)))?;
 
-        for mut episode in all_episodes {
-            episode.relevance.decay(decay_rate);
-            self.storage
-                .update_episode(&self.config.agent_id, &episode)
-                .await
-                .map_err(|e| Error::Storage(format!("Failed to update episode: {}", e)))?;
+        for episode in all_episodes {
+            self.storage.apply_relevance_change(&self.config.agent_id, episode.id,
+                crate::relevance_accounting::RelevanceChange::DecayNow {
+                    rate_per_hour: decay_rate,
+                }).await?;
         }
 
         debug!(

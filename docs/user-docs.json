@@ -434,6 +434,13 @@
       "title": "Property index equality and upgrades",
       "description": "Migrate graph property indexes with canonical equality, interruption recovery and explicit rollback requirements.",
       "order": 133
+    },
+    {
+      "source": "docs/agent-memory/relevance-accounting.md",
+      "file": "native-relevance-accounting.md",
+      "title": "Native relevance accounting",
+      "description": "Account elapsed time once with explicit policy, legacy adoption and atomic native updates.",
+      "order": 735
     }
   ]
 }

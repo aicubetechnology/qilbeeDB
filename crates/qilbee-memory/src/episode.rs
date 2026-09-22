@@ -216,8 +216,8 @@ impl Episode {
     }
 
     /// Mark as accessed
-    pub fn access(&mut self) {
-        self.relevance.access();
+    pub fn access(&mut self) -> qilbee_core::Result<crate::relevance_accounting::AccountingOutcome> {
+        self.relevance.access()
     }
 
     /// Mark as consolidated
@@ -357,7 +357,7 @@ mod tests {
         let mut episode = Episode::observation("agent-1", "Event");
         let initial_count = episode.relevance.access_count;
 
-        episode.access();
+        episode.access().unwrap();
         assert_eq!(episode.relevance.access_count, initial_count + 1);
     }
 
