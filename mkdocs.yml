@@ -216,6 +216,7 @@ nav:
       - Overview: architecture/overview.md
       - Storage Engine: architecture/storage.md
       - Atomic Graph Commits: architecture/atomic-commits.md
+      - Property Index Upgrades: architecture/property-index.md
       - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md

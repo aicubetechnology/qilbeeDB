@@ -8,8 +8,6 @@ use qilbee_core::{
 };
 use rocksdb::{ColumnFamily, ColumnFamilyDescriptor, DB, Options, WriteBatch};
 use std::collections::HashMap;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
 use tracing::{debug, info, warn};
 
@@ -24,45 +22,9 @@ fn ordered_meta_key(key: &str) -> Vec<u8> {
     bytes
 }
 
-/// Compute a hash for a property value for indexing
-fn hash_property_value(value: &PropertyValue) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    match value {
-        PropertyValue::Null => 0_u64.hash(&mut hasher),
-        PropertyValue::Boolean(b) => b.hash(&mut hasher),
-        PropertyValue::Integer(i) => i.hash(&mut hasher),
-        PropertyValue::Float(f) => f.to_bits().hash(&mut hasher),
-        PropertyValue::String(s) => s.hash(&mut hasher),
-        PropertyValue::Array(arr) => {
-            for item in arr {
-                hash_property_value(item).hash(&mut hasher);
-            }
-        }
-        PropertyValue::Map(m) => {
-            for (k, v) in m {
-                k.hash(&mut hasher);
-                hash_property_value(v).hash(&mut hasher);
-            }
-        }
-        PropertyValue::Bytes(b) => b.hash(&mut hasher),
-        PropertyValue::Date(d) => d.hash(&mut hasher),
-        PropertyValue::Time(t) => t.hash(&mut hasher),
-        PropertyValue::DateTime(dt) => dt.hash(&mut hasher),
-        PropertyValue::Duration(d) => d.hash(&mut hasher),
-        PropertyValue::Point2D { x, y, srid } => {
-            x.to_bits().hash(&mut hasher);
-            y.to_bits().hash(&mut hasher);
-            srid.hash(&mut hasher);
-        }
-        PropertyValue::Point3D { x, y, z, srid } => {
-            x.to_bits().hash(&mut hasher);
-            y.to_bits().hash(&mut hasher);
-            z.to_bits().hash(&mut hasher);
-            srid.hash(&mut hasher);
-        }
-    }
-    hasher.finish()
-}
+#[path = "property_index.rs"]
+mod property_index;
+use property_index::hash_property_value;
 
 /// Compare two property values for ordering
 /// Returns -1 if a < b, 0 if a == b, 1 if a > b
@@ -172,13 +134,14 @@ impl StorageEngine {
         let db = DB::open_cf_descriptors(&db_opts, &options.path, cf_descriptors)
             .map_err(|e| Error::Storage(e.to_string()))?;
 
-        info!("Storage engine opened successfully");
-
-        Ok(Self {
+        let engine = Self {
             db: Arc::new(db),
             options,
             mutation_lock: Arc::new(Mutex::new(())),
-        })
+        };
+        engine.ensure_property_index()?;
+        info!("Storage engine opened successfully");
+        Ok(engine)
     }
 
     /// Get a reference to a column family
@@ -1344,6 +1307,49 @@ mod tests {
         engine.put_meta("version", b"1.0.0").unwrap();
         let value = engine.get_meta("version").unwrap().unwrap();
         assert_eq!(&value, b"1.0.0");
+    }
+
+    #[test]
+    fn property_index_equal_signed_zero_must_share_lookup_identity() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("zero-index");
+        let mut node = Node::with_labels(IdGenerator::new().next_node_id(), ["Evidence"]);
+        node.set_property("score", PropertyValue::Float(-0.0));
+        engine.put_node(graph, &node).unwrap();
+        assert_eq!(PropertyValue::Float(-0.0), PropertyValue::Float(0.0));
+        let found = engine
+            .get_nodes_by_property(graph, "Evidence", "score", &PropertyValue::Float(0.0))
+            .unwrap();
+        assert_eq!(
+            found.len(),
+            1,
+            "equal signed zero values must retrieve the stored node"
+        );
+    }
+
+    #[test]
+    fn property_index_equal_maps_must_share_lookup_identity() {
+        let (engine, _dir) = create_test_engine();
+        let graph = GraphId::from_name("map-index");
+        let entries = (0..16)
+            .map(|i| (format!("field-{i}"), PropertyValue::Integer(i)))
+            .collect::<Vec<_>>();
+        let original = PropertyValue::Map(entries.iter().cloned().collect());
+        let mut node = Node::with_labels(IdGenerator::new().next_node_id(), ["Evidence"]);
+        node.set_property("attributes", original.clone());
+        engine.put_node(graph, &node).unwrap();
+        for _ in 0..16 {
+            let equivalent = PropertyValue::Map(entries.iter().rev().cloned().collect());
+            assert_eq!(equivalent, original);
+            let found = engine
+                .get_nodes_by_property(graph, "Evidence", "attributes", &equivalent)
+                .unwrap();
+            assert_eq!(
+                found.len(),
+                1,
+                "equal map values must retrieve the stored node regardless of iteration order"
+            );
+        }
     }
 
     #[test]

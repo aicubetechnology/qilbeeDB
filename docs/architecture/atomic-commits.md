@@ -63,11 +63,10 @@ validation and publication, not the application's entire lifetime.
 Low-level transactions do not add endpoint existence, uniqueness or cascade constraints.
 The managed graph methods separately guard endpoint checks and detach deletion
 under the shared writer lock, as documented in the lifecycle contract.
-It does not rebuild stale index keys left by older versions. Property indexing
-retains its existing hash format, including the unresolved ordering problem for
-map-valued properties; cleanup guarantees for such values require a canonical
-hash format and migration. Do not infer full index conformance from scalar
-property regression tests.
+Startup now reconstructs legacy property indexes using a canonical equality-compatible
+format, including map and signed-zero values. See [property index upgrades](property-index.md)
+for readiness, interruption recovery and mandatory rollback precautions. Transaction
+atomicity alone does not repair arbitrary index corruption.
 
 The original atomic commit tests exercise preparation failure, concurrent writers,
 database snapshots and graceful reopen. The lifecycle tests additionally kill a
