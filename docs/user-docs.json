@@ -89,7 +89,7 @@
       "source": "docs/research/retrieval-evaluation.md",
       "file": "retrieval-evaluation.md",
       "title": "Evaluate retrieval",
-      "description": "Compare frozen retrieval with explicit coverage, resource limits, restart-aware telemetry and reproducible hardware conditions.",
+      "description": "Evaluate frozen retrieval and reject confounded hardware comparisons with explicit coverage and resource evidence.",
       "order": 110
     },
     {

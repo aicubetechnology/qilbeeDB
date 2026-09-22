@@ -671,6 +671,7 @@ def evaluate_locked(client, fixture, scope, state_path, plan, container=None):
                     "retrieval_ms": result["timing"]["retrieval_micros"] / 1000,
                     "http_ms": elapsed,
                     "response_bytes": size,
+                    "response_payload_sha256": digest({k: v for k, v in result.items() if k != "timing"}),
                 }
                 if key not in rows:
                     counts = {
