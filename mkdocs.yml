@@ -220,6 +220,7 @@ nav:
       - Atomic Graph Commits: architecture/atomic-commits.md
       - Property Index Upgrades: architecture/property-index.md
       - Durable Graph Lifecycle: architecture/durable-graph-lifecycle.md
+      - Native Vector Integrity: architecture/native-vector-integrity.md
       - Query Engine: architecture/query-engine.md
       - Memory Engine: architecture/memory-engine.md
       - External Tool Knowledge: architecture/learned-tools.md
