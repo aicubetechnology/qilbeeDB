@@ -22400,6 +22400,169 @@
           }
         }
       }
+    },
+    "/api/v1/learning/metadata/query": {
+      "post": {
+        "operationId": "queryLearningMetadata",
+        "summary": "Discover company policy and evaluation-context summaries",
+        "tags": [
+          "Learning"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "description": "Unreleased. Requires learning_metadata_read or policy_admin on every page. Company is derived from current authentication; no memory grants are needed or created. Only policy/context registry kinds are accepted. Summaries preserve immutable registry version and digest without returning full payloads. Cursors bind company, kind and effective text filter. Pages are live observations, not one snapshot; exhausted is not durable company-wide completeness. Limits: 50 entries, 1000 primary records and 4 MiB primary key/value bytes per page. A single oversized record fails closed. Integrity errors fail the whole request. Authentication and capability checks precede retrieval admission. Discovery does not imply qualification or execution authority.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningMetadataQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Learning metadata read or policy administration capability is missing",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningMetadataQueryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -40446,6 +40609,225 @@
           "company_id",
           "resource",
           "inspection"
+        ],
+        "additionalProperties": false
+      },
+      "LearningMetadataCursor": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes; must not be blank."
+          },
+          "filter_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "position": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 4096,
+            "pattern": "^(?:[0-9a-f]{2})+$"
+          }
+        },
+        "required": [
+          "version",
+          "company_id",
+          "filter_digest",
+          "position"
+        ],
+        "additionalProperties": false,
+        "description": "Live position after the last scanned primary record, including filtered or non-platform records. Bound to company, kind and exact filters; not a snapshot, ranking, credential or signed proof. Do not edit it. Page and scan limits can change between requests."
+      },
+      "LearningMetadataQuery": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "policy",
+              "context"
+            ]
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Optional case-insensitive title/ID substring, 1–256 UTF-8 bytes with no control characters. Null and omission mean no text filter.",
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 25
+          },
+          "max_scanned_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearningMetadataCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false
+      },
+      "LearningMetadataEntry": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "policy",
+              "context"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Immutable registry ID, at most 512 UTF-8 bytes."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "Existing registry payload digest, not a new client JSON hashing scheme."
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "schema_version",
+          "payload_digest",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "LearningMetadataPage": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningMetadataEntry"
+            },
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearningMetadataCursor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_reason": {
+            "enum": [
+              "exhausted",
+              "entry_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "scanned_record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304,
+            "description": "Primary keys and values scanned in this page only. Excludes dependency-verification reads, internal database work and any lookahead. Not a CPU, RSS or HTTP response-size measurement."
+          },
+          "observed_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "entries",
+          "next_cursor",
+          "stop_reason",
+          "scanned_records",
+          "scanned_record_bytes",
+          "observed_at_millis"
+        ],
+        "additionalProperties": false,
+        "description": "One serialized observation under the learning writer lock. Exhausted means the remaining requested kind and company prefix was traversed at that observation, not that the company is empty or all data is eligible for reuse. Pages are live; concurrent inserts behind a cursor require a fresh traversal."
+      },
+      "LearningMetadataQueryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/LearningMetadataQuery"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "LearningMetadataQueryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes; must not be blank."
+          },
+          "page": {
+            "$ref": "#/components/schemas/LearningMetadataPage"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "page"
         ],
         "additionalProperties": false
       }

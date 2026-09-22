@@ -147,6 +147,7 @@ nav:
       - Current candidates: api/retrieval-candidates.md
       - Hybrid Memory Retrieval: api/hybrid-memory.md
       - Procedural Learning API: api/procedural-learning.md
+      - Learning metadata discovery: api/learning-metadata-discovery.md
       - Experience Receipts: api/experiences.md
       - Experience Strategy Candidates: api/experience-strategies.md
       - Learned Tool API: api/learned-tools.md
