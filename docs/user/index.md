@@ -20,7 +20,8 @@ access policies in either option. Model selection, external embeddings and agent
 execution remain responsibilities of your application.
 
 The [official source repository](https://github.com/aicubetechnology/qilbeeDB)
-provides the project overview, source code and contribution instructions.
+provides the project overview, current release links, platform and self-hosted
+entry points, source code and contribution instructions.
 
 ## Start building
 
