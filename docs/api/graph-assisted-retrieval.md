@@ -474,3 +474,7 @@ questions; neither authorizes a default change or establishes agent improvement.
 Protocol verification rejects a different seed, baseline, method set or reserved
 split under this identity. Use a fresh, independently frozen comparison before
 claiming generalization.
+
+See the [development results and limitations](../research/graph-v1-seed-development-results.md)
+for the measured comparison; an optional profile is not an independently proven
+quality improvement.
