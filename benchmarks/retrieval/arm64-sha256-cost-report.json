@@ -1,0 +1,2649 @@
+{
+  "schema_version": 1,
+  "experiment": "arm64_sha256_runtime_dispatch",
+  "candidate_source": "d079b41765bf53b44fb5c5fa49897df1a48a7535",
+  "baseline_source": "985e1749dea6635f01c0313a0c055c5ac288a7b8",
+  "source_manifest_sha256": "549bb4b758db0a6470765624d00f52532118e2558ec6f05cb2118a1ad4ce913e",
+  "architecture": "aarch64",
+  "sha2_cpu_feature_observed": true,
+  "cpu_limit_per_container": 2,
+  "memory_limit_bytes_per_container": 2147483648,
+  "concurrency": 1,
+  "corpus_documents": 1148,
+  "dimensions": 1536,
+  "reserved_queries": 0,
+  "all_compared_responses_identical": true,
+  "meaning": "Cost comparison only; no ranking-policy or relevance improvement claim",
+  "conditions": [
+    "Same persisted record IDs, vectors, receipts and scope in separate volume copies",
+    "Alternating AB/BA serial requests",
+    "Cold means process restarted; operating-system and device caches were not cleared",
+    "External embeddings reused; no provider generation or latency in this experiment"
+  ],
+  "runs": {
+    "warm": {
+      "methods": [
+        "semantic",
+        "weighted_rrf_v1",
+        "graph_hybrid_strength"
+      ],
+      "repetitions": 2,
+      "summary": {
+        "semantic": {
+          "baseline": {
+            "retrieval_p50_ms": 201.6395,
+            "retrieval_p95_ms": 293.73505
+          },
+          "candidate": {
+            "retrieval_p50_ms": 136.0025,
+            "retrieval_p95_ms": 197.5197499999999
+          }
+        },
+        "weighted_rrf_v1": {
+          "baseline": {
+            "retrieval_p50_ms": 206.08100000000002,
+            "retrieval_p95_ms": 240.84449999999993
+          },
+          "candidate": {
+            "retrieval_p50_ms": 142.8705,
+            "retrieval_p95_ms": 167.67504999999997
+          }
+        },
+        "graph_hybrid_strength": {
+          "baseline": {
+            "retrieval_p50_ms": 206.3725,
+            "retrieval_p95_ms": 249.37015
+          },
+          "candidate": {
+            "retrieval_p50_ms": 142.703,
+            "retrieval_p95_ms": 161.0591
+          }
+        }
+      },
+      "paired_query_intervals": {
+        "semantic": {
+          "mean": -67.9771625,
+          "low": -71.27844499999999,
+          "high": -64.990858125,
+          "queries": 40,
+          "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+        },
+        "weighted_rrf_v1": {
+          "mean": -68.4048875,
+          "low": -78.01840468750001,
+          "high": -61.18679312500001,
+          "queries": 40,
+          "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+        },
+        "graph_hybrid_strength": {
+          "mean": -66.6426125,
+          "low": -71.36008718749999,
+          "high": -63.046950312499995,
+          "queries": 40,
+          "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+        }
+      },
+      "rows": [
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 230.951,
+          "candidate_retrieval_ms": 196.237,
+          "baseline_http_ms": 235.687666,
+          "candidate_http_ms": 200.517666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 300.177,
+          "candidate_retrieval_ms": 151.602,
+          "baseline_http_ms": 307.521667,
+          "candidate_http_ms": 161.857417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 213.425,
+          "candidate_retrieval_ms": 142.933,
+          "baseline_http_ms": 217.295208,
+          "candidate_http_ms": 147.238791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 204.686,
+          "candidate_retrieval_ms": 141.431,
+          "baseline_http_ms": 208.054125,
+          "candidate_http_ms": 145.141583,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.101,
+          "candidate_retrieval_ms": 137.281,
+          "baseline_http_ms": 208.130458,
+          "candidate_http_ms": 144.55375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.919,
+          "candidate_retrieval_ms": 138.18,
+          "baseline_http_ms": 208.52325,
+          "candidate_http_ms": 164.420291,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 198.692,
+          "candidate_retrieval_ms": 142.719,
+          "baseline_http_ms": 201.998125,
+          "candidate_http_ms": 145.660584,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 192.338,
+          "candidate_retrieval_ms": 135.785,
+          "baseline_http_ms": 196.254625,
+          "candidate_http_ms": 139.521375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 239.675,
+          "candidate_retrieval_ms": 154.096,
+          "baseline_http_ms": 243.638625,
+          "candidate_http_ms": 158.40025,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.543,
+          "candidate_retrieval_ms": 140.551,
+          "baseline_http_ms": 210.938458,
+          "candidate_http_ms": 145.685125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 210.702,
+          "candidate_retrieval_ms": 143.084,
+          "baseline_http_ms": 214.440583,
+          "candidate_http_ms": 146.766875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 214.566,
+          "candidate_retrieval_ms": 145.077,
+          "baseline_http_ms": 220.514417,
+          "candidate_http_ms": 150.053041,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 223.326,
+          "candidate_retrieval_ms": 155.61,
+          "baseline_http_ms": 226.251083,
+          "candidate_http_ms": 160.941416,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 260.029,
+          "candidate_retrieval_ms": 150.445,
+          "baseline_http_ms": 264.788292,
+          "candidate_http_ms": 158.712542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 231.93,
+          "candidate_retrieval_ms": 142.488,
+          "baseline_http_ms": 235.965,
+          "candidate_http_ms": 146.802375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 216.731,
+          "candidate_retrieval_ms": 149.17,
+          "baseline_http_ms": 224.91075,
+          "candidate_http_ms": 154.692167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 217.053,
+          "candidate_retrieval_ms": 161.034,
+          "baseline_http_ms": 226.5665,
+          "candidate_http_ms": 172.556791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 213.432,
+          "candidate_retrieval_ms": 142.57,
+          "baseline_http_ms": 217.931667,
+          "candidate_http_ms": 146.847541,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 203.12,
+          "candidate_retrieval_ms": 137.467,
+          "baseline_http_ms": 207.334542,
+          "candidate_http_ms": 140.94,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 231.307,
+          "candidate_retrieval_ms": 140.461,
+          "baseline_http_ms": 237.991584,
+          "candidate_http_ms": 144.41725,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 474.944,
+          "candidate_retrieval_ms": 159.05,
+          "baseline_http_ms": 537.25775,
+          "candidate_http_ms": 169.836625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 238.425,
+          "candidate_retrieval_ms": 151.171,
+          "baseline_http_ms": 244.646916,
+          "candidate_http_ms": 156.766417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.422,
+          "candidate_retrieval_ms": 139.833,
+          "baseline_http_ms": 214.025875,
+          "candidate_http_ms": 144.532583,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.877,
+          "candidate_retrieval_ms": 138.704,
+          "baseline_http_ms": 203.758917,
+          "candidate_http_ms": 145.61625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 195.74,
+          "candidate_retrieval_ms": 147.256,
+          "baseline_http_ms": 199.146291,
+          "candidate_http_ms": 151.849625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.315,
+          "candidate_retrieval_ms": 135.438,
+          "baseline_http_ms": 210.010667,
+          "candidate_http_ms": 138.689958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 198.673,
+          "candidate_retrieval_ms": 142.002,
+          "baseline_http_ms": 204.6965,
+          "candidate_http_ms": 149.993417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 210.444,
+          "candidate_retrieval_ms": 147.854,
+          "baseline_http_ms": 214.215333,
+          "candidate_http_ms": 155.374125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 209.366,
+          "candidate_retrieval_ms": 141.579,
+          "baseline_http_ms": 212.928042,
+          "candidate_http_ms": 145.577708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.655,
+          "candidate_retrieval_ms": 140.69,
+          "baseline_http_ms": 203.672458,
+          "candidate_http_ms": 145.14725,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 192.487,
+          "candidate_retrieval_ms": 133.003,
+          "baseline_http_ms": 199.250083,
+          "candidate_http_ms": 136.090291,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 194.76,
+          "candidate_retrieval_ms": 132.324,
+          "baseline_http_ms": 197.153125,
+          "candidate_http_ms": 135.424166,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.907,
+          "candidate_retrieval_ms": 143.104,
+          "baseline_http_ms": 206.4105,
+          "candidate_http_ms": 146.32725,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.998,
+          "candidate_retrieval_ms": 141.194,
+          "baseline_http_ms": 206.889125,
+          "candidate_http_ms": 143.826542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.353,
+          "candidate_retrieval_ms": 160.561,
+          "baseline_http_ms": 208.18675,
+          "candidate_http_ms": 164.699083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 209.992,
+          "candidate_retrieval_ms": 143.744,
+          "baseline_http_ms": 214.939208,
+          "candidate_http_ms": 148.446875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.434,
+          "candidate_retrieval_ms": 145.682,
+          "baseline_http_ms": 208.026375,
+          "candidate_http_ms": 151.458208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 350.494,
+          "candidate_retrieval_ms": 245.386,
+          "baseline_http_ms": 372.685459,
+          "candidate_http_ms": 316.415792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 219.275,
+          "candidate_retrieval_ms": 143.818,
+          "baseline_http_ms": 225.029083,
+          "candidate_http_ms": 154.225833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.763,
+          "candidate_retrieval_ms": 139.481,
+          "baseline_http_ms": 206.69275,
+          "candidate_http_ms": 145.779958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.375,
+          "candidate_retrieval_ms": 139.929,
+          "baseline_http_ms": 211.675917,
+          "candidate_http_ms": 144.228917,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3cf8c6e0084c11ebbd56ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 201.643,
+          "candidate_retrieval_ms": 136.703,
+          "baseline_http_ms": 205.311625,
+          "candidate_http_ms": 142.435916,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 195.807,
+          "candidate_retrieval_ms": 130.65,
+          "baseline_http_ms": 199.957208,
+          "candidate_http_ms": 134.950709,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 193.668,
+          "candidate_retrieval_ms": 129.608,
+          "baseline_http_ms": 197.34,
+          "candidate_http_ms": 133.138,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 199.318,
+          "candidate_retrieval_ms": 139.282,
+          "baseline_http_ms": 202.610375,
+          "candidate_http_ms": 147.256833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.587,
+          "candidate_retrieval_ms": 146.547,
+          "baseline_http_ms": 206.180083,
+          "candidate_http_ms": 151.37075,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.865,
+          "candidate_retrieval_ms": 138.702,
+          "baseline_http_ms": 204.507,
+          "candidate_http_ms": 141.409,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ede24dd08ba11ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 249.273,
+          "candidate_retrieval_ms": 138.598,
+          "baseline_http_ms": 252.818167,
+          "candidate_http_ms": 142.61775,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 197.675,
+          "candidate_retrieval_ms": 133.603,
+          "baseline_http_ms": 200.810583,
+          "candidate_http_ms": 138.901666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.09,
+          "candidate_retrieval_ms": 134.091,
+          "baseline_http_ms": 205.783166,
+          "candidate_http_ms": 137.008709,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.783,
+          "candidate_retrieval_ms": 140.047,
+          "baseline_http_ms": 206.319625,
+          "candidate_http_ms": 142.991666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 234.489,
+          "candidate_retrieval_ms": 258.658,
+          "baseline_http_ms": 241.44275,
+          "candidate_http_ms": 262.950166,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 253.175,
+          "candidate_retrieval_ms": 196.248,
+          "baseline_http_ms": 258.621542,
+          "candidate_http_ms": 205.046791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:3ffd55240bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.089,
+          "candidate_retrieval_ms": 140.337,
+          "baseline_http_ms": 210.924208,
+          "candidate_http_ms": 144.235959,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 203.716,
+          "candidate_retrieval_ms": 143.49,
+          "baseline_http_ms": 208.436125,
+          "candidate_http_ms": 147.258292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 211.928,
+          "candidate_retrieval_ms": 150.248,
+          "baseline_http_ms": 214.470209,
+          "candidate_http_ms": 156.004292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 219.345,
+          "candidate_retrieval_ms": 149.95,
+          "baseline_http_ms": 226.98975,
+          "candidate_http_ms": 152.879,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.954,
+          "candidate_retrieval_ms": 146.607,
+          "baseline_http_ms": 212.592209,
+          "candidate_http_ms": 150.080667,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.205,
+          "candidate_retrieval_ms": 143.754,
+          "baseline_http_ms": 211.815208,
+          "candidate_http_ms": 150.237958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:404722ca0bde11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.841,
+          "candidate_retrieval_ms": 141.114,
+          "baseline_http_ms": 209.245708,
+          "candidate_http_ms": 146.757958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 209.096,
+          "candidate_retrieval_ms": 147.122,
+          "baseline_http_ms": 213.751792,
+          "candidate_http_ms": 151.828375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 214.119,
+          "candidate_retrieval_ms": 149.03,
+          "baseline_http_ms": 218.806167,
+          "candidate_http_ms": 154.086042,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 228.423,
+          "candidate_retrieval_ms": 157.244,
+          "baseline_http_ms": 243.100875,
+          "candidate_http_ms": 161.359333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.417,
+          "candidate_retrieval_ms": 145.663,
+          "baseline_http_ms": 210.477792,
+          "candidate_http_ms": 149.647584,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.46,
+          "candidate_retrieval_ms": 142.809,
+          "baseline_http_ms": 211.278625,
+          "candidate_http_ms": 145.967709,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:435eb4480baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 267.321,
+          "candidate_retrieval_ms": 142.774,
+          "baseline_http_ms": 282.765209,
+          "candidate_http_ms": 146.911167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 282.055,
+          "candidate_retrieval_ms": 262.372,
+          "baseline_http_ms": 296.666125,
+          "candidate_http_ms": 269.785125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 215.846,
+          "candidate_retrieval_ms": 140.789,
+          "baseline_http_ms": 228.5585,
+          "candidate_http_ms": 146.635083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 263.065,
+          "candidate_retrieval_ms": 158.833,
+          "baseline_http_ms": 269.580208,
+          "candidate_http_ms": 163.797833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.959,
+          "candidate_retrieval_ms": 143.753,
+          "baseline_http_ms": 210.619709,
+          "candidate_http_ms": 146.718792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.757,
+          "candidate_retrieval_ms": 138.208,
+          "baseline_http_ms": 205.425209,
+          "candidate_http_ms": 142.464917,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:4ab64cf80bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 198.325,
+          "candidate_retrieval_ms": 137.074,
+          "baseline_http_ms": 202.452167,
+          "candidate_http_ms": 141.166041,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 196.939,
+          "candidate_retrieval_ms": 131.32,
+          "baseline_http_ms": 201.905458,
+          "candidate_http_ms": 135.633667,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 196.675,
+          "candidate_retrieval_ms": 135.504,
+          "baseline_http_ms": 199.889917,
+          "candidate_http_ms": 138.20725,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.139,
+          "candidate_retrieval_ms": 141.63,
+          "baseline_http_ms": 210.028167,
+          "candidate_http_ms": 144.902167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.062,
+          "candidate_retrieval_ms": 140.044,
+          "baseline_http_ms": 206.532291,
+          "candidate_http_ms": 149.766542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.639,
+          "candidate_retrieval_ms": 145.351,
+          "baseline_http_ms": 205.822458,
+          "candidate_http_ms": 148.277833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:549212ae0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 251.216,
+          "candidate_retrieval_ms": 146.649,
+          "baseline_http_ms": 268.609791,
+          "candidate_http_ms": 150.713959,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 238.177,
+          "candidate_retrieval_ms": 146.36,
+          "baseline_http_ms": 245.370083,
+          "candidate_http_ms": 151.350917,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 197.742,
+          "candidate_retrieval_ms": 131.987,
+          "baseline_http_ms": 203.463875,
+          "candidate_http_ms": 135.115542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.311,
+          "candidate_retrieval_ms": 145.269,
+          "baseline_http_ms": 209.74775,
+          "candidate_http_ms": 148.616167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 207.865,
+          "candidate_retrieval_ms": 139.884,
+          "baseline_http_ms": 213.414,
+          "candidate_http_ms": 149.204666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 220.509,
+          "candidate_retrieval_ms": 166.638,
+          "baseline_http_ms": 226.252125,
+          "candidate_http_ms": 172.960334,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5898ba4b08f611ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 218.924,
+          "candidate_retrieval_ms": 150.175,
+          "baseline_http_ms": 224.519625,
+          "candidate_http_ms": 154.122292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 209.516,
+          "candidate_retrieval_ms": 148.764,
+          "baseline_http_ms": 216.638167,
+          "candidate_http_ms": 157.731583,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 201.813,
+          "candidate_retrieval_ms": 134.299,
+          "baseline_http_ms": 208.30275,
+          "candidate_http_ms": 140.980709,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.936,
+          "candidate_retrieval_ms": 144.164,
+          "baseline_http_ms": 212.009208,
+          "candidate_http_ms": 147.943125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 201.208,
+          "candidate_retrieval_ms": 184.615,
+          "baseline_http_ms": 205.630667,
+          "candidate_http_ms": 188.052875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.427,
+          "candidate_retrieval_ms": 141.579,
+          "baseline_http_ms": 209.852291,
+          "candidate_http_ms": 146.234083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5c78c7a20baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.665,
+          "candidate_retrieval_ms": 142.516,
+          "baseline_http_ms": 207.962,
+          "candidate_http_ms": 148.783625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.108,
+          "candidate_retrieval_ms": 144.138,
+          "baseline_http_ms": 209.629291,
+          "candidate_http_ms": 149.270167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 241.618,
+          "candidate_retrieval_ms": 158.019,
+          "baseline_http_ms": 257.059792,
+          "candidate_http_ms": 169.097875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 223.963,
+          "candidate_retrieval_ms": 158.728,
+          "baseline_http_ms": 249.7045,
+          "candidate_http_ms": 164.017417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 204.685,
+          "candidate_retrieval_ms": 142.325,
+          "baseline_http_ms": 207.425458,
+          "candidate_http_ms": 146.618292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.016,
+          "candidate_retrieval_ms": 144.268,
+          "baseline_http_ms": 210.612833,
+          "candidate_http_ms": 147.663584,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:5d41f2ee0baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 364.231,
+          "candidate_retrieval_ms": 154.153,
+          "baseline_http_ms": 379.374458,
+          "candidate_http_ms": 160.878292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 293.396,
+          "candidate_retrieval_ms": 221.892,
+          "baseline_http_ms": 312.590291,
+          "candidate_http_ms": 236.201125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.182,
+          "candidate_retrieval_ms": 137.863,
+          "baseline_http_ms": 205.890792,
+          "candidate_http_ms": 142.128167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.902,
+          "candidate_retrieval_ms": 149.779,
+          "baseline_http_ms": 212.660542,
+          "candidate_http_ms": 157.972208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.139,
+          "candidate_retrieval_ms": 143.225,
+          "baseline_http_ms": 209.296375,
+          "candidate_http_ms": 148.381875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.719,
+          "candidate_retrieval_ms": 140.473,
+          "baseline_http_ms": 211.090209,
+          "candidate_http_ms": 144.307333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:63223ade08b711ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.155,
+          "candidate_retrieval_ms": 138.99,
+          "baseline_http_ms": 209.270834,
+          "candidate_http_ms": 142.561333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 195.853,
+          "candidate_retrieval_ms": 132.348,
+          "baseline_http_ms": 200.243958,
+          "candidate_http_ms": 136.727,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 197.119,
+          "candidate_retrieval_ms": 131.321,
+          "baseline_http_ms": 200.188208,
+          "candidate_http_ms": 137.109625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 215.954,
+          "candidate_retrieval_ms": 146.163,
+          "baseline_http_ms": 219.520667,
+          "candidate_http_ms": 151.523458,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 225.3,
+          "candidate_retrieval_ms": 157.724,
+          "baseline_http_ms": 243.851875,
+          "candidate_http_ms": 163.830542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 217.241,
+          "candidate_retrieval_ms": 161.048,
+          "baseline_http_ms": 222.283542,
+          "candidate_http_ms": 168.577583,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:688149c20bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 222.939,
+          "candidate_retrieval_ms": 157.001,
+          "baseline_http_ms": 229.311417,
+          "candidate_http_ms": 162.101042,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 314.638,
+          "candidate_retrieval_ms": 267.573,
+          "baseline_http_ms": 319.788042,
+          "candidate_http_ms": 276.847792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 320.377,
+          "candidate_retrieval_ms": 158.2,
+          "baseline_http_ms": 343.109542,
+          "candidate_http_ms": 165.014125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 237.515,
+          "candidate_retrieval_ms": 161.092,
+          "baseline_http_ms": 244.259333,
+          "candidate_http_ms": 167.814708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 213.818,
+          "candidate_retrieval_ms": 142.906,
+          "baseline_http_ms": 220.220708,
+          "candidate_http_ms": 151.879209,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 215.86,
+          "candidate_retrieval_ms": 146.618,
+          "baseline_http_ms": 222.326333,
+          "candidate_http_ms": 152.532833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:6f8bb027090811ebbdadac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.338,
+          "candidate_retrieval_ms": 139.048,
+          "baseline_http_ms": 210.169375,
+          "candidate_http_ms": 146.272416,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.316,
+          "candidate_retrieval_ms": 132.782,
+          "baseline_http_ms": 214.672,
+          "candidate_http_ms": 138.334791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 212.483,
+          "candidate_retrieval_ms": 136.836,
+          "baseline_http_ms": 217.072917,
+          "candidate_http_ms": 143.696584,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.279,
+          "candidate_retrieval_ms": 151.363,
+          "baseline_http_ms": 211.724541,
+          "candidate_http_ms": 155.65725,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.514,
+          "candidate_retrieval_ms": 141.833,
+          "baseline_http_ms": 210.174625,
+          "candidate_http_ms": 147.586208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 203.994,
+          "candidate_retrieval_ms": 139.933,
+          "baseline_http_ms": 213.162083,
+          "candidate_http_ms": 146.06125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:79cb8ddc0bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 204.967,
+          "candidate_retrieval_ms": 141.006,
+          "baseline_http_ms": 210.988917,
+          "candidate_http_ms": 144.876292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.466,
+          "candidate_retrieval_ms": 135.418,
+          "baseline_http_ms": 204.841416,
+          "candidate_http_ms": 139.736791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 196.707,
+          "candidate_retrieval_ms": 134.057,
+          "baseline_http_ms": 199.383375,
+          "candidate_http_ms": 138.249792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.239,
+          "candidate_retrieval_ms": 146.656,
+          "baseline_http_ms": 211.379917,
+          "candidate_http_ms": 151.037708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.358,
+          "candidate_retrieval_ms": 149.309,
+          "baseline_http_ms": 210.164792,
+          "candidate_http_ms": 153.319958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 199.0,
+          "candidate_retrieval_ms": 142.619,
+          "baseline_http_ms": 202.227333,
+          "candidate_http_ms": 146.5215,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:82e088ac0bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 216.098,
+          "candidate_retrieval_ms": 140.43,
+          "baseline_http_ms": 223.429709,
+          "candidate_http_ms": 144.353,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 213.566,
+          "candidate_retrieval_ms": 133.033,
+          "baseline_http_ms": 221.288959,
+          "candidate_http_ms": 137.933333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.235,
+          "candidate_retrieval_ms": 138.029,
+          "baseline_http_ms": 205.568583,
+          "candidate_http_ms": 141.202042,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.572,
+          "candidate_retrieval_ms": 139.132,
+          "baseline_http_ms": 208.014375,
+          "candidate_http_ms": 143.629875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.023,
+          "candidate_retrieval_ms": 141.493,
+          "baseline_http_ms": 216.966792,
+          "candidate_http_ms": 145.198333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.504,
+          "candidate_retrieval_ms": 146.651,
+          "baseline_http_ms": 211.094,
+          "candidate_http_ms": 150.353959,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:84414bf00bb011ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 204.467,
+          "candidate_retrieval_ms": 139.529,
+          "baseline_http_ms": 207.751708,
+          "candidate_http_ms": 148.276208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.771,
+          "candidate_retrieval_ms": 135.001,
+          "baseline_http_ms": 206.047209,
+          "candidate_http_ms": 138.527292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.509,
+          "candidate_retrieval_ms": 132.138,
+          "baseline_http_ms": 210.222167,
+          "candidate_http_ms": 138.349625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 289.911,
+          "candidate_retrieval_ms": 267.17,
+          "baseline_http_ms": 343.934708,
+          "candidate_http_ms": 301.79575,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 421.391,
+          "candidate_retrieval_ms": 160.828,
+          "baseline_http_ms": 479.441375,
+          "candidate_http_ms": 168.716208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.763,
+          "candidate_retrieval_ms": 153.696,
+          "baseline_http_ms": 208.187167,
+          "candidate_http_ms": 161.239333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:8e85a6bd086311ebbd5eac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 216.12,
+          "candidate_retrieval_ms": 153.443,
+          "baseline_http_ms": 222.798625,
+          "candidate_http_ms": 158.031334,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.838,
+          "candidate_retrieval_ms": 132.176,
+          "baseline_http_ms": 214.233084,
+          "candidate_http_ms": 138.572625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 198.183,
+          "candidate_retrieval_ms": 133.279,
+          "baseline_http_ms": 204.1445,
+          "candidate_http_ms": 140.662833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.838,
+          "candidate_retrieval_ms": 141.232,
+          "baseline_http_ms": 213.218917,
+          "candidate_http_ms": 146.088959,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.371,
+          "candidate_retrieval_ms": 140.724,
+          "baseline_http_ms": 209.253458,
+          "candidate_http_ms": 144.950042,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.179,
+          "candidate_retrieval_ms": 140.039,
+          "baseline_http_ms": 209.013625,
+          "candidate_http_ms": 143.832083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:945bacba08ae11ebbd83ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.96,
+          "candidate_retrieval_ms": 139.052,
+          "baseline_http_ms": 206.637458,
+          "candidate_http_ms": 142.639708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.353,
+          "candidate_retrieval_ms": 134.674,
+          "baseline_http_ms": 204.670709,
+          "candidate_http_ms": 138.476875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.276,
+          "candidate_retrieval_ms": 133.293,
+          "baseline_http_ms": 202.3435,
+          "candidate_http_ms": 136.144875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.575,
+          "candidate_retrieval_ms": 141.633,
+          "baseline_http_ms": 209.934875,
+          "candidate_http_ms": 145.286875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.581,
+          "candidate_retrieval_ms": 140.254,
+          "baseline_http_ms": 206.611458,
+          "candidate_http_ms": 144.580542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.37,
+          "candidate_retrieval_ms": 144.012,
+          "baseline_http_ms": 210.883583,
+          "candidate_http_ms": 146.961334,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:95a081f508a411ebbd7dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.902,
+          "candidate_retrieval_ms": 140.49,
+          "baseline_http_ms": 203.884083,
+          "candidate_http_ms": 149.005833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 196.789,
+          "candidate_retrieval_ms": 139.063,
+          "baseline_http_ms": 200.113917,
+          "candidate_http_ms": 142.198792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.232,
+          "candidate_retrieval_ms": 136.159,
+          "baseline_http_ms": 205.248083,
+          "candidate_http_ms": 139.345334,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.197,
+          "candidate_retrieval_ms": 164.976,
+          "baseline_http_ms": 211.2745,
+          "candidate_http_ms": 172.718,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.749,
+          "candidate_retrieval_ms": 153.549,
+          "baseline_http_ms": 209.756459,
+          "candidate_http_ms": 157.5855,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.811,
+          "candidate_retrieval_ms": 142.126,
+          "baseline_http_ms": 210.407792,
+          "candidate_http_ms": 145.673083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9adb12b8088311ebbd6dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.435,
+          "candidate_retrieval_ms": 142.253,
+          "baseline_http_ms": 206.802583,
+          "candidate_http_ms": 146.143833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 195.888,
+          "candidate_retrieval_ms": 132.111,
+          "baseline_http_ms": 199.301625,
+          "candidate_http_ms": 140.473625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.311,
+          "candidate_retrieval_ms": 140.922,
+          "baseline_http_ms": 203.681458,
+          "candidate_http_ms": 143.750333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.755,
+          "candidate_retrieval_ms": 140.898,
+          "baseline_http_ms": 205.351875,
+          "candidate_http_ms": 144.798792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 201.165,
+          "candidate_retrieval_ms": 137.054,
+          "baseline_http_ms": 203.788333,
+          "candidate_http_ms": 143.769459,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.187,
+          "candidate_retrieval_ms": 138.118,
+          "baseline_http_ms": 205.297375,
+          "candidate_http_ms": 141.150708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:9ccb85e20baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.518,
+          "candidate_retrieval_ms": 139.154,
+          "baseline_http_ms": 206.063625,
+          "candidate_http_ms": 146.859792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.104,
+          "candidate_retrieval_ms": 136.539,
+          "baseline_http_ms": 208.4215,
+          "candidate_http_ms": 140.995833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.031,
+          "candidate_retrieval_ms": 134.728,
+          "baseline_http_ms": 202.972292,
+          "candidate_http_ms": 137.737708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.511,
+          "candidate_retrieval_ms": 142.27,
+          "baseline_http_ms": 214.314333,
+          "candidate_http_ms": 145.343791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.589,
+          "candidate_retrieval_ms": 142.228,
+          "baseline_http_ms": 205.170709,
+          "candidate_http_ms": 144.674417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 227.729,
+          "candidate_retrieval_ms": 146.191,
+          "baseline_http_ms": 231.156208,
+          "candidate_http_ms": 152.4915,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ab7b2e080baf11ebab90acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.588,
+          "candidate_retrieval_ms": 143.981,
+          "baseline_http_ms": 209.599166,
+          "candidate_http_ms": 147.48625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.553,
+          "candidate_retrieval_ms": 137.094,
+          "baseline_http_ms": 204.155958,
+          "candidate_http_ms": 139.727667,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.04,
+          "candidate_retrieval_ms": 134.804,
+          "baseline_http_ms": 205.462834,
+          "candidate_http_ms": 141.964375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.543,
+          "candidate_retrieval_ms": 140.389,
+          "baseline_http_ms": 204.533583,
+          "candidate_http_ms": 145.322458,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.849,
+          "candidate_retrieval_ms": 138.777,
+          "baseline_http_ms": 204.640083,
+          "candidate_http_ms": 142.0985,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 199.009,
+          "candidate_retrieval_ms": 142.507,
+          "baseline_http_ms": 208.690042,
+          "candidate_http_ms": 149.993709,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:acfbbcd508f311ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.755,
+          "candidate_retrieval_ms": 140.681,
+          "baseline_http_ms": 214.06275,
+          "candidate_http_ms": 144.700292,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 208.86,
+          "candidate_retrieval_ms": 150.079,
+          "baseline_http_ms": 213.468834,
+          "candidate_http_ms": 154.494542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 217.099,
+          "candidate_retrieval_ms": 143.766,
+          "baseline_http_ms": 222.751584,
+          "candidate_http_ms": 147.102667,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.395,
+          "candidate_retrieval_ms": 143.77,
+          "baseline_http_ms": 213.217584,
+          "candidate_http_ms": 152.044,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.688,
+          "candidate_retrieval_ms": 140.522,
+          "baseline_http_ms": 209.826292,
+          "candidate_http_ms": 144.775167,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.551,
+          "candidate_retrieval_ms": 149.39,
+          "baseline_http_ms": 209.626917,
+          "candidate_http_ms": 154.474792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c75f333208ba11ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.581,
+          "candidate_retrieval_ms": 142.071,
+          "baseline_http_ms": 214.674083,
+          "candidate_http_ms": 146.207875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.238,
+          "candidate_retrieval_ms": 132.808,
+          "baseline_http_ms": 208.329875,
+          "candidate_http_ms": 135.446375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 198.441,
+          "candidate_retrieval_ms": 132.434,
+          "baseline_http_ms": 204.787875,
+          "candidate_http_ms": 137.127875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.332,
+          "candidate_retrieval_ms": 139.563,
+          "baseline_http_ms": 210.8925,
+          "candidate_http_ms": 144.974958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.836,
+          "candidate_retrieval_ms": 141.479,
+          "baseline_http_ms": 207.630083,
+          "candidate_http_ms": 148.72125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.681,
+          "candidate_retrieval_ms": 145.3,
+          "baseline_http_ms": 213.395958,
+          "candidate_http_ms": 149.745209,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:c7df66f908ea11ebbda7ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 209.123,
+          "candidate_retrieval_ms": 161.27,
+          "baseline_http_ms": 213.714292,
+          "candidate_http_ms": 167.845917,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 200.605,
+          "candidate_retrieval_ms": 136.769,
+          "baseline_http_ms": 213.541083,
+          "candidate_http_ms": 141.508375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 197.622,
+          "candidate_retrieval_ms": 133.037,
+          "baseline_http_ms": 201.571084,
+          "candidate_http_ms": 143.264375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.106,
+          "candidate_retrieval_ms": 141.314,
+          "baseline_http_ms": 207.940708,
+          "candidate_http_ms": 144.988792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 204.2,
+          "candidate_retrieval_ms": 141.58,
+          "baseline_http_ms": 207.328958,
+          "candidate_http_ms": 146.742666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.318,
+          "candidate_retrieval_ms": 150.822,
+          "baseline_http_ms": 208.7125,
+          "candidate_http_ms": 158.568708,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:ca79e18308f811ebbdaaac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.873,
+          "candidate_retrieval_ms": 144.115,
+          "baseline_http_ms": 212.1345,
+          "candidate_http_ms": 147.604125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 193.859,
+          "candidate_retrieval_ms": 132.825,
+          "baseline_http_ms": 198.127625,
+          "candidate_http_ms": 135.995125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.517,
+          "candidate_retrieval_ms": 148.388,
+          "baseline_http_ms": 209.889917,
+          "candidate_http_ms": 151.801792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.292,
+          "candidate_retrieval_ms": 143.057,
+          "baseline_http_ms": 207.92275,
+          "candidate_http_ms": 146.578666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 221.924,
+          "candidate_retrieval_ms": 142.913,
+          "baseline_http_ms": 225.814084,
+          "candidate_http_ms": 146.781542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 221.523,
+          "candidate_retrieval_ms": 147.947,
+          "baseline_http_ms": 225.005,
+          "candidate_http_ms": 152.207917,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:cfa6279a085511ebbd59ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 209.696,
+          "candidate_retrieval_ms": 145.203,
+          "baseline_http_ms": 214.228541,
+          "candidate_http_ms": 150.272042,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 199.91,
+          "candidate_retrieval_ms": 134.168,
+          "baseline_http_ms": 203.075083,
+          "candidate_http_ms": 137.317333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 195.781,
+          "candidate_retrieval_ms": 133.223,
+          "baseline_http_ms": 199.023625,
+          "candidate_http_ms": 136.239041,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 205.386,
+          "candidate_retrieval_ms": 140.998,
+          "baseline_http_ms": 209.232209,
+          "candidate_http_ms": 145.652375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.43,
+          "candidate_retrieval_ms": 140.334,
+          "baseline_http_ms": 209.502959,
+          "candidate_http_ms": 143.885542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 202.325,
+          "candidate_retrieval_ms": 140.564,
+          "baseline_http_ms": 206.846833,
+          "candidate_http_ms": 147.152125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:d2daa92b086611ebbd5eac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 199.543,
+          "candidate_retrieval_ms": 138.887,
+          "baseline_http_ms": 206.784583,
+          "candidate_http_ms": 147.091458,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 196.355,
+          "candidate_retrieval_ms": 134.732,
+          "baseline_http_ms": 199.894042,
+          "candidate_http_ms": 137.934,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 208.072,
+          "candidate_retrieval_ms": 135.846,
+          "baseline_http_ms": 211.831209,
+          "candidate_http_ms": 147.940166,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.471,
+          "candidate_retrieval_ms": 141.796,
+          "baseline_http_ms": 210.832,
+          "candidate_http_ms": 146.544,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 221.423,
+          "candidate_retrieval_ms": 142.247,
+          "baseline_http_ms": 225.527375,
+          "candidate_http_ms": 147.537666,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 238.716,
+          "candidate_retrieval_ms": 152.175,
+          "baseline_http_ms": 241.736792,
+          "candidate_http_ms": 157.807,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:dc15d27e0bdd11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.964,
+          "candidate_retrieval_ms": 140.588,
+          "baseline_http_ms": 207.443958,
+          "candidate_http_ms": 144.34075,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 199.513,
+          "candidate_retrieval_ms": 143.142,
+          "baseline_http_ms": 203.25675,
+          "candidate_http_ms": 148.757833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 224.017,
+          "candidate_retrieval_ms": 159.722,
+          "baseline_http_ms": 228.662291,
+          "candidate_http_ms": 165.533125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 216.579,
+          "candidate_retrieval_ms": 168.569,
+          "baseline_http_ms": 222.076375,
+          "candidate_http_ms": 179.159958,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 213.11,
+          "candidate_retrieval_ms": 140.651,
+          "baseline_http_ms": 218.639458,
+          "candidate_http_ms": 145.289417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.557,
+          "candidate_retrieval_ms": 145.048,
+          "baseline_http_ms": 210.731625,
+          "candidate_http_ms": 156.9665,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:de41a956088611ebbd6dac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 209.915,
+          "candidate_retrieval_ms": 147.166,
+          "baseline_http_ms": 213.764833,
+          "candidate_http_ms": 151.322333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 195.787,
+          "candidate_retrieval_ms": 136.799,
+          "baseline_http_ms": 200.152125,
+          "candidate_http_ms": 141.008375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 211.036,
+          "candidate_retrieval_ms": 134.357,
+          "baseline_http_ms": 215.176583,
+          "candidate_http_ms": 139.562875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 206.498,
+          "candidate_retrieval_ms": 142.835,
+          "baseline_http_ms": 211.234042,
+          "candidate_http_ms": 146.7685,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 202.876,
+          "candidate_retrieval_ms": 144.613,
+          "baseline_http_ms": 207.032084,
+          "candidate_http_ms": 148.087291,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 207.766,
+          "candidate_retrieval_ms": 142.632,
+          "baseline_http_ms": 210.954375,
+          "candidate_http_ms": 150.698333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e1a43dce086e11ebbd62ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 203.15,
+          "candidate_retrieval_ms": 143.92,
+          "baseline_http_ms": 207.20225,
+          "candidate_http_ms": 147.281,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 194.132,
+          "candidate_retrieval_ms": 133.257,
+          "baseline_http_ms": 198.549958,
+          "candidate_http_ms": 136.789208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.145,
+          "candidate_retrieval_ms": 134.428,
+          "baseline_http_ms": 210.239042,
+          "candidate_http_ms": 137.338625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 214.349,
+          "candidate_retrieval_ms": 142.813,
+          "baseline_http_ms": 217.565333,
+          "candidate_http_ms": 147.186084,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 221.344,
+          "candidate_retrieval_ms": 142.278,
+          "baseline_http_ms": 224.850792,
+          "candidate_http_ms": 146.98225,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 209.176,
+          "candidate_retrieval_ms": 160.428,
+          "baseline_http_ms": 214.81925,
+          "candidate_http_ms": 164.327416,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:e5da4dc208b711ebbd88ac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 217.072,
+          "candidate_retrieval_ms": 146.407,
+          "baseline_http_ms": 221.402083,
+          "candidate_http_ms": 151.3305,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 201.286,
+          "candidate_retrieval_ms": 136.163,
+          "baseline_http_ms": 204.452708,
+          "candidate_http_ms": 140.11875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 200.924,
+          "candidate_retrieval_ms": 135.495,
+          "baseline_http_ms": 203.695834,
+          "candidate_http_ms": 137.909417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 203.767,
+          "candidate_retrieval_ms": 142.39,
+          "baseline_http_ms": 208.38325,
+          "candidate_http_ms": 146.190125,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 206.487,
+          "candidate_retrieval_ms": 142.102,
+          "baseline_http_ms": 212.797667,
+          "candidate_http_ms": 149.261791,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 203.072,
+          "candidate_retrieval_ms": 140.103,
+          "baseline_http_ms": 208.501084,
+          "candidate_http_ms": 143.595083,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f137fe640bda11eba7f7acde48001122",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 205.355,
+          "candidate_retrieval_ms": 142.853,
+          "baseline_http_ms": 209.361292,
+          "candidate_http_ms": 146.306542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 218.95,
+          "candidate_retrieval_ms": 138.844,
+          "baseline_http_ms": 226.227,
+          "candidate_http_ms": 143.141542,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 193.454,
+          "candidate_retrieval_ms": 134.98,
+          "baseline_http_ms": 199.463459,
+          "candidate_http_ms": 139.305417,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 0,
+          "baseline_retrieval_ms": 204.821,
+          "candidate_retrieval_ms": 145.825,
+          "baseline_http_ms": 211.552541,
+          "candidate_http_ms": 151.722333,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "weighted_rrf_v1",
+          "repetition": 1,
+          "baseline_retrieval_ms": 239.031,
+          "candidate_retrieval_ms": 167.628,
+          "baseline_http_ms": 249.467208,
+          "candidate_http_ms": 179.939834,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 0,
+          "baseline_retrieval_ms": 215.216,
+          "candidate_retrieval_ms": 171.592,
+          "baseline_http_ms": 221.12875,
+          "candidate_http_ms": 178.2625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:f2b3102b08de11ebbd9fac1f6bf848b6",
+          "method": "graph_hybrid_strength",
+          "repetition": 1,
+          "baseline_retrieval_ms": 218.625,
+          "candidate_retrieval_ms": 143.905,
+          "baseline_http_ms": 224.01775,
+          "candidate_http_ms": 148.364917,
+          "same_response": true
+        }
+      ]
+    },
+    "cold_process": {
+      "methods": [
+        "semantic"
+      ],
+      "repetitions": 2,
+      "summary": {
+        "semantic": {
+          "baseline": {
+            "retrieval_p50_ms": 241.74450000000002,
+            "retrieval_p95_ms": 289.83799999999997
+          },
+          "candidate": {
+            "retrieval_p50_ms": 189.30200000000002,
+            "retrieval_p95_ms": 224.36319999999998
+          }
+        }
+      },
+      "paired_query_intervals": {
+        "semantic": {
+          "mean": -58.61141666666666,
+          "low": -65.54116666666667,
+          "high": -52.32116666666666,
+          "queries": 6,
+          "method": "paired query bootstrap, 2000 draws, percentile 95%; exploratory, no multiplicity correction"
+        }
+      },
+      "rows": [
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 253.792,
+          "candidate_retrieval_ms": 212.008,
+          "baseline_http_ms": 259.984834,
+          "candidate_http_ms": 218.441375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:023bf04c0bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 243.564,
+          "candidate_retrieval_ms": 178.577,
+          "baseline_http_ms": 252.288625,
+          "candidate_http_ms": 188.257916,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 235.234,
+          "candidate_retrieval_ms": 163.496,
+          "baseline_http_ms": 246.195542,
+          "candidate_http_ms": 167.953833,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:188eb6da0bde11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 236.922,
+          "candidate_retrieval_ms": 167.635,
+          "baseline_http_ms": 241.48125,
+          "candidate_http_ms": 176.177,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 240.754,
+          "candidate_retrieval_ms": 202.189,
+          "baseline_http_ms": 253.195584,
+          "candidate_http_ms": 208.31075,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:274c82dc0bda11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 297.417,
+          "candidate_retrieval_ms": 239.464,
+          "baseline_http_ms": 305.851625,
+          "candidate_http_ms": 258.157625,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 237.728,
+          "candidate_retrieval_ms": 167.605,
+          "baseline_http_ms": 240.935042,
+          "candidate_http_ms": 179.254375,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:281793980bdd11eba7f7acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 238.513,
+          "candidate_retrieval_ms": 170.889,
+          "baseline_http_ms": 253.452417,
+          "candidate_http_ms": 181.350875,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 222.841,
+          "candidate_retrieval_ms": 195.895,
+          "baseline_http_ms": 226.854417,
+          "candidate_http_ms": 206.689792,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:2eaadcce0bb011ebab90acde48001122",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 283.637,
+          "candidate_retrieval_ms": 196.108,
+          "baseline_http_ms": 290.056125,
+          "candidate_http_ms": 203.13325,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 0,
+          "baseline_retrieval_ms": 242.735,
+          "candidate_retrieval_ms": 182.709,
+          "baseline_http_ms": 249.691792,
+          "candidate_http_ms": 189.504208,
+          "same_response": true
+        },
+        {
+          "query_id": "twowiki:39ad2caf087611ebbd67ac1f6bf848b6",
+          "method": "semantic",
+          "repetition": 1,
+          "baseline_retrieval_ms": 243.448,
+          "candidate_retrieval_ms": 196.673,
+          "baseline_http_ms": 251.695958,
+          "candidate_http_ms": 208.620709,
+          "same_response": true
+        }
+      ]
+    }
+  },
+  "warm_process_resources": {
+    "baseline": {
+      "cpu_seconds": 51.9,
+      "peak_rss_bytes": 68161536
+    },
+    "candidate": {
+      "cpu_seconds": 35.61,
+      "peak_rss_bytes": 68362240
+    }
+  }
+}
