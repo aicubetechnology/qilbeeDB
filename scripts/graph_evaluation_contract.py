@@ -251,7 +251,7 @@ def validate_page(result, fixture, state, query, method, protocol):
         if page["seed"]["mode"] != ("lexical" if graph_lexical else "hybrid"):
             raise ValueError("Graph seed method differs")
         if not graph_lexical and (
-            page["seed"]["hybrid_profile"] != PROFILES["weighted_rrf_v2"]
+            page["seed"]["hybrid_profile"] != PROFILES[protocol["graph_seed_hybrid_version"]]
             or page["seed"]["embedding_space"] != fixture["space"]
         ):
             raise ValueError("Graph seed profile or model space differs")

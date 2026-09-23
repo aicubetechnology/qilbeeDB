@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from evaluate_retrieval import PROFILES, digest, metrics, source_payload
-from evaluate_graph_retrieval import request_for, summary, verify_protocol, evaluation_stage, evaluation_queries
+from evaluate_graph_retrieval import request_for, summary, verify_protocol, evaluation_stage, evaluation_queries, verify_seed_baselines
 from export_graph_evaluation import export
 from graph_report_evidence import categories, comparisons
 from graph_evaluation_contract import (
@@ -488,6 +488,70 @@ class GraphPipelineChecks(unittest.TestCase):
             mutate(changed)
             with self.assertRaises(ValueError):
                 verify_protocol(changed, value, graph)
+
+    def test_v1_seed_protocol_cannot_be_relabelled_as_v2_or_reserved(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-best-channel-v1-seed-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(protocol["primary_comparison"]["baseline"], "weighted_rrf_v1")
+        mutations = [lambda p: p.update(split="test"),
+            lambda p: p.update(protocol_version="graph_best_channel_development_v1"),
+            lambda p: p.update(graph_seed_hybrid_version="weighted_rrf_v2"),
+            lambda p: p["primary_comparison"].update(baseline="weighted_rrf_v2"),
+            lambda p: p["graph_profiles"].update(graph_hybrid_best_channel="typed_path_balanced_v1"),
+            lambda p: p["methods"].remove("weighted_rrf_v2"),
+            lambda p: p["methods"].append("graph_hybrid_best_channel"),
+            lambda p: p.update(default_admission=True)]
+        for mutate in mutations:
+            changed = copy.deepcopy(protocol)
+            mutate(changed)
+            with self.assertRaises(ValueError):
+                verify_protocol(changed, value, graph)
+
+    def test_seed_request_and_response_must_match_frozen_protocol(self):
+        value, _, state, protocol, result = proof_fixture()
+        method = "graph_hybrid_balanced"
+        for version in ("weighted_rrf_v1", "weighted_rrf_v2"):
+            protocol["graph_seed_hybrid_version"] = version
+            _, body = request_for(method, value["queries"][1], value, state, protocol)
+            self.assertEqual(body["query"]["seed"]["ranking_version"], version)
+            result["page"]["seed"].update(mode="hybrid", hybrid_profile=PROFILES[version],
+                embedding_space=value["space"])
+            validate_page(result, value, state, value["queries"][1], method, protocol)
+            changed = copy.deepcopy(result)
+            other = "weighted_rrf_v2" if version == "weighted_rrf_v1" else "weighted_rrf_v1"
+            changed["page"]["seed"]["hybrid_profile"] = PROFILES[other]
+            with self.assertRaises(ValueError):
+                validate_page(changed, value, state, value["queries"][1], method, protocol)
+
+    def test_seed_baselines_bind_depth_zero_and_anchors_to_each_version(self):
+        for version in ("weighted_rrf_v1", "weighted_rrf_v2"):
+            other = "weighted_rrf_v2" if version == "weighted_rrf_v1" else "weighted_rrf_v1"
+            protocol = {"graph_seed_hybrid_version": version,
+                "graph_profiles": {"graph_hybrid_depth_zero": "unused",
+                    "graph_hybrid_best_channel": "unused", "graph_lexical_balanced": "unused"}}
+            rows = {}
+            for method, ids in [(version, ["a", "b"]), (other, ["c", "d"]),
+                    ("lexical", ["e", "f"])]:
+                rows["q", method] = {"ranked": ids, "hits": [
+                    {"record": {"record_id": rid}} for rid in ids]}
+            for method in protocol["graph_profiles"]:
+                ids = ["e", "f"] if method == "graph_lexical_balanced" else ["a", "b"]
+                rows["q", method] = {"ranked": ids, "work": {"seed": {
+                    "selected_anchors": [{"record_id": rid} for rid in ids]}}}
+            verify_seed_baselines(rows, ["q"], protocol)
+            bad = copy.deepcopy(rows)
+            bad["q", "graph_hybrid_depth_zero"]["ranked"] = ["c", "d"]
+            with self.assertRaises(ValueError):
+                verify_seed_baselines(bad, ["q"], protocol)
+            for method in protocol["graph_profiles"]:
+                bad = copy.deepcopy(rows)
+                bad["q", method]["work"]["seed"]["selected_anchors"] = [{"record_id": "c"}]
+                with self.assertRaises(ValueError):
+                    verify_seed_baselines(bad, ["q"], protocol)
 
     def test_best_channel_uses_maximum_and_rejects_additive_or_weighted_scores(self):
         value, _, state, protocol, result = proof_fixture()

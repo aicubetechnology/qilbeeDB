@@ -89,6 +89,7 @@ def evaluation_stage(protocol):
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
         "graph_best_channel_development_v1": "development",
+        "graph_best_channel_v1_seed_development_v1": "development",
         "graph_base_preserving_reserved_v1": "test",
     }
     expected = stages.get(protocol.get("protocol_version"))
@@ -130,7 +131,8 @@ def verify_protocol(protocol, fixture, graph):
         "graph_lexical_balanced",
         "graph_hybrid_depth_zero",
     }
-    best_channel_trial = protocol["protocol_version"] == "graph_best_channel_development_v1"
+    v1_seed_trial = protocol["protocol_version"] == "graph_best_channel_v1_seed_development_v1"
+    best_channel_trial = v1_seed_trial or protocol["protocol_version"] == "graph_best_channel_development_v1"
     candidate_trial = best_channel_trial or protocol["protocol_version"] in (
         "graph_base_preserving_development_v1", "graph_base_preserving_reserved_v1"
     )
@@ -158,14 +160,41 @@ def verify_protocol(protocol, fixture, graph):
     if best_channel_trial:
         profiles["graph_hybrid_best_channel"] = "typed_path_best_channel_v1"
         candidate = "graph_hybrid_best_channel"
+    expected_seed = "weighted_rrf_v1" if v1_seed_trial else "weighted_rrf_v2"
     if (
         protocol["graph_profiles"] != profiles
-        or protocol["graph_seed_hybrid_version"] != "weighted_rrf_v2"
+        or protocol["graph_seed_hybrid_version"] != expected_seed
         or protocol["primary_comparison"]
-        != {"candidate": candidate, "baseline": "weighted_rrf_v2"}
+        != {"candidate": candidate, "baseline": expected_seed}
         or protocol["default_admission"] is not False
     ):
         raise ValueError("Method label, seed profile or declared comparison changed")
+
+
+def verify_seed_baselines(rows, queries, protocol):
+    """Bind anchors and the depth-zero control to the declared seed policy."""
+    for qid in queries:
+        if (
+            rows[(qid, "graph_hybrid_depth_zero")]["ranked"]
+            != rows[(qid, protocol["graph_seed_hybrid_version"])]["ranked"]
+        ):
+            raise ValueError("Depth-zero ablation changed base result order")
+        for method in protocol["graph_profiles"]:
+            baseline = (
+                "lexical"
+                if method == "graph_lexical_balanced"
+                else protocol["graph_seed_hybrid_version"]
+            )
+            expected = [
+                h["record"]["record_id"] for h in rows[(qid, baseline)]["hits"][:4]
+            ]
+            if [
+                r["record_id"]
+                for r in rows[(qid, method)]["work"]["seed"]["selected_anchors"]
+            ] != expected:
+                raise ValueError(
+                    "Graph anchors differ from independently retrieved baseline"
+                )
 
 
 class ProcessMonitor:
@@ -452,28 +481,7 @@ def evaluate(
         verify_relations(client, graph, state)
         if fences(client, state["scope"]) != before:
             raise ValueError("Memory or relation history changed during evaluation")
-        for qid in queries:
-            if (
-                rows[(qid, "graph_hybrid_depth_zero")]["ranked"]
-                != rows[(qid, "weighted_rrf_v2")]["ranked"]
-            ):
-                raise ValueError("Depth-zero ablation changed base result order")
-            for method in protocol["graph_profiles"]:
-                baseline = (
-                    "lexical"
-                    if method == "graph_lexical_balanced"
-                    else "weighted_rrf_v2"
-                )
-                expected = [
-                    h["record"]["record_id"] for h in rows[(qid, baseline)]["hits"][:4]
-                ]
-                if [
-                    r["record_id"]
-                    for r in rows[(qid, method)]["work"]["seed"]["selected_anchors"]
-                ] != expected:
-                    raise ValueError(
-                        "Graph anchors differ from independently retrieved baseline"
-                    )
+        verify_seed_baselines(rows, queries, protocol)
         report["rows"] = list(rows.values())
         report["summary"] = {
             m: summary([r for (q, method), r in rows.items() if method == m])
