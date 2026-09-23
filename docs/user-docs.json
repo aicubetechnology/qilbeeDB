@@ -5,7 +5,7 @@
       "source": "docs/user/index.md",
       "file": "index.md",
       "title": "QilbeeDB documentation",
-      "description": "Build applications with durable memory, scoped retrieval and traceable learning.",
+      "description": "Find official QilbeeDB resources and build applications with durable memory, scoped retrieval and traceable learning.",
       "order": 0
     },
     {
@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Attach external embeddings and retrieve memories by model-bound cosine similarity.",
+      "description": "Store externally supplied, model-bound embeddings and retrieve exact cosine results with snapshot-scoped source eligibility.",
       "order": 60
     },
     {

@@ -194,3 +194,15 @@ prove that every omitted candidate was ranked correctly, or establish agent
 reasoning improvements. Keep full-scan coverage, isolation, frozen-corpus
 verification and separate task evaluation as independent requirements. No
 embedding generation or provider credentials are required for these checks.
+
+### Source eligibility during scoring
+
+**Availability: source preview for the serving-path optimization.** Exact vector
+search evaluates a record and its derived-memory sources before loading the
+embedding. Scoring reuses that eligibility decision only within the same
+immutable request snapshot and observation time; it does not traverse the same
+sources a second time. The embedding's source revision is still checked
+independently. A new request evaluates eligibility again, so changed, rejected,
+deleted or expired sources cannot acquire continued access from an earlier
+request. This optimization changes neither cosine values nor ranking rules and
+has no measured latency guarantee.
