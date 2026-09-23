@@ -96,3 +96,24 @@ isolation, persistence, integrity, provenance and retrieval remain database duti
 A knowledge qualification or selection result must not imply execution authority.
 Review ownership before expanding a capability. Agree shared integration changes
 with affected consumers without introducing consumer-specific core dependencies.
+
+
+## Collective knowledge product direction
+
+The product direction is an active, collective knowledge substrate for an
+enterprise's authorized agents: remember, learn from evidence, forget under
+explicit retention and invalidation policies, correlate knowledge and consolidate
+experience. Independence from agent frameworks must not reduce this objective
+to passive storage. Agents retain goals, business judgment and action execution.
+
+Treat "dreaming" as a research direction for offline replay, consolidation and
+candidate hypothesis generation, not a claim of consciousness or an already
+implemented feature. Derived knowledge must retain source revisions, provenance,
+uncertainty and evaluation status. A hypothesis must not silently become a fact
+or execution permission. Shared knowledge must respect tenant, project, agent,
+mission and private-subject authorization throughout derivation and retrieval.
+
+Before implementing a capability, specify its knowledge-level purpose, authority,
+source invalidation and forgetting behavior, resource limits and real-environment
+acceptance evidence. Distinguish demonstrated capabilities from planned work;
+measure retrieval quality and downstream agent-task benefit separately.

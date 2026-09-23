@@ -209,3 +209,17 @@ retrieval. A selected procedure or baseline reference never grants permission
 to execute an action. The application decides how to handle missing, incomplete,
 expired or unsuitable knowledge. Use the same boundary with the managed platform
 and with a self-hosted server.
+
+### Collective knowledge and capability limits
+
+A shared knowledge layer can serve multiple authorized agents without transferring
+their decision authority to the database. Current evidence-bound contracts store
+source revisions and qualification evidence, check eligibility and retrieve
+compatible knowledge. Sharing does not bypass private-subject or company access
+controls.
+
+Broader consolidation, experience replay and hypothesis generation are product
+research directions, not capabilities established by this API. Any future derived
+knowledge must distinguish hypotheses from verified observations and preserve
+provenance, access boundaries and source invalidation. Improved retrieval alone
+does not demonstrate improved agent reasoning.
