@@ -638,3 +638,8 @@ found improved retrieval for strength versus hybrid V1 on one 40-question
 development cohort, while balanced had slightly higher mean nDCG. This does not
 qualify a default change; reserved confirmation and agent-task evidence remain
 separate requirements. Use the exact advertised profile and inspect coverage.
+
+When switching external embeddings, freeze a new evaluation protocol even if the
+corpus and ranking formulas stay unchanged. The [captured 1536-dimensional protocol](../research/twowiki-captured1536-development-protocol.md)
+binds exact vector identity and preserves development/reserved roles. Input
+qualification alone provides no relevance or latency result.
