@@ -84,3 +84,15 @@ and real scoped credentials, preserve existing customer data, and record exact
 source/image identity, actions and observations. Exercise faults in an isolated
 real deployment rather than disrupting a shared production service. Static
 reviews remain analysis; historical unit-test counts do not establish acceptance.
+
+## Independent product and capability ownership
+
+QilbeeDB must serve independently implemented AI agents and applications through
+generic public contracts without requiring a particular consumer runtime,
+framework, identifier convention or administrative service. Agent harnesses,
+business rules, planning, model selection, autonomy controls and tool execution
+belong to consuming applications and their administration. Database authorization,
+isolation, persistence, integrity, provenance and retrieval remain database duties.
+A knowledge qualification or selection result must not imply execution authority.
+Review ownership before expanding a capability. Agree shared integration changes
+with affected consumers without introducing consumer-specific core dependencies.

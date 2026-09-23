@@ -198,3 +198,14 @@ scores or resource names; absent an explicit origin field it is shown as
 
 This console candidate remains under release validation. Its observation does
 not authorize application execution or demonstrate agent reasoning improvement.
+
+## Consumer-independent decisions
+
+These contracts are available to any authorized agent or application, regardless
+of its framework. The consuming application owns its harness, business rules,
+planning, autonomy controls, tool execution and administrative approvals.
+QilbeeDB enforces data authorization, isolation, integrity and evidence-bound
+retrieval. A selected procedure or baseline reference never grants permission
+to execute an action. The application decides how to handle missing, incomplete,
+expired or unsuitable knowledge. Use the same boundary with the managed platform
+and with a self-hosted server.

@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Select evidence-bound knowledge with exact source revisions, compatible tool identities and explicit read-only metadata authority.",
+      "description": "Store and retrieve evidence-bound knowledge with generic contracts while preserving application-owned decisions and execution authority.",
       "order": 106
     },
     {
