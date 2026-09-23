@@ -497,3 +497,12 @@ components limit statistical conclusions. Keep agent-task evaluation separate.
 The [same-import development report](../research/graph-seed-matrix-development-results.md)
 records paired effects, regressions and uncertainty. Its development observations
 do not establish a preferred production seed policy.
+
+### Reserve queries without hidden overlap
+
+Before a new confirmation, freeze the candidate and record all previously used
+fixtures. The [overlap-controlled cohort selector](../research/disjoint-cohort-selection.md)
+replays exact source hashes and excludes shared questions, component IDs,
+intermediate answers and supporting paragraphs. Missing quotas fail explicitly;
+a public-training subset must not be described as an official held-out test set.
+Selection does not measure retrieval quality or establish agent improvement.
