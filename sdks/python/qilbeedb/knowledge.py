@@ -81,6 +81,77 @@ class KnowledgeSelectionClient:
         self._validate(response, body)
         return response
 
+    def inspect(self, procedure_id):
+        """Read current qualification and source eligibility, retaining audit data.
+
+        A false reuse flag is a valid result. A transport or authorization error
+        supplies no current observation; this method never returns cached data.
+        """
+        wire.identifier(procedure_id, 512)
+        body = {"contract_version": 2, "scope": deepcopy(self._identity._scope),
+                "procedure_id": procedure_id}
+        with self._identity._operation() as token:
+            response = self._identity._http.request(
+                token, "/api/v1/learning/knowledge/inspect", body)
+        wire.object_fields(response, "contract_version inspection")
+        wire.require(type(response["contract_version"]) is int and response["contract_version"] == 2)
+        self._inspection(response["inspection"], procedure_id)
+        return response
+
+    def _inspection(self, knowledge, procedure_id):
+        wire.object_fields(knowledge, "receipt procedure qualification_active evidence eligible_for_knowledge_reuse")
+        for field in ("qualification_active", "eligible_for_knowledge_reuse"):
+            wire.require(type(knowledge[field]) is bool)
+        receipt, procedure = knowledge["receipt"], knowledge["procedure"]
+        wire.require(isinstance(receipt, dict) and isinstance(procedure, dict))
+        wire.require(type(receipt.get("schema_version")) is int and receipt.get("schema_version") == 2)
+        wire.require(receipt.get("tenant") == self._identity._tenant, "knowledge_tenant_mismatch")
+        wire.digest(receipt.get("receipt_digest"))
+        proposal, current = receipt.get("request"), procedure.get("record")
+        wire.require(isinstance(proposal, dict) and isinstance(current, dict))
+        wire.require(proposal.get("id") == procedure_id, "knowledge_procedure_mismatch")
+        current_proposal, scope = current.get("proposal"), current.get("scope")
+        wire.require(isinstance(current_proposal, dict) and isinstance(scope, dict))
+        wire.require(scope.get("tenant") == self._identity._tenant, "knowledge_tenant_mismatch")
+        for field in ("id", "instructions"):
+            wire.require(isinstance(proposal.get(field), str))
+            wire.require(current_proposal.get(field) == proposal[field], "knowledge_binding_mismatch")
+        sources = proposal.get("memory_sources")
+        wire.require(isinstance(sources, list) and 1 <= len(sources) <= 16)
+        seen = set()
+        for source in sources:
+            wire.object_fields(source, "record_id revision")
+            wire.uuid(source["record_id"])
+            wire.integer(source["revision"], 1)
+            wire.require(source["record_id"] not in seen)
+            seen.add(source["record_id"])
+        state = current.get("state")
+        wire.require(isinstance(state, str) and state in ("Candidate", "Active", "Rejected", "Suspended"))
+        wire.require(knowledge["qualification_active"] == (state == "Active"))
+        evidence = knowledge["evidence"]
+        wire.object_fields(evidence, "eligible evaluated_at_millis first_failure all_dependencies_checked dependency_work")
+        for field in ("eligible", "all_dependencies_checked"):
+            wire.require(type(evidence[field]) is bool)
+        wire.integer(evidence["evaluated_at_millis"], 0, 2**63 - 1)
+        wire.object_fields(evidence["dependency_work"], "records_examined bytes_examined")
+        for value in evidence["dependency_work"].values():
+            wire.integer(value)
+        failure = evidence["first_failure"]
+        if failure is None:
+            wire.require(evidence["eligible"] and evidence["all_dependencies_checked"])
+        else:
+            wire.object_fields(failure, "record_id expected_revision actual_revision reason")
+            wire.uuid(failure["record_id"])
+            for field in ("expected_revision", "actual_revision"):
+                if failure[field] is not None:
+                    wire.integer(failure[field], 1)
+            wire.require(isinstance(failure["reason"], str) and failure["reason"] in (
+                "deleted", "expired", "rejected", "source_missing", "source_revision_changed",
+                "dependency_cycle", "depth_limit", "node_limit"))
+            wire.require(not evidence["eligible"] and not evidence["all_dependencies_checked"])
+        wire.require(knowledge["eligible_for_knowledge_reuse"] == (
+            knowledge["qualification_active"] and evidence["eligible"] and evidence["all_dependencies_checked"]))
+
     def _validate(self, response, request):
         wire.object_fields(response, "contract_version selection_version scope policy_id context_id evaluated_at_millis index_generation result coverage work")
         wire.require(type(response["contract_version"]) is int and response["contract_version"] == 3)

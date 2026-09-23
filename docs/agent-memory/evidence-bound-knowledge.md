@@ -339,3 +339,41 @@ access-control implementation. The server remains the authority for those
 contracts. The default response limit is 16 MiB and can be lowered through
 `max_response_bytes` (1 KiB–64 MiB); exceeding it stops the operation.
 The limit applies to identity checks as well as selection responses.
+
+### Recheck knowledge before reuse (unreleased SDK)
+
+Use `client.inspect(procedure_id)` to read current qualification and source
+eligibility through the existing v2 inspection contract. This operation works
+independently of v3 selection; it requires a server supporting v2 inspection.
+The same company, subject, scope and response-size checks apply on managed and
+self-hosted installations.
+
+```python
+observation = client.inspect("authorized-read-v1")
+knowledge = observation["inspection"]
+if knowledge["eligible_for_knowledge_reuse"]:
+    print("Eligible at", knowledge["evidence"]["evaluated_at_millis"])
+else:
+    print("Not eligible for reuse")
+    print(knowledge["evidence"]["first_failure"])
+```
+
+The application decides how to handle the observation. Qualification can be
+inactive even when sources remain eligible. A changed, rejected, deleted or
+expired source can invalidate otherwise active knowledge. An incomplete dependency
+check must not be treated as success. The response retains the receipt and
+procedure history for inspection even when reuse is ineligible; retained
+instructions are not approval to execute them.
+
+A missing proposal produces `ConsumerAPIError` with status 404. Authorization,
+identity, response-size and transport failures use the same exceptions described
+above and supply no new eligibility observation. The client does not substitute a
+previous successful response, mutate an earlier returned observation, retry or
+choose another procedure. Your application must distinguish historical results
+from current evidence and define its own recovery behavior.
+
+Inspection is an observation at the server's reported time, not an execution
+reservation. Sources or qualification may change after the response. Rechecking
+reduces stale reuse but does not make an external action atomic with database
+state. An eligible response does not establish factual truth, task suitability,
+tool compatibility for a new context, or permission to perform an action.
