@@ -34697,7 +34697,8 @@
           "typed_path_temporal_v1",
           "typed_path_evidence_v1",
           "typed_path_base_preserving_v1",
-          "typed_path_best_channel_v1"
+          "typed_path_best_channel_v1",
+          "typed_path_strength_v1"
         ]
       },
       "GraphRankingProfileBalancedV1": {
@@ -35395,6 +35396,9 @@
           },
           {
             "$ref": "#/components/schemas/GraphRankingProfileBestChannelV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileStrengthV1"
           }
         ]
       },
@@ -36079,7 +36083,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 0.3333333333333333,
-            "description": "Versioned ranking score: sum for strongest_typed_path_rrf, maximum for strongest_typed_path_max; not cosine or a probability."
+            "description": "Versioned ranking score: sum for strongest_typed_path_rrf; maximum for strongest_typed_path_max; base reciprocal-rank contribution plus weighted absolute path strength for strongest_typed_path_strength. Not cosine or a probability."
           },
           "base": {
             "anyOf": [
@@ -36603,6 +36607,65 @@
                 }
               }
             }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_strength_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.16666666666666666
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.16666666666666666
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         ]
       },
@@ -36637,8 +36700,8 @@
             "items": {
               "$ref": "#/components/schemas/GraphRankingProfile"
             },
-            "maxItems": 6,
-            "minItems": 6
+            "maxItems": 7,
+            "minItems": 7
           },
           "execution_limits": {
             "$ref": "#/components/schemas/RetrievalExecutionLimits"
@@ -41395,6 +41458,175 @@
           },
           "graph_weight": {
             "const": 1.0
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileStrengthV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_strength_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_strength"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.5
+          },
+          "graph_weight": {
+            "const": 0.5
           },
           "hop_decay": {
             "const": 0.5

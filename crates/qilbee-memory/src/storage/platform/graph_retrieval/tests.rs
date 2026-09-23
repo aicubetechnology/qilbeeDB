@@ -3,6 +3,8 @@ use super::*;
 use tempfile::TempDir;
 #[path = "tests_boundaries.rs"]
 mod boundaries;
+#[path = "tests_strength.rs"]
+mod strength;
 
 fn query(text: &str) -> GraphRetrievalQuery {
     serde_json::from_value(serde_json::json!({

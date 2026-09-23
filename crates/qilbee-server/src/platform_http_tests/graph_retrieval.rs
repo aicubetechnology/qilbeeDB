@@ -73,7 +73,7 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
     let catalog = http
         .call("GET", CATALOG, CATALOG, &key, Value::Null, 200)
         .await;
-    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 6);
+    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 7);
     for profile in catalog["graph_profiles"].as_array().unwrap() {
         for mode in ["lexical", "semantic", "hybrid"] {
             let mut body = query();
@@ -96,7 +96,12 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
                         .map_or(0.0, |rank| weight / (2.0 + rank as f64))
                 };
                 let base = contribution("base", profile["base_weight"].as_f64().unwrap());
-                let graph = contribution("graph", profile["graph_weight"].as_f64().unwrap());
+                let graph = if profile["method"] == "strongest_typed_path_strength" {
+                    hit["graph"]["strength"].as_f64().unwrap_or(0.0)
+                        * profile["graph_weight"].as_f64().unwrap()
+                } else {
+                    contribution("graph", profile["graph_weight"].as_f64().unwrap())
+                };
                 let expected = if profile["method"] == "strongest_typed_path_max" {
                     base.max(graph)
                 } else {
@@ -120,6 +125,8 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
             invalid["page"]["hits"][0][limited_channel]["contribution"] =
                 json!(if profile["version"] == "typed_path_best_channel_v1" {
                     0.34
+                } else if profile["version"] == "typed_path_strength_v1" {
+                    0.17
                 } else {
                     0.1
                 });
@@ -127,6 +134,18 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
                 !validator.is_valid(&invalid),
                 "Profile-specific contribution bound must be enforced"
             );
+            if profile["version"] == "typed_path_strength_v1" {
+                for (channel, property, bad) in [
+                    ("base", "contribution", 0.17),
+                    ("graph", "contribution", 0.17),
+                    ("graph", "strength", 0.34),
+                    ("graph", "strength", -0.01),
+                ] {
+                    let mut invalid = value.clone();
+                    invalid["page"]["hits"][0][channel][property] = json!(bad);
+                    assert!(!validator.is_valid(&invalid));
+                }
+            }
             assert_eq!(
                 page["hits"][1]["graph"]["steps"][0]["relation_id"],
                 edge["receipt"]["relation_id"]
