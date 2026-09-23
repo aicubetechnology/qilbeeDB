@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Compare versioned graph scores and verify ranking, coverage and measurement evidence.",
+      "description": "Interpret graph scores and verify ranking, coverage and measurement evidence in development and reserved comparisons.",
       "order": 208
     },
     {

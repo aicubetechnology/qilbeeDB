@@ -383,6 +383,47 @@ independent evidence of superiority. Compare relevance, regressions, work and
 coverage on your workload, with a separately frozen evaluation before admission.
 No agent reasoning or token-efficiency improvement follows from this formula.
 
+### Reproduce a best-channel development comparison
+
+Use `benchmarks/retrieval/graph-best-channel-development-v1.json` with
+`scripts/evaluate_graph_retrieval.py` to compare ten methods, including the
+existing base-preserving profile. The declared primary comparison is
+`graph_hybrid_best_channel` versus `weighted_rrf_v2`; the graph seed remains
+hybrid v2. The protocol selects only the fixture's development queries. It
+rejects a reserved split, missing/duplicated methods, a substituted ranking
+version or a different declared primary comparison.
+
+Freeze the source revision, server profile catalog, fixture, model space,
+relations and protocol before running. Use an authorized disposable scope,
+externally generated vectors and the same budgets for all methods. The existing
+prepare/evaluate workflow records current source evidence, query-level scores,
+coverage and resource observations. Export the completed report only after
+checking the full method/query/repetition matrix.
+
+This is a development experiment, including when it reproduces an earlier
+prototype. The protocol does not authorize applying its result to an already
+observed reserved cohort or changing a production default. Independent evaluation
+and downstream task outcomes require their own frozen contracts.
+
+The [completed development comparison](../research/best-channel-development-results.md)
+reports relevance, regressions, coverage and observed cost. Its uncertainty does
+not establish general superiority or justify a default change.
+
+## Check latency and payload measurements
+
+**Availability: source preview for evaluation tooling.** Graph report exports
+reject missing or duplicate repetitions, non-finite or negative durations, and
+non-integer byte counts. Measured retrieval time cannot exceed its enclosing HTTP
+observation by more than the runner's one-millisecond tolerance. The reported
+embedding-plus-HTTP estimate must equal its two components; lexical-only methods
+cannot include query embedding time.
+
+Payload byte counts are checked against the canonical UTF-8 payloads retained in
+the report and cannot exceed the response size. A mismatch stops export; keep the
+original evidence and investigate rather than editing measurements to pass.
+These consistency checks do not establish hardware isolation, representative
+concurrency, provider billing or a production latency guarantee.
+
 ## Prepare a fresh reserved graph comparison
 
 **Availability: source preview for evaluation tooling.** An explicit selected-ID
@@ -415,18 +456,3 @@ hybrid v2. Some queries improved and others regressed; traversal and candidate
 limits affected coverage. The profile remains optional and experimental. Select
 a retrieval method using representative workload evaluation, including coverage
 and cost, and assess agent-task outcomes separately.
-
-## Check latency and payload measurements
-
-**Availability: source preview for evaluation tooling.** Graph report exports
-reject missing or duplicate repetitions, non-finite or negative durations, and
-non-integer byte counts. Measured retrieval time cannot exceed its enclosing HTTP
-observation by more than the runner's one-millisecond tolerance. The reported
-embedding-plus-HTTP estimate must equal its two components; lexical-only methods
-cannot include query embedding time.
-
-Payload byte counts are checked against the canonical UTF-8 payloads retained in
-the report and cannot exceed the response size. A mismatch stops export; keep the
-original evidence and investigate rather than editing measurements to pass.
-These consistency checks do not establish hardware isolation, representative
-concurrency, provider billing or a production latency guarantee.
