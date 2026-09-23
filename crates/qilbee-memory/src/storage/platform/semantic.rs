@@ -105,6 +105,9 @@ pub(super) struct StoredEmbedding {
     namespace: String,
     pub(super) receipt: EmbeddingReceipt,
     pub(super) vector: Vec<f32>,
+    // Derived from validated bytes; never persisted or included in vector identity.
+    #[serde(skip)]
+    pub(super) validated_norm: f64,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -153,7 +156,7 @@ fn decode_embedding(
     space: &EmbeddingSpace,
     id: Uuid,
 ) -> Result<StoredEmbedding> {
-    let stored: StoredEmbedding = decode(bytes)?;
+    let mut stored: StoredEmbedding = decode(bytes)?;
     if stored.schema_version != 1
         || stored.namespace != namespace
         || stored.receipt.contract_version != 1
@@ -161,10 +164,10 @@ fn decode_embedding(
         || stored.receipt.record_revision == 0
         || stored.receipt.space != *space
         || stored.receipt.vector_digest != vector_digest(&stored.vector)?
-        || norm(&stored.vector, space.dimensions).is_err()
     {
         return Err(inconsistent());
     }
+    stored.validated_norm = norm(&stored.vector, space.dimensions).map_err(|_| inconsistent())?;
     Ok(stored)
 }
 impl RocksDbMemoryStorage {
@@ -285,6 +288,7 @@ impl RocksDbMemoryStorage {
                     namespace: namespace.into(),
                     receipt: receipt.clone(),
                     vector: command.vector.clone(),
+                    validated_norm: 0.0,
                 })?,
             );
         }
@@ -467,7 +471,7 @@ impl super::snapshot::MemorySnapshot<'_> {
                 continue;
             }
             current_bindings += 1;
-            let denominator = query_norm * norm(&embedding.vector, query.space.dimensions)?;
+            let denominator = query_norm * embedding.validated_norm;
             let dot: f64 = query
                 .vector
                 .iter()
@@ -526,7 +530,17 @@ mod tests {
             namespace: "scope".into(),
             receipt,
             vector,
+            validated_norm: 0.0,
         };
+        let bytes = encode(&stored).unwrap();
+        stored.validated_norm = 999.0;
+        assert_eq!(bytes, encode(&stored).unwrap());
+        let decoded = decode_embedding(&bytes, "scope", &space, id).unwrap();
+        assert_eq!(decoded.validated_norm, 1.0);
+        assert_eq!(encode(&decoded).unwrap(), bytes);
+        let mut injected: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        injected["validated_norm"] = serde_json::json!(0.001);
+        assert!(decode_embedding(&serde_json::to_vec(&injected).unwrap(), "scope", &space, id).is_err());
         stored.vector[0] = 2.0;
         assert!(matches!(
             decode_embedding(&encode(&stored).unwrap(), "scope", &space, id),
