@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Use scoped graph retrieval and reproduce immutable ranking comparisons with verified path evidence, fixed cohorts and explicit experimental limits.",
+      "description": "Retrieve scoped graph evidence and audit fixed ranking comparisons, observed-cohort regressions and lost or recovered labeled support.",
       "order": 208
     },
     {

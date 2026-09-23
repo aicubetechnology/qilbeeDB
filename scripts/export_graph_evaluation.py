@@ -25,7 +25,7 @@ def export(report, fixture):
     if plan["protocol_sha256"] != digest(protocol):
         raise ValueError("Export protocol differs from the pinned plan")
     stage = evaluation_stage(protocol)
-    if protocol["protocol_version"] == "graph_path_strength_development_v1":
+    if protocol["protocol_version"] in ("graph_path_strength_development_v1", "graph_path_strength_regression_v1"):
         from path_strength_contract import verify_path_strength_protocol
         verify_path_strength_protocol(protocol, fixture)
     if protocol["protocol_version"] == "graph_balanced_v1_support_reserved_v1":
@@ -101,6 +101,11 @@ def export(report, fixture):
         extra["seed_comparisons"] = expected_seed_comparisons
     elif "seed_comparisons" in report:
         raise ValueError("Seed comparisons were not predeclared")
+    if "support_comparisons" in protocol:
+        from graph_report_evidence import verify_support_transitions
+        extra["support_transitions"] = verify_support_transitions(report, rows, protocol, queries)
+    elif "support_transitions" in report:
+        raise ValueError("Support comparisons were not predeclared")
     resources = report["resources"]
     return {
         **extra,
