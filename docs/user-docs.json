@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Propose evidence-bound knowledge, inspect current sources and select compatible active knowledge with explicit versioned work limits.",
+      "description": "Use evidence-bound knowledge and the optional Python v3 client with explicit scope, work limits and application-owned decisions.",
       "order": 106
     },
     {

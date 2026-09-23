@@ -37,6 +37,7 @@ from .relation_consumer import (
     RelationDelivery,
     RelationChangeSink,
 )
+from .knowledge import KnowledgeSelectionClient
 from .consolidation import (
     ConsolidationClient,
     ConsolidationInput,
@@ -87,6 +88,7 @@ def __dir__():
 
 
 __all__ = [
+    "KnowledgeSelectionClient",
     "ConsolidationClient",
     "ConsolidationInput",
     "ConsolidationResult",
