@@ -4,7 +4,9 @@
 ledger. Agents or applications propose procedures; a trusted evaluator supplies
 paired outcomes; the database qualifies, selects and suspends procedures. It
 does not train model weights, generate proposals, execute instructions or run
-evaluations. The HTTP server and SDKs do not expose this module yet.
+evaluations. This guide describes the native ledger API. For authenticated HTTP
+contracts, use [procedural learning](../api/procedural-learning.md) and
+[evidence-bound knowledge](evidence-bound-knowledge.md).
 
 ```mermaid
 flowchart LR
@@ -15,7 +17,8 @@ flowchart LR
     A --> C[Agent context]
     C --> M[External monitoring]
     M --> D
-    D --> B[Suspend and select baseline]
+    D --> B[Exclude suspended knowledge]
+    B --> F[Application decides its next action]
 ```
 
 ## Execute the offline demonstration
@@ -30,6 +33,23 @@ latency violations to demonstrate automatic suspension. It uses a temporary
 directory and no model, API key or network. This is an executable API example,
 not evidence of general agent improvement or benchmark leadership.
 
+## Database and application responsibilities
+
+QilbeeDB provides generic memory and evidence contracts for any AI agent or
+application. It does not require a particular agent framework. The application
+owns its harness, prompts, planning, model selection, business rules, autonomy
+controls and execution approvals. The database owns persistence, data access
+controls, isolation, integrity and retrieval under the configured data policy.
+Applications embedding the native library must supply authentication as described below; HTTP
+clients use the server's authenticated contracts.
+
+An active qualification means the recorded evidence passed the specified ledger
+method and policy. It is not business approval, a claim of factual truth or
+permission to execute instructions. A selection result supplies knowledge; the
+application decides whether and how to use it. A baseline reference identifies
+an alternative recorded by the application, not a mandatory next action.
+These boundaries apply to managed-platform and self-hosted use alike.
+
 ## Integration contract
 
 1. Open a **separate database directory** with `LearningMemory::open(path)`.
@@ -41,7 +61,8 @@ not evidence of general agent improvement or benchmark leadership.
    submit `PairedEvaluation` using `record_evaluation`. Utility scores must be
    finite and in `[0, 1]`. Record cost in the policy's defined integer units.
 5. Call `select(scope, task, baseline_revision, evaluation_contract, max_instruction_bytes)` to get
-   an active procedure. `None` means the application should use its baseline.
+   an active procedure. `None` means no matching active procedure was selected.
+   The application decides whether to use its baseline, seek other context or stop.
    The budget counts UTF-8 bytes of instructions, **not tokenizer tokens**.
 6. Submit new, paired monitoring cases. After the configured consecutive
    failure limit, selection excludes the procedure automatically. The host
@@ -88,8 +109,9 @@ fresh holdout or a justified multiple-testing protocol and preregistered cases.
 Monitoring uses a deliberately separate operational rule: reset the failure
 streak only if the candidate meets the utility floor, is no worse than the
 paired baseline, and meets both resource limits. At the failure limit, set
-`Suspended`. This is a circuit breaker, not a statistical drift detector or a
-guarantee against all regressions. Delivery order defines the streak; evaluators
+`Suspended`. This excludes the revision from ledger selection; it does not stop
+an agent, revoke tool permissions or choose the application's fallback. The rule
+is not a statistical drift detector or a guarantee against all regressions. Delivery order defines the streak; evaluators
 must order monitoring cases. Historical successes cannot hide a recent streak.
 
 ## Integrity and trust boundary

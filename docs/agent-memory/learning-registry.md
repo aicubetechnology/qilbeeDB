@@ -25,7 +25,7 @@ operation activates a procedure or claims its evidence is true.
 | Field | Meaning |
 | --- | --- |
 | `task` | Versioned task definition |
-| `baseline_revision` | Exact baseline used for paired comparison and fallback |
+| `baseline_revision` | Exact baseline used for paired comparison; application decides fallback |
 | `model_provider`, `model_revision` | Provider and immutable model/deployment identity |
 | `tools` | Map of tool name to exact artifact/version identity; empty means no tools |
 | `environment_revision` | Runtime/environment identity |
