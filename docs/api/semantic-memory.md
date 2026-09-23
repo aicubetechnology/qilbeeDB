@@ -220,3 +220,12 @@ unchanged, so this optimization requires no embedding migration. The cosine
 formula, score meaning, ranking versions and scan budgets are unchanged. Avoid
 inferring a latency improvement from this implementation change alone; measure
 your workload on a controlled deployment.
+
+## Frozen vectors for offline evaluation
+
+A provider that does not expose an immutable weight revision requires an explicit
+evaluation limitation. A captured-vector snapshot can bind exact texts and
+vectors for an isolated reproducible experiment; it cannot establish compatibility
+with newly generated queries. See the [offline handoff verification guide](../research/captured-vector-handoff.md)
+for evidence checks, failure handling and the separate database roundtrip gate.
+The production model-space contract remains unchanged.

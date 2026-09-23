@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Attach external embeddings, preserve cosine semantics and validate compatible revision-bound vector retrieval.",
+      "description": "Store external embeddings, preserve cosine semantics and distinguish model revisions from offline captured-vector evidence.",
       "order": 60
     },
     {
