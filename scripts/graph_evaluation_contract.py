@@ -72,12 +72,20 @@ def verify_fixture_graph(fixture, graph):
     if graph["source_sha256"] != digest(source):
         raise ValueError("Graph is bound to another frozen source")
     expected = {d["id"]: d["text"] for d in fixture["documents"]}
-    projected = {
-        d["id"]: d["title"] + "\n" + d["paragraph_text"] for d in graph["projection"]
-    }
+    policy_version = graph.get("policy", {}).get("version")
+    if policy_version == "twowiki_document_title_graph_v1":
+        from materialize_twowiki_cohort import document_graph as twowiki_document_graph
+        edges, metadata = twowiki_document_graph(graph["projection"])
+        projected = {d["id"]: d["title"] + "\n" + " ".join(d["sentences"])
+                     for d in graph["projection"]}
+    elif policy_version == "document_title_graph_v1":
+        edges, metadata = document_graph(graph["projection"])
+        projected = {d["id"]: d["title"] + "\n" + d["paragraph_text"]
+                     for d in graph["projection"]}
+    else:
+        raise ValueError("Unknown frozen document graph policy")
     if expected != projected:
         raise ValueError("Graph document projection differs from retrieval source")
-    edges, metadata = document_graph(graph["projection"])
     if (
         edges != graph["relations"]
         or any(graph.get(k) != v for k, v in metadata.items() if k != "relations")

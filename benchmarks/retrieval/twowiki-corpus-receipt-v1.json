@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "materialized_not_evaluated",
+  "source_sha256": "5e2ebbe199609d1f06450712be6b016ef46416d1c4b5c1b0fe5969628591446b",
+  "graph_sha256": "764b548948f6e8f33f8ce43d2b0667841ef0bb0d8575fdfbd7e7a0650de0ebfe",
+  "selection_manifest_sha256": "48212c78a273680da9fcddbe6f29d14806cfeb06400f026cc96b8f0c6614bdfa",
+  "documents": 1148,
+  "relations": 328,
+  "queries_by_split": {
+    "development": 40,
+    "test": 120
+  },
+  "split_mapping": {
+    "development": "Selected development role from public development source",
+    "test": "Reserved confirmation role from public development source; not official hidden test"
+  },
+  "graph_policy_sha256": "53579293bffe30ddf09be17daae3184b9970583715b0b145210fe6fa846cd188",
+  "graph_inputs": "Document ID, title and source sentences only; no questions, answers, support labels or evidence triples",
+  "embedding_generation_performed": false,
+  "retrieval_performed": false
+}
