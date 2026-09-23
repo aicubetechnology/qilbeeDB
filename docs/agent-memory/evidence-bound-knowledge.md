@@ -488,3 +488,12 @@ examined position: an unverified candidate is neither returned nor skipped.
 An oversized first candidate produces an explicit error instead of an endless
 empty continuation. These bounds describe inspection work, not total physical
 storage I/O or an enterprise's application execution budget.
+
+For self-hosted installations, treat writing combined knowledge as a storage
+compatibility boundary. Keep a verified backup before upgrading and use a server
+that understands the mandatory origin records when reopening the database. Older
+servers with ordinary-only knowledge validation may reject a ledger containing
+combined records. Do not remove origin records to force a downgrade: they are
+part of the evidence integrity contract. Recover using a compatible server and
+preserve any writes made after the backup. Managed-platform customers should use
+the platform's recovery process rather than attempting a storage downgrade.
