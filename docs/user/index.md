@@ -169,3 +169,7 @@ independent evaluation cohort.
 For evaluations that span datasets, preserve source-qualified identities and
 declared observation history. The [cross-source audit guide](../research/cross-source-capacity.md)
 shows how to report overlap and missing annotation coverage before selection.
+
+Freeze evaluation roles and selection settings before measuring a candidate. The
+[reproducible cohort guide](../research/cross-source-selection.md) explains mutual
+exclusions, quota failures and replay without inspecting retrieval quality.
