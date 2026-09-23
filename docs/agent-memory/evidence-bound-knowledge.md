@@ -390,3 +390,101 @@ reservation. Sources or qualification may change after the response. Rechecking
 reduces stale reuse but does not make an external action atomic with database
 state. An eligible response does not establish factual truth, task suitability,
 tool compatibility for a new context, or permission to perform an action.
+
+## Combine experience observations and current memory (unreleased)
+
+Use combined knowledge when instructions depend both on immutable experience
+observations and on memory revisions that must remain usable. This opt-in contract
+works through the same public API for managed-platform customers and self-hosted
+installations. Confirm that your server advertises these contracts before use;
+existing SDK selection and inspection methods do not automatically adopt them.
+
+The application owns inference, its model, prompts and evaluation. QilbeeDB
+resolves authorized experience references, checks the supplied export digest,
+retains the declared inference provenance and binds the resulting knowledge to
+its memory sources. It does not execute inference or tools. A reported experience
+outcome remains a source observation, not independently verified factual truth.
+
+### Create, retry and inspect
+
+| Operation | Contract | Required capabilities in the same scope |
+| --- | --- | --- |
+| `POST /api/v1/learning/knowledge/experience-proposals` | 1 | `procedure_propose`, `memory_read`, `experience_read` |
+| `POST /api/v1/learning/knowledge/experience-proposals/read` | 1 | `memory_read`, `experience_read` |
+| `POST /api/v1/learning/knowledge/experience-proposals/inspect` | 1 | `memory_read` |
+
+A creation request contains `scope` and `proposal`. The proposal contains
+`knowledge`, `experience_selection`, `expected_export_digest` and `inference`.
+Use the OpenAPI component `OriginProposalRequest` for the complete field schema.
+The server computes the evidence summary from stored, authorized observations;
+a caller-supplied description cannot replace those observations. The ordinary
+knowledge, combined receipt and mandatory origin binding are persisted atomically.
+
+Preserve the original proposal ID and payload after an uncertain response. Read
+or retry the same intent; changed content under that ID conflicts. The immutable
+receipt identifies the original admission, not current reuse eligibility. Optional
+implementation and environment identities in this new proposal input normalize
+to explicit nulls. This does not change the older ordinary proposal contract.
+
+Inspection returns current qualification, source validity and a minimal origin
+descriptor. It does not include the protected experience summary or full combined
+receipt. Reading that evidence requires `experience_read` as well as `memory_read`.
+Source edits, rejection, deletion or expiry can prevent reuse while preserving
+historical receipts. Recheck eligibility before reuse; this remains an observation,
+not a transaction with an external action.
+
+### Select across origins
+
+Use `/api/v1/learning/knowledge/select` with `contract_version: 4`,
+`selection_version: "active_knowledge_origin_bound_v1"` and explicit
+`accepted_origin_kinds`. The supported kinds are `memory_only` and
+`experience_memory`; duplicates are invalid. The response returns the canonical
+order, memory-only first. All other identity and work-limit fields remain required.
+
+The server merges the requested active origin projections using the existing
+qualification-bound order and deterministic procedure-ID tie-break. There is no
+origin preference or caller-selected weighting. Work limits apply across the
+candidate traversal, including authoritative reads and projection frontiers needed
+to verify origins and receipts. Fixed policy/context bootstrap reads precede these
+counters, as in version 3. Opening
+another projection does not reset a limit. An unresolved higher-ranked candidate
+produces incomplete coverage rather than an unverified winner.
+
+A selected result has type `procedure` for memory-only knowledge or
+`experience_knowledge` for combined knowledge, and includes the verified minimal
+origin. A baseline requires exhausting every requested projection. An incomplete
+result is not a recommendation to execute a baseline. The application handles
+these outcomes and retains decision authority.
+
+Versions 2 and 3 remain ordinary-only. Direct legacy inspection or historical
+read of combined knowledge returns HTTP 409 `unsupported_knowledge_origin`.
+Do not silently downgrade after this error. Preserve the resource and use the
+explicitly supported new contract.
+
+### Discover and inspect company knowledge
+
+Company catalog `/api/v1/company/learning/query` version 2 supports knowledge and
+procedure catalogs with explicit `accepted_origin_kinds`. Other catalog kinds
+continue using version 1. Company `/api/v1/company/learning/read` version 2 returns
+minimal origin alongside authorized details. Administrative current inspection
+uses `/api/v1/company/learning/knowledge/inspect` version 3. These operations use
+the company's existing administrative authority; they do not provide protected
+combined experience receipts through a metadata response.
+
+A verified generic procedure has `origin: null`. This does not mean memory-only
+knowledge. A missing mandatory knowledge origin is an integrity error, not null.
+Catalog origin filtering retains generic procedures in the procedure catalog.
+
+Follow the returned cursor with unchanged filters and accepted origins. Cursor
+versions cannot be interchanged. Pages are live observations, not snapshots.
+Retain confirmed rows after a continuation failure and retry the same cursor;
+never infer an empty company from an empty filtered page.
+
+Origin verification has a request-wide limit of 1,000 stored records and 4 MiB
+of admitted bytes, separate from primary catalog scanning. Responses report
+`origin_records_examined`, `origin_bytes_examined` and `origin_lookahead_bytes`.
+Stops at `origin_record_limit` or `origin_byte_limit` resume after the last fully
+examined position: an unverified candidate is neither returned nor skipped.
+An oversized first candidate produces an explicit error instead of an endless
+empty continuation. These bounds describe inspection work, not total physical
+storage I/O or an enterprise's application execution budget.

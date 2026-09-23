@@ -156,9 +156,26 @@ impl LearningMemory {
                     None => None,
                 }
             }
-            LearningResourceKind::Procedure => self
-                .registered_procedure(company, namespace, id)?
-                .map(LearningResourceDetails::Procedure),
+            LearningResourceKind::Procedure => {
+                let procedure = self.registered_procedure(company, namespace, id)?;
+                // Direct legacy reads must negotiate combined origins rather than
+                // presenting their procedure as ordinary memory-only knowledge.
+                let receipt = self.knowledge_receipt(company, namespace, id)?;
+                if let Some(procedure) = &procedure {
+                    if receipt.is_none()
+                        && (super::super::knowledge::has_knowledge_binding_marker(
+                            &procedure.record.proposal.source_refs,
+                        ) || super::super::knowledge_origin::has_origin_marker(
+                            &procedure.record.proposal.source_refs,
+                        ))
+                    {
+                        return Err(corrupt());
+                    }
+                } else if receipt.is_some() {
+                    return Err(corrupt());
+                }
+                procedure.map(LearningResourceDetails::Procedure)
+            }
             LearningResourceKind::Strategy => {
                 match self.strategy_candidate(company, namespace, id)? {
                     Some(candidate) => Some(LearningResourceDetails::Strategy(StrategyDetails {

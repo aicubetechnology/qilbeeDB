@@ -18604,13 +18604,20 @@
             "loginSession": []
           }
         ],
-        "description": "Unreleased. Requires credential_admin in the authenticated company. Includes all private subjects and resources whose original writers expired or were revoked; no memory inventory or delegated key is needed. Scoped learning records must use the canonical platform namespace. Raw library namespaces are skipped and counted, never attributed to a scope by assumption. Policy/context/executor registries are company-wide. Authorization precedes retrieval admission. Stored identity and dependency-integrity failures fail the whole request, without partial success. At most 50 results and 1000 primary records per page, with a fixed 4 MiB primary key/value scan ceiling. Existing kind-specific readers also verify bounded dependencies; their bytes are not included in the scan counter. A resource above the fixed ceiling fails closed. The database does not execute tools or generate embeddings. Reads neither register agents nor issue credentials. Current stored state is not experimental proof or authorization for agent reuse.",
+        "description": "Unreleased. Requires credential_admin in the authenticated company. Includes all private subjects and resources whose original writers expired or were revoked; no memory inventory or delegated key is needed. Scoped learning records must use the canonical platform namespace. Raw library namespaces are skipped and counted, never attributed to a scope by assumption. Policy/context/executor registries are company-wide. Authorization precedes retrieval admission. Stored identity and dependency-integrity failures fail the whole request, without partial success. At most 50 results and 1000 primary records per page, with a fixed 4 MiB primary key/value scan ceiling. Existing kind-specific readers also verify bounded dependencies; their bytes are not included in the scan counter. A resource above the fixed ceiling fails closed. The database does not execute tools or generate embeddings. Reads neither register agents nor issue credentials. Current stored state is not experimental proof or authorization for agent reuse. Explicit opt-in combined-origin contract; minimal origin metadata does not disclose protected experience evidence or authorize execution.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompanyLearningQueryRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CompanyLearningQueryRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OriginCompanyCatalogRequestV2"
+                  }
+                ]
               }
             }
           }
@@ -18719,7 +18726,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompanyLearningQueryResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CompanyLearningQueryResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OriginCompanyCatalogResponseV2"
+                    }
+                  ]
                 }
               }
             }
@@ -18767,13 +18781,20 @@
             "loginSession": []
           }
         ],
-        "description": "Unreleased. Requires credential_admin in the authenticated company. Includes all private subjects and resources whose original writers expired or were revoked; no memory inventory or delegated key is needed. Scoped learning records must use the canonical platform namespace. Raw library namespaces are skipped and counted, never attributed to a scope by assumption. Policy/context/executor registries are company-wide. Authorization precedes retrieval admission. Stored identity and dependency-integrity failures fail the whole request, without partial success. At most 50 results and 1000 primary records per page, with a fixed 4 MiB primary key/value scan ceiling. Existing kind-specific readers also verify bounded dependencies; their bytes are not included in the scan counter. A resource above the fixed ceiling fails closed. The database does not execute tools or generate embeddings. Reads neither register agents nor issue credentials. Current stored state is not experimental proof or authorization for agent reuse.",
+        "description": "Requires credential_admin in the authenticated company. Read one exact authorized resource, including private subjects and records whose writers expired or were revoked. Version 1 remains available; unreleased version 2 adds a verified minimal knowledge origin. A generic nonknowledge resource has origin null. Combined knowledge details do not include the protected experience receipt or summary. Direct legacy reads of combined knowledge return 409 unsupported_knowledge_origin. Integrity failures fail the request. This is a resource read, not a catalog page; catalog scan/page bounds do not describe this operation. Historical details do not establish current reuse eligibility or execution permission.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompanyLearningReadRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CompanyLearningReadRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OriginCompanyLearningReadRequestV2"
+                  }
+                ]
               }
             }
           }
@@ -18882,7 +18903,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompanyLearningReadResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CompanyLearningReadResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OriginCompanyLearningReadResponseV2"
+                    }
+                  ]
                 }
               }
             }
@@ -18926,6 +18954,31 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict; unsupported_knowledge_origin when a legacy contract directly addresses combined knowledge",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedKnowledgeOriginError"
+                    }
+                  ]
                 }
               }
             }
@@ -22112,7 +22165,7 @@
             }
           },
           "409": {
-            "description": "Idempotency payload or expected revision conflict",
+            "description": "Idempotency payload or expected revision conflict; unsupported_knowledge_origin when the addressed origin is incompatible with this explicit contract",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -22124,7 +22177,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedKnowledgeOriginError"
+                    }
+                  ]
                 }
               }
             }
@@ -22278,7 +22338,7 @@
             }
           },
           "409": {
-            "description": "Idempotency payload or expected revision conflict",
+            "description": "Idempotency payload or expected revision conflict; unsupported_knowledge_origin when a legacy contract directly addresses combined knowledge",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -22290,7 +22350,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedKnowledgeOriginError"
+                    }
+                  ]
                 }
               }
             }
@@ -22366,7 +22433,7 @@
       "post": {
         "operationId": "knowledgeSelect",
         "summary": "Select compatible evidence-bound knowledge with explicit coverage",
-        "description": "Explicit contract versions 2 and 3. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires memory_read; current observation, not execution authorization. Explicit contract_version 3 selects active knowledge with bounded inspection under active_knowledge_bound_v1. Version 2 remains unchanged. An incomplete response does not authorize fallback or execution.",
+        "description": "Explicit contract versions 2, 3 and 4. Combined-origin version 4 is unreleased. Requires memory_read in the exact scope. Version 2 preserves history scanning; version 3 uses active_knowledge_bound_v1 and remains ordinary-only; version 4 uses active_knowledge_origin_bound_v1 with explicit accepted_origin_kinds. Version 4 work counters aggregate admitted authoritative reads and projection frontiers across requested origins. Fixed policy/context bootstrap reads precede candidate counters, as in version 3. No code execution or execution authorization is provided. Incomplete coverage must not be treated as a verified selection. Errors retain the platform version 1 envelope.",
         "tags": [
           "Learning"
         ],
@@ -22390,6 +22457,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/KnowledgeSelectResponseV3"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OriginKnowledgeSelectResponseV4"
                     }
                   ]
                 }
@@ -22552,6 +22622,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/KnowledgeSelectRequestV3"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OriginKnowledgeSelectRequestV4"
                   }
                 ]
               }
@@ -22575,13 +22648,20 @@
             "loginSession": []
           }
         ],
-        "description": "Unreleased. Requires credential_admin. Company comes exclusively from current authentication. Reads all authorized private subjects, independently of original writer revocation. Uses a current memory evidence view; recorded qualification and current reuse eligibility are separate. This observation does not authorize execution or guarantee future eligibility. Errors retain the platform contract_version 1 envelope.",
+        "description": "Unreleased. Requires credential_admin. Company comes exclusively from current authentication. Reads all authorized private subjects, independently of original writer revocation. Uses a current memory evidence view; recorded qualification and current reuse eligibility are separate. This observation does not authorize execution or guarantee future eligibility. Errors retain the platform contract_version 1 envelope. Explicit opt-in combined-origin contract; minimal origin metadata does not disclose protected experience evidence or authorize execution.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompanyKnowledgeInspectRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CompanyKnowledgeInspectRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OriginCompanyKnowledgeInspectRequestV3"
+                  }
+                ]
               }
             }
           }
@@ -22690,7 +22770,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompanyKnowledgeInspectResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CompanyKnowledgeInspectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OriginCompanyKnowledgeInspectResponseV3"
+                    }
+                  ]
                 }
               }
             }
@@ -22734,6 +22821,31 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CompanyMemoryNotFoundError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict; unsupported_knowledge_origin when a legacy contract directly addresses combined knowledge",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedKnowledgeOriginError"
+                    }
+                  ]
                 }
               }
             }
@@ -22898,6 +23010,565 @@
                   "type": "string",
                   "const": "no-store"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/knowledge/experience-proposals": {
+      "post": {
+        "operationId": "combinedKnowledgePropose",
+        "summary": "Create combined knowledge with procedure_propose, memory_read and experience_read in the same exact scope.",
+        "description": "Unreleased. Create combined knowledge with procedure_propose, memory_read and experience_read in the same exact scope. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OriginReceiptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OriginProposalRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/knowledge/experience-proposals/read": {
+      "post": {
+        "operationId": "combinedKnowledgeRead",
+        "summary": "Read the immutable combined receipt with memory_read and experience_read in the same exact scope.",
+        "description": "Unreleased. Read the immutable combined receipt with memory_read and experience_read in the same exact scope. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OriginReceiptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OriginCombinedInspectionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/knowledge/experience-proposals/inspect": {
+      "post": {
+        "operationId": "combinedKnowledgeInspect",
+        "summary": "Inspect eligibility and minimal origin with memory_read; protected experience summaries are not returned.",
+        "description": "Unreleased. Inspect eligibility and minimal origin with memory_read; protected experience summaries are not returned. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission.",
+        "tags": [
+          "Learning"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OriginCombinedInspectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No current record in the authorized scope",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency payload or expected revision conflict; unsupported_knowledge_origin when the addressed origin is incompatible with this explicit contract",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedKnowledgeOriginError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OriginCombinedInspectionRequest"
               }
             }
           }
@@ -43094,6 +43765,4077 @@
             }
           }
         ]
+      },
+      "OriginKnowledgeProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768,
+            "description": "At most 32768 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "memory_sources": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "$ref": "#/components/schemas/OriginMemorySourceRef"
+            },
+            "description": "Unique IDs; exact positive revisions. Canonical order is source UUID order."
+          },
+          "external_tools": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/OriginExternalToolKnowledge"
+            },
+            "description": "Unique names; canonical order is tool-name order."
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "title",
+          "instructions",
+          "memory_sources",
+          "external_tools"
+        ]
+      },
+      "OriginMemorySourceRef": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "record_id",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExternalToolKnowledge": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "schema_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "implementation_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage_contract": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; runtime also enforces byte length."
+          }
+        },
+        "required": [
+          "name",
+          "schema_revision",
+          "implementation_revision",
+          "environment_revision",
+          "usage_contract"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "implementation_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "environment_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "environment_revision": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "OriginKnowledgeReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 2
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginKnowledgeProposal"
+          },
+          "policy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OriginProcedureRecord"
+              },
+              {
+                "properties": {
+                  "state": {
+                    "const": "Candidate"
+                  }
+                }
+              }
+            ]
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "policy_digest",
+          "context_digest",
+          "actor",
+          "record",
+          "receipt_digest"
+        ]
+      },
+      "OriginProcedureRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/OriginLearningScope"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/OriginProcedureProposal"
+          },
+          "state": {
+            "$ref": "#/components/schemas/OriginProcedureState"
+          },
+          "qualification_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mean_improvement": {
+            "type": "number"
+          },
+          "mean_candidate_utility": {
+            "type": "number"
+          },
+          "budget_violations": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lower_improvement_bound": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monitoring_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "failure_streak": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginLearningDecision"
+            }
+          },
+          "created_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "proposal",
+          "state",
+          "qualification_count",
+          "mean_improvement",
+          "mean_candidate_utility",
+          "budget_violations",
+          "lower_improvement_bound",
+          "monitoring_count",
+          "failure_streak",
+          "decisions",
+          "created_at_millis"
+        ]
+      },
+      "OriginLearningScope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "agent": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "tenant",
+          "agent",
+          "environment"
+        ]
+      },
+      "OriginProcedureProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "policy": {
+            "$ref": "#/components/schemas/OriginLearningPolicy"
+          }
+        },
+        "required": [
+          "id",
+          "task",
+          "baseline_revision",
+          "instructions",
+          "source_refs",
+          "policy"
+        ]
+      },
+      "OriginLearningPolicy": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "qualification_trials": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 1000000
+          },
+          "confidence_delta": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 0.5
+          },
+          "min_improvement": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "min_candidate_utility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "max_cost_units": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "max_latency_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          },
+          "max_failure_streak": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "evaluator_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evaluation_contract": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "qualification_trials",
+          "confidence_delta",
+          "min_improvement",
+          "min_candidate_utility",
+          "max_cost_units",
+          "max_latency_ms",
+          "max_failure_streak",
+          "evaluator_id",
+          "evaluation_contract"
+        ]
+      },
+      "OriginProcedureState": {
+        "type": "string",
+        "enum": [
+          "Candidate",
+          "Active",
+          "Rejected",
+          "Suspended"
+        ]
+      },
+      "OriginLearningDecision": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/OriginProcedureState"
+          },
+          "to": {
+            "$ref": "#/components/schemas/OriginProcedureState"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "triggering_case": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "reason",
+          "triggering_case",
+          "recorded_at_millis"
+        ]
+      },
+      "OriginExperienceExportRef": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "event_id",
+          "event_digest"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExperienceExportSummary": {
+        "type": "object",
+        "properties": {
+          "attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "succeeded": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "cancelled": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "cost_units": {
+            "$ref": "#/components/schemas/OriginExperienceAccountingSummary"
+          },
+          "latency_ms": {
+            "$ref": "#/components/schemas/OriginExperienceAccountingSummary"
+          }
+        },
+        "required": [
+          "attempts",
+          "succeeded",
+          "failed",
+          "cancelled",
+          "unknown",
+          "cost_units",
+          "latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExperienceAccountingSummary": {
+        "type": "object",
+        "properties": {
+          "known_reports": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "unknown_reports": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 64
+          },
+          "reported_total": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "description": "Exact unsigned decimal sum; a string avoids floating-point rounding and u64 overflow."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_lower_bound": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Exact unsigned decimal sum; a string avoids floating-point rounding and u64 overflow."
+          }
+        },
+        "required": [
+          "known_reports",
+          "unknown_reports",
+          "reported_total",
+          "observed_lower_bound"
+        ],
+        "additionalProperties": false
+      },
+      "OriginStrategyExtractor": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "model_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "prompt_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Nonblank, at most 2048 UTF-8 bytes; server limits bytes, not Unicode code points."
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "model_revision",
+          "prompt_revision",
+          "evidence_ref"
+        ],
+        "additionalProperties": false
+      },
+      "OriginScope": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/OriginVisibility"
+          }
+        },
+        "required": [
+          "project_id",
+          "agent_id",
+          "visibility"
+        ],
+        "additionalProperties": false
+      },
+      "OriginVisibility": {
+        "type": "string",
+        "enum": [
+          "private",
+          "shared"
+        ]
+      },
+      "OriginCombinedSelection": {
+        "type": "object",
+        "properties": {
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginExperienceExportRef"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "context_digest",
+          "accounting_unit",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCombinedSummary": {
+        "type": "object",
+        "properties": {
+          "attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "succeeded": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "cancelled": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "unknown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "cost_units": {
+            "$ref": "#/components/schemas/OriginExperienceAccountingSummary"
+          },
+          "latency_ms": {
+            "$ref": "#/components/schemas/OriginExperienceAccountingSummary"
+          }
+        },
+        "required": [
+          "attempts",
+          "succeeded",
+          "failed",
+          "cancelled",
+          "unknown",
+          "cost_units",
+          "latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "OriginInference": {
+        "type": "object",
+        "properties": {
+          "extractor": {
+            "$ref": "#/components/schemas/OriginStrategyExtractor"
+          },
+          "preconditions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank; at most 1024 UTF-8 bytes. No normalization or trimming."
+            }
+          },
+          "counterexamples": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank; at most 1024 UTF-8 bytes. No normalization or trimming."
+            }
+          }
+        },
+        "required": [
+          "extractor",
+          "preconditions",
+          "counterexamples"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCombinedReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "const": 1
+          },
+          "method_version": {
+            "const": "qilbee.experience-knowledge.v1"
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank; at most 512 UTF-8 bytes. No normalization or trimming."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "Nonblank; at most 4096 UTF-8 bytes. No normalization or trimming."
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginCanonicalCombinedProposal"
+          },
+          "export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/OriginCombinedSummary"
+          },
+          "origin_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "knowledge_receipt": {
+            "$ref": "#/components/schemas/OriginKnowledgeReceipt"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "method_version",
+          "tenant",
+          "namespace",
+          "request",
+          "export_digest",
+          "summary",
+          "origin_digest",
+          "knowledge_receipt",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "OriginProposalRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OriginScope"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/OriginCombinedProposalInput"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "proposal"
+        ],
+        "additionalProperties": false
+      },
+      "OriginReceiptResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/OriginCombinedReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "OriginOriginDescriptor": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "experience_memory"
+          },
+          "method_version": {
+            "const": "qilbee.experience-knowledge.v1"
+          },
+          "origin_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "kind",
+          "method_version",
+          "origin_digest"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExternalToolIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "schema_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "implementation_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "schema_revision",
+          "implementation_revision",
+          "environment_revision"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "implementation_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "environment_revision": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "environment_revision": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "OriginKnowledgeSelectionWorkLimitsV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "candidate_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "index_entries": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "learning_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16777216
+          },
+          "dependency_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "dependency_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16777216
+          }
+        },
+        "required": [
+          "candidate_records",
+          "index_entries",
+          "learning_bytes",
+          "dependency_records",
+          "dependency_bytes"
+        ]
+      },
+      "OriginKnowledgeInspection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/OriginKnowledgeReceipt"
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/OriginRegisteredProcedure"
+          },
+          "qualification_active": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/OriginMemoryEvidenceEligibility"
+          },
+          "eligible_for_knowledge_reuse": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "receipt",
+          "procedure",
+          "qualification_active",
+          "evidence",
+          "eligible_for_knowledge_reuse"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "procedure": {
+                  "properties": {
+                    "record": {
+                      "properties": {
+                        "state": {
+                          "const": "Active"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "qualification_active": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "qualification_active": {
+                  "const": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "qualification_active": {
+                  "const": true
+                },
+                "evidence": {
+                  "properties": {
+                    "eligible": {
+                      "const": true
+                    },
+                    "all_dependencies_checked": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "eligible_for_knowledge_reuse": {
+                  "const": true
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "eligible_for_knowledge_reuse": {
+                  "const": false
+                }
+              }
+            }
+          }
+        ]
+      },
+      "OriginRegisteredProcedure": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/OriginProposalReceipt"
+          },
+          "record": {
+            "$ref": "#/components/schemas/OriginProcedureRecord"
+          }
+        },
+        "required": [
+          "receipt",
+          "record"
+        ]
+      },
+      "OriginProposalReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginRegisteredProposal"
+          },
+          "policy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "record": {
+            "$ref": "#/components/schemas/OriginProcedureRecord"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "policy_digest",
+          "context_digest",
+          "actor",
+          "record"
+        ]
+      },
+      "OriginRegisteredProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "instructions",
+          "source_refs"
+        ]
+      },
+      "OriginMemoryEvidenceEligibility": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "eligible": {
+            "type": "boolean"
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "first_failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginMemoryEligibilityFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "all_dependencies_checked": {
+            "type": "boolean"
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/OriginDependencyWork"
+          }
+        },
+        "required": [
+          "eligible",
+          "evaluated_at_millis",
+          "first_failure",
+          "all_dependencies_checked",
+          "dependency_work"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "eligible": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "all_dependencies_checked": {
+                  "const": true
+                },
+                "first_failure": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "all_dependencies_checked": {
+                  "const": false
+                },
+                "first_failure": {
+                  "$ref": "#/components/schemas/OriginMemoryEligibilityFailure"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "OriginMemoryEligibilityFailure": {
+        "type": "object",
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expected_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actual_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/OriginMemoryEligibilityReason"
+          }
+        },
+        "required": [
+          "record_id",
+          "expected_revision",
+          "actual_revision",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "OriginMemoryEligibilityReason": {
+        "type": "string",
+        "enum": [
+          "eligible",
+          "deleted",
+          "expired",
+          "rejected",
+          "source_missing",
+          "source_revision_changed",
+          "dependency_cycle",
+          "depth_limit",
+          "node_limit"
+        ]
+      },
+      "OriginDependencyWork": {
+        "type": "object",
+        "properties": {
+          "records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4096
+          },
+          "bytes_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16777216
+          }
+        },
+        "required": [
+          "records_examined",
+          "bytes_examined"
+        ],
+        "additionalProperties": false
+      },
+      "OriginKnowledgeSelectionCoverageV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "decision_complete": {
+            "type": "boolean"
+          },
+          "index_exhausted": {
+            "type": "boolean"
+          },
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "first_eligible",
+              "index_exhausted",
+              "index_entry_limit",
+              "candidate_record_limit",
+              "learning_byte_limit",
+              "dependency_record_limit",
+              "dependency_byte_limit",
+              "dependency_depth_limit",
+              "dependency_node_limit"
+            ]
+          }
+        },
+        "required": [
+          "decision_complete",
+          "index_exhausted",
+          "stop_reason"
+        ]
+      },
+      "OriginKnowledgeSelectionWorkV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index_entries_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "candidate_records_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "learning_bytes_inspected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "learning_lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_records_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_bytes_inspected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "eligible_candidates": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "index_entries_examined",
+          "candidate_records_examined",
+          "learning_bytes_inspected",
+          "learning_lookahead_bytes",
+          "dependency_records_examined",
+          "dependency_bytes_inspected",
+          "dependency_lookahead_bytes",
+          "eligible_candidates"
+        ]
+      },
+      "OriginLearningResourceKind": {
+        "type": "string",
+        "enum": [
+          "experience",
+          "procedure",
+          "strategy",
+          "tool_artifact",
+          "tool_development",
+          "policy",
+          "context",
+          "executor",
+          "knowledge"
+        ]
+      },
+      "OriginLearningCatalogFilter": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mission_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "enum": [
+                  "private",
+                  "shared"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false,
+        "description": "Exact optional scope filters; registry kinds reject them. Text is a case-insensitive substring over the displayed, whitespace-normalized title (first 160 Unicode characters) or resource ID, not full-text retrieval. Empty results can have a continuation."
+      },
+      "OriginLearningResourceRef": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/OriginLearningResourceKind"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; must not be blank."
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "Selection returned by the company catalog; it confers no authority. Scoped kinds require a scope. Private scopes require a subject, shared scopes prohibit one. Policy, context and executor selections require null/omitted scope and subject. The company is always derived from current authentication."
+      },
+      "OriginLearningResourceDetails": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "experience"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginExperienceRecord"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "procedure"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginRegisteredProcedure"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "strategy"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginLearningStrategyDetails"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "tool_artifact"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginToolArtifact"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "tool_development"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginToolDevelopment"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "policy"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginPolicyEntry"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "context"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginContextEntry"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "executor"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginToolExecutor"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "knowledge"
+              },
+              "record": {
+                "$ref": "#/components/schemas/OriginKnowledgeDetails"
+              }
+            },
+            "required": [
+              "kind",
+              "record"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "OriginExperienceRecord": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/OriginExperienceReceipt"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginExperienceOutcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "revision",
+          "outcome",
+          "last_event_id",
+          "reported_cost_units",
+          "reported_latency_ms",
+          "observed_cost_units",
+          "observed_latency_ms"
+        ],
+        "additionalProperties": false,
+        "description": "Null outcome means no report. Reported usage is from the latest observation; observed usage retains cumulative lower bounds across unknown reports. A terminal outcome may only receive further observations with the same outcome."
+      },
+      "OriginExperienceReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginExperienceRequest"
+          },
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "parent_event_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actor": {
+            "$ref": "#/components/schemas/OriginExperienceActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "context_digest",
+          "parent_event_digest",
+          "actor",
+          "recorded_at_millis",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExperienceRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "reporter_subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "input": {
+            "$ref": "#/components/schemas/OriginExperienceEvidence"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginExperienceParent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "context_id",
+          "reporter_subject_id",
+          "accounting_unit",
+          "input"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExperienceEvidence": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "At most 2048 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "reference",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "description": "Caller-declared content address. The server records but does not fetch or validate the external content."
+      },
+      "OriginExperienceParent": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          }
+        },
+        "required": [
+          "attempt_id",
+          "event_id"
+        ],
+        "additionalProperties": false,
+        "description": "An existing immutable event in the same authorized namespace; cannot refer to the new attempt itself."
+      },
+      "OriginExperienceActor": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "subject_id",
+          "credential_id"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExperienceOutcome": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "description": "An authenticated reporter assertion, not independently verified execution or qualification evidence."
+      },
+      "OriginLearningStrategyDetails": {
+        "type": "object",
+        "properties": {
+          "candidate": {
+            "$ref": "#/components/schemas/OriginStrategyCandidateReceipt"
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/OriginRegisteredProcedure"
+          }
+        },
+        "required": [
+          "candidate",
+          "procedure"
+        ],
+        "additionalProperties": false
+      },
+      "OriginStrategyCandidateReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "method_version": {
+            "type": "string",
+            "const": "qilbee.experience-strategy.v1"
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginStrategyCandidate"
+          },
+          "export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/OriginExperienceExportSummary"
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/OriginProposalReceipt"
+          },
+          "strategy_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "schema_version",
+          "method_version",
+          "request",
+          "export_digest",
+          "summary",
+          "proposal",
+          "strategy_digest"
+        ],
+        "additionalProperties": false
+      },
+      "OriginStrategyCandidate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Nonblank, at most 512 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16384,
+            "description": "Nonblank, at most 16384 UTF-8 bytes; server limits bytes, not Unicode code points."
+          },
+          "preconditions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank, at most 1024 UTF-8 bytes; server limits bytes, not Unicode code points."
+            }
+          },
+          "counterexamples": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Nonblank, at most 1024 UTF-8 bytes; server limits bytes, not Unicode code points."
+            }
+          },
+          "extractor": {
+            "$ref": "#/components/schemas/OriginStrategyExtractor"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/OriginStrategyObservationSelection"
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "instructions",
+          "preconditions",
+          "counterexamples",
+          "extractor",
+          "selection"
+        ],
+        "additionalProperties": false
+      },
+      "OriginStrategyObservationSelection": {
+        "type": "object",
+        "properties": {
+          "context_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "accounting_unit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes, nonblank; byte limits are enforced by the server."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginExperienceExportRef"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "context_digest",
+          "accounting_unit",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolArtifact": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "proposal": {
+            "$ref": "#/components/schemas/OriginToolArtifactProposal"
+          },
+          "artifact_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "dependency_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/OriginToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "proposal",
+          "artifact_digest",
+          "source_digest",
+          "dependency_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolArtifactProposal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 24576,
+            "description": "At most 24576 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "dependency_lock": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "description": "At most 8192 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "runtime_image_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "entrypoint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "input_schema": {
+            "type": [
+              "object",
+              "boolean"
+            ],
+            "description": "Declared schema, at most 8192 serialized bytes; not executed or compiled by this endpoint."
+          },
+          "output_schema": {
+            "type": [
+              "object",
+              "boolean"
+            ],
+            "description": "Declared schema, at most 8192 serialized bytes."
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048,
+              "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+            },
+            "minItems": 1,
+            "maxItems": 32
+          },
+          "parent_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair_evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "dependency_lock",
+          "runtime_image_digest",
+          "entrypoint",
+          "input_schema",
+          "output_schema",
+          "source_refs"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolActor": {
+        "type": "object",
+        "properties": {
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "credential_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "subject_id",
+          "credential_id"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolDevelopment": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/OriginToolDevelopmentReceipt"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "pending_or_unknown",
+              "cancellation_requested",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "last_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "artifact_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_cost_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "receipt",
+          "revision",
+          "state",
+          "reason",
+          "last_event_id",
+          "artifact_id",
+          "artifact_digest",
+          "cost_units",
+          "latency_ms",
+          "observed_cost_units",
+          "observed_latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolDevelopmentReceipt": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "request": {
+            "$ref": "#/components/schemas/OriginToolDevelopmentRequest"
+          },
+          "request_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "executor_profile_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/OriginToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "namespace",
+          "request",
+          "request_digest",
+          "executor_profile_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolDevelopmentRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "executor_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192,
+            "description": "At most 8192 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "parent_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repair_evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "description": "At most 2048 UTF-8 bytes; byte limits are enforced by the server."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "executor_id",
+          "objective"
+        ],
+        "additionalProperties": false
+      },
+      "OriginPolicyEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "$ref": "#/components/schemas/OriginPolicyDefinition"
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "registered_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "id",
+          "payload",
+          "payload_digest",
+          "registered_by",
+          "recorded_at_millis"
+        ]
+      },
+      "OriginPolicyDefinition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "fixed_budget_hoeffding_v1"
+            ]
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/OriginLearningPolicy"
+          }
+        },
+        "required": [
+          "algorithm",
+          "parameters"
+        ]
+      },
+      "OriginContextEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "$ref": "#/components/schemas/OriginEvaluationContext"
+          },
+          "payload_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "registered_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "id",
+          "payload",
+          "payload_digest",
+          "registered_by",
+          "recorded_at_millis"
+        ]
+      },
+      "OriginEvaluationContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evaluation_contract": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dataset_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "harness_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "permissions_revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tools": {
+            "type": "object",
+            "maxProperties": 128,
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "task",
+          "baseline_revision",
+          "model_provider",
+          "model_revision",
+          "environment_revision",
+          "evaluation_contract",
+          "dataset_revision",
+          "harness_revision",
+          "permissions_revision",
+          "tools"
+        ]
+      },
+      "OriginToolExecutor": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "tenant": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "profile": {
+            "$ref": "#/components/schemas/OriginToolExecutorProfile"
+          },
+          "profile_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/OriginToolActor"
+          },
+          "recorded_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "schema_version",
+          "tenant",
+          "profile",
+          "profile_digest",
+          "actor",
+          "recorded_at_millis"
+        ],
+        "additionalProperties": false
+      },
+      "OriginToolExecutorProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "runtime_image_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "environment_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "permissions_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; byte limits are enforced by the server."
+          },
+          "max_cost_units": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          },
+          "max_latency_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18446744073709551615
+          }
+        },
+        "required": [
+          "id",
+          "subject_id",
+          "runtime_image_digest",
+          "environment_revision",
+          "permissions_revision",
+          "max_cost_units",
+          "max_latency_ms"
+        ],
+        "additionalProperties": false
+      },
+      "OriginKnowledgeDetails": {
+        "type": "object",
+        "properties": {
+          "receipt": {
+            "$ref": "#/components/schemas/OriginKnowledgeReceipt"
+          },
+          "procedure": {
+            "$ref": "#/components/schemas/OriginRegisteredProcedure"
+          }
+        },
+        "required": [
+          "receipt",
+          "procedure"
+        ],
+        "additionalProperties": false,
+        "description": "Historical immutable receipt and current qualification ledger state. Does not inspect current source evidence or establish reuse eligibility."
+      },
+      "OriginCompanyKnowledgeResourceRef": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "knowledge"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; must not be blank."
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "description": "At most 256 UTF-8 bytes; must not be blank."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "Selection returned by the company catalog; it confers no authority. Scoped kinds require a scope. Private scopes require a subject, shared scopes prohibit one. Policy, context and executor selections require null/omitted scope and subject. The company is always derived from current authentication."
+      },
+      "OriginAcceptedOrigins": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 2,
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "memory_only",
+            "experience_memory"
+          ]
+        }
+      },
+      "OriginMemoryOnlyOrigin": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "const": "memory_only"
+          }
+        }
+      },
+      "OriginMinimalOrigin": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OriginMemoryOnlyOrigin"
+          },
+          {
+            "$ref": "#/components/schemas/OriginOriginDescriptor"
+          }
+        ]
+      },
+      "OriginKnowledgeSelectRequestV4": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": 4
+          },
+          "selection_version": {
+            "const": "active_knowledge_origin_bound_v1"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OriginScope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "max_instruction_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65536
+          },
+          "external_tool_identities": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/OriginExternalToolIdentity"
+            },
+            "description": "Required exact identity set, order-independent. Repeated tool names return HTTP 400 even when revisions differ; exact duplicates also return 400. Compare names by exact UTF-8 value without trimming, case folding or Unicode normalization; canonical order is ascending UTF-8 name. Null is explicit unbound identity, never a wildcard. Name uniqueness requires runtime validation in addition to uniqueItems.",
+            "uniqueItems": true
+          },
+          "work_limits": {
+            "$ref": "#/components/schemas/OriginKnowledgeSelectionWorkLimitsV3"
+          },
+          "accepted_origin_kinds": {
+            "$ref": "#/components/schemas/OriginAcceptedOrigins"
+          }
+        },
+        "required": [
+          "contract_version",
+          "selection_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "max_instruction_bytes",
+          "external_tool_identities",
+          "work_limits",
+          "accepted_origin_kinds"
+        ]
+      },
+      "OriginKnowledgeSelectionOutcomeV4": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "procedure",
+                "type": "string"
+              },
+              "knowledge": {
+                "$ref": "#/components/schemas/OriginKnowledgeInspection"
+              },
+              "origin": {
+                "$ref": "#/components/schemas/OriginMemoryOnlyOrigin"
+              }
+            },
+            "required": [
+              "type",
+              "knowledge",
+              "origin"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "experience_knowledge"
+              },
+              "knowledge": {
+                "$ref": "#/components/schemas/OriginKnowledgeInspection"
+              },
+              "origin": {
+                "$ref": "#/components/schemas/OriginOriginDescriptor"
+              }
+            },
+            "required": [
+              "type",
+              "knowledge",
+              "origin"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "baseline",
+                "type": "string"
+              },
+              "baseline_revision": {
+                "type": "string"
+              },
+              "reason": {
+                "const": "no_eligible_bound_procedure",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "baseline_revision",
+              "reason"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "incomplete",
+                "type": "string"
+              },
+              "baseline_revision": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "index_entry_limit",
+                  "candidate_record_limit",
+                  "learning_byte_limit",
+                  "dependency_record_limit",
+                  "dependency_byte_limit",
+                  "dependency_depth_limit",
+                  "dependency_node_limit"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "baseline_revision",
+              "reason"
+            ]
+          }
+        ]
+      },
+      "OriginKnowledgeSelectResponseV4": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": 4
+          },
+          "selection_version": {
+            "const": "active_knowledge_origin_bound_v1"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OriginScope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "index_generation": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "result": {
+            "$ref": "#/components/schemas/OriginKnowledgeSelectionOutcomeV4"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/OriginKnowledgeSelectionCoverageV3"
+          },
+          "work": {
+            "$ref": "#/components/schemas/OriginKnowledgeSelectionWorkV3"
+          },
+          "accepted_origin_kinds": {
+            "$ref": "#/components/schemas/OriginAcceptedOrigins"
+          }
+        },
+        "required": [
+          "contract_version",
+          "selection_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "evaluated_at_millis",
+          "index_generation",
+          "result",
+          "coverage",
+          "work",
+          "accepted_origin_kinds"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "procedure",
+                        "experience_knowledge"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": true
+                    },
+                    "stop_reason": {
+                      "const": "first_eligible"
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 1
+                    }
+                  }
+                },
+                "result": {
+                  "properties": {
+                    "knowledge": {
+                      "properties": {
+                        "qualification_active": {
+                          "const": true
+                        },
+                        "eligible_for_knowledge_reuse": {
+                          "const": true
+                        },
+                        "procedure": {
+                          "properties": {
+                            "record": {
+                              "properties": {
+                                "state": {
+                                  "const": "Active"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "evidence": {
+                          "properties": {
+                            "eligible": {
+                              "const": true
+                            },
+                            "all_dependencies_checked": {
+                              "const": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "baseline"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": true
+                    },
+                    "index_exhausted": {
+                      "const": true
+                    },
+                    "stop_reason": {
+                      "const": "index_exhausted"
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": false
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "index_entry_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "index_entry_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "candidate_record_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "candidate_record_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "learning_byte_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "learning_byte_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_record_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_record_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_byte_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_byte_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_depth_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_depth_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_node_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_node_limit"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "OriginLearningCatalogQueryV2": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "enum": [
+              "knowledge",
+              "procedure"
+            ]
+          },
+          "filter": {
+            "$ref": "#/components/schemas/OriginLearningCatalogFilter"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 25
+          },
+          "max_scanned_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginLearningCatalogCursorV2"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accepted_origin_kinds": {
+            "$ref": "#/components/schemas/OriginAcceptedOrigins"
+          }
+        },
+        "required": [
+          "kind",
+          "accepted_origin_kinds"
+        ],
+        "additionalProperties": false
+      },
+      "OriginLearningCatalogCursorV2": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": 2
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes; must not be blank."
+          },
+          "filter_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "position": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 12000,
+            "pattern": "^(?:[0-9a-f]{2})+$"
+          },
+          "accepted_origin_kinds": {
+            "$ref": "#/components/schemas/OriginAcceptedOrigins"
+          }
+        },
+        "required": [
+          "version",
+          "company_id",
+          "filter_digest",
+          "position",
+          "accepted_origin_kinds"
+        ],
+        "additionalProperties": false,
+        "description": "Live seek cursor bound to version, authenticated company, kind, filters and canonical accepted origins. Never a credential or snapshot."
+      },
+      "OriginLearningCatalogEntryV2": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/OriginLearningResourceRef"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unreported",
+              "unknown",
+              "succeeded",
+              "failed",
+              "cancelled",
+              "candidate",
+              "active",
+              "rejected",
+              "suspended",
+              "registered",
+              "requested",
+              "pending_or_unknown",
+              "cancellation_requested"
+            ]
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 18446744073709551615
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recorded_at_millis": {
+            "type": "integer"
+          },
+          "origin": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OriginMemoryOnlyOrigin"
+              },
+              {
+                "$ref": "#/components/schemas/OriginOriginDescriptor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "resource",
+          "title",
+          "status",
+          "revision",
+          "recorded_at_millis",
+          "origin"
+        ],
+        "additionalProperties": false
+      },
+      "OriginLearningCatalogPageV2": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginLearningCatalogEntryV2"
+            },
+            "maxItems": 50
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OriginLearningCatalogCursorV2"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_reason": {
+            "enum": [
+              "exhausted",
+              "entry_limit",
+              "scan_limit",
+              "byte_limit",
+              "origin_record_limit",
+              "origin_byte_limit"
+            ]
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "scanned_record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304,
+            "description": "Primary keys and values scanned in this page only. Excludes dependency-verification reads, internal database work and any lookahead. Not a CPU, RSS or HTTP response-size measurement."
+          },
+          "skipped_non_platform_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "observed_at_millis": {
+            "type": "integer"
+          },
+          "origin_records_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "origin_bytes_examined": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          },
+          "origin_lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4194304
+          }
+        },
+        "required": [
+          "entries",
+          "next_cursor",
+          "stop_reason",
+          "scanned_records",
+          "scanned_record_bytes",
+          "skipped_non_platform_records",
+          "observed_at_millis",
+          "origin_records_examined",
+          "origin_bytes_examined",
+          "origin_lookahead_bytes"
+        ],
+        "additionalProperties": false,
+        "description": "One serialized observation under the learning writer lock. Exhausted means the remaining requested kind and company prefix was traversed at that observation, not that the company is empty or all data is eligible for reuse. Pages are live; concurrent inserts behind a cursor require a fresh traversal."
+      },
+      "OriginCompanyCatalogRequestV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "query": {
+            "$ref": "#/components/schemas/OriginLearningCatalogQueryV2"
+          }
+        }
+      },
+      "OriginCompanyCatalogResponseV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "company_id",
+          "accepted_origin_kinds",
+          "page"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "accepted_origin_kinds": {
+            "$ref": "#/components/schemas/OriginAcceptedOrigins"
+          },
+          "page": {
+            "$ref": "#/components/schemas/OriginLearningCatalogPageV2"
+          }
+        }
+      },
+      "OriginCompanyKnowledgeInspectRequestV3": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 3
+          },
+          "resource": {
+            "$ref": "#/components/schemas/OriginCompanyKnowledgeResourceRef"
+          }
+        },
+        "required": [
+          "contract_version",
+          "resource"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCompanyKnowledgeInspectResponseV3": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 3
+          },
+          "company_id": {
+            "type": "string"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/OriginCompanyKnowledgeResourceRef"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/OriginKnowledgeInspection"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/OriginMinimalOrigin"
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "resource",
+          "inspection",
+          "origin"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCombinedInspectionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "scope",
+          "procedure_id"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OriginScope"
+          },
+          "procedure_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      },
+      "OriginCombinedInspectionResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contract_version",
+          "scope",
+          "inspection",
+          "origin"
+        ],
+        "properties": {
+          "contract_version": {
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/OriginScope"
+          },
+          "inspection": {
+            "$ref": "#/components/schemas/OriginKnowledgeInspection"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/OriginOriginDescriptor"
+          }
+        }
+      },
+      "OriginCompanyLearningReadRequestV2": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "resource": {
+            "$ref": "#/components/schemas/OriginLearningResourceRef"
+          }
+        },
+        "required": [
+          "contract_version",
+          "resource"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCompanyLearningReadResponseV2": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "const": 2
+          },
+          "company_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "At most 256 UTF-8 bytes; must not be blank."
+          },
+          "resource": {
+            "$ref": "#/components/schemas/OriginLearningResourceRef"
+          },
+          "details": {
+            "$ref": "#/components/schemas/OriginLearningResourceDetails"
+          },
+          "origin": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OriginMemoryOnlyOrigin"
+              },
+              {
+                "$ref": "#/components/schemas/OriginOriginDescriptor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "company_id",
+          "resource",
+          "details",
+          "origin"
+        ],
+        "additionalProperties": false
+      },
+      "OriginCanonicalCombinedProposal": {
+        "type": "object",
+        "properties": {
+          "knowledge": {
+            "$ref": "#/components/schemas/OriginKnowledgeProposal"
+          },
+          "experience_selection": {
+            "$ref": "#/components/schemas/OriginCombinedSelection"
+          },
+          "expected_export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "inference": {
+            "$ref": "#/components/schemas/OriginInference"
+          }
+        },
+        "required": [
+          "knowledge",
+          "experience_selection",
+          "expected_export_digest",
+          "inference"
+        ],
+        "additionalProperties": false
+      },
+      "OriginExternalToolKnowledgeInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "schema_revision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "implementation_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "environment_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage_contract": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "description": "At most 4096 UTF-8 bytes; runtime also enforces byte length."
+          }
+        },
+        "required": [
+          "name",
+          "schema_revision",
+          "usage_contract"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "implementation_revision",
+              "environment_revision"
+            ],
+            "properties": {
+              "implementation_revision": {
+                "type": "string"
+              },
+              "environment_revision": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "properties": {
+              "implementation_revision": {
+                "type": "null"
+              },
+              "environment_revision": {
+                "type": "null"
+              }
+            }
+          }
+        ]
+      },
+      "OriginKnowledgeProposalInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32768,
+            "description": "At most 32768 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "memory_sources": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "$ref": "#/components/schemas/OriginMemorySourceRef"
+            },
+            "description": "Unique IDs; exact positive revisions. Canonical order is source UUID order."
+          },
+          "external_tools": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/OriginExternalToolKnowledgeInput"
+            },
+            "description": "Unique names; canonical order is tool-name order."
+          }
+        },
+        "required": [
+          "id",
+          "policy_id",
+          "context_id",
+          "title",
+          "instructions",
+          "memory_sources",
+          "external_tools"
+        ]
+      },
+      "OriginCombinedProposalInput": {
+        "type": "object",
+        "properties": {
+          "knowledge": {
+            "$ref": "#/components/schemas/OriginKnowledgeProposalInput"
+          },
+          "experience_selection": {
+            "$ref": "#/components/schemas/OriginCombinedSelection"
+          },
+          "expected_export_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "inference": {
+            "$ref": "#/components/schemas/OriginInference"
+          }
+        },
+        "required": [
+          "knowledge",
+          "experience_selection",
+          "expected_export_digest",
+          "inference"
+        ],
+        "additionalProperties": false
+      },
+      "UnsupportedKnowledgeOriginError": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "const": "unsupported_knowledge_origin"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "contract_version",
+          "error"
+        ],
+        "additionalProperties": false,
+        "description": "The addressed knowledge origin requires a different explicit contract. No automatic downgrade is performed."
       }
     }
   }
