@@ -75,3 +75,59 @@ This tool selects and verifies IDs. Materializing the corpus, generating externa
 embeddings, binding the chosen candidate to a frozen run and executing a comparison
 are subsequent steps. Existing observed cohorts remain regression data. Do not
 use the newly selected queries for tuning and then call them confirmation data.
+
+## Materialize and verify a corpus bundle
+
+`scripts/materialize_disjoint_musique.py` replays the complete selection before
+materializing its documents and sparse support judgments. Choose an existing
+historical fixture for warm-up. Its exact file digest must be part of the frozen
+exclusion history, and its development queries must be unique official-training
+questions. Reserved queries cannot become warm-up queries.
+
+```bash
+python3 scripts/materialize_disjoint_musique.py materialize \
+  --source-dir ./musique-source \
+  --prior-fixture ./previous-source.json \
+  --prior-fixture ./another-previous-source.json \
+  --warmup-fixture ./previous-source.json \
+  --manifest ./new-selection.json \
+  --bundle ./new-corpus
+
+python3 scripts/materialize_disjoint_musique.py verify \
+  --source-dir ./musique-source \
+  --prior-fixture ./previous-source.json \
+  --prior-fixture ./another-previous-source.json \
+  --warmup-fixture ./previous-source.json \
+  --manifest ./new-selection.json \
+  --bundle ./new-corpus
+```
+
+The exclusive output directory contains `source.json`, `relations.json` and a
+`receipt.json` written last. Verification reconstructs both artifacts from the
+pinned official sources and checks their complete contents and receipt. The
+receipt binds the source, graph, selection and warm-up fixture digests, along
+with counts and split provenance. A file's existence alone is not completion.
+A missing, truncated, modified or mismatched artifact fails verification.
+
+After an interruption, retain the incomplete directory for diagnosis and use a
+new output path for a fresh attempt. The tool does not overwrite or silently
+repair existing bundles. Verify the bundle before passing its source file to
+an external embedding generator or downstream evaluation runner.
+
+Document-only graph construction receives exactly document IDs, titles and
+paragraph text. Questions and support labels define the evaluation judgments,
+not graph edges. The graph's source digest is recalculated after recording the
+actual split mapping and replay evidence; provenance changes cannot leave the
+graph bound to an earlier source description.
+
+For the frozen 140-query selection, `development` contains the 30 previously
+observed training questions for warm-up only, and `test` contains the 140 queries
+reserved for this evaluation. This internal split label does not convert public
+training data into the official benchmark test set. Materialization performs no
+embedding generation or retrieval and does not establish relevance improvements.
+
+The [verified materialization receipt](https://github.com/aicubetechnology/qilbeeDB/blob/aicube/disjoint-corpus-materialization/benchmarks/retrieval/musique-support-disjoint-corpus-receipt-v1.json)
+binds 3,175 deduplicated documents and 6,257 document-derived relations for this
+170-query bundle. A separate reconstruction from official source rows confirmed
+the exact query texts, split assignments, support judgments and document union.
+These are corpus-integrity results, not retrieval or agent-quality measurements.

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "materialized_not_evaluated",
+  "source_sha256": "f278afaef53ea5ab94c8992ea0753a0285ce8948a904b8deb0f02c679e0c8365",
+  "graph_sha256": "caa691aa13917dff20b9731b1c72747a24e5bf544d7d8ac0a03a5895f0717df4",
+  "selection_manifest_sha256": "3b55479df13203e57c7ec3209a0cb1b569aea88de167c5aebf9c9624d582a12f",
+  "warmup_fixture_file_sha256": "1d95bc1da0739016d077c60c2e5498f86d3cc634768ca9a2e6340b68120984ac",
+  "documents": 3175,
+  "relations": 6257,
+  "queries_by_split": {
+    "development": 30,
+    "test": 140
+  },
+  "split_mapping": {
+    "development": "previously observed official training questions; warm-up only in the reserved comparison",
+    "test": "new-to-this-evaluation public train subset; not official hidden test or guaranteed model-unseen data"
+  },
+  "graph_inputs": "Document ID, title and paragraph text only; no question, answer, decomposition or supporting label",
+  "embedding_generation_performed": false,
+  "retrieval_performed": false
+}
