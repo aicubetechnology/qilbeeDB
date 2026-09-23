@@ -373,3 +373,12 @@ the same database manifest, budgets and query vectors. Report truncation,
 coverage, uncertainty, category losses and operating cost. Public development
 questions are not a hidden test or proof of absence from model training, and
 retrieval results do not establish improved agent-task performance.
+
+### Reserved evidence for the optional profile
+
+The [200-question reserved comparison](../research/fresh-reserved-graph-results.md)
+did not demonstrate a relevance gain for `typed_path_base_preserving_v1` over
+hybrid v2. Some queries improved and others regressed; traversal and candidate
+limits affected coverage. The profile remains optional and experimental. Select
+a retrieval method using representative workload evaluation, including coverage
+and cost, and assess agent-task outcomes separately.
