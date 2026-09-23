@@ -382,3 +382,18 @@ hybrid v2. Some queries improved and others regressed; traversal and candidate
 limits affected coverage. The profile remains optional and experimental. Select
 a retrieval method using representative workload evaluation, including coverage
 and cost, and assess agent-task outcomes separately.
+
+## Check latency and payload measurements
+
+**Availability: source preview for evaluation tooling.** Graph report exports
+reject missing or duplicate repetitions, non-finite or negative durations, and
+non-integer byte counts. Measured retrieval time cannot exceed its enclosing HTTP
+observation by more than the runner's one-millisecond tolerance. The reported
+embedding-plus-HTTP estimate must equal its two components; lexical-only methods
+cannot include query embedding time.
+
+Payload byte counts are checked against the canonical UTF-8 payloads retained in
+the report and cannot exceed the response size. A mismatch stops export; keep the
+original evidence and investigate rather than editing measurements to pass.
+These consistency checks do not establish hardware isolation, representative
+concurrency, provider billing or a production latency guarantee.

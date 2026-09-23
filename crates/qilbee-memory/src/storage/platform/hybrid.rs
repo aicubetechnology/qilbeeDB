@@ -165,8 +165,7 @@ impl MemorySnapshot<'_> {
         let mut lexical = super::lexical::rank_records(&records, &query.text);
         let mut semantic = Vec::with_capacity(embeddings.len());
         for (&id, embedding) in &embeddings {
-            let denominator =
-                query_norm * super::semantic::norm(&embedding.vector, query.space.dimensions)?;
+            let denominator = query_norm * embedding.validated_norm;
             let dot: f64 = query
                 .vector
                 .iter()
