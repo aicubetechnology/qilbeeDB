@@ -638,3 +638,17 @@ found improved retrieval for strength versus hybrid V1 on one 40-question
 development cohort, while balanced had slightly higher mean nDCG. This does not
 qualify a default change; reserved confirmation and agent-task evidence remain
 separate requirements. Use the exact advertised profile and inspect coverage.
+
+When switching external embeddings, freeze a new evaluation protocol even if the
+corpus and ranking formulas stay unchanged. The [captured 1536-dimensional protocol](../research/twowiki-captured1536-development-protocol.md)
+binds exact vector identity and preserves development/reserved roles. Input
+qualification alone provides no relevance or latency result.
+
+Evaluation tooling checks required per-query timing evidence before starting HTTP
+work. Missing generation observations must be represented honestly under a
+validated report contract; batch durations cannot substitute for query durations.
+
+The [1536-dimensional development results](../research/twowiki-captured1536-development-results.md)
+show a mean gain for graph retrieval with query-level regressions. Balanced
+outperformed strength on average; no production default changes. Reserved
+confirmation and separate agent-task evaluation remain necessary.

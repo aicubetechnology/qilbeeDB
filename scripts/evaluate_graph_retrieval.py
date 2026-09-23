@@ -91,6 +91,7 @@ def evaluation_stage(protocol):
         "graph_seed_matrix_development_v1": "development",
         "graph_path_strength_development_v1": "development",
         "twowiki_strength_development_v1": "development",
+        "twowiki_captured1536_development_v1": "development",
         "graph_path_strength_regression_v1": "test",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
@@ -129,7 +130,7 @@ def verify_protocol(protocol, fixture, graph):
         or not 1 <= protocol["repetitions"] <= 20
     ):
         raise ValueError("Protocol differs from supported frozen comparison")
-    if protocol["protocol_version"] == "twowiki_strength_development_v1":
+    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1"):
         from twowiki_evaluation_contract import verify_twowiki_protocol
         verify_twowiki_protocol(protocol, fixture, graph)
         return
@@ -302,7 +303,8 @@ def summary(rows):
         **{k: statistics.mean(r["metrics"][k] for r in rows) for k in metrics_keys},
         **{
             k: {
-                label: quantile([s[k] for r in rows for s in r["samples"]], p)
+                label: (None if any(s[k] is None for r in rows for s in r["samples"])
+                        else quantile([s[k] for r in rows for s in r["samples"]], p))
                 for label, p in [("p50", 0.5), ("p95", 0.95)]
             }
             for k in [
@@ -322,6 +324,38 @@ def summary(rows):
     }
 
 
+def validate_generation_timings(generation, fixture, protocol):
+    """Validate existing per-query timing evidence before any benchmark HTTP call."""
+    if generation.get("fixture_sha256") != digest(fixture):
+        raise ValueError("Embedding timings belong to another frozen vector set")
+    if all(method in ("lexical", "graph_lexical_balanced") for method in protocol["methods"]):
+        return
+    if "generation_sha256" in protocol and digest(generation) != protocol["generation_sha256"]:
+        raise ValueError("Generation evidence differs from the frozen protocol")
+    if "query_timing_status" in protocol and generation.get("query_timing_status") != protocol["query_timing_status"]:
+        raise ValueError("Generation timing availability differs from the frozen protocol")
+    if generation.get("query_timing_status") == "unavailable_batch_capture":
+        if generation.get("queries") != {} or not generation.get("batch_evidence"):
+            raise ValueError("Unavailable batch timing requires separate evidence and no invented query allocation")
+        return
+    if generation.get("query_timing_status") not in (None, "measured"):
+        raise ValueError("Unknown query timing status")
+    timings = generation.get("queries")
+    if not isinstance(timings, dict):
+        raise ValueError("Per-query embedding timings are unavailable; batch timing cannot be allocated to queries")
+    for query_id in evaluation_queries(fixture, protocol):
+        entry = timings.get(query_id)
+        if not isinstance(entry, dict) or "elapsed_ms" not in entry:
+            raise ValueError("Missing embedding timing for a measured query")
+        value = entry["elapsed_ms"]
+        try:
+            valid = type(value) in (int, float) and math.isfinite(value) and value >= 0
+        except OverflowError:
+            valid = False
+        if not valid:
+            raise ValueError("Embedding timing must be a finite nonnegative duration")
+
+
 def evaluate(
     client,
     fixture,
@@ -337,8 +371,7 @@ def evaluate(
     validate_state(state, fixture)
     if state["fixture_sha256"] != digest(fixture):
         raise ValueError("Manifest belongs to another frozen vector set")
-    if generation["fixture_sha256"] != digest(fixture):
-        raise ValueError("Embedding timings belong to another frozen vector set")
+    validate_generation_timings(generation, fixture, protocol)
     identity = client.call("GET", "/api/v1/identity")[0]["credential"]
     if (
         identity["tenant_id"] != state["tenant_id"]
@@ -483,15 +516,17 @@ def evaluate(
             embedding_ms = (
                 0
                 if method in ["lexical", "graph_lexical_balanced"]
-                else generation["queries"][qid]["elapsed_ms"]
+                else (None if generation.get("query_timing_status") == "unavailable_batch_capture"
+                      else generation["queries"][qid]["elapsed_ms"])
             )
             rows[row_key]["samples"].append(
                 {
                     "repetition": rep,
                     "retrieval_ms": retrieval_ms,
                     "http_ms": elapsed,
-                    "embedding_plus_http_ms": embedding_ms + elapsed,
+                    "embedding_plus_http_ms": None if embedding_ms is None else embedding_ms + elapsed,
                     "external_query_embedding_ms": embedding_ms,
+                    **({"embedding_timing_status": "unavailable_batch_capture"} if embedding_ms is None else {}),
                     "response_bytes": byte_count,
                     "payload_bytes": sum(
                         len(canonical(h["record"]["payload"])) for h in page["hits"]

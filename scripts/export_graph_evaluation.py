@@ -24,8 +24,10 @@ def export(report, fixture):
     protocol = plan["protocol"]
     if plan["protocol_sha256"] != digest(protocol):
         raise ValueError("Export protocol differs from the pinned plan")
+    if "generation_sha256" in protocol and plan.get("generation_sha256") != protocol["generation_sha256"]:
+        raise ValueError("Export generation evidence differs from the frozen protocol")
     stage = evaluation_stage(protocol)
-    if protocol["protocol_version"] == "twowiki_strength_development_v1":
+    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1"):
         from twowiki_evaluation_contract import verify_twowiki_protocol
         verify_twowiki_protocol(protocol, fixture)
     if protocol["protocol_version"] in ("graph_path_strength_development_v1", "graph_path_strength_regression_v1"):
@@ -60,6 +62,9 @@ def export(report, fixture):
                 "Published metrics differ from recorded judgments and ranking"
             )
         validate_measurements(row, protocol["repetitions"])
+        if protocol.get("query_timing_status") == "unavailable_batch_capture" and row["method"] not in ("lexical", "graph_lexical_balanced"):
+            if any(sample.get("embedding_timing_status") != "unavailable_batch_capture" for sample in row["samples"]):
+                raise ValueError("Vector timing availability differs from the frozen batch capture")
         rows.append(
             {
                 k: row[k]
