@@ -404,3 +404,7 @@ This is a development experiment, including when it reproduces an earlier
 prototype. The protocol does not authorize applying its result to an already
 observed reserved cohort or changing a production default. Independent evaluation
 and downstream task outcomes require their own frozen contracts.
+
+The [completed development comparison](../research/best-channel-development-results.md)
+reports relevance, regressions, coverage and observed cost. Its uncertainty does
+not establish general superiority or justify a default change.
