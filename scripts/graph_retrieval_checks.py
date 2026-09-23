@@ -889,6 +889,30 @@ class GraphPipelineChecks(unittest.TestCase):
         self.assertNotIn("documents", public["source_provenance"])
         self.assertNotIn("hits", public["rows"][0])
         self.assertNotIn('"vector":', json.dumps(public))
+        batch = copy.deepcopy(report)
+        batch_protocol = batch["plan"]["protocol"]
+        batch_protocol.update(query_timing_status="unavailable_batch_capture", generation_sha256="synthetic")
+        batch["plan"]["protocol_sha256"] = digest(batch_protocol)
+        for row in batch["rows"]:
+            if row["method"] not in ("lexical", "graph_lexical_balanced"):
+                for sample in row["samples"]:
+                    sample.update(external_query_embedding_ms=None, embedding_plus_http_ms=None,
+                                  embedding_timing_status="unavailable_batch_capture")
+        batch["summary"] = {m: summary([r for r in batch["rows"] if r["method"] == m])
+                            for m in batch_protocol["methods"]}
+        batch["categories"] = categories(batch["rows"], batch_protocol, selected)
+        batch["comparisons"] = comparisons(batch["rows"], batch_protocol, selected)
+        batch_public = export(batch, value)
+        self.assertIsNone(batch_public["summary"]["semantic"]["embedding_plus_http_ms"]["p95"])
+        self.assertEqual(batch_public["summary"]["semantic"]["http_ms"]["p95"], 1.0)
+        self.assertEqual(batch_public["summary"]["lexical"]["embedding_plus_http_ms"]["p95"], 1.0)
+        invented = copy.deepcopy(batch)
+        semantic_row = next(r for r in invented["rows"] if r["method"] == "semantic")
+        for sample in semantic_row["samples"]:
+            sample.pop("embedding_timing_status")
+            sample.update(external_query_embedding_ms=0.0, embedding_plus_http_ms=sample["http_ms"])
+        with self.assertRaisesRegex(ValueError, "availability differs"):
+            export(invented, value)
         development = copy.deepcopy(report)
         development["plan"]["protocol"].update(
             protocol_version="graph_multihop_development_v1", split="development")
