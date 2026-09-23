@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from evaluate_retrieval import PROFILES, digest, metrics, source_payload
-from evaluate_graph_retrieval import request_for, summary, verify_protocol
+from evaluate_graph_retrieval import request_for, summary, verify_protocol, evaluation_stage, evaluation_queries
 from export_graph_evaluation import export
 from graph_evaluation_contract import (
     fences,
@@ -332,6 +332,22 @@ class GraphPipelineChecks(unittest.TestCase):
                 dict(protocol, methods=protocol["methods"] + ["lexical"]), value, graph
             )
 
+    def test_development_protocol_cannot_query_or_claim_reserved_split(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-multihop-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(evaluation_stage(protocol), "development")
+        self.assertEqual(set(evaluation_queries(value, protocol)), {"development"})
+        for change in ({"split": "test"}, {"protocol_version": "graph_multihop_compare_v1"},
+            {"protocol_version": "unknown"}, {"default_admission": True}):
+            with self.assertRaises(ValueError): verify_protocol(dict(protocol, **change), value, graph)
+        empty = copy.deepcopy(value)
+        empty["queries"] = [q for q in empty["queries"] if q["split"] == "test"]
+        with self.assertRaises(ValueError): evaluation_queries(empty, protocol)
+
     def test_all_requests_use_the_same_frozen_vectors_scope_and_result_limit(self):
         value, graph = fixture()
         protocol = json.loads(
@@ -616,7 +632,8 @@ class GraphPipelineChecks(unittest.TestCase):
             ]
         }
         plan.update(
-            fixture_sha256=digest(value), model_space=value["space"], protocol=protocol
+            fixture_sha256=digest(value), model_space=value["space"], protocol=protocol,
+            protocol_sha256=digest(protocol)
         )
         report = {
             "status": "completed",
@@ -648,6 +665,26 @@ class GraphPipelineChecks(unittest.TestCase):
         self.assertNotIn("documents", public["source_provenance"])
         self.assertNotIn("hits", public["rows"][0])
         self.assertNotIn('"vector":', json.dumps(public))
+        development = copy.deepcopy(report)
+        development["plan"]["protocol"].update(
+            protocol_version="graph_multihop_development_v1", split="development")
+        development["plan"]["protocol_sha256"] = digest(development["plan"]["protocol"])
+        development["evaluation_stage"] = "development"
+        for row in development["rows"]: row["query_id"] = "development"
+        changed_plan = copy.deepcopy(development)
+        changed_plan["plan"]["protocol_sha256"] = "wrong"
+        with self.assertRaises(ValueError): export(changed_plan, value)
+        published = export(development, value)
+        self.assertEqual(published["evaluation_stage"], "development")
+        self.assertFalse(published["default_admission"])
+        for label in (None, "reserved_comparison"):
+            altered = copy.deepcopy(development)
+            if label is None: altered.pop("evaluation_stage")
+            else: altered["evaluation_stage"] = label
+            with self.assertRaises(ValueError): export(altered, value)
+        development["rows"][0]["query_id"] = "test"
+        with self.assertRaises(ValueError): export(development, value)
+
         mutations = [
             lambda r: r.update(status="failed"),
             lambda r: r.update(verified_fences_unchanged=False),

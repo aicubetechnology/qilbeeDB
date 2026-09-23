@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from evaluate_retrieval import digest, metrics, save
-from evaluate_graph_retrieval import summary
+from evaluate_graph_retrieval import summary, evaluation_stage, evaluation_queries
 
 
 def export(report, fixture):
@@ -20,9 +20,12 @@ def export(report, fixture):
     ):
         raise ValueError("Only completed, source-verified evidence can be exported")
     protocol = plan["protocol"]
-    queries = {
-        q["id"]: q for q in fixture["queries"] if q["split"] == protocol["split"]
-    }
+    if plan["protocol_sha256"] != digest(protocol):
+        raise ValueError("Export protocol differs from the pinned plan")
+    stage = evaluation_stage(protocol)
+    if report.get("evaluation_stage", "reserved_comparison") != stage:
+        raise ValueError("Report mislabels its evaluation stage")
+    queries = evaluation_queries(fixture, protocol)
     expected = {(qid, method) for qid in queries for method in protocol["methods"]}
     seen = set()
     rows = []
@@ -82,6 +85,7 @@ def export(report, fixture):
     return {
         "schema_version": 1,
         "status": "completed",
+        "evaluation_stage": stage,
         "default_admission": False,
         "scope_of_evidence": report["scope_of_evidence"],
         "started_at": report["started_at"],

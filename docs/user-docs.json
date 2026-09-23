@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Retrieve scoped memory through typed paths and validate ranking and frozen cosine evidence before comparison.",
+      "description": "Retrieve scoped memory through typed paths, validate frozen evidence, and separate development investigations from reserved comparisons.",
       "order": 208
     },
     {
