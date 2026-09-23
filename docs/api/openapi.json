@@ -34695,7 +34695,8 @@
           "typed_path_balanced_v1",
           "typed_path_entity_v1",
           "typed_path_temporal_v1",
-          "typed_path_evidence_v1"
+          "typed_path_evidence_v1",
+          "typed_path_base_preserving_v1"
         ]
       },
       "GraphRankingProfileBalancedV1": {
@@ -35387,6 +35388,9 @@
           },
           {
             "$ref": "#/components/schemas/GraphRankingProfileEvidenceV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileBasePreservingV1"
           }
         ]
       },
@@ -35889,7 +35893,8 @@
           "contribution": {
             "type": "number",
             "minimum": 0,
-            "maximum": 0.08333333333333333
+            "maximum": 0.25,
+            "description": "Base-channel RRF contribution; the enclosing page constrains its maximum by ranking version."
           }
         },
         "required": [
@@ -36238,7 +36243,78 @@
           "hits",
           "relations"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_base_preserving_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "GraphRetrievalResponse": {
         "type": "object",
@@ -36271,8 +36347,8 @@
             "items": {
               "$ref": "#/components/schemas/GraphRankingProfile"
             },
-            "maxItems": 4,
-            "minItems": 4
+            "maxItems": 5,
+            "minItems": 5
           },
           "execution_limits": {
             "$ref": "#/components/schemas/RetrievalExecutionLimits"
@@ -40828,6 +40904,175 @@
           "contract_version",
           "company_id",
           "page"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileBasePreservingV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_base_preserving_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_rrf"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 0.75
+          },
+          "graph_weight": {
+            "const": 0.25
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
         ],
         "additionalProperties": false
       }

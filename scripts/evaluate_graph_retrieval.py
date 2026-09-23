@@ -87,6 +87,7 @@ def evaluation_stage(protocol):
     stages = {
         "graph_multihop_compare_v1": "test",
         "graph_multihop_development_v1": "development",
+        "graph_base_preserving_development_v1": "development",
     }
     expected = stages.get(protocol.get("protocol_version"))
     if expected is None or protocol.get("split") != expected:
@@ -127,6 +128,9 @@ def verify_protocol(protocol, fixture, graph):
         "graph_lexical_balanced",
         "graph_hybrid_depth_zero",
     }
+    candidate_trial = protocol["protocol_version"] == "graph_base_preserving_development_v1"
+    if candidate_trial:
+        required.add("graph_hybrid_base_preserving")
     if set(protocol["methods"]) != required or len(protocol["methods"]) != len(
         required
     ):
@@ -140,11 +144,15 @@ def verify_protocol(protocol, fixture, graph):
         for method in required
         if method.startswith("graph_")
     }
+    candidate = "graph_hybrid_balanced"
+    if candidate_trial:
+        profiles["graph_hybrid_base_preserving"] = "typed_path_base_preserving_v1"
+        candidate = "graph_hybrid_base_preserving"
     if (
         protocol["graph_profiles"] != profiles
         or protocol["graph_seed_hybrid_version"] != "weighted_rrf_v2"
         or protocol["primary_comparison"]
-        != {"candidate": "graph_hybrid_balanced", "baseline": "weighted_rrf_v2"}
+        != {"candidate": candidate, "baseline": "weighted_rrf_v2"}
         or protocol["default_admission"] is not False
     ):
         raise ValueError("Method label, seed profile or declared comparison changed")

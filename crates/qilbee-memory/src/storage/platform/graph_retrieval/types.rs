@@ -8,6 +8,7 @@ pub enum GraphRankingVersion {
     TypedPathEntityV1,
     TypedPathTemporalV1,
     TypedPathEvidenceV1,
+    TypedPathBasePreservingV1,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -35,19 +36,26 @@ pub struct GraphRankingProfile {
     pub maximum_score: f64,
 }
 impl GraphRankingVersion {
-    pub const ALL: [Self; 4] = [
+    pub const ALL: [Self; 5] = [
         Self::TypedPathBalancedV1,
         Self::TypedPathEntityV1,
         Self::TypedPathTemporalV1,
         Self::TypedPathEvidenceV1,
+        Self::TypedPathBasePreservingV1,
     ];
     pub fn profile(self) -> GraphRankingProfile {
         use MemoryRelationKind::*;
         let weights = match self {
-            Self::TypedPathBalancedV1 => [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            Self::TypedPathBalancedV1 | Self::TypedPathBasePreservingV1 => {
+                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+            }
             Self::TypedPathEntityV1 => [0.5, 1.0, 0.0, 0.0, 0.0, 0.0],
             Self::TypedPathTemporalV1 => [0.25, 0.5, 1.0, 0.0, 0.0, 0.0],
             Self::TypedPathEvidenceV1 => [0.25, 0.5, 0.25, 0.75, 1.0, 1.0],
+        };
+        let (base_weight, graph_weight) = match self {
+            Self::TypedPathBasePreservingV1 => (0.75, 0.25),
+            _ => (0.25, 0.75),
         };
         GraphRankingProfile {
             version: self,
@@ -57,8 +65,8 @@ impl GraphRankingVersion {
             base_candidate_limit: 100,
             anchor_limit: 4,
             rank_constant: 2,
-            base_weight: 0.25,
-            graph_weight: 0.75,
+            base_weight,
+            graph_weight,
             hop_decay: 0.5,
             cosine_affinity_floor: 0.5,
             cosine_affinity_weight: 0.5,
@@ -75,7 +83,7 @@ impl GraphRankingVersion {
             .zip(weights)
             .map(|(kind, weight)| GraphRelationWeight { kind, weight })
             .collect(),
-            maximum_score: 0.25 / 3.0 + 0.75 / 3.0,
+            maximum_score: base_weight / 3.0 + graph_weight / 3.0,
         }
     }
 }

@@ -95,68 +95,62 @@ fn semantic_source_bytes_stop_before_a_second_row_and_do_not_change_legacy_searc
 
 #[test]
 fn clock_expiry_and_rejected_derivation_sources_cannot_bridge_a_graph() {
-    let dir = TempDir::new().unwrap();
-    let db = open(dir.path());
-    let a = create(&db, "scope", "anchor");
-    let source = create(&db, "scope", "source");
-    let b = change(
-        &db,
-        MemoryOperation::Derive {
-            record: input("derived bridge"),
-            derivation: MemoryDerivation {
-                sources: vec![MemorySourceRef {
-                    record_id: source.record_id,
-                    revision: 1,
-                }],
-                method: "fixture".into(),
-                method_revision: "v1".into(),
-                evidence_ref: "trace://derivation".into(),
+    for version in GraphRankingVersion::ALL {
+        let mut q = query("anchor");
+        q.ranking_version = version;
+        let dir = TempDir::new().unwrap();
+        let db = open(dir.path());
+        let a = create(&db, "scope", "anchor");
+        let source = create(&db, "scope", "source");
+        let b = change(
+            &db,
+            MemoryOperation::Derive {
+                record: input("derived bridge"),
+                derivation: MemoryDerivation {
+                    sources: vec![MemorySourceRef {
+                        record_id: source.record_id,
+                        revision: 1,
+                    }],
+                    method: "fixture".into(),
+                    method_revision: "v1".into(),
+                    evidence_ref: "trace://derivation".into(),
+                },
             },
-        },
-        "derived",
-    );
-    let c = create(&db, "scope", "leaf");
-    link(&db, &a, &b, MemoryRelationKind::Supports, "ab");
-    link(&db, &b, &c, MemoryRelationKind::Supports, "bc");
-    assert_eq!(
-        db.search_memory_graph("scope", &query("anchor"))
-            .unwrap()
-            .hits
-            .len(),
-        3
-    );
-    db.review_memory_record(
-        "scope",
-        &actor(),
-        &MemoryReviewCommand {
-            contract_version: 1,
-            idempotency_key: "reject".into(),
-            record_id: source.record_id,
-            expected_revision: 1,
-            disposition: MemoryReviewDisposition::Rejected,
-            evidence_ref: "trace://rejection".into(),
-        },
-    )
-    .unwrap();
-    assert_eq!(
-        ids(&db.search_memory_graph("scope", &query("anchor")).unwrap()),
-        [a.record_id].into()
-    );
-    let expiry = chrono::Utc::now().timestamp_millis() + 60000;
-    let mut record = input("expiring");
-    record.valid_until_millis = Some(expiry);
-    let expiring = change(&db, MemoryOperation::Create { record }, "expiring");
-    link(&db, &a, &expiring, MemoryRelationKind::Supports, "ae");
-    let mut before = db.memory_snapshot();
-    before.now = expiry - 1;
-    assert!(
-        ids(&before.search_graph("scope", &query("anchor")).unwrap()).contains(&expiring.record_id)
-    );
-    let mut after = db.memory_snapshot();
-    after.now = expiry;
-    assert!(
-        !ids(&after.search_graph("scope", &query("anchor")).unwrap()).contains(&expiring.record_id)
-    );
+            "derived",
+        );
+        let c = create(&db, "scope", "leaf");
+        link(&db, &a, &b, MemoryRelationKind::SameEntity, "ab");
+        link(&db, &b, &c, MemoryRelationKind::SameEntity, "bc");
+        assert_eq!(db.search_memory_graph("scope", &q).unwrap().hits.len(), 3);
+        db.review_memory_record(
+            "scope",
+            &actor(),
+            &MemoryReviewCommand {
+                contract_version: 1,
+                idempotency_key: "reject".into(),
+                record_id: source.record_id,
+                expected_revision: 1,
+                disposition: MemoryReviewDisposition::Rejected,
+                evidence_ref: "trace://rejection".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(
+            ids(&db.search_memory_graph("scope", &q).unwrap()),
+            [a.record_id].into()
+        );
+        let expiry = chrono::Utc::now().timestamp_millis() + 60000;
+        let mut record = input("expiring");
+        record.valid_until_millis = Some(expiry);
+        let expiring = change(&db, MemoryOperation::Create { record }, "expiring");
+        link(&db, &a, &expiring, MemoryRelationKind::SameEntity, "ae");
+        let mut before = db.memory_snapshot();
+        before.now = expiry - 1;
+        assert!(ids(&before.search_graph("scope", &q).unwrap()).contains(&expiring.record_id));
+        let mut after = db.memory_snapshot();
+        after.now = expiry;
+        assert!(!ids(&after.search_graph("scope", &q).unwrap()).contains(&expiring.record_id));
+    }
 }
 
 #[test]
