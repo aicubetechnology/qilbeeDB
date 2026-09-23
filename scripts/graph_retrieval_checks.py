@@ -467,6 +467,28 @@ class GraphPipelineChecks(unittest.TestCase):
                 near(bad, 0.5)
         near(0.50000000001, 0.5)
 
+    def test_best_channel_uses_maximum_and_rejects_additive_or_weighted_scores(self):
+        value, _, state, protocol, result = proof_fixture()
+        method = "graph_lexical_balanced"
+        protocol["graph_profiles"][method] = "typed_path_best_channel_v1"
+        result["page"]["ranking"] = graph_profile("typed_path_best_channel_v1")
+        hit = result["page"]["hits"][0]
+        hit["graph"]["contribution"] = 1 / 3
+        hit["base"] = {"rank": 2, "contribution": 1 / 4}
+        hit["score"] = 1 / 3
+        def check(candidate):
+            return validate_page(candidate, value, state, value["queries"][1], method, protocol)
+        self.assertEqual(len(check(result)), 1)
+        for score in [1 / 3 + 1 / 4, 0.25 / 3 + 0.75 / 4]:
+            forged = copy.deepcopy(result)
+            forged["page"]["hits"][0]["score"] = score
+            with self.assertRaises(ValueError):
+                check(forged)
+        forged = copy.deepcopy(result)
+        forged["page"]["ranking"]["method"] = "strongest_typed_path_rrf"
+        with self.assertRaises(ValueError):
+            check(forged)
+
     def test_new_profile_checks_both_contributions_and_rejects_legacy_weights(self):
         value, _, state, protocol, result = proof_fixture()
         method = "graph_lexical_balanced"

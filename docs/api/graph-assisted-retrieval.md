@@ -350,6 +350,39 @@ hybrid v2 as its primary comparison. Freeze a fresh reserved evaluation before
 using it to assess generalization; no improvement or default admission follows
 from adding this optional profile.
 
+## Best-channel experimental selection
+
+**Availability: source preview.** Select `typed_path_best_channel_v1` explicitly
+to compare a policy that uses the better reciprocal rank from the base and graph
+channels. Its catalog method is `strongest_typed_path_max`:
+
+```text
+base_value = base present ? 1 / (2 + base_rank) : 0
+graph_value = graph present ? 1 / (2 + graph_rank) : 0
+score = max(base_value, graph_value)
+```
+
+The channel weights are both 1; they are independent scale factors, not mixing
+probabilities. The maximum final score is 1/3. `base.contribution` and
+`graph.contribution` expose the channel values; **do not sum them** for this
+method. Ties use ascending record UUID. Native lexical/cosine scores retain their
+own meaning. Check the authenticated catalog and the response's ranking version
+before interpreting any combined score. A server that does not advertise this
+version does not support it.
+
+This policy keeps the same four anchors, bounded traversal, relation weights,
+path proofs, affinity rules and current-source eligibility as the balanced
+profile. It can admit graph-only evidence to the top ten even when ten base
+candidates exist. That capability does not guarantee useful evidence: lexical
+and graph neighborhoods can disagree, and useful base results can be displaced.
+Repeated assertions still use the strongest path rather than accumulated votes.
+
+All five previous profiles preserve their formulas and parameters. This version
+is optional and experimental; a development-only screening result is not
+independent evidence of superiority. Compare relevance, regressions, work and
+coverage on your workload, with a separately frozen evaluation before admission.
+No agent reasoning or token-efficiency improvement follows from this formula.
+
 ## Prepare a fresh reserved graph comparison
 
 **Availability: source preview for evaluation tooling.** An explicit selected-ID

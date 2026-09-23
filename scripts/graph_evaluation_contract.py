@@ -18,18 +18,19 @@ def graph_profile(version):
     weights = {
         "typed_path_balanced_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_base_preserving_v1": [1, 1, 1, 1, 1, 1],
+        "typed_path_best_channel_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_entity_v1": [0.5, 1, 0, 0, 0, 0],
     }[version]
     return {
         "version": version,
-        "method": "strongest_typed_path_rrf",
+        "method": "strongest_typed_path_max" if version == "typed_path_best_channel_v1" else "strongest_typed_path_rrf",
         "experimental": True,
         "traversal_version": "typed_relations_v1",
         "base_candidate_limit": 100,
         "anchor_limit": 4,
         "rank_constant": 2,
-        "base_weight": 0.75 if version == "typed_path_base_preserving_v1" else 0.25,
-        "graph_weight": 0.25 if version == "typed_path_base_preserving_v1" else 0.75,
+        "base_weight": 1.0 if version == "typed_path_best_channel_v1" else 0.75 if version == "typed_path_base_preserving_v1" else 0.25,
+        "graph_weight": 1.0 if version == "typed_path_best_channel_v1" else 0.25 if version == "typed_path_base_preserving_v1" else 0.75,
         "hop_decay": 0.5,
         "cosine_affinity_floor": 0.5,
         "cosine_affinity_weight": 0.5,
@@ -336,11 +337,8 @@ def validate_page(result, fixture, state, query, method, protocol):
             raise ValueError("Graph result has no ranking evidence")
         if not 0 <= hit["score"] <= page["ranking"]["maximum_score"]:
             raise ValueError("Graph score exceeds the profile range")
-        near(
-            hit["score"],
-            (base["contribution"] if base else 0)
-            + (path["contribution"] if path else 0),
-        )
+        contributions = [base["contribution"] if base else 0, path["contribution"] if path else 0]
+        near(hit["score"], max(contributions) if profile["method"] == "strongest_typed_path_max" else sum(contributions))
         if base:
             if type(base["rank"]) is not int or not 1 <= base["rank"] <= 100:
                 raise ValueError("Base rank exceeds the frozen candidate pool")

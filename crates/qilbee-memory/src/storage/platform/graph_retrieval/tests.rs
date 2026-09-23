@@ -402,3 +402,54 @@ fn returned_payload_count_and_proofs_respect_the_requested_context_budget() {
     assert!(empty.coverage.complete);
     assert!(empty.graph_roots.is_empty());
 }
+
+#[test]
+fn best_channel_admits_graph_only_evidence_without_summing_duplicate_signals() {
+    let dir = TempDir::new().unwrap();
+    let db = open(dir.path());
+    let mut anchors = Vec::new();
+    for index in 0..10 {
+        anchors.push(create(&db, "scope", &format!("anchor {index}")));
+    }
+    anchors.sort_by_key(|r| r.record_id);
+    let distant = create(&db, "scope", "distant evidence");
+    link(
+        &db,
+        &anchors[0],
+        &distant,
+        MemoryRelationKind::SameEntity,
+        "discovery",
+    );
+    let mut q = query("anchor");
+    q.ranking_version = GraphRankingVersion::TypedPathBasePreservingV1;
+    let old = db.search_memory_graph("scope", &q).unwrap();
+    assert_eq!(old.hits.len(), 10);
+    assert!(!ids(&old).contains(&distant.record_id));
+    q.ranking_version = GraphRankingVersion::TypedPathBestChannelV1;
+    let page = db.search_memory_graph("scope", &q).unwrap();
+    assert_eq!(page.hits.len(), 10);
+    let hit = page
+        .hits
+        .iter()
+        .find(|h| h.record.record_id == distant.record_id)
+        .unwrap();
+    assert!(hit.base.is_none());
+    assert_eq!(hit.graph.as_ref().unwrap().rank, 5);
+    assert_eq!(hit.score, 1.0 / 7.0);
+    let first = &page.hits[0];
+    assert_eq!(first.base.as_ref().unwrap().contribution, 1.0 / 3.0);
+    assert_eq!(first.graph.as_ref().unwrap().contribution, 1.0 / 3.0);
+    assert_eq!(first.score, 1.0 / 3.0);
+    for pair in page.hits.windows(2) {
+        assert!(pair[0].score >= pair[1].score);
+        if pair[0].score == pair[1].score {
+            assert!(pair[0].record.record_id < pair[1].record.record_id);
+        }
+    }
+    assert!(
+        db.search_memory_graph("another-scope", &q)
+            .unwrap()
+            .hits
+            .is_empty()
+    );
+}

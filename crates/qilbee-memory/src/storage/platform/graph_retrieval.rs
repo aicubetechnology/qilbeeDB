@@ -123,7 +123,11 @@ impl MemorySnapshot<'_> {
                 affinity: None,
             });
             hit.affinity = affinities.get(&id).cloned();
-            hit.score += path.contribution;
+            hit.score = if profile.version == GraphRankingVersion::TypedPathBestChannelV1 {
+                hit.score.max(path.contribution)
+            } else {
+                hit.score + path.contribution
+            };
             hit.graph = Some(path);
         }
         let candidates_ranked = hits.len();
