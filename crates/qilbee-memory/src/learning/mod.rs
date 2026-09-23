@@ -33,3 +33,5 @@ pub use store::experience_export::*;
 pub use store::strategies::*;
 
 pub use store::knowledge::*;
+
+pub use store::knowledge_selection::*;

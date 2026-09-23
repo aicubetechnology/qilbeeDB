@@ -22040,7 +22040,7 @@
       "post": {
         "operationId": "knowledgeSelect",
         "summary": "Select compatible evidence-bound knowledge with explicit coverage",
-        "description": "Contract version 2. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires memory_read; current observation, not execution authorization.",
+        "description": "Explicit contract versions 2 and 3. No code storage, executor registration, external downloads or execution. Errors retain the platform contract_version 1 envelope. Requires memory_read; current observation, not execution authorization. Explicit contract_version 3 selects active knowledge with bounded inspection under active_knowledge_bound_v1. Version 2 remains unchanged. An incomplete response does not authorize fallback or execution.",
         "tags": [
           "Learning"
         ],
@@ -22058,7 +22058,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KnowledgeSelectResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/KnowledgeSelectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KnowledgeSelectResponseV3"
+                    }
+                  ]
                 }
               }
             }
@@ -22213,7 +22220,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/KnowledgeSelectRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/KnowledgeSelectRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KnowledgeSelectRequestV3"
+                  }
+                ]
               }
             }
           }
@@ -41766,6 +41780,639 @@
           "relation_weights"
         ],
         "additionalProperties": false
+      },
+      "KnowledgeSelectionWorkLimitsV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "candidate_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "index_entries": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "learning_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16777216
+          },
+          "dependency_records": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4096
+          },
+          "dependency_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16777216
+          }
+        },
+        "required": [
+          "candidate_records",
+          "index_entries",
+          "learning_bytes",
+          "dependency_records",
+          "dependency_bytes"
+        ]
+      },
+      "KnowledgeSelectRequestV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": 3,
+            "type": "integer"
+          },
+          "selection_version": {
+            "const": "active_knowledge_bound_v1",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "max_instruction_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65536
+          },
+          "external_tool_identities": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/ExternalToolIdentity"
+            },
+            "description": "Required exact identity set, order-independent. Repeated tool names return HTTP 400 even when revisions differ; exact duplicates also return 400. Compare names by exact UTF-8 value without trimming, case folding or Unicode normalization; canonical order is ascending UTF-8 name. Null is explicit unbound identity, never a wildcard. Name uniqueness requires runtime validation in addition to uniqueItems.",
+            "uniqueItems": true
+          },
+          "work_limits": {
+            "$ref": "#/components/schemas/KnowledgeSelectionWorkLimitsV3"
+          }
+        },
+        "required": [
+          "contract_version",
+          "selection_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "max_instruction_bytes",
+          "external_tool_identities",
+          "work_limits"
+        ]
+      },
+      "KnowledgeSelectionWorkV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index_entries_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "candidate_records_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "learning_bytes_inspected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "learning_lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_records_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_bytes_inspected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dependency_lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "eligible_candidates": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "index_entries_examined",
+          "candidate_records_examined",
+          "learning_bytes_inspected",
+          "learning_lookahead_bytes",
+          "dependency_records_examined",
+          "dependency_bytes_inspected",
+          "dependency_lookahead_bytes",
+          "eligible_candidates"
+        ]
+      },
+      "KnowledgeSelectionCoverageV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "decision_complete": {
+            "type": "boolean"
+          },
+          "index_exhausted": {
+            "type": "boolean"
+          },
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "first_eligible",
+              "index_exhausted",
+              "index_entry_limit",
+              "candidate_record_limit",
+              "learning_byte_limit",
+              "dependency_record_limit",
+              "dependency_byte_limit",
+              "dependency_depth_limit",
+              "dependency_node_limit"
+            ]
+          }
+        },
+        "required": [
+          "decision_complete",
+          "index_exhausted",
+          "stop_reason"
+        ]
+      },
+      "KnowledgeSelectionOutcomeV3": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "procedure",
+                "type": "string"
+              },
+              "knowledge": {
+                "$ref": "#/components/schemas/KnowledgeInspection"
+              }
+            },
+            "required": [
+              "type",
+              "knowledge"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "baseline",
+                "type": "string"
+              },
+              "baseline_revision": {
+                "type": "string"
+              },
+              "reason": {
+                "const": "no_eligible_bound_procedure",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "baseline_revision",
+              "reason"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "incomplete",
+                "type": "string"
+              },
+              "baseline_revision": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "index_entry_limit",
+                  "candidate_record_limit",
+                  "learning_byte_limit",
+                  "dependency_record_limit",
+                  "dependency_byte_limit",
+                  "dependency_depth_limit",
+                  "dependency_node_limit"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "baseline_revision",
+              "reason"
+            ]
+          }
+        ]
+      },
+      "KnowledgeSelectResponseV3": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_version": {
+            "const": 3,
+            "type": "integer"
+          },
+          "selection_version": {
+            "const": "active_knowledge_bound_v1",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "policy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "context_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "At most 512 UTF-8 bytes; runtime also enforces byte length."
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "index_generation": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "result": {
+            "$ref": "#/components/schemas/KnowledgeSelectionOutcomeV3"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/KnowledgeSelectionCoverageV3"
+          },
+          "work": {
+            "$ref": "#/components/schemas/KnowledgeSelectionWorkV3"
+          }
+        },
+        "required": [
+          "contract_version",
+          "selection_version",
+          "scope",
+          "policy_id",
+          "context_id",
+          "evaluated_at_millis",
+          "index_generation",
+          "result",
+          "coverage",
+          "work"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "procedure"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": true
+                    },
+                    "stop_reason": {
+                      "const": "first_eligible"
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 1
+                    }
+                  }
+                },
+                "result": {
+                  "properties": {
+                    "knowledge": {
+                      "properties": {
+                        "qualification_active": {
+                          "const": true
+                        },
+                        "eligible_for_knowledge_reuse": {
+                          "const": true
+                        },
+                        "procedure": {
+                          "properties": {
+                            "record": {
+                              "properties": {
+                                "state": {
+                                  "const": "Active"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "evidence": {
+                          "properties": {
+                            "eligible": {
+                              "const": true
+                            },
+                            "all_dependencies_checked": {
+                              "const": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "baseline"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": true
+                    },
+                    "index_exhausted": {
+                      "const": true
+                    },
+                    "stop_reason": {
+                      "const": "index_exhausted"
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "decision_complete": {
+                      "const": false
+                    }
+                  }
+                },
+                "work": {
+                  "properties": {
+                    "eligible_candidates": {
+                      "const": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "index_entry_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "index_entry_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "candidate_record_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "candidate_record_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "learning_byte_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "learning_byte_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_record_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_record_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_byte_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_byte_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_depth_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_depth_limit"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "type": {
+                      "const": "incomplete"
+                    },
+                    "reason": {
+                      "const": "dependency_node_limit"
+                    }
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "coverage": {
+                  "properties": {
+                    "stop_reason": {
+                      "const": "dependency_node_limit"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   }

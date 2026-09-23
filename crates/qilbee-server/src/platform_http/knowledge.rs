@@ -1,7 +1,10 @@
 //! Evidence-bound knowledge; no tool code registration or execution authority.
 use super::*;
 use crate::security::identity::ResourceScope;
-use qilbee_memory::learning::{ExternalToolIdentity, KnowledgeProposal, KnowledgeSelectRequest};
+use qilbee_memory::learning::{
+    ExternalToolIdentity, KnowledgeProposal, KnowledgeSelectRequest, KnowledgeSelectRequestV3,
+    KnowledgeSelectionWorkLimits,
+};
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .route("/api/v1/learning/knowledge/proposals", post(propose))
@@ -32,6 +35,18 @@ struct SelectRequest {
     max_instruction_bytes: usize,
     candidate_limit: usize,
     external_tool_identities: Vec<ExternalToolIdentity>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SelectRequestV3 {
+    contract_version: u32,
+    selection_version: String,
+    scope: ResourceScope,
+    policy_id: String,
+    context_id: String,
+    max_instruction_bytes: usize,
+    external_tool_identities: Vec<ExternalToolIdentity>,
+    work_limits: KnowledgeSelectionWorkLimits,
 }
 fn version2(version: u32) -> ApiResult<()> {
     if version == 2 {
@@ -118,16 +133,45 @@ async fn inspect(
 async fn select(
     State(state): State<PlatformState>,
     headers: HeaderMap,
-    body: Result<Json<SelectRequest>, JsonRejection>,
+    body: Result<Json<Value>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let learning = state.learning.clone();
     let memory = state.memory.clone();
     let limits = state.retrieval_limits.clone();
-    state.run(headers,move|identity,token,_| {
-        let request=json_body(body)?;version2(request.contract_version)?;
-        let scope=identity.authorize(token,Capability::MemoryRead,&request.scope).map_err(ApiError::operation)?;
-        let _permit=limits.acquire()?;
-        let selection=learning.select_knowledge(&memory,&scope.tenant_id,&scope.storage_namespace,KnowledgeSelectRequest {policy_id:request.policy_id.clone(),context_id:request.context_id.clone(),max_instruction_bytes:request.max_instruction_bytes,candidate_limit:request.candidate_limit,external_tool_identities:request.external_tool_identities}).map_err(ApiError::operation)?;
-        Ok(Json(json!({"contract_version":2,"policy_id":request.policy_id,"context_id":request.context_id,"result":selection})))
+    state.run(headers, move |identity, token, _| {
+        let value = json_body(body)?;
+        let invalid = |message: &'static str| ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", message);
+        match value.get("contract_version").and_then(Value::as_u64) {
+            Some(2) => {
+                let request: SelectRequest = serde_json::from_value(value)
+                    .map_err(|_| invalid("Invalid knowledge selection request fields"))?;
+                version2(request.contract_version)?;
+                let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+                let _permit = limits.acquire()?;
+                let selection = learning.select_knowledge(&memory, &scope.tenant_id, &scope.storage_namespace,
+                    KnowledgeSelectRequest { policy_id: request.policy_id.clone(), context_id: request.context_id.clone(),
+                        max_instruction_bytes: request.max_instruction_bytes, candidate_limit: request.candidate_limit,
+                        external_tool_identities: request.external_tool_identities }).map_err(ApiError::operation)?;
+                Ok(Json(json!({"contract_version":2,"policy_id":request.policy_id,"context_id":request.context_id,"result":selection})))
+            }
+            Some(3) => {
+                let request: SelectRequestV3 = serde_json::from_value(value)
+                    .map_err(|_| invalid("Invalid knowledge selection request fields"))?;
+                let scope = identity.authorize(token, Capability::MemoryRead, &request.scope).map_err(ApiError::operation)?;
+                let _permit = limits.acquire()?;
+                let selection = learning.select_knowledge_v3(&memory, &scope.tenant_id, &scope.storage_namespace,
+                    KnowledgeSelectRequestV3 { selection_version: request.selection_version,
+                        policy_id: request.policy_id.clone(), context_id: request.context_id.clone(),
+                        max_instruction_bytes: request.max_instruction_bytes,
+                        external_tool_identities: request.external_tool_identities,
+                        work_limits: request.work_limits }).map_err(ApiError::operation)?;
+                Ok(Json(json!({"contract_version":request.contract_version,"scope":request.scope,
+                    "policy_id":request.policy_id,"context_id":request.context_id,
+                    "selection_version":selection.selection_version,"evaluated_at_millis":selection.evaluated_at_millis,
+                    "index_generation":selection.index_generation,"result":selection.result,
+                    "coverage":selection.coverage,"work":selection.work})))
+            }
+            _ => Err(invalid("Knowledge selection requires contract_version 2 or 3")),
+        }
     }).await
 }

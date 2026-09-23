@@ -165,7 +165,7 @@ pub struct KnowledgeReceipt {
     /// Digest of all preceding fields, excluding this digest itself.
     pub receipt_digest: String,
 }
-fn key(tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
+pub(super) fn key(tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
     validate_text(tenant, "tenant", 512)?;
     validate_text(namespace, "authorized namespace", 4096)?;
     validate_text(id, "knowledge ID", 512)?;
@@ -261,6 +261,7 @@ impl LearningMemory {
         };
         receipt.receipt_digest = receipt.digest()?;
         let mut batch = WriteBatch::default();
+        self.put_knowledge_locator(&mut batch, &receipt)?;
         Self::put_registered_proposal(&mut batch, &binding)?;
         batch.put(key, encode(&receipt)?);
         self.inner
@@ -290,6 +291,16 @@ impl LearningMemory {
             .ok_or_else(|| {
                 Error::DataCorruption("Knowledge procedure binding is missing".into())
             })?;
+        Self::validate_knowledge_binding(tenant, namespace, id, &receipt, &binding)?;
+        Ok(Some(receipt))
+    }
+    pub(super) fn validate_knowledge_binding(
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        receipt: &KnowledgeReceipt,
+        binding: &super::bound::RegisteredProcedure,
+    ) -> Result<()> {
         let request_digest = super::registry::digest(&receipt.request)?;
         if receipt.schema_version != 2
             || receipt.tenant != tenant
@@ -316,7 +327,7 @@ impl LearningMemory {
                 "Knowledge receipt integrity mismatch".into(),
             ));
         }
-        Ok(Some(receipt))
+        Ok(())
     }
 }
 

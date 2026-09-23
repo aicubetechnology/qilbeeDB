@@ -198,3 +198,57 @@ scores or resource names; absent an explicit origin field it is shown as
 
 This console candidate remains under release validation. Its observation does
 not authorize application execution or demonstrate agent reasoning improvement.
+
+## Bounded active-knowledge selection (v3, unreleased)
+
+Use `POST /api/v1/learning/knowledge/select` with explicit `contract_version: 3`
+and `selection_version: "active_knowledge_bound_v1"`. Version 2 remains available
+with its original request, response and history-scanning behavior. Clients must
+opt into v3; there is no automatic upgrade or downgrade.
+
+Version 3 examines a dedicated active-knowledge index in the authorized scope.
+Ordinary procedures and inactive knowledge remain in the audit ledger but do not
+consume its candidate budget. Candidates are ordered by their recorded finite
+qualification lower bound, descending, then by procedure ID in ascending UTF-8
+order. The server owns this method; callers cannot supply ranking weights.
+Each candidate must match the exact policy, context and external tool identity
+set and pass current source checks before it can be returned.
+
+Supply all `work_limits`: `candidate_records` (1–1000), `index_entries` (1–4096),
+`learning_bytes` (1–16777216), `dependency_records` (1–4096) and
+`dependency_bytes` (1–16777216). Candidate records count active candidates
+inspected, including candidates later excluded. A successful selection returns
+one eligible candidate. These inspection limits are distinct from agent autonomy
+or business resource policies.
+
+The `result.type` is:
+
+- `procedure`: the first fully eligible candidate under the specified order.
+- `baseline`: the authorized index was exhausted without an eligible candidate.
+- `incomplete`: a work, depth or node limit prevented a complete decision.
+
+An unresolved higher-ranked candidate stops selection; it is not silently skipped
+in favor of a lower-ranked candidate. A proven invalid source excludes its
+candidate. `coverage` explains completeness and the stopping reason. A procedure
+can be a complete decision without exhausting the index. A baseline reference
+never instructs the application to execute it; the application owns fallback.
+
+`work` reports learning and dependency inspection separately. Byte counters cover
+encoded values admitted for integrity checking and decoding, including relevant
+integrity index values. They do not measure disk-block I/O, network traffic or
+process CPU. One fetched value may exceed the remaining byte budget; its size is
+reported as lookahead and it is not decoded. Repeated source reads use the same
+request-local snapshot and cache. Expiration is checked against that observation
+clock; recheck eligibility before later reuse.
+
+External tool identities are order-independent. Duplicate names return HTTP 400,
+even when their revisions differ. Names compare exactly, without case folding or
+Unicode normalization. Null implementation and environment identities must both
+be explicit and never act as wildcards. An empty identity set is valid.
+
+The derived index is rebuilt before the learning store opens, including after an
+older binary wrote to the authoritative ledger. Opening time therefore depends
+on retained history. Reconstruction cleans obsolete generations and flushes in
+batches at an entry-count or encoded-byte threshold; one entry may exceed the byte
+threshold. This is not a bound on total disk usage or startup time. Do not treat
+`index_generation` as a pagination cursor or a reusable snapshot lease.

@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Select evidence-bound knowledge with exact source revisions, compatible tool identities and explicit read-only metadata authority.",
+      "description": "Propose evidence-bound knowledge, inspect current sources and select compatible active knowledge with explicit versioned work limits.",
       "order": 106
     },
     {
