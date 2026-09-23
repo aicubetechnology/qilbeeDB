@@ -77,6 +77,27 @@ Thus, in this run, top-ten turnover promotes lower-ranked base candidates rather
 than discovering results outside the retained base channel. This is diagnostic
 attribution, not a new held-out evaluation or a proof of the cause of every loss.
 
+A label-aware reachability audit finds 114 support entries missing from the
+hybrid-v2 top ten but reachable within two hops, of which six were recovered.
+This ignores traversal budgets and is an oracle diagnostic, not an achievable
+retrieval estimate. A replay restricted to this fully eligible fixture matches
+all 200 observed traversal work counters, stop reasons and candidate counts.
+Of the 108 unrecovered reachable entries, 86 occur in the bounded neighborhood
+and 22 do not. More exploration alone therefore cannot explain or correct most
+of these misses; the replay does not establish general storage/security or
+scoring equivalence.
+
+There is also a structural limitation of this profile. With four anchors, any
+graph-only result has graph rank at least five: hop decay bounds a non-anchor's
+strength below the first three anchors and at most equal to the fourth, whose
+zero-hop path wins the tie. Its fusion contribution is therefore at most
+`0.25 / (2 + 5) = 1/28`. If ten base candidates exist, each of their base
+contributions is at least `0.75 / (2 + 10) = 1/16`, even before graph evidence.
+Thus a graph-only result cannot enter the top ten under these conditions.
+Revising exploration without revising this fusion constraint cannot enable that
+form of graph discovery. This argument is specific to this profile and limit;
+it does not apply to every graph profile or sparse base result set.
+
 [MAGMA](https://arxiv.org/html/2601.03236v2) motivates a distinct hypothesis:
 query-conditioned traversal can prioritize useful relational paths instead of
 only changing final fusion weights. QilbeeDB's current implementation selects a
