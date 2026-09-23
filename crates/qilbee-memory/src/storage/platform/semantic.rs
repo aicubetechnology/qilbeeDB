@@ -448,9 +448,10 @@ impl super::snapshot::MemorySnapshot<'_> {
             if record.revision < embedding.receipt.record_revision {
                 return Err(inconsistent());
             }
-            if record.revision != embedding.receipt.record_revision
-                || !self.eligible(namespace, &record)?
-            {
+            // The embedding was loaded only after eligibility succeeded in this
+            // same snapshot and clock. Rewalking the sources cannot change that
+            // decision; keep the independent embedding revision check.
+            if record.revision != embedding.receipt.record_revision {
                 continue;
             }
             let payload = record.payload.as_ref().expect("visible memory has content");

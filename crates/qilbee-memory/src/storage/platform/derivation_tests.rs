@@ -309,6 +309,12 @@ fn expired_and_rejected_sources_cannot_support_derived_memory() {
     let d = db
         .apply_memory_command("scope", &actor(), &command("derived", vec![source(&s)]))
         .unwrap();
+    db.apply_memory_embedding(
+        "scope",
+        &actor(),
+        &attach(d.record_id, "derived-vector", vec![1.0, 0.0, 0.0]),
+    )
+    .unwrap();
     let before = db.memory_snapshot();
     db.review_memory_record(
         "scope",
@@ -350,6 +356,25 @@ fn expired_and_rejected_sources_cannot_support_derived_memory() {
         )
         .is_err()
     );
+    assert_eq!(
+        before.search_semantic("scope", &search()).unwrap().hits[0]
+            .record
+            .record_id,
+        d.record_id
+    );
+    assert!(
+        db.search_memory_semantic("scope", &search())
+            .unwrap()
+            .hits
+            .is_empty()
+    );
+    assert!(
+        before
+            .search_semantic("foreign", &search())
+            .unwrap()
+            .hits
+            .is_empty()
+    );
     let mut r = input("expiring");
     r.valid_until_millis = Some(chrono::Utc::now().timestamp_millis() + 60_000);
     let exp = db
@@ -370,8 +395,29 @@ fn expired_and_rejected_sources_cannot_support_derived_memory() {
             &command("expiring-derived", vec![source(&exp)]),
         )
         .unwrap();
+    db.apply_memory_embedding(
+        "scope",
+        &actor(),
+        &attach(derived.record_id, "expiring-vector", vec![1.0, 0.0, 0.0]),
+    )
+    .unwrap();
+    let mut current = db.memory_snapshot();
+    current.now = r.valid_until_millis.unwrap() - 1;
+    assert_eq!(
+        current.search_semantic("scope", &search()).unwrap().hits[0]
+            .record
+            .record_id,
+        derived.record_id
+    );
     let mut future = db.memory_snapshot();
     future.now = r.valid_until_millis.unwrap();
+    assert!(
+        future
+            .search_semantic("scope", &search())
+            .unwrap()
+            .hits
+            .is_empty()
+    );
     assert!(
         !future
             .eligible(
