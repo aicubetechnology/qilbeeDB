@@ -349,3 +349,18 @@ previous development or reserved protocol. It declares the new candidate versus
 hybrid v2 as its primary comparison. Freeze a fresh reserved evaluation before
 using it to assess generalization; no improvement or default admission follows
 from adding this optional profile.
+
+## Check latency and payload measurements
+
+**Availability: source preview for evaluation tooling.** Graph report exports
+reject missing or duplicate repetitions, non-finite or negative durations, and
+non-integer byte counts. Measured retrieval time cannot exceed its enclosing HTTP
+observation by more than the runner's one-millisecond tolerance. The reported
+embedding-plus-HTTP estimate must equal its two components; lexical-only methods
+cannot include query embedding time.
+
+Payload byte counts are checked against the canonical UTF-8 payloads retained in
+the report and cannot exceed the response size. A mismatch stops export; keep the
+original evidence and investigate rather than editing measurements to pass.
+These consistency checks do not establish hardware isolation, representative
+concurrency, provider billing or a production latency guarantee.
