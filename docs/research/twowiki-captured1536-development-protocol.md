@@ -44,9 +44,10 @@ is measured by this development protocol.
 The capture provides batch-level generation evidence. It does not provide a
 separable generation duration for each query. Do not divide batch times among
 inputs, fill missing values with zero, or interpret retrieval-only latency as
-complete generation-to-response latency. The evaluator's report representation
-for absent per-query generation measurements must be validated before executing
-this comparison. No timing or relevance conclusion is established by input
+complete generation-to-response latency. For vector methods, both generation and combined generation-plus-HTTP durations
+are null with `embedding_timing_status: unavailable_batch_capture`. If any sample
+lacks combined timing, its aggregate p50/p95 remain null. Retrieval and HTTP
+observations remain numeric. Numeric historical reports remain valid. No timing or relevance conclusion is established by input
 qualification alone.
 
 Report sparse judgment coverage, per-category results, candidate and graph
@@ -57,6 +58,5 @@ and downstream agent-task evaluation before broader conclusions.
 The evaluator now validates its existing numeric per-query timing inputs before
 any HTTP request. Missing measured-query entries, mismatched fixture identity,
 non-finite or negative durations and batch-only timing input fail immediately.
-Reserved-query timings are not required for a development run. This preflight
-does not invent unavailable measurements or implement the pending representation
-for batch captures; the latter remains a separate contract requirement.
+Reserved-query timings are not required for a development run. The frozen generation evidence binds batch-only availability to this protocol;
+vector measurements cannot silently substitute invented numeric durations.

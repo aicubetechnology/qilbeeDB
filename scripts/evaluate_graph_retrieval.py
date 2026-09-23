@@ -303,7 +303,8 @@ def summary(rows):
         **{k: statistics.mean(r["metrics"][k] for r in rows) for k in metrics_keys},
         **{
             k: {
-                label: quantile([s[k] for r in rows for s in r["samples"]], p)
+                label: (None if any(s[k] is None for r in rows for s in r["samples"])
+                        else quantile([s[k] for r in rows for s in r["samples"]], p))
                 for label, p in [("p50", 0.5), ("p95", 0.95)]
             }
             for k in [
@@ -329,6 +330,16 @@ def validate_generation_timings(generation, fixture, protocol):
         raise ValueError("Embedding timings belong to another frozen vector set")
     if all(method in ("lexical", "graph_lexical_balanced") for method in protocol["methods"]):
         return
+    if "generation_sha256" in protocol and digest(generation) != protocol["generation_sha256"]:
+        raise ValueError("Generation evidence differs from the frozen protocol")
+    if "query_timing_status" in protocol and generation.get("query_timing_status") != protocol["query_timing_status"]:
+        raise ValueError("Generation timing availability differs from the frozen protocol")
+    if generation.get("query_timing_status") == "unavailable_batch_capture":
+        if generation.get("queries") != {} or not generation.get("batch_evidence"):
+            raise ValueError("Unavailable batch timing requires separate evidence and no invented query allocation")
+        return
+    if generation.get("query_timing_status") not in (None, "measured"):
+        raise ValueError("Unknown query timing status")
     timings = generation.get("queries")
     if not isinstance(timings, dict):
         raise ValueError("Per-query embedding timings are unavailable; batch timing cannot be allocated to queries")
@@ -505,15 +516,17 @@ def evaluate(
             embedding_ms = (
                 0
                 if method in ["lexical", "graph_lexical_balanced"]
-                else generation["queries"][qid]["elapsed_ms"]
+                else (None if generation.get("query_timing_status") == "unavailable_batch_capture"
+                      else generation["queries"][qid]["elapsed_ms"])
             )
             rows[row_key]["samples"].append(
                 {
                     "repetition": rep,
                     "retrieval_ms": retrieval_ms,
                     "http_ms": elapsed,
-                    "embedding_plus_http_ms": embedding_ms + elapsed,
+                    "embedding_plus_http_ms": None if embedding_ms is None else embedding_ms + elapsed,
                     "external_query_embedding_ms": embedding_ms,
+                    **({"embedding_timing_status": "unavailable_batch_capture"} if embedding_ms is None else {}),
                     "response_bytes": byte_count,
                     "payload_bytes": sum(
                         len(canonical(h["record"]["payload"])) for h in page["hits"]

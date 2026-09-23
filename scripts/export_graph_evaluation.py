@@ -60,6 +60,9 @@ def export(report, fixture):
                 "Published metrics differ from recorded judgments and ranking"
             )
         validate_measurements(row, protocol["repetitions"])
+        if protocol.get("query_timing_status") == "unavailable_batch_capture" and row["method"] not in ("lexical", "graph_lexical_balanced"):
+            if any(sample.get("embedding_timing_status") != "unavailable_batch_capture" for sample in row["samples"]):
+                raise ValueError("Vector timing availability differs from the frozen batch capture")
         rows.append(
             {
                 k: row[k]

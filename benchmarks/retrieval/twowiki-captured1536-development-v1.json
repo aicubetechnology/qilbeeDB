@@ -246,5 +246,7 @@
   "embedding_identity_kind": "captured-vector-set",
   "provider_weight_revision": null,
   "offline_only": true,
-  "newly_generated_queries_compatible": false
+  "newly_generated_queries_compatible": false,
+  "generation_sha256": "bff5aaaa81da5e3d1d80975109b8aca5b577c7735c57a8c1802fc9e0bf4328fa",
+  "query_timing_status": "unavailable_batch_capture"
 }
