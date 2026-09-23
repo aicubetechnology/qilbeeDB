@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "protocol_version": "graph_base_preserving_reserved_v1",
+  "frozen_before_retrieval": true,
+  "source_sha256": "77184df2d7c6b5fd9eb978e958dcef7606fc86e5dad568fd161b566eeecd2b3b",
+  "graph_policy_sha256": "15e13a30ef90b01b1008371382a111769fbf26259b2005ff1b25467659a5bd0c",
+  "relations_sha256": "d2dd6356c0d4aa55c3ab3cd5940adec96dd49153ba6157f0b4e7f998335fc319",
+  "dataset": "MuSiQue-Ans v1.0 frozen 200 public-dev questions disjoint from prior query components; 30 prior train questions for warmup only",
+  "primary_comparison": {
+    "candidate": "graph_hybrid_base_preserving",
+    "baseline": "weighted_rrf_v2"
+  },
+  "methods": [
+    "lexical",
+    "semantic",
+    "weighted_rrf_v1",
+    "weighted_rrf_v2",
+    "graph_hybrid_balanced",
+    "graph_hybrid_entity",
+    "graph_lexical_balanced",
+    "graph_hybrid_depth_zero",
+    "graph_hybrid_base_preserving"
+  ],
+  "graph_seed_hybrid_version": "weighted_rrf_v2",
+  "graph_profiles": {
+    "graph_hybrid_balanced": "typed_path_balanced_v1",
+    "graph_hybrid_entity": "typed_path_entity_v1",
+    "graph_lexical_balanced": "typed_path_balanced_v1",
+    "graph_hybrid_depth_zero": "typed_path_balanced_v1",
+    "graph_hybrid_base_preserving": "typed_path_base_preserving_v1"
+  },
+  "k": 10,
+  "scan_limit": 10000,
+  "scan_bytes_limit": 67108864,
+  "expansion": {
+    "direction": "both",
+    "max_depth": 2,
+    "node_limit": 128,
+    "edge_limit": 256,
+    "scan_limit": 1024,
+    "embedding_bytes_limit": 8388608
+  },
+  "min_score": -1.0,
+  "split": "test",
+  "repetitions": 3,
+  "warmup": "one fixed development query once per method; excluded from metrics",
+  "order": "seeded shuffle of all query, method and repetition jobs",
+  "seed": 20260921,
+  "client_concurrency": 1,
+  "cache": "RocksDB and OS caches retained; no result cache; no forced cold run",
+  "query_embeddings": "frozen once and reused by every vector mode; no encoder inside DB",
+  "reported_metrics": [
+    "nDCG@10",
+    "judged Recall@10",
+    "all labeled supports@10",
+    "no labeled support@10",
+    "per-category results",
+    "paired query bootstrap intervals",
+    "retrieval p50/p95",
+    "HTTP p50/p95",
+    "estimated external-embedding-plus-HTTP p50/p95",
+    "canonical payload bytes",
+    "response bytes",
+    "source, candidate, graph and affinity work",
+    "coverage cuts",
+    "failures",
+    "process CPU/RSS when observed"
+  ],
+  "default_admission": false,
+  "scope_of_evidence": "Fresh-to-campaign reserved comparison on 200 public development questions. Not hidden test, model-training exclusion, or agent-task evidence. No default admission without assessing uncertainty, category regressions and operating cost."
+}

@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Store externally supplied, model-bound embeddings and retrieve exact cosine results with snapshot-scoped source eligibility.",
+      "description": "Attach external embeddings, preserve cosine semantics and validate compatible revision-bound vector retrieval.",
       "order": 60
     },
     {
@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Compare versioned graph retrieval policies, interpret additive or best-channel scores, and preserve scope, evidence and coverage.",
+      "description": "Compare versioned graph scores and verify ranking, coverage and measurement evidence.",
       "order": 208
     },
     {

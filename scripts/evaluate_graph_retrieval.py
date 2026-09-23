@@ -88,6 +88,7 @@ def evaluation_stage(protocol):
         "graph_multihop_compare_v1": "test",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
+        "graph_base_preserving_reserved_v1": "test",
     }
     expected = stages.get(protocol.get("protocol_version"))
     if expected is None or protocol.get("split") != expected:
@@ -128,7 +129,9 @@ def verify_protocol(protocol, fixture, graph):
         "graph_lexical_balanced",
         "graph_hybrid_depth_zero",
     }
-    candidate_trial = protocol["protocol_version"] == "graph_base_preserving_development_v1"
+    candidate_trial = protocol["protocol_version"] in (
+        "graph_base_preserving_development_v1", "graph_base_preserving_reserved_v1"
+    )
     if candidate_trial:
         required.add("graph_hybrid_base_preserving")
     if set(protocol["methods"]) != required or len(protocol["methods"]) != len(
