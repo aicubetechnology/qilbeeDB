@@ -641,14 +641,15 @@ class GraphPipelineChecks(unittest.TestCase):
                 "samples": [
                     {
                         "repetition": rep,
+                        "external_query_embedding_ms": 0.0,
+                        "response_bytes": 1,
+                        "payload_bytes": 0,
                         **{
                             k: 1.0
                             for k in [
                                 "retrieval_ms",
                                 "http_ms",
                                 "embedding_plus_http_ms",
-                                "response_bytes",
-                                "payload_bytes",
                             ]
                         },
                     }
