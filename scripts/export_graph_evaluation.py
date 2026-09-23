@@ -27,7 +27,7 @@ def export(report, fixture):
     if "generation_sha256" in protocol and plan.get("generation_sha256") != protocol["generation_sha256"]:
         raise ValueError("Export generation evidence differs from the frozen protocol")
     stage = evaluation_stage(protocol)
-    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1"):
+    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1", "twowiki_captured1536_reserved_v1"):
         from twowiki_evaluation_contract import verify_twowiki_protocol
         verify_twowiki_protocol(protocol, fixture)
     if protocol["protocol_version"] in ("graph_path_strength_development_v1", "graph_path_strength_regression_v1"):
@@ -38,6 +38,10 @@ def export(report, fixture):
         verify_support_reserved(protocol, fixture)
     if report.get("evaluation_stage", "reserved_comparison") != stage:
         raise ValueError("Report mislabels its evaluation stage")
+    if report.get("scope_of_evidence") != protocol.get("scope_of_evidence"):
+        raise ValueError("Report evidence scope differs from the frozen protocol")
+    if report.get("default_admission", False) is not False or protocol.get("default_admission") is not False:
+        raise ValueError("Experimental evidence cannot admit a production default")
     queries = evaluation_queries(fixture, protocol)
     expected = {(qid, method) for qid in queries for method in protocol["methods"]}
     seen = set()
