@@ -16,6 +16,7 @@ __license__ = "Apache-2.0"
 
 # Legacy graph clients load on access so the verified consumer remains stdlib-only.
 from importlib import import_module
+from .ordered_memory import OrderedMemoryClient
 from .consumer import (
     VerifiedMemoryConsumer,
     VerifiedCursor,
@@ -88,6 +89,7 @@ def __dir__():
 
 
 __all__ = [
+    "OrderedMemoryClient",
     "KnowledgeSelectionClient",
     "ConsolidationClient",
     "ConsolidationInput",

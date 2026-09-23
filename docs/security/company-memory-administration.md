@@ -333,3 +333,5 @@ and root memory UUIDs. It returns eligible nodes and revision-bound evidence
 edges in one snapshot, with explicit depth/node cuts. It uses the same company
 administrative authority without delegated credentials. Unlike retained inventory,
 it omits unavailable payloads. See [memory evidence graphs](../api/memory-evidence-graph.md).
+
+For a Python application reading one authorized scope, see [Ordered memory reads with Python](../client-libraries/ordered-memory.md). Company administration remains a separate capability.

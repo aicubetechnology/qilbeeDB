@@ -106,6 +106,7 @@ nav:
     - Client Libraries:
       - Overview: client-libraries/overview.md
       - Python SDK: client-libraries/python.md
+      - Ordered memory with Python: client-libraries/ordered-memory.md
       - Connection Management: client-libraries/connections.md
     - Graph Operations:
       - Nodes: graph-operations/nodes.md
