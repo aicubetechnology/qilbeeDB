@@ -605,3 +605,25 @@ gains, change the default or demonstrate agent-task improvement.
 The [completed HTTP development report](../research/path-strength-development-results.md)
 records the primary uncertainty interval, regressions, coverage cuts and measured
 local cost. Its exploratory result does not establish a preferred default.
+
+### Track regressions after a cohort has been observed
+
+`graph-path-strength-regression-v1.json` reuses all 140 questions from the earlier
+balanced-profile comparison as **observed regression data**. The source fixture
+retains its historical `test` split for identity and provenance, but the evaluator
+and report use `evaluation_stage: observed_regression`. This reuse cannot be
+presented as a new reserved confirmation. The protocol pins the earlier report's
+hash, exact measured and warm-up IDs, source identity, methods and work limits.
+
+The `support_transitions` report compares positively judged support sets for each
+query. It identifies loss of all labeled support, recovery of the first labeled
+support, loss or recovery of complete labeled support, and the exact document IDs
+lost, gained and retained. A query without positive judgments is listed separately;
+it is not treated as a measured retrieval failure. Sparse judgments do not prove
+that every other returned document is irrelevant.
+
+Transitions are recomputed from frozen judgments and recorded rankings before
+export. Altering a count and its list of queries together cannot hide a loss.
+Examine these cases alongside relevance, cost, coverage and category results.
+An observed regression comparison can expose problems and guide development;
+independent confirmation still needs new, predeclared evaluation data.

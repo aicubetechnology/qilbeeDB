@@ -90,6 +90,7 @@ def evaluation_stage(protocol):
         "graph_balanced_v1_support_reserved_v1": "test",
         "graph_seed_matrix_development_v1": "development",
         "graph_path_strength_development_v1": "development",
+        "graph_path_strength_regression_v1": "test",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
         "graph_best_channel_development_v1": "development",
@@ -99,6 +100,8 @@ def evaluation_stage(protocol):
     expected = stages.get(protocol.get("protocol_version"))
     if expected is None or protocol.get("split") != expected:
         raise ValueError("Protocol identity and evaluation split differ")
+    if protocol["protocol_version"] == "graph_path_strength_regression_v1":
+        return "observed_regression"
     return "development" if expected == "development" else "reserved_comparison"
 
 
@@ -125,7 +128,7 @@ def verify_protocol(protocol, fixture, graph):
         or not 1 <= protocol["repetitions"] <= 20
     ):
         raise ValueError("Protocol differs from supported frozen comparison")
-    if protocol["protocol_version"] == "graph_path_strength_development_v1":
+    if protocol["protocol_version"] in ("graph_path_strength_development_v1", "graph_path_strength_regression_v1"):
         from path_strength_contract import verify_path_strength_protocol
         verify_path_strength_protocol(protocol, fixture)
         return
@@ -546,6 +549,9 @@ def evaluate(
                 "primary_predeclared": baseline == primary["baseline"],
                 "metrics": differences,
             }
+        if "support_comparisons" in protocol:
+            from graph_report_evidence import support_transitions
+            report["support_transitions"] = support_transitions(report["rows"], protocol, queries)
         if "seed_comparisons" in protocol:
             from graph_report_evidence import seed_comparisons
             report["seed_comparisons"] = seed_comparisons(report["rows"], protocol, queries)
