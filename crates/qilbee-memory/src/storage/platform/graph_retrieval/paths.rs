@@ -134,7 +134,11 @@ pub(super) fn rank_paths(
                 GraphPathContribution {
                     rank,
                     strength: path.strength,
-                    contribution: profile.graph_weight / (profile.rank_constant + rank) as f64,
+                    contribution: if profile.version == GraphRankingVersion::TypedPathStrengthV1 {
+                        profile.graph_weight * path.strength
+                    } else {
+                        profile.graph_weight / (profile.rank_constant + rank) as f64
+                    },
                     anchor: path.anchor,
                     anchor_rank: path.anchor_rank,
                     steps: path.steps,

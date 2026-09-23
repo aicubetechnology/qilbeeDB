@@ -118,17 +118,17 @@ ties. Within an uncut neighborhood, adding equal parallel assertions cannot infl
 rank, and cycling cannot increase strength. Added edges can still consume bounded
 traversal work; compare coverage as well as scores.
 
-The final score is:
+For the four initial profiles, the final score is:
 
 ```text
 score = (base present ? 0.25 / (2 + base_rank) : 0)
       + (graph present ? 0.75 / (2 + graph_rank) : 0)
 ```
 
-Final ties use ascending record UUID. The maximum for every current graph version
-is `0.25/3 + 0.75/3 = 1/3`. This is neither cosine nor a probability. The published
-OpenAPI fixes each profile's parameters and validates real HTTP responses for all
-four versions. Raw native scores and external vector receipts remain separate.
+Final ties use ascending record UUID. The maximum for these initial versions
+is `0.25/3 + 0.75/3 = 1/3`. This is neither cosine nor a probability. Later profiles
+have their own formulas below. The published OpenAPI fixes each profile's
+parameters. Raw native scores and external vector receipts remain separate.
 
 ## Paths and current memory authority
 
@@ -531,3 +531,49 @@ No result automatically changes the default or establishes agent improvement.
 The [completed reserved comparison](../research/balanced-support-reserved-results.md)
 reports both complete-support gains and lost-support regressions. Its primary
 uncertainty interval includes zero, so it does not admit a new default.
+
+### Preserve path magnitude (unreleased experiment)
+
+`typed_path_strength_v1` is an optional source preview. Use it only when your
+server's graph-ranking catalog advertises that exact identity. It does not change
+the existing profiles or the default retrieval method.
+
+This profile keeps the balanced relation weights, 100 base candidates, four
+anchors, traversal limits, hop decay and affinity rules described above. It uses
+`method: strongest_typed_path_strength`, with equal base and graph weights:
+
+```text
+score = (base present ? 0.5 / (2 + base_rank) : 0)
+      + (graph present ? 0.5 * strongest_path_strength : 0)
+```
+
+Ranks are one-based. A path starts at `1 / (2 + anchor_rank)` and multiplies
+that value by `0.5 * relation_weight * destination_affinity` for every edge.
+This profile fixes every relation weight at 1. Lexical affinity is 1. Vector
+cosine is bounded to [-1, 1], then affinity is `0.5 + 0.5 * max(cosine, 0)`,
+which lies in [0.5, 1]. Missing or stale embeddings use affinity 0.5. Finite,
+nonzero vectors with the declared dimensions are required; nonfinite vector
+values are rejected before ranking. Negative cosine does not subtract evidence.
+There is no per-query normalization or weight redistribution for a missing channel.
+
+Consequently, every edge factor is at most 0.5, and path strength is in [0, 1/3].
+Equal channel weights do not imply equal score distributions or calibrated
+relevance. They are immutable experimental parameters requiring evaluation.
+
+A graph hit's `rank` still describes its position among eligible paths, but its
+`contribution` depends on absolute `strength`. Decreasing path strength can now
+reduce the contribution even when graph rank stays unchanged. An absent graph
+path contributes zero; the absence does not establish that a memory is irrelevant.
+The maximum contribution of either channel is `1/6`; the combined maximum is
+`1/3`. Neither strength nor score is a probability. Final ties use record UUID.
+
+For a lexical query, a first-ranked anchor contributes `1/6` through each channel.
+A graph-only, one-hop neighbor of that anchor with relation weight 1 has strength
+`1/6` and score `1/12`. Such a neighbor can enter the top ten; this method does not
+guarantee preservation of the base top ten. Duplicate paths are not summed.
+
+This is a development hypothesis about fusion, not a demonstrated relevance gain.
+Keep the seed version, scope, corpus revisions and work budgets fixed when
+comparing it. Report lost relevant results as well as newly recovered results.
+A truncated neighborhood remains truncated; this formula does not restore
+unexamined candidates or replace freshness checks before context reuse.
