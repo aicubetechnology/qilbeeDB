@@ -53,3 +53,10 @@ Report sparse judgment coverage, per-category results, candidate and graph
 truncation, response sizes, uncertainty and losses as well as average relevance.
 A development benefit would still require a separately frozen reserved comparison
 and downstream agent-task evaluation before broader conclusions.
+
+The evaluator now validates its existing numeric per-query timing inputs before
+any HTTP request. Missing measured-query entries, mismatched fixture identity,
+non-finite or negative durations and batch-only timing input fail immediately.
+Reserved-query timings are not required for a development run. This preflight
+does not invent unavailable measurements or implement the pending representation
+for batch captures; the latter remains a separate contract requirement.

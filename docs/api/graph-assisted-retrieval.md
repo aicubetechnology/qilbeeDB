@@ -643,3 +643,7 @@ When switching external embeddings, freeze a new evaluation protocol even if the
 corpus and ranking formulas stay unchanged. The [captured 1536-dimensional protocol](../research/twowiki-captured1536-development-protocol.md)
 binds exact vector identity and preserves development/reserved roles. Input
 qualification alone provides no relevance or latency result.
+
+Evaluation tooling checks required per-query timing evidence before starting HTTP
+work. Missing generation observations must be represented honestly under a
+validated report contract; batch durations cannot substitute for query durations.

@@ -323,6 +323,28 @@ def summary(rows):
     }
 
 
+def validate_generation_timings(generation, fixture, protocol):
+    """Validate existing per-query timing evidence before any benchmark HTTP call."""
+    if generation.get("fixture_sha256") != digest(fixture):
+        raise ValueError("Embedding timings belong to another frozen vector set")
+    if all(method in ("lexical", "graph_lexical_balanced") for method in protocol["methods"]):
+        return
+    timings = generation.get("queries")
+    if not isinstance(timings, dict):
+        raise ValueError("Per-query embedding timings are unavailable; batch timing cannot be allocated to queries")
+    for query_id in evaluation_queries(fixture, protocol):
+        entry = timings.get(query_id)
+        if not isinstance(entry, dict) or "elapsed_ms" not in entry:
+            raise ValueError("Missing embedding timing for a measured query")
+        value = entry["elapsed_ms"]
+        try:
+            valid = type(value) in (int, float) and math.isfinite(value) and value >= 0
+        except OverflowError:
+            valid = False
+        if not valid:
+            raise ValueError("Embedding timing must be a finite nonnegative duration")
+
+
 def evaluate(
     client,
     fixture,
@@ -338,8 +360,7 @@ def evaluate(
     validate_state(state, fixture)
     if state["fixture_sha256"] != digest(fixture):
         raise ValueError("Manifest belongs to another frozen vector set")
-    if generation["fixture_sha256"] != digest(fixture):
-        raise ValueError("Embedding timings belong to another frozen vector set")
+    validate_generation_timings(generation, fixture, protocol)
     identity = client.call("GET", "/api/v1/identity")[0]["credential"]
     if (
         identity["tenant_id"] != state["tenant_id"]
