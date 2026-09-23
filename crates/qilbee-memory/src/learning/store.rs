@@ -454,6 +454,8 @@ pub mod experience_export;
 pub mod strategies;
 
 pub mod knowledge;
+mod knowledge_origin_hash;
+pub mod knowledge_origin;
 
 pub mod knowledge_selection;
 

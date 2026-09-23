@@ -3,11 +3,13 @@ use super::*;
 use crate::storage::platform::{CompanyMemoryAddress, MemoryResourceScope, MemoryVisibility};
 use serde::Deserialize;
 
+mod origins;
+pub use origins::*;
 mod evidence;
-mod records;
 mod metadata;
-pub use metadata::*;
+mod records;
 pub use evidence::*;
+pub use metadata::*;
 #[cfg(test)]
 mod tests;
 pub use records::{KnowledgeDetails, LearningResourceDetails, StrategyDetails};
@@ -371,16 +373,22 @@ impl LearningMemory {
             page.scanned_record_bytes += bytes;
             match resource {
                 Some(resource) if query.filter.matches(&resource) => {
-                    let details = self
-                        .catalog_details(company, &resource)?
-                        .ok_or_else(corrupt)?;
-                    let entry = self.catalog_summary(company, &details, resource)?;
-                    if text.as_ref().is_none_or(|v| {
-                        entry.title.to_lowercase().contains(v)
-                            || entry.resource.id.to_lowercase().contains(v)
-                    }) {
-                        observe(&details, &entry)?;
-                        page.entries.push(entry);
+                    // Version 1 enumerates ordinary resources only. The reader
+                    // verifies combined evidence before returning this conflict;
+                    // corrupt mandatory origins remain errors, never skipped.
+                    let details = match self.catalog_details(company, &resource) {
+                        Err(Error::UnsupportedKnowledgeOrigin) => None,
+                        result => Some(result?.ok_or_else(corrupt)?),
+                    };
+                    if let Some(details) = details {
+                        let entry = self.catalog_summary(company, &details, resource)?;
+                        if text.as_ref().is_none_or(|v| {
+                            entry.title.to_lowercase().contains(v)
+                                || entry.resource.id.to_lowercase().contains(v)
+                        }) {
+                            observe(&details, &entry)?;
+                            page.entries.push(entry);
+                        }
                     }
                 }
                 None => page.skipped_non_platform_records += 1,
@@ -432,5 +440,92 @@ impl LearningMemory {
             .namespace(company)?
             .ok_or_else(|| invalid("Knowledge scope is required"))?;
         self.inspect_knowledge(memory, company, &namespace, &resource.id)
+    }
+}
+
+impl LearningMemory {
+    /// Versioned company inspection preserves minimal origin disclosure and
+    /// derives the namespace exclusively from the authenticated company.
+    pub fn inspect_company_knowledge_with_origin(
+        &self,
+        memory: &crate::RocksDbMemoryStorage,
+        company: &str,
+        resource: &LearningResourceRef,
+    ) -> Result<
+        Option<(
+            super::knowledge::KnowledgeInspection,
+            super::knowledge_origin::KnowledgeOriginDescriptor,
+        )>,
+    > {
+        if resource.kind != LearningResourceKind::Knowledge {
+            return Err(invalid("A knowledge resource reference is required"));
+        }
+        let namespace = resource
+            .namespace(company)?
+            .ok_or_else(|| invalid("Knowledge scope is required"))?;
+        self.inspect_knowledge_with_origin(memory, company, &namespace, &resource.id)
+    }
+}
+
+impl LearningMemory {
+    /// Contract-v2 details expose only a verified origin descriptor. Generic
+    /// procedures remain visible with null origin; reserved markers never do.
+    pub fn inspect_company_learning_resource_with_origin(
+        &self,
+        company: &str,
+        resource: &LearningResourceRef,
+    ) -> Result<
+        Option<(
+            LearningResourceDetails,
+            Option<super::knowledge_origin::KnowledgeOriginDescriptor>,
+        )>,
+    > {
+        validate_text(company, "company", 256)?;
+        let namespace = resource.namespace(company)?;
+        let _guard = self
+            .inner
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
+        if !matches!(
+            resource.kind,
+            LearningResourceKind::Knowledge | LearningResourceKind::Procedure
+        ) {
+            return Ok(self
+                .catalog_details(company, resource)?
+                .map(|details| (details, None)));
+        }
+        let namespace =
+            namespace.ok_or_else(|| invalid("Knowledge or procedure scope is required"))?;
+        let binding = self.registered_procedure(company, &namespace, &resource.id)?;
+        let receipt = self.knowledge_receipt_any_origin(company, &namespace, &resource.id)?;
+        if let Some(receipt) = receipt {
+            let origin = super::knowledge_origin::descriptor_from_verified_receipt(&receipt)?;
+            let binding = binding
+                .ok_or_else(|| Error::DataCorruption("Knowledge procedure is missing".into()))?;
+            let details = if resource.kind == LearningResourceKind::Knowledge {
+                LearningResourceDetails::Knowledge(KnowledgeDetails {
+                    receipt,
+                    procedure: binding,
+                })
+            } else {
+                LearningResourceDetails::Procedure(binding)
+            };
+            return Ok(Some((details, Some(origin))));
+        }
+        if let Some(binding) = binding {
+            let sources = &binding.record.proposal.source_refs;
+            if super::knowledge::has_knowledge_binding_marker(sources)
+                || super::knowledge_origin::has_origin_marker(sources)
+            {
+                return Err(Error::DataCorruption(
+                    "Mandatory knowledge binding is missing".into(),
+                ));
+            }
+            if resource.kind == LearningResourceKind::Procedure {
+                return Ok(Some((LearningResourceDetails::Procedure(binding), None)));
+            }
+        }
+        Ok(None)
     }
 }

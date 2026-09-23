@@ -32,13 +32,19 @@ impl LearningMemory {
     }
 
     pub(super) fn knowledge_index_prefix(&self, receipt: &KnowledgeReceipt) -> Result<Vec<u8>> {
-        self.selection_index_prefix(
+        let mut prefix = self.selection_index_prefix(
             &receipt.tenant,
             &receipt.namespace,
             &receipt.request.policy_id,
             &receipt.request.context_id,
             &receipt.request.external_identities()?,
-        )
+        )?;
+        if super::knowledge_origin::has_origin_marker(&receipt.record.proposal.source_refs) {
+            // Keep ordinary-only readers on projection 1; mixed readers merge
+            // projection 2 under one shared request budget and ordering key.
+            prefix[INDEX_ROOT.len() + 16] = 2;
+        }
+        Ok(prefix)
     }
 
     pub(super) fn selection_index_prefix(
@@ -57,6 +63,17 @@ impl LearningMemory {
         key.extend_from_slice(&(identities.len() as u32).to_be_bytes());
         key.extend_from_slice(&identities);
         Ok(key)
+    }
+
+    pub(super) fn origin_selection_index_prefix(
+        &self,
+        mut prefix: Vec<u8>,
+        kind: super::knowledge_selection::KnowledgeOriginKind,
+    ) -> Vec<u8> {
+        if kind == super::knowledge_selection::KnowledgeOriginKind::ExperienceMemory {
+            prefix[INDEX_ROOT.len() + 16] = 2;
+        }
+        prefix
     }
 
     pub(super) fn active_key(
@@ -121,7 +138,7 @@ impl LearningMemory {
             .ok_or_else(|| Error::DataCorruption("Knowledge index locator is missing".into()))?;
         let locator: KnowledgeLocator = decode(&bytes)?;
         let receipt = self
-            .knowledge_receipt(&locator.tenant, &locator.namespace, &locator.id)?
+            .knowledge_receipt_any_origin(&locator.tenant, &locator.namespace, &locator.id)?
             .ok_or_else(|| Error::DataCorruption("Knowledge index receipt is missing".into()))?;
         if receipt.record.scope != before.scope
             || receipt.request.id != before.proposal.id
@@ -192,7 +209,7 @@ impl LearningMemory {
                 ));
             }
             let receipt = self
-                .knowledge_receipt(&raw.tenant, &raw.namespace, &raw.request.id)?
+                .knowledge_receipt_any_origin(&raw.tenant, &raw.namespace, &raw.request.id)?
                 .ok_or_else(|| {
                     Error::DataCorruption("Knowledge receipt disappeared during rebuild".into())
                 })?;
@@ -224,6 +241,39 @@ impl LearningMemory {
             .db
             .write_opt(batch, &write_options())
             .map_err(storage_error)?;
+        // Audit the reverse origin link, including orphaned origins whose
+        // ordinary receipt was removed. Never publish an incomplete generation.
+        for item in self
+            .inner
+            .db
+            .iterator(IteratorMode::From(&[17], Direction::Forward))
+        {
+            let (key, bytes) = item.map_err(storage_error)?;
+            if key.first() != Some(&17) {
+                break;
+            }
+            let raw: super::knowledge_origin::CombinedKnowledgeReceipt = decode(&bytes)?;
+            if key.as_ref()
+                != super::knowledge_origin::origin_key(
+                    &raw.tenant,
+                    &raw.namespace,
+                    &raw.request.knowledge.id,
+                )?
+                .as_slice()
+            {
+                return Err(Error::DataCorruption(
+                    "Knowledge origin storage key mismatch".into(),
+                ));
+            }
+            self.combined_knowledge_receipt(
+                &raw.tenant,
+                &raw.namespace,
+                &raw.request.knowledge.id,
+            )?
+            .ok_or_else(|| {
+                Error::DataCorruption("Knowledge origin disappeared during rebuild".into())
+            })?;
+        }
         // Also inspect authoritative procedures: missing receipts must not silently
         // turn active knowledge into an apparently empty derived index.
         for item in self
@@ -241,7 +291,8 @@ impl LearningMemory {
                     "Procedure storage key mismatch".into(),
                 ));
             }
-            if has_knowledge_binding_marker(&record.proposal.source_refs)
+            if (has_knowledge_binding_marker(&record.proposal.source_refs)
+                || super::knowledge_origin::has_origin_marker(&record.proposal.source_refs))
                 && self
                     .inner
                     .db

@@ -47,6 +47,9 @@ pub enum Error {
     #[error("Constraint violation: {0}")]
     ConstraintViolation(String),
 
+    #[error("Knowledge origin requires a compatible negotiated contract")]
+    UnsupportedKnowledgeOrigin,
+
     #[error("Unique constraint violation on {property} for label {label}")]
     UniqueViolation { label: String, property: String },
 

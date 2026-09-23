@@ -1,7 +1,8 @@
 //! Native company learning catalogs. Caller-selected tenants are never accepted.
 use super::*;
 use qilbee_memory::learning::{
-    LearningCatalogQuery, LearningEvidenceQuery, LearningEvidenceRef, LearningResourceRef,
+    LearningCatalogQuery, LearningCatalogQueryV2, LearningEvidenceQuery, LearningEvidenceRef,
+    LearningResourceRef,
 };
 
 pub(super) fn routes() -> Router<PlatformState> {
@@ -26,7 +27,7 @@ pub(super) fn routes() -> Router<PlatformState> {
 #[serde(deny_unknown_fields)]
 struct CatalogRequest {
     contract_version: u32,
-    query: LearningCatalogQuery,
+    query: Value,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -46,15 +47,23 @@ async fn query(
         .run(headers, move |_, _, principal| {
             require_admin(&principal)?;
             let request = json_body(body)?;
-            version(request.contract_version)?;
             let _permit = limits.acquire()?;
-            let page = learning
-                .company_learning_catalog(&principal.tenant_id, &request.query)
-                .map_err(ApiError::operation)?;
-            Ok(
-                Json(json!({"contract_version":1,"company_id":principal.tenant_id,"page":page}))
-                    .into_response(),
-            )
+            match request.contract_version {
+                1 => {
+                    let query: LearningCatalogQuery = serde_json::from_value(request.query)
+                        .map_err(|_| ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Invalid version 1 catalog query"))?;
+                    let page = learning.company_learning_catalog(&principal.tenant_id, &query).map_err(ApiError::operation)?;
+                    Ok(Json(json!({"contract_version":1,"company_id":principal.tenant_id,"page":page})).into_response())
+                }
+                2 => {
+                    let query: LearningCatalogQueryV2 = serde_json::from_value(request.query)
+                        .map_err(|_| ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Invalid version 2 catalog query"))?;
+                    let accepted = query.canonical_origins().map_err(ApiError::operation)?;
+                    let page = learning.company_learning_catalog_with_origin(&principal.tenant_id, &query).map_err(ApiError::operation)?;
+                    Ok(Json(json!({"contract_version":2,"company_id":principal.tenant_id,"accepted_origin_kinds":accepted,"page":page})).into_response())
+                }
+                _ => Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Learning catalog requires contract_version 1 or 2")),
+            }
         })
         .await
 }
@@ -69,8 +78,15 @@ async fn read(
     state.run(headers, move |_, _, principal| {
         require_admin(&principal)?;
         let request = json_body(body)?;
-        version(request.contract_version)?;
+        if !matches!(request.contract_version, 1 | 2) {
+            return Err(ApiError::new(StatusCode::BAD_REQUEST, "invalid_request", "Learning resource read requires contract_version 1 or 2"));
+        }
         let _permit = limits.acquire()?;
+        if request.contract_version == 2 {
+            let (details, origin) = learning.inspect_company_learning_resource_with_origin(&principal.tenant_id, &request.resource)
+                .map_err(ApiError::operation)?.ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "record_not_found", "No learning resource exists in the authorized company"))?;
+            return Ok(Json(json!({"contract_version":2,"company_id":principal.tenant_id,"resource":request.resource,"details":details,"origin":origin})).into_response());
+        }
         let details = learning.inspect_company_learning_resource(&principal.tenant_id, &request.resource)
             .map_err(ApiError::operation)?.ok_or_else(|| ApiError::new(StatusCode::NOT_FOUND, "record_not_found", "No learning resource exists in the authorized company"))?;
         Ok(Json(json!({"contract_version":1,"company_id":principal.tenant_id,"resource":request.resource,"details":details})).into_response())
@@ -139,8 +155,18 @@ async fn inspect_knowledge(
     state.run(headers,move|_,_,principal| {
         require_admin(&principal)?;
         let request=json_body(body)?;
-        if request.contract_version!=2 {return Err(ApiError::new(StatusCode::BAD_REQUEST,"invalid_request","Knowledge requires contract_version 2"));}
+        if !matches!(request.contract_version, 2 | 3) {
+            return Err(ApiError::new(StatusCode::BAD_REQUEST,"invalid_request","Knowledge inspection requires contract_version 2 or 3"));
+        }
         let _permit=limits.acquire()?;
+        if request.contract_version == 3 {
+            let (inspection, origin) = learning.inspect_company_knowledge_with_origin(
+                &memory, &principal.tenant_id, &request.resource,
+            ).map_err(ApiError::operation)?.ok_or_else(|| ApiError::new(
+                StatusCode::NOT_FOUND, "record_not_found", "No knowledge proposal exists in the authorized company",
+            ))?;
+            return Ok(Json(json!({"contract_version":3,"company_id":principal.tenant_id,"resource":request.resource,"inspection":inspection,"origin":origin})));
+        }
         let inspection=learning.inspect_company_knowledge(&memory,&principal.tenant_id,&request.resource).map_err(ApiError::operation)?.ok_or_else(||ApiError::new(StatusCode::NOT_FOUND,"record_not_found","No knowledge proposal exists in the authorized company"))?;
         Ok(Json(json!({"contract_version":2,"company_id":principal.tenant_id,"resource":request.resource,"inspection":inspection})))
     }).await

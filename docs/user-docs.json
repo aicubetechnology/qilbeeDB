@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Choose revision-bound procedural knowledge, inspect current source validity and use bounded selection without transferring execution authority.",
+      "description": "Store evidence-bound instructions, inspect current eligibility, and explicitly adopt combined experience and memory origins.",
       "order": 106
     },
     {

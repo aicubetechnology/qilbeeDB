@@ -377,6 +377,11 @@ impl ApiError {
                 "record_not_found",
                 "No current record exists in the authorized scope",
             ),
+            Error::UnsupportedKnowledgeOrigin => Self::new(
+                StatusCode::CONFLICT,
+                "unsupported_knowledge_origin",
+                "This knowledge origin requires a compatible contract version",
+            ),
             Error::ConstraintViolation(_) => Self::new(
                 StatusCode::CONFLICT,
                 "idempotency_conflict",

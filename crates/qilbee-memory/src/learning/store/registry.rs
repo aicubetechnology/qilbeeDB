@@ -76,7 +76,7 @@ impl EvaluationContext {
 pub(super) fn digest<T: Serialize>(value: &T) -> Result<String> {
     Ok(format!("{:x}", Sha256::digest(encode(value)?)))
 }
-fn registry_key(kind: u8, tenant: &str, id: &str) -> Vec<u8> {
+pub(super) fn registry_key(kind: u8, tenant: &str, id: &str) -> Vec<u8> {
     let mut key = vec![kind];
     append_component(&mut key, tenant);
     append_component(&mut key, id);

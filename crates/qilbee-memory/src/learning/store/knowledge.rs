@@ -176,7 +176,7 @@ pub(super) fn key(tenant: &str, namespace: &str, id: &str) -> Result<Vec<u8>> {
     Ok(key)
 }
 impl KnowledgeReceipt {
-    fn digest(&self) -> Result<String> {
+    pub(super) fn digest(&self) -> Result<String> {
         super::registry::digest(&(
             self.schema_version,
             &self.tenant,
@@ -224,6 +224,29 @@ impl LearningMemory {
                 "Existing procedures cannot acquire a knowledge binding".into(),
             ));
         }
+        let (binding, receipt) =
+            self.prepare_knowledge_receipt(tenant, namespace, request, actor, None)?;
+        let mut batch = WriteBatch::default();
+        self.put_knowledge_locator(&mut batch, &receipt)?;
+        Self::put_registered_proposal(&mut batch, &binding)?;
+        batch.put(key, encode(&receipt)?);
+        self.inner
+            .db
+            .write_opt(batch, &write_options())
+            .map_err(storage_error)?;
+        Ok(receipt)
+    }
+    /// Prepare immutable linked records without committing any of them. The
+    /// caller holds the mutation lock and commits every required origin record
+    /// in the same synchronous batch. Origin admission must resolve evidence first.
+    pub(super) fn prepare_knowledge_receipt(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        request: KnowledgeProposal,
+        actor: &str,
+        origin_digest: Option<&str>,
+    ) -> Result<(super::bound::ProposalReceipt, KnowledgeReceipt)> {
         let context = self
             .context(tenant, &request.context_id)?
             .ok_or_else(|| Error::KeyNotFound("Evaluation context not found".into()))?;
@@ -240,12 +263,17 @@ impl LearningMemory {
             }
         }
         let binding_digest = super::registry::digest(&request)?;
+        let mut source_refs = vec![format!("qilbee-knowledge-v2:{binding_digest}")];
+        if let Some(origin_digest) = origin_digest {
+            super::experience::validate_digest(origin_digest)?;
+            source_refs.push(format!("qilbee-experience-knowledge-v1:{origin_digest}"));
+        }
         let legacy = super::bound::RegisteredProposal {
             id: request.id.clone(),
             policy_id: request.policy_id.clone(),
             context_id: request.context_id.clone(),
             instructions: request.instructions.clone(),
-            source_refs: vec![format!("qilbee-knowledge-v2:{binding_digest}")],
+            source_refs,
         };
         let binding = self.prepare_registered_proposal(tenant, namespace, legacy, actor)?;
         let mut receipt = KnowledgeReceipt {
@@ -260,15 +288,7 @@ impl LearningMemory {
             receipt_digest: String::new(),
         };
         receipt.receipt_digest = receipt.digest()?;
-        let mut batch = WriteBatch::default();
-        self.put_knowledge_locator(&mut batch, &receipt)?;
-        Self::put_registered_proposal(&mut batch, &binding)?;
-        batch.put(key, encode(&receipt)?);
-        self.inner
-            .db
-            .write_opt(batch, &write_options())
-            .map_err(storage_error)?;
-        Ok(receipt)
+        Ok((binding, receipt))
     }
     /// Original immutable receipt only; this does not report current eligibility.
     pub fn knowledge_receipt(
@@ -277,6 +297,18 @@ impl LearningMemory {
         namespace: &str,
         id: &str,
     ) -> Result<Option<KnowledgeReceipt>> {
+        if self
+            .inner
+            .db
+            .get(super::knowledge_origin::origin_key(tenant, namespace, id)?)
+            .map_err(storage_error)?
+            .is_some()
+        {
+            // Verify stored evidence before reporting a negotiated-version conflict.
+            self.combined_knowledge_receipt(tenant, namespace, id)?
+                .ok_or_else(|| Error::DataCorruption("Knowledge origin disappeared".into()))?;
+            return Err(Error::UnsupportedKnowledgeOrigin);
+        }
         let Some(bytes) = self
             .inner
             .db
@@ -302,6 +334,24 @@ impl LearningMemory {
         binding: &super::bound::RegisteredProcedure,
     ) -> Result<()> {
         let request_digest = super::registry::digest(&receipt.request)?;
+        Self::validate_knowledge_binding_sources(
+            tenant,
+            namespace,
+            id,
+            receipt,
+            binding,
+            &[format!("qilbee-knowledge-v2:{request_digest}")],
+        )
+    }
+
+    pub(super) fn validate_knowledge_binding_sources(
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        receipt: &KnowledgeReceipt,
+        binding: &super::bound::RegisteredProcedure,
+        expected_sources: &[String],
+    ) -> Result<()> {
         if receipt.schema_version != 2
             || receipt.tenant != tenant
             || receipt.namespace != namespace
@@ -320,8 +370,7 @@ impl LearningMemory {
             || binding.receipt.request.instructions != receipt.request.instructions
             || binding.receipt.request.policy_id != receipt.request.policy_id
             || binding.receipt.request.context_id != receipt.request.context_id
-            || binding.receipt.request.source_refs
-                != vec![format!("qilbee-knowledge-v2:{request_digest}")]
+            || binding.receipt.request.source_refs != expected_sources
         {
             return Err(Error::DataCorruption(
                 "Knowledge receipt integrity mismatch".into(),
@@ -338,7 +387,11 @@ pub(super) fn has_knowledge_binding_marker(sources: &[String]) -> bool {
         .any(|source| source.starts_with(SOURCE_PREFIX))
 }
 pub(super) fn reject_reserved_legacy_sources(sources: &[String]) -> Result<()> {
-    if has_knowledge_binding_marker(sources) {
+    if has_knowledge_binding_marker(sources)
+        || sources
+            .iter()
+            .any(|source| source.starts_with("qilbee-experience-knowledge-v1:"))
+    {
         Err(Error::ValidationError(
             "Reserved knowledge binding references require the v2 proposal contract".into(),
         ))
@@ -478,6 +531,13 @@ impl LearningMemory {
             }
             coverage.records_examined += 1;
             let record: ProcedureRecord = decode(&bytes)?;
+            if super::knowledge_origin::has_origin_marker(&record.proposal.source_refs) {
+                self.combined_knowledge_receipt(tenant, namespace, &record.proposal.id)?
+                    .ok_or_else(|| {
+                        Error::DataCorruption("Knowledge selection origin is missing".into())
+                    })?;
+                continue;
+            }
             if !has_knowledge_binding_marker(&record.proposal.source_refs) {
                 continue;
             }

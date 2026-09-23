@@ -113,6 +113,14 @@ impl LearningMemory {
             }
             events.push(event);
         }
+        Self::export_from_verified_events(request.context_digest, request.accounting_unit, events)
+    }
+
+    pub(super) fn export_from_verified_events(
+        context_digest: String,
+        accounting_unit: String,
+        mut events: Vec<ExperienceEvent>,
+    ) -> Result<ExperienceExport> {
         events.sort_by(|a, b| {
             a.record
                 .receipt
@@ -148,8 +156,8 @@ impl LearningMemory {
         let mut export = ExperienceExport {
             method_version: "qilbee.experience-export.v1".into(),
             coverage: "explicit_event_set".into(),
-            context_digest: request.context_digest,
-            accounting_unit: request.accounting_unit,
+            context_digest,
+            accounting_unit,
             events,
             summary,
             export_digest: String::new(),

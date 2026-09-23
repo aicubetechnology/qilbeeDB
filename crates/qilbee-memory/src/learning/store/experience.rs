@@ -282,15 +282,29 @@ impl LearningMemory {
         id: &str,
         receipt: &ExperienceReceipt,
     ) -> Result<()> {
-        receipt.request.validate().map_err(|_| corrupt())?;
-        receipt.actor.validate().map_err(|_| corrupt())?;
         let context = self
             .context(tenant, &receipt.request.context_id)?
             .ok_or_else(corrupt)?;
+        Self::validate_experience_receipt_context(tenant, namespace, id, receipt, &context)
+    }
+
+    /// Pure integrity check shared by ordinary and budgeted readers. The context
+    /// must first be read and verified through its registry contract.
+    pub(super) fn validate_experience_receipt_context(
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        receipt: &ExperienceReceipt,
+        context: &super::registry::RegistryEntry<super::registry::EvaluationContext>,
+    ) -> Result<()> {
+        receipt.request.validate().map_err(|_| corrupt())?;
+        receipt.actor.validate().map_err(|_| corrupt())?;
         if receipt.schema_version != 1
             || receipt.tenant != tenant
             || receipt.namespace != namespace
             || receipt.request.id != id
+            || context.tenant != tenant
+            || context.id != receipt.request.context_id
             || receipt.context_digest != context.payload_digest
             || receipt.receipt_digest != receipt.digest()?
             || receipt.parent_event_digest.is_some() != receipt.request.parent.is_some()
@@ -359,25 +373,34 @@ impl LearningMemory {
                 let current = self
                     .read_experience_record(tenant, namespace, id)?
                     .ok_or_else(corrupt)?;
-                if receipt.schema_version != 1
-                    || receipt.command.event_id != event
-                    || receipt.record.last_event_id.as_deref() != Some(event)
-                    || receipt.command.expected_revision.checked_add(1)
-                        != Some(receipt.record.revision)
-                    || receipt.command.context_digest != receipt.record.receipt.context_digest
-                    || Some(receipt.command.outcome) != receipt.record.outcome
-                    || receipt.command.cost_units != receipt.record.reported_cost_units
-                    || receipt.command.latency_ms != receipt.record.reported_latency_ms
-                    || receipt.actor.subject_id
-                        != receipt.record.receipt.request.reporter_subject_id
-                    || current.receipt != receipt.record.receipt
-                    || receipt.event_digest != receipt.digest()?
-                {
-                    return Err(corrupt());
-                }
+                Self::validate_experience_event_record(event, &receipt, &current)?;
                 Ok(receipt)
             })
             .transpose()
+    }
+
+    pub(super) fn validate_experience_event_record(
+        event: &str,
+        receipt: &ExperienceEvent,
+        current: &ExperienceRecord,
+    ) -> Result<()> {
+        receipt.command.validate().map_err(|_| corrupt())?;
+        receipt.actor.validate().map_err(|_| corrupt())?;
+        if receipt.schema_version != 1
+            || receipt.command.event_id != event
+            || receipt.record.last_event_id.as_deref() != Some(event)
+            || receipt.command.expected_revision.checked_add(1) != Some(receipt.record.revision)
+            || receipt.command.context_digest != receipt.record.receipt.context_digest
+            || Some(receipt.command.outcome) != receipt.record.outcome
+            || receipt.command.cost_units != receipt.record.reported_cost_units
+            || receipt.command.latency_ms != receipt.record.reported_latency_ms
+            || receipt.actor.subject_id != receipt.record.receipt.request.reporter_subject_id
+            || current.receipt != receipt.record.receipt
+            || receipt.event_digest != receipt.digest()?
+        {
+            return Err(corrupt());
+        }
+        Ok(())
     }
 
     /// Commit the event and resulting state atomically, retaining cumulative lower bounds.

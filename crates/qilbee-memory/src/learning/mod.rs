@@ -35,3 +35,5 @@ pub use store::strategies::*;
 pub use store::knowledge::*;
 
 pub use store::knowledge_selection::*;
+
+pub use store::knowledge_origin::{CombinedKnowledgeInput, CombinedKnowledgeProposal, CombinedKnowledgeReceipt, KnowledgeOriginDescriptor};
