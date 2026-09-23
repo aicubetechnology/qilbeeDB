@@ -73,7 +73,7 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
     let catalog = http
         .call("GET", CATALOG, CATALOG, &key, Value::Null, 200)
         .await;
-    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 5);
+    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 6);
     for profile in catalog["graph_profiles"].as_array().unwrap() {
         for mode in ["lexical", "semantic", "hybrid"] {
             let mut body = query();
@@ -95,8 +95,13 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
                         .and_then(Value::as_u64)
                         .map_or(0.0, |rank| weight / (2.0 + rank as f64))
                 };
-                let expected = contribution("base", profile["base_weight"].as_f64().unwrap())
-                    + contribution("graph", profile["graph_weight"].as_f64().unwrap());
+                let base = contribution("base", profile["base_weight"].as_f64().unwrap());
+                let graph = contribution("graph", profile["graph_weight"].as_f64().unwrap());
+                let expected = if profile["method"] == "strongest_typed_path_max" {
+                    base.max(graph)
+                } else {
+                    base + graph
+                };
                 assert!((hit["score"].as_f64().unwrap() - expected).abs() < 1e-12);
             }
             assert_eq!(page["hits"].as_array().unwrap().len(), 2);
@@ -112,7 +117,12 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
             } else {
                 "base"
             };
-            invalid["page"]["hits"][0][limited_channel]["contribution"] = json!(0.1);
+            invalid["page"]["hits"][0][limited_channel]["contribution"] =
+                json!(if profile["version"] == "typed_path_best_channel_v1" {
+                    0.34
+                } else {
+                    0.1
+                });
             assert!(
                 !validator.is_valid(&invalid),
                 "Profile-specific contribution bound must be enforced"

@@ -1141,7 +1141,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -1151,7 +1151,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -1161,7 +1161,7 @@
           "schema": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         {
@@ -8192,7 +8192,7 @@
       "post": {
         "operationId": "verifiedMemoryChanges",
         "summary": "Read prefix-anchored memory changes",
-        "description": "Requires memory_read. Validates complete version-2 cursors against the authorized scope history, including after divergent restore and sequence catch-up. The baseline bounds the verified suffix; older events are not backfilled. Limits 1–256. Fixed through fence, after exclusive. 409 requires reconciliation; no silent fallback to version 1.",
+        "description": "Requires memory_read. Validates complete version-2 cursors against the authorized scope history, including after divergent restore and sequence catch-up. The baseline bounds the verified suffix; older events are not backfilled. Limits 1\u2013256. Fixed through fence, after exclusive. 409 requires reconciliation; no silent fallback to version 1.",
         "tags": [
           "Memory"
         ],
@@ -9377,7 +9377,7 @@
       "post": {
         "operationId": "auditMemoryJournal",
         "summary": "Audit a bounded anchored journal range",
-        "description": "Requires memory_read. Checks the same scoped event digests and consecutive prefix links as the v2 feed but returns only range metadata and counts, without event or record identities. Limit 1–256. Continue with checked_through as after and preserve high_watermark as through. Complete covers only the requested range after the baseline; it is not a full-volume, legacy-history or external-evidence attestation. Inconsistency returns 500 with no partial page.",
+        "description": "Requires memory_read. Checks the same scoped event digests and consecutive prefix links as the v2 feed but returns only range metadata and counts, without event or record identities. Limit 1\u2013256. Continue with checked_through as after and preserve high_watermark as through. Complete covers only the requested range after the baseline; it is not a full-volume, legacy-history or external-evidence attestation. Inconsistency returns 500 with no partial page.",
         "tags": [
           "Memory"
         ],
@@ -13989,7 +13989,7 @@
     "/api/v1/memory/records/batch": {
       "post": {
         "operationId": "readMemoryRecordBatch",
-        "summary": "Read 1–100 current memories in one scoped snapshot",
+        "summary": "Read 1\u2013100 current memories in one scoped snapshot",
         "description": "Requires memory_read for one exact scope; tenant and private subject are credential-derived. Preserves request order and checks root and transitive eligibility at one server time. Null means unavailable, without disclosing a reason. No continuation or partial success: invalid/duplicate IDs, 8 MiB root-byte exhaustion or aggregate dependency work exhaustion fail the request. Uses the shared retrieval admission slots, after authorization. This does not activate a journal, advance a checkpoint or certify future freshness; mutations and time can invalidate records after evaluation.",
         "tags": [
           "Memory"
@@ -14042,7 +14042,7 @@
             }
           },
           "400": {
-            "description": "Invalid or duplicate UUIDs, count outside 1–100, unsupported contract version, root bytes above 8 MiB or aggregate dependency work exhausted. No successful entries returned.",
+            "description": "Invalid or duplicate UUIDs, count outside 1\u2013100, unsupported contract version, root bytes above 8 MiB or aggregate dependency work exhausted. No successful entries returned.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -14511,7 +14511,7 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "1–256 UTF-8 bytes, not blank and without control characters."
+              "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
             }
           }
         ]
@@ -15066,7 +15066,7 @@
       "post": {
         "operationId": "readMemoryEvidenceGraph",
         "summary": "Read current scoped evidence ancestry in one snapshot",
-        "description": "Available in the 0.12.0 contract. Requires memory_read for one exact scope before storage access or retrieval admission. Traverse outgoing derived_from ancestry of 1–16 distinct root UUIDs, breadth first, roots in request order and children in UUID order. Tenant and private subject are credential-derived. Every returned record and its complete dependency graph must be eligible at one snapshot and server clock, even when display depth is zero. Nodes are deduplicated; edges pin exact revisions and have both endpoints in nodes. No ranking, entity extraction, incoming-edge search, cross-scope expansion or cursor. Depth/node cuts return 200 with explicit incomplete coverage; unavailable roots disclose no reason, and not_examined roots are distinct. Byte or dependency-budget exhaustion and encountered corruption fail the entire request. complete describes currently eligible ancestry from the requested roots, not the entire corpus or future validity. All responses are no-store.",
+        "description": "Available in the 0.12.0 contract. Requires memory_read for one exact scope before storage access or retrieval admission. Traverse outgoing derived_from ancestry of 1\u201316 distinct root UUIDs, breadth first, roots in request order and children in UUID order. Tenant and private subject are credential-derived. Every returned record and its complete dependency graph must be eligible at one snapshot and server clock, even when display depth is zero. Nodes are deduplicated; edges pin exact revisions and have both endpoints in nodes. No ranking, entity extraction, incoming-edge search, cross-scope expansion or cursor. Depth/node cuts return 200 with explicit incomplete coverage; unavailable roots disclose no reason, and not_examined roots are distinct. Byte or dependency-budget exhaustion and encountered corruption fail the entire request. complete describes currently eligible ancestry from the requested roots, not the entire corpus or future validity. All responses are no-store.",
         "tags": [
           "Memory"
         ],
@@ -15123,7 +15123,7 @@
             }
           },
           "400": {
-            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0–8, node limit outside 1–256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
+            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0\u20138, node limit outside 1\u2013256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -15294,7 +15294,7 @@
             }
           },
           "400": {
-            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0–8, node limit outside 1–256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
+            "description": "Invalid or duplicate roots, unsupported contract version, depth outside 0\u20138, node limit outside 1\u2013256, canonical record bytes above 8 MiB, or dependency work above 4096 reads / 16 MiB. No graph is returned on failure.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -22851,7 +22851,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013128 UTF-8 bytes, not blank and without control characters."
           },
           "revision": {
             "type": "integer",
@@ -22917,7 +22917,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 2048,
-                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
               }
             },
             "required": [
@@ -22941,13 +22941,13 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "consumer_id": {
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013128 UTF-8 bytes, not blank and without control characters."
           },
           "expected_revision": {
             "type": "integer",
@@ -23028,7 +23028,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "previous": {
             "anyOf": [
@@ -23049,7 +23049,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 2048,
-                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -23444,7 +23444,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013128 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -23489,7 +23489,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013128 UTF-8 bytes, not blank and without control characters."
           },
           "revision": {
             "type": "integer",
@@ -23540,7 +23540,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013128 UTF-8 bytes, not blank and without control characters."
           },
           "witness": {
             "anyOf": [
@@ -23923,7 +23923,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -24002,7 +24002,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -24029,7 +24029,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -24074,17 +24074,17 @@
           "provider": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -24103,17 +24103,17 @@
           "method": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "method_revision": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "evidence_ref": {
             "type": "string",
             "minLength": 1,
-            "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
           },
           "model": {
             "anyOf": [
@@ -24253,7 +24253,7 @@
               "evidence_ref": {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
               }
             },
             "required": [
@@ -24283,7 +24283,7 @@
               "evidence_ref": {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
               }
             },
             "required": [
@@ -24313,7 +24313,7 @@
               "evidence_ref": {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
               },
               "disposition": {
                 "$ref": "#/components/schemas/MemoryReviewDisposition"
@@ -24394,7 +24394,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "operation": {
             "$ref": "#/components/schemas/MemoryRelationOperation"
@@ -24529,7 +24529,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "relation_id": {
             "type": "string",
@@ -24559,7 +24559,7 @@
           "evidence_ref": {
             "type": "string",
             "minLength": 1,
-            "description": "1–2048 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u20132048 UTF-8 bytes, not blank and without control characters."
           },
           "relation_digest": {
             "type": "string",
@@ -24857,14 +24857,14 @@
           "project_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "mission_id": {
             "anyOf": [
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -24874,7 +24874,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "visibility": {
             "$ref": "#/components/schemas/Visibility"
@@ -24893,7 +24893,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -25039,7 +25039,7 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "spec": {
             "$ref": "#/components/schemas/CredentialSpec"
@@ -25393,7 +25393,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -25455,7 +25455,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -27861,19 +27861,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "model": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "revision": {
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "dimensions": {
             "type": "integer",
@@ -27904,7 +27904,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -27952,7 +27952,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, without control characters."
+            "description": "1\u2013256 UTF-8 bytes, without control characters."
           },
           "record_id": {
             "type": "string",
@@ -28243,7 +28243,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -28309,7 +28309,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 4096,
-            "description": "At most 4096 UTF-8 bytes and 1–64 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
+            "description": "At most 4096 UTF-8 bytes and 1\u201364 distinct lowercase Unicode alphanumeric terms; punctuation-only text is invalid."
           },
           "scan_bytes_limit": {
             "type": "integer",
@@ -29137,7 +29137,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256,
-            "description": "1–256 UTF-8 bytes, nonblank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters."
           },
           "accounting_unit": {
             "type": "string",
@@ -30472,7 +30472,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -30512,7 +30512,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "record_id": {
             "type": "string",
@@ -30967,7 +30967,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "consumer_id": {
             "type": "string",
@@ -31002,7 +31002,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "checkpoint": {
             "$ref": "#/components/schemas/MemoryCheckpoint"
@@ -31366,7 +31366,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "consumer_id": {
             "type": "string",
@@ -31412,7 +31412,7 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
+            "description": "1\u2013256 UTF-8 bytes; not blank; no control characters. Scoped by authenticated tenant, namespace and subject."
           },
           "checkpoint": {
             "$ref": "#/components/schemas/VerifiedMemoryCheckpoint"
@@ -32302,7 +32302,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 128,
-            "description": "1–128 UTF-8 bytes, nonblank and without control characters; owned by the authenticated subject."
+            "description": "1\u2013128 UTF-8 bytes, nonblank and without control characters; owned by the authenticated subject."
           },
           "witness": {
             "anyOf": [
@@ -32603,7 +32603,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "capabilities": {
             "type": "array",
@@ -32743,12 +32743,12 @@
           "tenant_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, nonblank and without control characters; immutable identity, not a display name."
+            "description": "1\u2013256 UTF-8 bytes, nonblank and without control characters; immutable identity, not a display name."
           },
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "display_name": {
             "type": [
@@ -32777,7 +32777,7 @@
           "subject_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           }
         },
         "required": [
@@ -33611,7 +33611,7 @@
                 "items": {
                   "type": "string",
                   "minLength": 1,
-                  "description": "An opaque external identifier: 1–256 UTF-8 bytes, not blank, without control characters. Matching is exact."
+                  "description": "An opaque external identifier: 1\u2013256 UTF-8 bytes, not blank, without control characters. Matching is exact."
                 },
                 "maxItems": 256,
                 "uniqueItems": true
@@ -33854,7 +33854,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "registered_at_millis": {
             "type": "integer",
@@ -33871,7 +33871,7 @@
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -33907,7 +33907,7 @@
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -33931,7 +33931,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "page": {
             "$ref": "#/components/schemas/ObservedAgentPage"
@@ -33955,7 +33955,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "scope": {
             "$ref": "#/components/schemas/Scope"
@@ -33965,7 +33965,7 @@
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -34020,7 +34020,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "page": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspacePage"
@@ -34238,7 +34238,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -34265,7 +34265,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -34672,7 +34672,7 @@
           "company_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "workspace": {
             "$ref": "#/components/schemas/CompanyMemoryWorkspace"
@@ -34696,7 +34696,8 @@
           "typed_path_entity_v1",
           "typed_path_temporal_v1",
           "typed_path_evidence_v1",
-          "typed_path_base_preserving_v1"
+          "typed_path_base_preserving_v1",
+          "typed_path_best_channel_v1"
         ]
       },
       "GraphRankingProfileBalancedV1": {
@@ -35391,6 +35392,9 @@
           },
           {
             "$ref": "#/components/schemas/GraphRankingProfileBasePreservingV1"
+          },
+          {
+            "$ref": "#/components/schemas/GraphRankingProfileBestChannelV1"
           }
         ]
       },
@@ -35893,8 +35897,8 @@
           "contribution": {
             "type": "number",
             "minimum": 0,
-            "maximum": 0.25,
-            "description": "Base-channel RRF contribution; the enclosing page constrains its maximum by ranking version."
+            "maximum": 0.3333333333333333,
+            "description": "Channel reciprocal-rank value. The ranking method sums or takes the maximum; page constraints preserve version-specific bounds."
           }
         },
         "required": [
@@ -35974,7 +35978,8 @@
           "contribution": {
             "type": "number",
             "minimum": 0,
-            "maximum": 0.25
+            "maximum": 0.3333333333333333,
+            "description": "Channel reciprocal-rank value. The ranking method sums or takes the maximum; page constraints preserve version-specific bounds."
           },
           "anchor": {
             "$ref": "#/components/schemas/MemorySourceRef"
@@ -36074,7 +36079,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 0.3333333333333333,
-            "description": "Versioned base/graph reciprocal rank fusion, not cosine or probability."
+            "description": "Versioned ranking score: sum for strongest_typed_path_rrf, maximum for strongest_typed_path_max; not cosine or a probability."
           },
           "base": {
             "anyOf": [
@@ -36251,6 +36256,242 @@
                 "ranking": {
                   "properties": {
                     "version": {
+                      "const": "typed_path_balanced_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.25
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_entity_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.25
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_temporal_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.25
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_evidence_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
+            },
+            "then": {
+              "properties": {
+                "hits": {
+                  "items": {
+                    "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.08333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.25
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
                       "const": "typed_path_base_preserving_v1"
                     }
                   },
@@ -36268,6 +36509,21 @@
                 "hits": {
                   "items": {
                     "properties": {
+                      "base": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.25
+                              }
+                            }
+                          }
+                        ]
+                      },
                       "graph": {
                         "anyOf": [
                           {
@@ -36287,8 +36543,27 @@
                   }
                 }
               }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "ranking": {
+                  "properties": {
+                    "version": {
+                      "const": "typed_path_best_channel_v1"
+                    }
+                  },
+                  "required": [
+                    "version"
+                  ]
+                }
+              },
+              "required": [
+                "ranking"
+              ]
             },
-            "else": {
+            "then": {
               "properties": {
                 "hits": {
                   "items": {
@@ -36302,7 +36577,22 @@
                             "type": "object",
                             "properties": {
                               "contribution": {
-                                "maximum": 0.08333333333333333
+                                "maximum": 0.3333333333333333
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "graph": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "contribution": {
+                                "maximum": 0.3333333333333333
                               }
                             }
                           }
@@ -36347,8 +36637,8 @@
             "items": {
               "$ref": "#/components/schemas/GraphRankingProfile"
             },
-            "maxItems": 5,
-            "minItems": 5
+            "maxItems": 6,
+            "minItems": 6
           },
           "execution_limits": {
             "$ref": "#/components/schemas/RetrievalExecutionLimits"
@@ -37028,7 +37318,7 @@
           "idempotency_key"
         ],
         "additionalProperties": false,
-        "description": "Names use 1–256 UTF-8 bytes, with no control characters or surrounding whitespace; null explicitly clears the label. Labels are not unique identifiers and do not confer authority. A missing display_name is invalid. The idempotency identity is company-bound and its replay also requires the original actor."
+        "description": "Names use 1\u2013256 UTF-8 bytes, with no control characters or surrounding whitespace; null explicitly clears the label. Labels are not unique identifiers and do not confer authority. A missing display_name is invalid. The idempotency identity is company-bound and its replay also requires the original actor."
       },
       "AgentProfileReceipt": {
         "type": "object",
@@ -37068,7 +37358,7 @@
           "agent_id": {
             "type": "string",
             "minLength": 1,
-            "description": "1–256 UTF-8 bytes, not blank and without control characters."
+            "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
           },
           "registered_at_millis": {
             "type": "integer",
@@ -37085,7 +37375,7 @@
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "1–256 UTF-8 bytes, not blank and without control characters."
+                "description": "1\u2013256 UTF-8 bytes, not blank and without control characters."
               },
               {
                 "type": "null"
@@ -40738,7 +41028,7 @@
             ],
             "minLength": 1,
             "maxLength": 256,
-            "description": "Optional case-insensitive title/ID substring, 1–256 UTF-8 bytes with no control characters. Null and omission mean no text filter.",
+            "description": "Optional case-insensitive title/ID substring, 1\u2013256 UTF-8 bytes with no control characters. Null and omission mean no text filter.",
             "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
           },
           "limit": {
@@ -40936,6 +41226,175 @@
           },
           "graph_weight": {
             "const": 0.25
+          },
+          "hop_decay": {
+            "const": 0.5
+          },
+          "cosine_affinity_floor": {
+            "const": 0.5
+          },
+          "cosine_affinity_weight": {
+            "const": 0.5
+          },
+          "missing_embedding_affinity": {
+            "const": 0.5
+          },
+          "maximum_score": {
+            "const": 0.3333333333333333
+          },
+          "relation_weights": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "prefixItems": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "semantic_related"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "same_entity"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "temporal_before"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "causal_claim"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "supports"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "contradicts"
+                  },
+                  "weight": {
+                    "const": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "weight"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "version",
+          "method",
+          "experimental",
+          "traversal_version",
+          "base_candidate_limit",
+          "anchor_limit",
+          "rank_constant",
+          "base_weight",
+          "graph_weight",
+          "hop_decay",
+          "cosine_affinity_floor",
+          "cosine_affinity_weight",
+          "missing_embedding_affinity",
+          "maximum_score",
+          "relation_weights"
+        ],
+        "additionalProperties": false
+      },
+      "GraphRankingProfileBestChannelV1": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "const": "typed_path_best_channel_v1"
+          },
+          "method": {
+            "const": "strongest_typed_path_max"
+          },
+          "experimental": {
+            "const": true
+          },
+          "traversal_version": {
+            "const": "typed_relations_v1"
+          },
+          "base_candidate_limit": {
+            "const": 100
+          },
+          "anchor_limit": {
+            "const": 4
+          },
+          "rank_constant": {
+            "const": 2
+          },
+          "base_weight": {
+            "const": 1.0
+          },
+          "graph_weight": {
+            "const": 1.0
           },
           "hop_decay": {
             "const": 0.5

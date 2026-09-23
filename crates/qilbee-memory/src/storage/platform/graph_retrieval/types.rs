@@ -9,6 +9,7 @@ pub enum GraphRankingVersion {
     TypedPathTemporalV1,
     TypedPathEvidenceV1,
     TypedPathBasePreservingV1,
+    TypedPathBestChannelV1,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -36,30 +37,37 @@ pub struct GraphRankingProfile {
     pub maximum_score: f64,
 }
 impl GraphRankingVersion {
-    pub const ALL: [Self; 5] = [
+    pub const ALL: [Self; 6] = [
         Self::TypedPathBalancedV1,
         Self::TypedPathEntityV1,
         Self::TypedPathTemporalV1,
         Self::TypedPathEvidenceV1,
         Self::TypedPathBasePreservingV1,
+        Self::TypedPathBestChannelV1,
     ];
     pub fn profile(self) -> GraphRankingProfile {
         use MemoryRelationKind::*;
         let weights = match self {
-            Self::TypedPathBalancedV1 | Self::TypedPathBasePreservingV1 => {
-                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-            }
+            Self::TypedPathBalancedV1
+            | Self::TypedPathBasePreservingV1
+            | Self::TypedPathBestChannelV1 => [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
             Self::TypedPathEntityV1 => [0.5, 1.0, 0.0, 0.0, 0.0, 0.0],
             Self::TypedPathTemporalV1 => [0.25, 0.5, 1.0, 0.0, 0.0, 0.0],
             Self::TypedPathEvidenceV1 => [0.25, 0.5, 0.25, 0.75, 1.0, 1.0],
         };
         let (base_weight, graph_weight) = match self {
             Self::TypedPathBasePreservingV1 => (0.75, 0.25),
+            Self::TypedPathBestChannelV1 => (1.0, 1.0),
             _ => (0.25, 0.75),
         };
         GraphRankingProfile {
             version: self,
-            method: "strongest_typed_path_rrf".into(),
+            method: if self == Self::TypedPathBestChannelV1 {
+                "strongest_typed_path_max"
+            } else {
+                "strongest_typed_path_rrf"
+            }
+            .into(),
             experimental: true,
             traversal_version: TYPED_GRAPH_TRAVERSAL_VERSION.into(),
             base_candidate_limit: 100,
@@ -83,7 +91,11 @@ impl GraphRankingVersion {
             .zip(weights)
             .map(|(kind, weight)| GraphRelationWeight { kind, weight })
             .collect(),
-            maximum_score: base_weight / 3.0 + graph_weight / 3.0,
+            maximum_score: if self == Self::TypedPathBestChannelV1 {
+                1.0 / 3.0
+            } else {
+                base_weight / 3.0 + graph_weight / 3.0
+            },
         }
     }
 }
