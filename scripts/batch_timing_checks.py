@@ -15,6 +15,18 @@ class BatchTimingChecks(unittest.TestCase):
                                 embedding_timing_status='unavailable_batch_capture')
         return row
 
+    def test_export_rejects_changed_generation_binding_before_rows(self):
+        from export_graph_evaluation import export
+        fixture = {}
+        protocol = {"generation_sha256":"frozen-generation"}
+        for value in (None, "substituted-generation"):
+            report = {"status":"completed", "failures":[],
+                "verified_fences_unchanged":True,"verified_current_sources_and_relations":True,
+                "plan":{"fixture_sha256":digest(fixture),"protocol":protocol,
+                        "protocol_sha256":digest(protocol),"generation_sha256":value}}
+            with self.assertRaisesRegex(ValueError, "generation evidence differs"):
+                export(report, fixture)
+
     def test_explicit_paired_nulls_only(self):
         validate_measurements(self.row(), 1)
         for field, value in [('external_query_embedding_ms',0),('embedding_plus_http_ms',2),

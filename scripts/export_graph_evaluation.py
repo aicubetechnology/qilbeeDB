@@ -24,6 +24,8 @@ def export(report, fixture):
     protocol = plan["protocol"]
     if plan["protocol_sha256"] != digest(protocol):
         raise ValueError("Export protocol differs from the pinned plan")
+    if "generation_sha256" in protocol and plan.get("generation_sha256") != protocol["generation_sha256"]:
+        raise ValueError("Export generation evidence differs from the frozen protocol")
     stage = evaluation_stage(protocol)
     if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1"):
         from twowiki_evaluation_contract import verify_twowiki_protocol
