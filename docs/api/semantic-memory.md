@@ -206,3 +206,17 @@ independently. A new request evaluates eligibility again, so changed, rejected,
 deleted or expired sources cannot acquire continued access from an earlier
 request. This optimization changes neither cosine values nor ranking rules and
 has no measured latency guarantee.
+
+## Validated vector norm reuse
+
+**Availability: source preview.** Exact cosine retrieval, hybrid semantic scoring
+and graph affinity scoring reuse the vector norm computed while validating a
+stored embedding. The norm is derived in memory from the decoded vector; it is
+not a caller-supplied value, a persisted field or a cross-request cache.
+
+The source revision, model-space binding, vector digest and finite/nonzero-vector
+checks remain mandatory. Existing stored bytes and receipt identities are
+unchanged, so this optimization requires no embedding migration. The cosine
+formula, score meaning, ranking versions and scan budgets are unchanged. Avoid
+inferring a latency improvement from this implementation change alone; measure
+your workload on a controlled deployment.
