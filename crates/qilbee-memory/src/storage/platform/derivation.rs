@@ -30,6 +30,14 @@ pub struct DependencyWork {
 pub(super) struct DependencyState {
     pub work: DependencyWork,
     pub cache: BTreeMap<(String, Uuid), Option<DependencyRecord>>,
+    pub limits: Option<(usize, usize)>,
+    pub exhausted: Option<DependencyBudgetStop>,
+    pub lookahead_bytes: usize,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DependencyBudgetStop {
+    Records,
+    Bytes,
 }
 #[derive(Clone)]
 pub(super) struct DependencyRecord {
@@ -65,6 +73,9 @@ impl MemorySnapshot<'_> {
         let key = (namespace.to_owned(), id);
         if let Some(record) = self.dependencies.borrow().cache.get(&key) {
             return Ok(record.clone());
+        }
+        if self.dependencies.borrow().limits.is_some() {
+            return self.bounded_dependency(namespace, id, key);
         }
         if self.dependencies.borrow().work.records_examined >= MAX_DEPENDENCY_RECORDS {
             return Err(Error::ValidationError(
@@ -109,5 +120,77 @@ impl MemorySnapshot<'_> {
         state.work.bytes_examined += len;
         state.cache.insert(key, record.clone());
         Ok(record)
+    }
+}
+
+impl MemorySnapshot<'_> {
+    fn bounded_dependency(
+        &self,
+        namespace: &str,
+        id: Uuid,
+        cache_key: (String, Uuid),
+    ) -> Result<Option<DependencyRecord>> {
+        let (record_limit, byte_limit) = self
+            .dependencies
+            .borrow()
+            .limits
+            .ok_or_else(|| Error::Internal("Missing bounded dependency limits".into()))?;
+        {
+            let mut state = self.dependencies.borrow_mut();
+            if state.exhausted.is_some() {
+                return Err(Error::ValidationError(
+                    "Dependency inspection budget exhausted".into(),
+                ));
+            }
+            if state.work.records_examined >= record_limit {
+                state.exhausted = Some(DependencyBudgetStop::Records);
+                return Err(Error::ValidationError(
+                    "Dependency record budget exhausted".into(),
+                ));
+            }
+            // Missing lookups and byte-blocked lookups still consume a record attempt.
+            state.work.records_examined += 1;
+        }
+        let bytes = self
+            .db
+            .get_cf(
+                self.storage.cf(super::super::cf::EPISODES)?,
+                record_key(0x10, namespace, id),
+            )
+            .map_err(storage_error)?;
+        let len = bytes.as_ref().map_or(0, Vec::len);
+        self.admit_dependency_bytes(len, byte_limit)?;
+        let index = self
+            .db
+            .get_cf(
+                self.storage.cf(super::super::cf::EPISODE_INDEX)?,
+                record_key(0x11, namespace, id),
+            )
+            .map_err(storage_error)?;
+        self.admit_dependency_bytes(index.as_ref().map_or(0, Vec::len), byte_limit)?;
+        let record = decode_record_pair(id, bytes, index)?.map(|r| DependencyRecord {
+            record_bytes: len,
+            revision: r.revision,
+            reason: super::eligibility::record_reason(&r, self.now),
+            derivation: r.derivation,
+        });
+        self.dependencies
+            .borrow_mut()
+            .cache
+            .insert(cache_key, record.clone());
+        Ok(record)
+    }
+
+    fn admit_dependency_bytes(&self, len: usize, limit: usize) -> Result<()> {
+        let mut state = self.dependencies.borrow_mut();
+        if len > limit.saturating_sub(state.work.bytes_examined) {
+            state.exhausted = Some(DependencyBudgetStop::Bytes);
+            state.lookahead_bytes = len;
+            return Err(Error::ValidationError(
+                "Dependency byte budget exhausted".into(),
+            ));
+        }
+        state.work.bytes_examined += len;
+        Ok(())
     }
 }

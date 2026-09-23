@@ -69,6 +69,31 @@ impl RocksDbMemoryStorage {
     }
 }
 impl MemoryEvidenceView<'_> {
+    pub(crate) fn with_work_limits(self, records: usize, bytes: usize) -> Result<Self> {
+        if records == 0
+            || records > super::derivation::MAX_DEPENDENCY_RECORDS
+            || bytes == 0
+            || bytes > super::derivation::MAX_DEPENDENCY_BYTES
+        {
+            return Err(Error::ValidationError(
+                "Invalid dependency inspection limits".into(),
+            ));
+        }
+        self.snapshot.dependencies.borrow_mut().limits = Some((records, bytes));
+        Ok(self)
+    }
+
+    pub(crate) fn bounded_work(
+        &self,
+    ) -> (
+        DependencyWork,
+        usize,
+        Option<super::derivation::DependencyBudgetStop>,
+    ) {
+        let state = self.snapshot.dependencies.borrow();
+        (state.work.clone(), state.lookahead_bytes, state.exhausted)
+    }
+
     pub(crate) fn observed_at_millis(&self) -> i64 {
         self.snapshot.now
     }

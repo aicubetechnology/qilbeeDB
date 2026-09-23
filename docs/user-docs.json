@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Store and retrieve evidence-bound knowledge with generic contracts while preserving application-owned decisions and execution authority.",
+      "description": "Propose evidence-bound knowledge, inspect current sources and select compatible active knowledge with explicit versioned work limits.",
       "order": 106
     },
     {

@@ -11,6 +11,7 @@ const SCHEMA_KEY: &[u8] = b"\0qilbee-learning-schema";
 const SCHEMA_VERSION: &[u8] = b"1";
 
 struct Inner {
+    knowledge_generation: uuid::Uuid,
     db: DB,
     mutation_lock: Mutex<()>,
 }
@@ -99,12 +100,15 @@ impl LearningMemory {
                     .map_err(storage_error)?;
             }
         }
-        Ok(Self {
+        let storage = Self {
             inner: Arc::new(Inner {
+                knowledge_generation: uuid::Uuid::new_v4(),
                 db,
                 mutation_lock: Mutex::new(()),
             }),
-        })
+        };
+        storage.rebuild_knowledge_index()?;
+        Ok(storage)
     }
 
     /// Register a candidate. Repeating the same proposal is idempotent; changing
@@ -248,6 +252,7 @@ impl LearningMemory {
         }
 
         let now = chrono::Utc::now().timestamp_millis();
+        let before = record.clone();
         record.apply(&evaluation, now)?;
         let receipt = EvaluationReceipt {
             evaluation,
@@ -258,6 +263,7 @@ impl LearningMemory {
         batch.put(procedure_key(scope, id), encode(&record)?);
         batch.put(key, encode(&receipt)?);
         batch.put(source_key, receipt.evaluation.case_id.as_bytes());
+        self.update_knowledge_index(&mut batch, &before, &record)?;
         Ok((
             EvaluationResult {
                 receipt,
@@ -448,3 +454,7 @@ pub mod experience_export;
 pub mod strategies;
 
 pub mod knowledge;
+
+pub mod knowledge_selection;
+
+mod knowledge_index;

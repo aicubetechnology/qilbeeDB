@@ -30,7 +30,7 @@ pub struct RegisteredProcedure {
     pub receipt: ProposalReceipt,
     pub record: ProcedureRecord,
 }
-fn binding_key(tenant: &str, namespace: &str, id: &str) -> Vec<u8> {
+pub(super) fn binding_key(tenant: &str, namespace: &str, id: &str) -> Vec<u8> {
     let mut key = vec![6];
     for part in [tenant, namespace, id] {
         append_component(&mut key, part);
@@ -94,7 +94,7 @@ impl LearningMemory {
         let (policy, context) = self.contracts(tenant, namespace, policy_id, context_id)?;
         Self::bound_scope(tenant, namespace, &policy, &context)
     }
-    fn contracts(
+    pub(super) fn contracts(
         &self,
         tenant: &str,
         namespace: &str,
@@ -118,7 +118,7 @@ impl LearningMemory {
         }
         Ok((policy, context))
     }
-    fn bound_scope(
+    pub(super) fn bound_scope(
         tenant: &str,
         namespace: &str,
         policy: &RegistryEntry<PolicyDefinition>,
@@ -257,13 +257,31 @@ impl LearningMemory {
                 )
             })?;
         let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
+        let record = self
+            .get(&scope, id)?
+            .ok_or_else(|| Error::DataCorruption("Registered procedure is missing".into()))?;
+        Self::validate_registered_binding(
+            tenant, namespace, id, &receipt, &record, &policy, &context,
+        )?;
+        Ok(Some(RegisteredProcedure { receipt, record }))
+    }
+    pub(super) fn validate_registered_binding(
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        receipt: &ProposalReceipt,
+        record: &ProcedureRecord,
+        policy: &RegistryEntry<PolicyDefinition>,
+        context: &RegistryEntry<EvaluationContext>,
+    ) -> Result<()> {
+        let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
         let expected = ProcedureProposal {
             id: id.into(),
-            task: context.payload.task,
-            baseline_revision: context.payload.baseline_revision,
+            task: context.payload.task.clone(),
+            baseline_revision: context.payload.baseline_revision.clone(),
             instructions: receipt.request.instructions.clone(),
             source_refs: receipt.request.source_refs.clone(),
-            policy: policy.payload.parameters,
+            policy: policy.payload.parameters.clone(),
         };
         if receipt.schema_version != 1
             || receipt.tenant != tenant
@@ -279,9 +297,6 @@ impl LearningMemory {
                 "Procedure binding identity, version or contract mismatch".into(),
             ));
         }
-        let record = self
-            .get(&scope, id)?
-            .ok_or_else(|| Error::DataCorruption("Registered procedure is missing".into()))?;
         if record.scope != scope
             || record.proposal != receipt.record.proposal
             || record.created_at_millis != receipt.record.created_at_millis
@@ -290,7 +305,7 @@ impl LearningMemory {
                 "Procedure differs from its immutable binding".into(),
             ));
         }
-        Ok(Some(RegisteredProcedure { receipt, record }))
+        Ok(())
     }
 }
 
