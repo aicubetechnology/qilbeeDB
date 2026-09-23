@@ -5,7 +5,7 @@ an externally captured vector set. It does not contain measured retrieval result
 or qualify any ranking method as a production default.
 
 The frozen protocol is
-[`twowiki-captured1536-development-v1.json`](../../benchmarks/retrieval/twowiki-captured1536-development-v1.json).
+`benchmarks/retrieval/twowiki-captured1536-development-v1.json`.
 It uses the same source documents, document-only graph, cohort selection, 40
 development questions and 120 reserved questions as the earlier 2Wiki comparison.
 Only the external vector fixture, declared embedding identity and protocol
