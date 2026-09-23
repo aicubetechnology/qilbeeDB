@@ -277,3 +277,65 @@ on retained history. Reconstruction cleans obsolete generations and flushes in
 batches at an entry-count or encoded-byte threshold; one entry may exceed the byte
 threshold. This is not a bound on total disk usage or startup time. Do not treat
 `index_generation` as a pagination cursor or a reusable snapshot lease.
+
+## Python selection client (unreleased)
+
+`KnowledgeSelectionClient` is an optional, standard-library-only client for v3.
+It works with any agent framework and with either a managed API endpoint or your
+self-hosted server. Both the server and SDK must include v3 support; an older
+server's error is propagated without silently switching to v2.
+
+```python
+import os
+from qilbeedb import KnowledgeSelectionClient
+
+client = KnowledgeSelectionClient(
+    os.environ["QILBEEDB_API_URL"],
+    lambda: os.environ["QILBEEDB_API_KEY"],
+    tenant_id=os.environ["QILBEEDB_TENANT_ID"],
+    subject_id=os.environ["QILBEEDB_SUBJECT_ID"],
+    scope={
+        "project_id": "research", "agent_id": "assistant",
+        "mission_id": None, "visibility": "private",
+    },
+)
+response = client.select(
+    policy_id="policy-v1", context_id="context-v1",
+    selection_version="active_knowledge_bound_v1",
+    external_tool_identities=[], max_instruction_bytes=8192,
+    work_limits={
+        "candidate_records": 100, "index_entries": 256,
+        "learning_bytes": 1048576, "dependency_records": 512,
+        "dependency_bytes": 4194304,
+    },
+)
+print(response["result"]["type"])
+print(response["coverage"])
+```
+
+Use identities and limits appropriate to your authorized scope and workload.
+The sample limits are examples, not recommended enterprise policy. The client
+checks the expected company and subject before every selection; a credential
+supplier can support rotation without writing the key to disk. The server
+remains responsible for authorizing every request.
+
+The return value preserves the complete response. Your application handles
+`procedure`, `baseline` and `incomplete` explicitly. The client does not execute
+instructions, choose a fallback, generate embeddings or call a model. It does not
+cache a result as proof of continuing eligibility or retry requests automatically.
+Recheck current knowledge before subsequent reuse.
+
+Catch `ConsumerAPIError` for HTTP failures, `ConsumerTransportError` for connection
+failures, and `ConsumerProtocolError` for inconsistent response data.
+`ReconciliationRequired` identifies an unexpected company or subject. Inspect the
+exception's `code` and, for HTTP failures, `status`; exception text does not include
+credentials or returned memory content. Deciding whether to retry remains an
+application responsibility. A missing response provides no selected knowledge.
+
+Checks cover request binding, scope, method, work limits, outcome/coverage
+consistency, selected source identities and current eligibility flags. This is
+not independent verification of ledger digests, factual truth or the server's
+access-control implementation. The server remains the authority for those
+contracts. The default response limit is 16 MiB and can be lowered through
+`max_response_bytes` (1 KiB–64 MiB); exceeding it stops the operation.
+The limit applies to identity checks as well as selection responses.
