@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Attach external embeddings and retrieve memories by model-bound cosine similarity.",
+      "description": "Store externally supplied, model-bound embeddings and retrieve exact cosine results with snapshot-scoped source eligibility.",
       "order": 60
     },
     {
