@@ -467,6 +467,28 @@ class GraphPipelineChecks(unittest.TestCase):
                 near(bad, 0.5)
         near(0.50000000001, 0.5)
 
+    def test_best_channel_protocol_is_development_only_and_pins_all_methods(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-best-channel-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(len(protocol["methods"]), 10)
+        self.assertTrue(all(q["split"] == "development" for q in evaluation_queries(value, protocol).values()))
+        mutations = [lambda p: p.update(split="test"),
+            lambda p: p.update(protocol_version="graph_base_preserving_development_v1"),
+            lambda p: p["primary_comparison"].update(candidate="graph_hybrid_base_preserving"),
+            lambda p: p["graph_profiles"].update(graph_hybrid_best_channel="typed_path_balanced_v1"),
+            lambda p: p["methods"].append("graph_hybrid_best_channel"),
+            lambda p: p["methods"].remove("weighted_rrf_v1"),
+            lambda p: p.update(default_admission=True)]
+        for mutate in mutations:
+            changed = copy.deepcopy(protocol)
+            mutate(changed)
+            with self.assertRaises(ValueError):
+                verify_protocol(changed, value, graph)
+
     def test_best_channel_uses_maximum_and_rejects_additive_or_weighted_scores(self):
         value, _, state, protocol, result = proof_fixture()
         method = "graph_lexical_balanced"

@@ -88,6 +88,7 @@ def evaluation_stage(protocol):
         "graph_multihop_compare_v1": "test",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
+        "graph_best_channel_development_v1": "development",
     }
     expected = stages.get(protocol.get("protocol_version"))
     if expected is None or protocol.get("split") != expected:
@@ -128,9 +129,12 @@ def verify_protocol(protocol, fixture, graph):
         "graph_lexical_balanced",
         "graph_hybrid_depth_zero",
     }
-    candidate_trial = protocol["protocol_version"] == "graph_base_preserving_development_v1"
+    best_channel_trial = protocol["protocol_version"] == "graph_best_channel_development_v1"
+    candidate_trial = protocol["protocol_version"] == "graph_base_preserving_development_v1" or best_channel_trial
     if candidate_trial:
         required.add("graph_hybrid_base_preserving")
+    if best_channel_trial:
+        required.add("graph_hybrid_best_channel")
     if set(protocol["methods"]) != required or len(protocol["methods"]) != len(
         required
     ):
@@ -148,6 +152,9 @@ def verify_protocol(protocol, fixture, graph):
     if candidate_trial:
         profiles["graph_hybrid_base_preserving"] = "typed_path_base_preserving_v1"
         candidate = "graph_hybrid_base_preserving"
+    if best_channel_trial:
+        profiles["graph_hybrid_best_channel"] = "typed_path_best_channel_v1"
+        candidate = "graph_hybrid_best_channel"
     if (
         protocol["graph_profiles"] != profiles
         or protocol["graph_seed_hybrid_version"] != "weighted_rrf_v2"

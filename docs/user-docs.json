@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Compare versioned graph retrieval policies, interpret additive or best-channel scores, and preserve scope, evidence and coverage.",
+      "description": "Interpret versioned graph scores and reproduce bounded development comparisons with explicit evidence and coverage.",
       "order": 208
     },
     {

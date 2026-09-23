@@ -382,3 +382,25 @@ is optional and experimental; a development-only screening result is not
 independent evidence of superiority. Compare relevance, regressions, work and
 coverage on your workload, with a separately frozen evaluation before admission.
 No agent reasoning or token-efficiency improvement follows from this formula.
+
+### Reproduce a best-channel development comparison
+
+Use `benchmarks/retrieval/graph-best-channel-development-v1.json` with
+`scripts/evaluate_graph_retrieval.py` to compare ten methods, including the
+existing base-preserving profile. The declared primary comparison is
+`graph_hybrid_best_channel` versus `weighted_rrf_v2`; the graph seed remains
+hybrid v2. The protocol selects only the fixture's development queries. It
+rejects a reserved split, missing/duplicated methods, a substituted ranking
+version or a different declared primary comparison.
+
+Freeze the source revision, server profile catalog, fixture, model space,
+relations and protocol before running. Use an authorized disposable scope,
+externally generated vectors and the same budgets for all methods. The existing
+prepare/evaluate workflow records current source evidence, query-level scores,
+coverage and resource observations. Export the completed report only after
+checking the full method/query/repetition matrix.
+
+This is a development experiment, including when it reproduces an earlier
+prototype. The protocol does not authorize applying its result to an already
+observed reserved cohort or changing a production default. Independent evaluation
+and downstream task outcomes require their own frozen contracts.
