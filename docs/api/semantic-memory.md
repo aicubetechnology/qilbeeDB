@@ -152,6 +152,21 @@ revocation retain the existing live authorization behavior.
 response envelopes. Use [`/docs`](http://localhost:7474/docs) from a browser on
 the Docker host to inspect the complete contract.
 
+## Runtime integrity verification
+
+ARM64 builds enable runtime selection of SHA-256 acceleration when the CPU
+supports the required instructions. The cryptographic dependency retains its
+software fallback. This changes computation cost, not the digest algorithm,
+receipt format, vector identity or scope checks. Existing embeddings do not need
+to be regenerated or reindexed for this change.
+
+Managed-platform clients require no request changes. Self-hosted operators use
+the matching build for their architecture; no `target-cpu` override is required.
+Performance depends on the CPU, workload and deployment. An improvement in
+integrity verification cost does not imply better retrieval relevance or agent
+reasoning. See the [ARM64 retrieval comparison](../research/arm64-integrity-cost.md)
+for measured conditions and limits.
+
 ## Measure retrieval time
 
 The `X-Qilbee-Retrieval-Micros` response header measures server wall time spent in
