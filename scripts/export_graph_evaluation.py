@@ -25,6 +25,9 @@ def export(report, fixture):
     if plan["protocol_sha256"] != digest(protocol):
         raise ValueError("Export protocol differs from the pinned plan")
     stage = evaluation_stage(protocol)
+    if protocol["protocol_version"] == "twowiki_strength_development_v1":
+        from twowiki_evaluation_contract import verify_twowiki_protocol
+        verify_twowiki_protocol(protocol, fixture)
     if protocol["protocol_version"] in ("graph_path_strength_development_v1", "graph_path_strength_regression_v1"):
         from path_strength_contract import verify_path_strength_protocol
         verify_path_strength_protocol(protocol, fixture)
