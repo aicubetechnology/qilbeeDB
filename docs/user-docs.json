@@ -399,6 +399,13 @@
       "title": "Shared observations through an application",
       "description": "Publish and revalidate shared observations with application-owned membership, durable retry identities and current-state reads.",
       "order": 51
+    },
+    {
+      "source": "docs/client-libraries/ordered-memory.md",
+      "file": "python-ordered-memory.md",
+      "title": "Ordered memory reads with Python",
+      "description": "Read live scoped memory pages in creation order and preserve continuation, authorization and work limits.",
+      "order": 575
     }
   ]
 }
