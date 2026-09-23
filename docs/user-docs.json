@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Interpret graph scores, compare seed policies, verify overlap-controlled corpus bundles and inspect ranking, coverage and measurement evidence.",
+      "description": "Interpret graph scores, bind reserved comparisons to exact corpus and seed contracts, and inspect coverage and measurement evidence.",
       "order": 208
     },
     {
