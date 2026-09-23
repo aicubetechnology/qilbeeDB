@@ -101,3 +101,7 @@ projection and both role allocations are bound in the manifest. Before consuming
 it, verify its complete replay and compare its plan to the independently retained
 approved plan. The original source remains public development data; the
 confirmation label describes this experiment's reserved role only.
+
+The [corpus materializer](twowiki-corpus-materialization.md) replays this manifest,
+preserves sparse sentence-support provenance and builds source-qualified relations
+from documents only. It verifies the complete bundle before reuse.

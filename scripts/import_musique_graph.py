@@ -48,6 +48,11 @@ def identity(title, text):
 
 
 def document_graph(documents):
+    return _document_graph(documents, GRAPH_POLICY,
+                           lambda doc: doc["id"] == identity(doc["title"], doc["paragraph_text"]))
+
+
+def _document_graph(documents, policy, identity_matches):
     """Accept only a document projection, so label-dependent edges cannot hide here."""
     if any(set(d) != {"id", "title", "paragraph_text"} for d in documents):
         raise ValueError("Graph construction accepts document fields only")
@@ -55,7 +60,7 @@ def document_graph(documents):
         raise ValueError("Duplicate graph document ID")
     titles = defaultdict(list)
     for doc in documents:
-        if doc["id"] != identity(doc["title"], doc["paragraph_text"]):
+        if not identity_matches(doc):
             raise ValueError("Graph document identity differs from its text")
         titles[" ".join(words(doc["title"]))].append(doc["id"])
     for ids in titles.values():
@@ -67,7 +72,7 @@ def document_graph(documents):
         and not title.isdecimal()
         and (
             " " in title
-            or len(title) >= GRAPH_POLICY["minimum_single_token_title_characters"]
+            or len(title) >= policy["minimum_single_token_title_characters"]
         )
     }
     counts = Counter(token for title in eligible for token in set(title.split()))
@@ -86,8 +91,8 @@ def document_graph(documents):
             "kind": kind,
             "provenance": {
                 "origin": "tool_observation",
-                "method": GRAPH_POLICY["version"],
-                "method_revision": digest(GRAPH_POLICY),
+                "method": policy["version"],
+                "method_revision": digest(policy),
                 "evidence_ref": evidence,
                 "model": None,
             },
@@ -96,7 +101,7 @@ def document_graph(documents):
     for doc in sorted(documents, key=lambda d: d["id"]):
         own_title = " ".join(words(doc["title"]))
         same = [x for x in titles[own_title] if x != doc["id"]]
-        for other in same[: GRAPH_POLICY["same_title_neighbors_per_document"]]:
+        for other in same[: policy["same_title_neighbors_per_document"]]:
             source, target = sorted([doc["id"], other])
             edge(source, target, "same_entity", "title-sha256:" + digest(own_title))
         tokens = words(doc["paragraph_text"])
@@ -107,7 +112,7 @@ def document_graph(documents):
                 if title != own_title and " " + title + " " in text:
                     candidates.update((title, target) for target in eligible[title])
         selected = sorted(candidates, key=lambda v: (-len(v[0]), v[1]))[
-            : GRAPH_POLICY["mention_targets_per_document"]
+            : policy["mention_targets_per_document"]
         ]
         for title, target in selected:
             edge(
@@ -118,8 +123,8 @@ def document_graph(documents):
             )
     result = sorted(edges.values(), key=lambda e: e["id"])
     return result, {
-        "policy": GRAPH_POLICY,
-        "policy_sha256": digest(GRAPH_POLICY),
+        "policy": policy,
+        "policy_sha256": digest(policy),
         "document_projection_sha256": digest(sorted(documents, key=lambda d: d["id"])),
         "relations_sha256": digest(result),
         "documents": len(documents),

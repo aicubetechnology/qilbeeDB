@@ -173,3 +173,7 @@ shows how to report overlap and missing annotation coverage before selection.
 Freeze evaluation roles and selection settings before measuring a candidate. The
 [reproducible cohort guide](../research/cross-source-selection.md) explains mutual
 exclusions, quota failures and replay without inspecting retrieval quality.
+
+Preserve document revisions and judgment provenance when turning an evaluation
+selection into a corpus. The [materialization guide](../research/twowiki-corpus-materialization.md)
+explains replay, document-only graph construction and incomplete-bundle recovery.
