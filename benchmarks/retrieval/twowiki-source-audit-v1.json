@@ -1,0 +1,3227 @@
+{
+  "audit_version": "twowiki_public_development_source_audit_v1",
+  "source_split": "public_development",
+  "archive_sha256": "95df2bf56fdabe034e27aebc580e02264232203cf52552f9efe8a919e5529eef",
+  "development_sha256": "79f77ae104088ea8e25b1a65dbece768d45771194663bc5660ec9a98070dadf5",
+  "source_records": 12576,
+  "source_categories": {
+    "bridge_comparison": 2751,
+    "comparison": 3040,
+    "compositional": 5236,
+    "inference": 1549
+  },
+  "structurally_eligible_categories": {
+    "bridge_comparison": 2674,
+    "comparison": 2772,
+    "compositional": 5081,
+    "inference": 1517
+  },
+  "quarantine_reasons": {
+    "duplicate_context_title": 463,
+    "support_sentence_out_of_range": 70
+  },
+  "quarantined_records": [
+    {
+      "id": "00b92f9d089e11ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "01de6863085b11ebbd5cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "01f233340bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "021379a40bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "024076580bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "02940204087811ebbd67ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0296498208f611ebbdaaac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "02a9ff56094411ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0306ad3308fe11ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "033b1aff087c11ebbd69ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "03d68971096e11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "03d7dadb087f11ebbd6bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "041879d0093a11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "04a065a60bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "07211fce094e11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "07f2140e0bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "086d798a0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "08cd9d6408ba11ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0963c8b80bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "0bcf6de3093911ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0c4974760bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0cc593140bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0dcaa666089411ebbd75ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0dcba1500bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0e18c6be0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0e2082e408d111ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0ed5ae7108b711ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0f16160c0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "0f2180ba08c711ebbd91ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0f26cc3508a711ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "0ffe5ca00bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "1071381b096311ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "10b8567808c311ebbd8dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "11d4031608c211ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "11e3b06b08aa11ebbd80ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "12851c8c08b611ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "13162f53099611ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "131a6988086411ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "131fe1ba087011ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "13288e3a090b11ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "14d4196408c711ebbd91ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1597b4be086311ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1649093b091e11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "16c457c20bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "172fd661094811ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "17e09010084f11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "17ec5f82095d11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1800b6fc086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1806efe409b911ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1831cf5f086811ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "188088f7095311ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "194e28160bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "19ab7c2a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1b1b8ed6085111ebbd58ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1b38f1ce0bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1bca00b5089d11ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1bf30a41086611ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1bf5e04e08a411ebbd7cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1c147a56098111ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1ce02038090011ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1d38646108e611ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1db6218108e511ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1e71a37108da11ebbd9cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1e9c0bbb08a311ebbd7bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1fc14b400bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "1fdc8f3e0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "203b441208db11ebbd9cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "207788f1084a11ebbd55ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2079a7a6084b11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "20ad267b087411ebbd67ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "20d3483b08c111ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "20d3483c08c111ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "215d741f08e511ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "231a47860bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2330faf1097511ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "23c786fe08d611ebbd98ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "23d5d8740bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "24d918ae0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "24eb62980bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "255fa5eb08af11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2609b40a08fb11ebbdacac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "26599301084d11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "26af280a0bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "26e684660bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "26ebdb06089911ebbd77ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2782092e088411ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "28986e180bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2982f22c0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "29bfaeec0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "2a84a2920bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "2a98df6408d111ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2ad0448f088811ebbd6eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2ad168d509b411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2b75986e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2bb3448b086211ebbd5dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2c4e44380bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2ce0057a085111ebbd58ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2d5d6a2208be11ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2d76a8f408dd11ebbd9dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2de101c808d711ebbd99ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2dee8d7a0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "2e294eec0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "2e2fabfc095e11ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2e6fa204086211ebbd5dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2e7b57820bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2edebdf1085911ebbd5bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2eec9ea609ba11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "2ef751ac086e11ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3088aac60bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "316a9e6c0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "31700bce08b711ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "322dc9a2087b11ebbd67ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "32b37f0a0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title",
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "333ef175086f11ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3398c4f609bb11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "33e0136a08ce11ebbd94ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "355ac9940bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "35cfb78a0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "361dc208086f11ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "37a4158e0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "37f634be0baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "38050e100bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "383c7761087311ebbd66ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3929c8c80bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3936b1500bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3a238506088611ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3aa8382a08c011ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3ac032da0baf11ebab90acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3b2db90a093011ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3bb4c10c0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3bf1539d08ed11ebbda7ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3c3204c8084d11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3c9ec66a089011ebbd72ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3e1f8f82084b11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3e6de09c0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3eba2cd2089911ebbd77ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3f210e940baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "3f3cd37408e711ebbda5ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "3f9d631c08bf11ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4039b1be08d511ebbd98ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "41b416a00bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "4209b4d8085511ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4216f41a08df11ebbda0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "42f160760bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "43bc7b940bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "43fedada095511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "44e9813a0bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4618f4f60bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "467ac35e0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "46cb0ba408ad11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "46e99a3d094111ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4770abf0088e11ebbd70ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "496763c5089611ebbd76ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "497c1bdb094911ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4a08f0e80bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4a24e89e08a611ebbd7eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4a3edf720bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4ac03c47086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4b3014b809b411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4bc286620bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4bf3295e09b311ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4bff11db08ab11ebbd82ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4c405d3608c411ebbd8eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4c55cdf0096f11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4d2a73fa08c511ebbd8eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4d92e50a0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "4dd6b933097411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4de804bd096811ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4e743442096411ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "4e891cbc086411ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5055c9de0bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "511af4e80baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "52ac9cc4096c11ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "53175e86086b11ebbd5fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "53531f4c0baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "53a8974a0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5580e98b088b11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "561a61ae0bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5627f678086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "562aab540baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "563d58c20bdb11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "565d21740bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "569f6717097d11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "571c28120bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "57348a9e091811ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5747134c095e11ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "57dabdf1091c11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "58b2f61c08cb11ebbd92ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "593a648c0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "595209340bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "596c76bc08a311ebbd7bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "59930a360bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "59ecc1a908c811ebbd91ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5a79e5060bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5b43e68c086211ebbd5dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5baaafa8084a11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5bfb989408f811ebbdaaac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5c3b5e41095611ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5c67a4c00bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5c9e73200bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5cc0a8e0086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5cd30b020bd911eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "5d0f4fd2088111ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5d33913e0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5e7f9165094211ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5e849c97088b11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5eff227e094e11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5f180c13088911ebbd6eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "5f35e944087011ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6138bd9c095411ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "617f8d060bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "618c39ce0bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "61bf56e80bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "61cc91aa088c11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "61d278be088611ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "61de37720bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "62a221580bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "62c96c7c0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "63a0ba880bd911eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "63c16246095211ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6427df5c086611ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "658f9a300bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "66794f3808da11ebbd9cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "675e5d6308e411ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "676bf7000bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "6786673a0bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "67d605640bb011ebab90acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "689d225009b411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "68a9c7ec085a11ebbd5cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "69319c9e08d011ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "695689d20baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "696ef1dc0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "69d3571508ff11ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6a59f5a20bb011ebab90acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6b10f275096011ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6b2ad6600bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6bc3222c086511ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6c6649e60bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6c9b4c03086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6ccbe6a8098011ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6d0f23b008b011ebbd84ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6d14f21a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6d92780e0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6e7347dc0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6eb1969d088011ebbd6cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6ed89c43094d11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6edd70ff089011ebbd72ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "6f1c59360bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "7019886b093511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "701b5e2a090a11ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "703bb4500bd911eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "70dc266a0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "70e0b5360bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "712dc54c0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7156654108f211ebbdaaac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "71bf184e0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "71c2ec3c086711ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "71cc6f3a0bde11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "71dbcd8e0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7250010e0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "72cfea12086711ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "734d9f0408a111ebbd79ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7368acd60bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "743f23820bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "74c011600bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "74c24c8c0bde11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "757e321e094d11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "77d689dd08d811ebbd9bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "77f2d5bc0bb011ebab90acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "77f5a3dc0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "78505ad8088c11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "79155d3a086711ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7a01a52a089c11ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7a0206f2089f11ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7a2630040bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7a69aa4308c111ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7ab285e60bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7adefa720bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7aec38ed089211ebbd73ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7bb996ce0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7d67307408ef11ebbda8ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "7df608580bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "804026ed086911ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "81502a9c08c211ebbd8cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "816baad6085511ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "83a497ce0bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "85f17aea08c911ebbd92ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "867efe19097a11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "86b7e74808e211ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "86c28414085311ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8710b870086a11ebbd5fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "87724861086d11ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "878a351608e811ebbda6ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "87d642a208ae11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "88adf4ed089511ebbd75ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "88e77b3808af11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "89d8009a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8b6a5821091111ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8be07b240bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8cc029e708c311ebbd8dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8cca23e5091611ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8cddc8520baf11ebab90acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8d9cf88009b311ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8df789f4088b11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "8f2b2975088a11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9219ff74093511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9337e50e097311ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "937cd0300bb011ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "93b5fedc0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "946878a6085811ebbd5bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9564cd35089311ebbd75ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9588e1c2088911ebbd6eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "95bf64480bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "95c89d31088e11ebbd70ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "95d4781b086311ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "95e9339a095011ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "960f40120bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "964d1a520bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "967024260bd911eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "96a5652f085611ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "96bf78ee0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9900c8200bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "990dabb40bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9a9a151f096f11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9b1655a108e511ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9b231f480bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "9b87e90d08a611ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9b9ed9840bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9d5ec862097b11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9dde4d9f089811ebbd77ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "9fdd6a9408b811ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a05cc87008a711ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a0a792ae08d111ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a111296e086111ebbd5dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a1636efb090511ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a1b59b780bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a1fc7b00088211ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a2baae73086411ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a3561235086b11ebbd5fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a391993708bf11ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a48cb0f1088811ebbd6eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a4d8ea760bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a5c0298f099111ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a64a25c6094311ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a65fd4c9094811ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a687e05f086b11ebbd5fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a6fb9ed0095311ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a7c458ef089311ebbd75ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a7c95d2b088511ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a813d16b094911ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a816ef120bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "a8934f0c0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a8f04a7f090211ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a8f3ff980bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "a9ef98760baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "aa40eda8096e11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "aae0d09b087011ebbd63ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ac9716f60bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "aca606aa0bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "acfdf12e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "adf6e99108a011ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ae714dea0bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "aef8b45408af11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "af5e8d1308e811ebbda6ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "afc5b57c0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "afcff22e0bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "aff36dd4092411ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b01609420baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "b0a03b3208a111ebbd79ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b0b2952008d311ebbd96ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b0c5055e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b0f743e3094f11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b117db300bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b15a17f708b911ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b16690f208a111ebbd79ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b2858d44089911ebbd77ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b3c7f126086311ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b3d611b3088a11ebbd6fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b430f7b608d611ebbd98ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b4f63414088511ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b529c58a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b7a7f4ba0bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "b80145be08a211ebbd7bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b87177b00bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b8cbc13e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b8f13b3709b111ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b93cca75093911ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b9d18962093511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "b9e30a520bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ba9891a6092911ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bb5828f2090811ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bb80633c08b311ebbd86ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bbccb00a08c211ebbd8cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bc1d1d10095011ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bc6ac3f7095511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bce1855a0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "be0a595e0baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "beaf107f089a11ebbd77ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "bedfa2300baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "bf06c94208a711ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c049b0240bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "c049debe0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c0960922089c11ebbd78ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c096367c0bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c107508209b911ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c16090ad094811ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c1aab4db094f11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c1d6a4ac0baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "c2085d70088111ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c213141e08e411ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c218a802090711ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c3367cd8092411ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c39a9f5108c611ebbd91ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c3e1ad9e090d11ebbdadac1f6bf848b6",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "c46c8f6e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c47475c2097c11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c4854c61086e11ebbd62ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c5c305b5084a11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c61541df084b11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c6ab5b3c08ce11ebbd94ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c6b4652c08c111ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c6c4ebde08be11ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c6da584808f911ebbdaaac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c79a852708b111ebbd85ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c81f50b00bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c90e5160091611ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "c9983efa086511ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ca610b5208c711ebbd91ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ca9bb77b08fb11ebbdacac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "cc2fd612088f11ebbd72ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "cd56b2d708c111ebbd8bac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "cd791c8a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "cf776ad6091d11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "cff8f6da08b811ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d03663e108e211ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d13ac3f40bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d1bd3c36095f11ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d1bdbdbe087711ebbd67ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d27c4969084d11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d2911abd08ca11ebbd92ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d2c7402008bf11ebbd8aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d2ef1bea096611ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d4c086d009b811ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d4fc7884089611ebbd76ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d543d1a7085611ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d6074911090011ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d6502e780bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d7da7004090611ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d817c7a408ea11ebbda7ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d84280200bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d879b26208ad11ebbd83ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d8c36503097411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d8dd595708fb11ebbdacac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d8de3d3d088411ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d8e5f5d6087011ebbd63ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d94b8e3708e911ebbda7ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "d9f2ea720bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "da208aa4084911ebbd55ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "da6c03a908d111ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "da79ed93098011ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "dab62b000baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "dafdba2208b411ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "db371cbb088011ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "db72500e08fe11ebbdadac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "db760b4a0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "dbd9551d086b11ebbd60ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "dc4c7573087211ebbd66ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "dd01c8180bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "dd2b76c60bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "dd90826d086c11ebbd61ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ddcf5c25096311ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ddd2fec6096311ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "de467258097411ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "de64290e0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "deea8eb80bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "df41588c0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "df66ea220bdc11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e0b71974084e11ebbd56ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e23884ee095a11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e332f484092211ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e410241608e511ebbda4ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e43f26380bda11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "e4ccf7f1096411ebbdafac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e4ed56d7084911ebbd55ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e50256be092011ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e64f0b1c0bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "e67c313b08a511ebbd7dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e762a1ef08d011ebbd95ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e7ebb87508c811ebbd92ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e81fc36c0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e867c55a087711ebbd67ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "e91b328108aa11ebbd80ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "eb184b2c0baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "eb2a75220bdc11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "eb2b1a37095c11ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "eb55d5f00baf11ebab90acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "ebea9324087c11ebbd6aac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "eccdbf80085b11ebbd5cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ee559aaa08c211ebbd8cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ee5cf4a008a711ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ef22b9d208b211ebbd85ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ef8526a60bd911eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "efa871c8085611ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "efcb57f00bdb11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f2d62e4b09b511ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f31afa16094511ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f31d220f08f111ebbdaaac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f37a8fca0bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f3988f4e0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f3b47f7908a611ebbd7fac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f4d06fc9088011ebbd6dac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f60858c308fa11ebbdacac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f6384b5c099e11ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f68b59ac0bd911eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f7bae9100bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f7ff7626098911ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f85b9b8d086611ebbd5eac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f8684dee0bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f87c0e920bdd11eba7f7acde48001122",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "f8d80ac908e811ebbda6ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "f9051cdb093711ebbdaeac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "faecc3fa08d211ebbd96ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fb37a7ac097511ebbdb0ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fbae3264089411ebbd75ac1f6bf848b6",
+      "reasons": [
+        "support_sentence_out_of_range"
+      ]
+    },
+    {
+      "id": "fc4c59300bda11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fd01563408e711ebbda6ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fd201cb6085b11ebbd5cac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fd49afe6084811ebbd55ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fd68c8f6085311ebbd59ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fdbc20e00bdd11eba7f7acde48001122",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "fdcce32008b911ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    },
+    {
+      "id": "ff8d920c08b611ebbd88ac1f6bf848b6",
+      "reasons": [
+        "duplicate_context_title"
+      ]
+    }
+  ],
+  "selected_queries": 0,
+  "retrieval_performed": false,
+  "limits": [
+    "Structural eligibility does not establish disjointness from observed history",
+    "Source categories are not interchangeable with MuSiQue hop strata",
+    "Quarantine reasons are nonexclusive; ambiguous titles are not silently resolved",
+    "Sentence labels do not fully judge relevance in a merged retrieval corpus",
+    "Public data may occur in model training; no hidden-test or reasoning-gain claim"
+  ]
+}

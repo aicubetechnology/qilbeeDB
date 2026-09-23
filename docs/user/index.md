@@ -159,3 +159,9 @@ provides replayable selection and capacity checks for the supported research
 fixture. An exhausted evaluation stratum is a reason to declare a new protocol,
 not to silently weaken exclusions. Retrieval relevance and downstream agent-task
 benefits require separate measurements.
+
+When adopting another evaluation dataset, validate its document references before
+measuring retrieval. Keep answer annotations out of graph construction and report
+quarantined records. The [source-contract example](../research/twowiki-source-contract.md)
+illustrates these checks; structural validation alone does not establish an
+independent evaluation cohort.

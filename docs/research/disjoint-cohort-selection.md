@@ -186,3 +186,10 @@ These are corpus-integrity results, not retrieval or agent-quality measurements.
 The materialization receipt describes that completed stage only. Subsequent
 embedding generation and retrieval have separate frozen inputs and evidence in
 the [reserved comparison](balanced-support-reserved-results.md).
+
+## Alternative source validation
+
+The [2WikiMultiHopQA source contract](twowiki-source-contract.md) provides a
+separate structural audit for a potential replacement multi-step evaluation. Its
+question categories are not MuSiQue hop strata; its eligible records still need
+cross-source overlap checks and a frozen selection protocol before retrieval.
