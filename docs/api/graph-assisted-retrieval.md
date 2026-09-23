@@ -577,3 +577,27 @@ Keep the seed version, scope, corpus revisions and work budgets fixed when
 comparing it. Report lost relevant results as well as newly recovered results.
 A truncated neighborhood remains truncated; this formula does not restore
 unexamined candidates or replace freshness checks before context reuse.
+
+### Reproduce the path-strength development comparison
+
+`benchmarks/retrieval/graph-path-strength-development-v1.json` fixes eight methods
+on the same 30 previously observed development queries: lexical, semantic,
+hybrid v1, hybrid v2, balanced graph, best-channel graph, path-strength graph and
+a depth-zero path-strength control. All graph arms use hybrid v1 seeds. The
+primary comparison is path-strength graph versus hybrid v1, with the same corpus,
+external vectors, final result limit and work budgets.
+
+The evaluator checks the exact versioned protocol, source digest and query IDs.
+It reconstructs path strength from frozen endpoint revisions, relations and
+external vectors before verifying the contribution and combined score. Changing
+the path's reported strength together with its score cannot bypass this check.
+The depth-zero arm must retain the baseline order, and every graph arm must use
+the independently retrieved baseline anchors. The exporter rejects modified
+protocols even when their supplied digest has also been updated.
+
+Use `scripts/evaluate_graph_retrieval.py` to prepare the authorized isolated scope
+and evaluate this protocol, then `scripts/export_graph_evaluation.py` to verify
+and export the completed report. Failed or incomplete comparisons are not accepted
+as complete evidence. Keep raw responses and frozen sources for audit. This
+protocol measures development behavior; it cannot establish independent relevance
+gains, change the default or demonstrate agent-task improvement.
