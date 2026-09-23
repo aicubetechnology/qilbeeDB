@@ -392,6 +392,13 @@
       "title": "Learning metadata discovery",
       "description": "Find company policies and evaluation contexts with bounded, read-only discovery.",
       "order": 1075
+    },
+    {
+      "source": "docs/api/shared-observations.md",
+      "file": "shared-observations.md",
+      "title": "Shared observations through an application",
+      "description": "Publish and revalidate shared observations with application-owned membership, durable retry identities and current-state reads.",
+      "order": 51
     }
   ]
 }
