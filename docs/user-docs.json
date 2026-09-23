@@ -5,7 +5,7 @@
       "source": "docs/user/index.md",
       "file": "index.md",
       "title": "QilbeeDB documentation",
-      "description": "Find official QilbeeDB resources and build applications with durable memory, scoped retrieval and traceable learning.",
+      "description": "Find QilbeeDB workflows for durable memory, scoped retrieval, traceable learning and reproducible evaluation.",
       "order": 0
     },
     {

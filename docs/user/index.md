@@ -129,7 +129,7 @@ current eligibility checks remain necessary before cached context is reused.
 
 The [graph-assisted retrieval API](../api/graph-assisted-retrieval.md) selects lexical, semantic
 or hybrid anchors and ranks memories through exact typed paths in one snapshot.
-Four immutable experimental profiles expose separate base and graph contributions,
+Immutable experimental profiles expose separate base and graph contributions,
 coverage and provenance. Existing search scores and defaults remain unchanged;
 the [reserved comparison](../research/graph-retrieval-results.md) found uncertain
 mean improvement and material regressions. Agent-task benefits remain unmeasured.
@@ -149,3 +149,13 @@ The 0.14.0 [external graph consolidation contract](../api/graph-consolidation.md
 coordinates durable external extraction, exact source revisions and fenced atomic
 relation publication. Its worker and administrative workflows require qualification
 before release; inferred relations do not establish an agent-quality gain.
+
+## Evaluate retrieval on your workload
+
+Keep tuning queries separate from final evaluation queries, and preserve the
+complete history of queries already inspected. A new question identifier can
+still reuse known answers or evidence. The [overlap-controlled evaluation guide](../research/disjoint-cohort-selection.md)
+provides replayable selection and capacity checks for the supported research
+fixture. An exhausted evaluation stratum is a reason to declare a new protocol,
+not to silently weaken exclusions. Retrieval relevance and downstream agent-task
+benefits require separate measurements.
