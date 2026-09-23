@@ -601,3 +601,7 @@ and export the completed report. Failed or incomplete comparisons are not accept
 as complete evidence. Keep raw responses and frozen sources for audit. This
 protocol measures development behavior; it cannot establish independent relevance
 gains, change the default or demonstrate agent-task improvement.
+
+The [completed HTTP development report](../research/path-strength-development-results.md)
+records the primary uncertainty interval, regressions, coverage cuts and measured
+local cost. Its exploratory result does not establish a preferred default.
