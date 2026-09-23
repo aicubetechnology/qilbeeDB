@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Retrieve scoped graph evidence and audit fixed ranking comparisons, observed-cohort regressions and lost or recovered labeled support.",
+      "description": "Retrieve scoped memory with explicit graph profiles, path evidence, coverage and separately qualified development results.",
       "order": 208
     },
     {

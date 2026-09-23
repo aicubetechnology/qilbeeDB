@@ -86,3 +86,7 @@ with 40 development and 120 reserved-confirmation queries. The
 [corpus receipt](https://github.com/aicubetechnology/qilbeeDB/blob/aicube/twowiki-materialization/benchmarks/retrieval/twowiki-corpus-receipt-v1.json)
 binds the exact source and graph. Relation counts describe this construction;
 they are not evidence of graph coverage, relevance gains or better reasoning.
+
+The [development comparison](twowiki-strength-development-results.md) measures
+seven fixed methods on the 40 development questions. Its findings do not include
+the reserved confirmation questions or establish agent-task benefits.

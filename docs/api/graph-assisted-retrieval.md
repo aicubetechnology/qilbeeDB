@@ -632,3 +632,9 @@ The [completed full-cohort regression report](../research/path-strength-regressi
 records every transition, the positive exploratory mean difference, remaining
 losses and local retrieval cost. It motivates a fresh comparison without
 establishing a preferred production method.
+
+The [2Wiki development comparison](../research/twowiki-strength-development-results.md)
+found improved retrieval for strength versus hybrid V1 on one 40-question
+development cohort, while balanced had slightly higher mean nDCG. This does not
+qualify a default change; reserved confirmation and agent-task evidence remain
+separate requirements. Use the exact advertised profile and inspect coverage.
