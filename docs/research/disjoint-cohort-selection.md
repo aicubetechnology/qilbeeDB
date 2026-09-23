@@ -78,6 +78,55 @@ embeddings, binding the chosen candidate to a frozen run and executing a compari
 are subsequent steps. Existing observed cohorts remain regression data. Do not
 use the newly selected queries for tuning and then call them confirmation data.
 
+## Audit capacity before selecting a new cohort
+
+Run `audit` with all previously observed fixtures to distinguish exhausted strata
+from a greedy selection failure. It accepts a source split but no seed or quota;
+it selects no queries and performs no retrieval. It reports eligibility against
+history only. Within-cohort overlaps may reduce the eventual selection further.
+
+```bash
+python3 scripts/select_disjoint_musique.py audit \
+  --source-dir ./musique-source \
+  --prior-fixture ./previous-source.json \
+  --prior-fixture ./another-previous-source.json \
+  --source-split train \
+  --manifest ./eligibility.json
+
+python3 scripts/select_disjoint_musique.py verify-audit \
+  --source-dir ./musique-source \
+  --prior-fixture ./previous-source.json \
+  --prior-fixture ./another-previous-source.json \
+  --manifest ./eligibility.json
+```
+
+`verify-audit` recomputes every field from the pinned source and declared history;
+changed counts, source bytes or provenance fail. Existing outputs are never
+overwritten. Preserve the input bytes with the artifact. Conflict categories are
+nonexclusive: one candidate can share an answer and a supporting paragraph.
+Previously observed IDs are counted first rather than in those conflict categories.
+Do not sum category counts to estimate unique excluded questions.
+
+### Observed capacity after 470 historical questions
+
+The [frozen capacity audit](https://github.com/aicubetechnology/qilbeeDB/blob/aicube/retrieval-cohort-feasibility/benchmarks/retrieval/musique-history-eligibility-v1.json)
+adds the materialized cohort to the two earlier fixtures, covering 470 unique
+observed questions across the official training and development sources.
+
+| Training stratum | Answerable source questions | Eligible against declared history |
+| --- | ---: | ---: |
+| Two hops | 14,376 | 5,559 |
+| Three hops | 4,387 | 0 |
+| Four hops | 1,175 | 0 |
+
+The planned 80/40/20 selection cannot succeed under these exclusions; a different
+seed cannot create eligible three- or four-hop questions. This is a limit of the
+specified source and exclusion policy, not a claim that no novel multi-step
+questions exist. No ranking was measured by this audit. Reusing observed cases,
+relaxing exclusions or replacing the cohort with two-hop questions would change
+the evaluation claim and requires a separately declared protocol. Preserve the
+failed attempt when designing a replacement benchmark.
+
 ## Materialize and verify a corpus bundle
 
 `scripts/materialize_disjoint_musique.py` replays the complete selection before

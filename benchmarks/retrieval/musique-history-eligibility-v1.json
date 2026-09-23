@@ -1,0 +1,63 @@
+{
+  "audit_version": "musique_disjoint_eligibility_v1",
+  "source_split": "train",
+  "source_file_sha256": {
+    "musique_ans_v1.0_train.jsonl": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+    "musique_ans_v1.0_dev.jsonl": "15fa63794d18a94ce12411aca6e2327e65b6e83b0b1490efab3f1962e48abf3b"
+  },
+  "prior_fixture_sha256": [
+    "1d95bc1da0739016d077c60c2e5498f86d3cc634768ca9a2e6340b68120984ac",
+    "4e677ab641c30888e2670c90f6d378c3baea85fe688c597e0017d57e0d560115",
+    "c2957b367b4c6350a858b7ac5582d0fd4b25a8eb490a4d770393d8eba3169b25"
+  ],
+  "previous_unique_queries": 470,
+  "source_rows": 19938,
+  "answerable_by_hop": {
+    "2": 14376,
+    "3": 4387,
+    "4": 1175
+  },
+  "eligible_by_hop": {
+    "2": 5559,
+    "3": 0,
+    "4": 0
+  },
+  "exclusion_counts": {
+    "answer": 11920,
+    "component": 3669,
+    "previous_id": 170,
+    "subquestion": 7334,
+    "support": 3946
+  },
+  "exclusion_counts_by_hop": {
+    "2": {
+      "answer": 6797,
+      "component": 1857,
+      "previous_id": 90,
+      "subquestion": 3873,
+      "support": 2040
+    },
+    "3": {
+      "answer": 3979,
+      "component": 1221,
+      "previous_id": 50,
+      "subquestion": 2614,
+      "support": 1273
+    },
+    "4": {
+      "answer": 1144,
+      "component": 591,
+      "previous_id": 30,
+      "subquestion": 847,
+      "support": 633
+    }
+  },
+  "selected_queries": 0,
+  "retrieval_performed": false,
+  "limits": [
+    "Eligibility against declared history is an upper bound; within-cohort overlaps can reduce feasible quotas",
+    "Conflict categories are nonexclusive and cannot be summed into unique excluded rows",
+    "No quota, normalization or exclusion rule was changed",
+    "Unlisted historical fixtures cannot be excluded automatically"
+  ]
+}
