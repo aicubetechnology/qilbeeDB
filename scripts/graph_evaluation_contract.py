@@ -26,18 +26,19 @@ def graph_profile(version):
         "typed_path_balanced_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_base_preserving_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_best_channel_v1": [1, 1, 1, 1, 1, 1],
+        "typed_path_strength_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_entity_v1": [0.5, 1, 0, 0, 0, 0],
     }[version]
     return {
         "version": version,
-        "method": "strongest_typed_path_max" if version == "typed_path_best_channel_v1" else "strongest_typed_path_rrf",
+        "method": "strongest_typed_path_strength" if version == "typed_path_strength_v1" else "strongest_typed_path_max" if version == "typed_path_best_channel_v1" else "strongest_typed_path_rrf",
         "experimental": True,
         "traversal_version": "typed_relations_v1",
         "base_candidate_limit": 100,
         "anchor_limit": 4,
         "rank_constant": 2,
-        "base_weight": 1.0 if version == "typed_path_best_channel_v1" else 0.75 if version == "typed_path_base_preserving_v1" else 0.25,
-        "graph_weight": 1.0 if version == "typed_path_best_channel_v1" else 0.25 if version == "typed_path_base_preserving_v1" else 0.75,
+        "base_weight": 0.5 if version == "typed_path_strength_v1" else 1.0 if version == "typed_path_best_channel_v1" else 0.75 if version == "typed_path_base_preserving_v1" else 0.25,
+        "graph_weight": 0.5 if version == "typed_path_strength_v1" else 1.0 if version == "typed_path_best_channel_v1" else 0.25 if version == "typed_path_base_preserving_v1" else 0.75,
         "hop_decay": 0.5,
         "cosine_affinity_floor": 0.5,
         "cosine_affinity_weight": 0.5,
@@ -360,7 +361,6 @@ def validate_page(result, fixture, state, query, method, protocol):
                 "anchor_rank"
             ] <= len(page["seed"]["selected_anchors"]):
                 raise ValueError("Anchor rank exceeds the selected roots")
-            near(path["contribution"], profile["graph_weight"] / (profile["rank_constant"] + path["rank"]))
             previous = path["anchor"]
             if (
                 previous != page["seed"]["selected_anchors"][path["anchor_rank"] - 1]
@@ -415,6 +415,8 @@ def validate_page(result, fixture, state, query, method, protocol):
             }:
                 raise ValueError("Path does not end at the retrieved revision")
             near(path["strength"], strength)
+            expected_contribution = profile["graph_weight"] * strength if profile["method"] == "strongest_typed_path_strength" else profile["graph_weight"] / (profile["rank_constant"] + path["rank"])
+            near(path["contribution"], expected_contribution)
     if used_proofs != set(proofs):
         raise ValueError("Unrelated assertions were attached to final context")
     return [aliases[rid] for rid in ids]

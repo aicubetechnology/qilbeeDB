@@ -89,6 +89,7 @@ def evaluation_stage(protocol):
         "graph_multihop_compare_v1": "test",
         "graph_balanced_v1_support_reserved_v1": "test",
         "graph_seed_matrix_development_v1": "development",
+        "graph_path_strength_development_v1": "development",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
         "graph_best_channel_development_v1": "development",
@@ -124,6 +125,10 @@ def verify_protocol(protocol, fixture, graph):
         or not 1 <= protocol["repetitions"] <= 20
     ):
         raise ValueError("Protocol differs from supported frozen comparison")
+    if protocol["protocol_version"] == "graph_path_strength_development_v1":
+        from path_strength_contract import verify_path_strength_protocol
+        verify_path_strength_protocol(protocol, fixture)
+        return
     if protocol["protocol_version"] == "graph_balanced_v1_support_reserved_v1":
         from support_reserved_contract import verify_support_reserved
         verify_support_reserved(protocol, fixture, graph)
