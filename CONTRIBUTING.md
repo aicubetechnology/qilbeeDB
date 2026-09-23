@@ -73,3 +73,14 @@ website. Propose shared-boundary changes through the collaboration protocol and
 obtain explicit agreement from the responsible teams before implementation.
 Do not revert or redeploy another team's site to correct a prior boundary breach;
 preserve the observed state and provide a factual handoff.
+
+
+## Real-environment validation
+
+Run acceptance work against the actual QilbeeDB stack and actual persistence,
+authorization and recovery paths. Do not introduce simulated services, mocked
+clients or synthetic-only test-suite runs as validation. Use isolated records
+and real scoped credentials, preserve existing customer data, and record exact
+source/image identity, actions and observations. Exercise faults in an isolated
+real deployment rather than disrupting a shared production service. Static
+reviews remain analysis; historical unit-test counts do not establish acceptance.

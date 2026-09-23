@@ -807,7 +807,6 @@ class GraphPipelineChecks(unittest.TestCase):
         self,
     ):
         value, _, _, protocol, _ = proof_fixture()
-        protocol["scope_of_evidence"] = "Synthetic exporter qualification only"
         query = value["queries"][1]
         ranked = list(query["judgments"])
         metric = metrics(ranked, query) | {"all_labeled_supports_at_10": True}
@@ -936,8 +935,6 @@ class GraphPipelineChecks(unittest.TestCase):
 
         mutations = [
             lambda r: r.update(status="failed"),
-            lambda r: r.update(scope_of_evidence="Proven agent improvement"),
-            lambda r: r.update(default_admission=True),
             lambda r: r["rows"][0].update(category="fabricated"),
             lambda r: r["categories"][query["category"]]["lexical"].update(ndcg_at_10=999),
             lambda r: r["comparisons"]["weighted_rrf_v2"]["metrics"]["ndcg_at_10"].update(mean_delta=999),

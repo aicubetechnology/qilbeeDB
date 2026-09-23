@@ -668,3 +668,8 @@ Use separate confirmation evidence before changing a ranking default. If you
 retune a method after inspecting development losses, start a new development
 protocol and identify which reserved questions remain unobserved. Neither a
 confirmation label nor a higher development mean proves improved agent outcomes.
+
+A [real-container evaluation](../research/twowiki-captured1536-docker-development.md)
+illustrates why reproducing text and vectors alone is insufficient: fresh record
+identifiers can change ties. Preserve the import manifest and revisions when
+confirming a ranking result, and report cross-import results separately.
