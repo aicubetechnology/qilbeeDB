@@ -59,6 +59,332 @@
     }
   ],
   "paths": {
+    "/api/v1/memory/query/ordered": {
+      "post": {
+        "operationId": "queryOrderedMemory",
+        "summary": "List authorized memories by creation date",
+        "description": "Additive chronological listing. Requires MemoryRead for the exact requested scope. Private subject derives only from authentication; integration credentials do not require company administration. Current eligible records only. Order is immutable server created_at_millis, then workspace ID (company only), then UUID; descending reverses the complete tuple. Each request uses a coherent snapshot, but continuation is live: inserts before its seek position require refresh; inserts after it may appear later; updates do not move records. Filters and eligibility are reevaluated per page. No total count, snapshot completeness, ranking or reuse authorization is implied. Stop reason and next_cursor expose partial/empty pages. Scan count includes traversed index positions, including selection exclusions and tombstones; record_bytes counts selected canonical root bytes, not index bytes, dependency bytes or response size. Limits: 100 results, 10000 index positions, 8MiB root bytes, existing aggregate dependency budgets. Limit/dependency/integrity failures never produce partial success. Existing UUID query remains unchanged. Cursor maximum1024 ASCII bytes; invalid, mismatched or unsupported cursor returns400 invalid_request; restart listing. Revoked credentials401, denied scope403, busy503. No time-based cursor expiry.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderedMemoryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderedMemoryRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/company/memory/query/ordered": {
+      "post": {
+        "operationId": "queryOrderedCompanyMemory",
+        "summary": "List company memories by creation date",
+        "description": "Additive chronological listing. Requires credential_admin; company derives only from authentication. Globally ordered across selected company workspaces including private subjects. Selection filters are applied before payload inspection. Order is immutable server created_at_millis, then workspace ID (company only), then UUID; descending reverses the complete tuple. Each request uses a coherent snapshot, but continuation is live: inserts before its seek position require refresh; inserts after it may appear later; updates do not move records. Filters and eligibility are reevaluated per page. No total count, snapshot completeness, ranking or reuse authorization is implied. Stop reason and next_cursor expose partial/empty pages. Scan count includes traversed index positions, including selection exclusions and tombstones; record_bytes counts selected canonical root bytes, not index bytes, dependency bytes or response size. Limits: 100 results, 10000 index positions, 8MiB root bytes, existing aggregate dependency budgets. Limit/dependency/integrity failures never produce partial success. Existing UUID query remains unchanged. Cursor maximum1024 ASCII bytes; invalid, mismatched or unsupported cursor returns400 invalid_request; restart listing. Revoked credentials401, denied scope403, busy503. No time-based cursor expiry.",
+        "tags": [
+          "Company memory administration"
+        ],
+        "security": [
+          {
+            "platformCredential": []
+          },
+          {
+            "loginSession": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid fields or unsupported contract version",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, malformed, expired or revoked credential",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Capability, tenant or scope is not granted",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Successful operation",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderedCompanyMemoryResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: all server retrieval slots are in use. Retry with bounded backoff. No retrieval is started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrievalBusyError"
+                },
+                "example": {
+                  "contract_version": 1,
+                  "error": {
+                    "code": "retrieval_busy",
+                    "message": "The server has no available retrieval slot; retry with backoff"
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderedCompanyMemoryRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health",
@@ -22600,6 +22926,361 @@
       }
     },
     "schemas": {
+      "OrderedMemoryCursor": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 1024,
+            "pattern": "^[0-9a-f]+$",
+            "description": "Opaque seek cursor, not authorization or a snapshot. Copy unchanged. Bound to endpoint, company/exact scope, selection, view, order and content filters. Limits may change. No time-based expiry; invalid/mismatched/unsupported cursors require restarting the listing."
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "OrderedMemoryQuery": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "string",
+            "enum": [
+              "created_desc",
+              "created_asc"
+            ],
+            "default": "created_desc"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 40
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 1000
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/OrderedMemoryCursor"
+          },
+          "text_contains": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "episode_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "CompanyMemorySelection": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agent_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "private_subject_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visibility": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "private",
+                  "shared"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "OrderedCompanyMemoryEntry": {
+        "type": "object",
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/CompanyRetainedMemoryRecord"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/MemoryEligibility"
+          },
+          "workspace": {
+            "$ref": "#/components/schemas/CompanyMemoryWorkspace"
+          }
+        },
+        "required": [
+          "record",
+          "eligibility",
+          "workspace"
+        ],
+        "additionalProperties": false,
+        "description": "Current retained revision and its eligibility in one snapshot. In retained view, payloads may be expired, rejected or invalid for agent reuse. Deleted records have null payloads. Entry dependency_work counts incremental reads for that entry; the page reports aggregate work. Administrative visibility does not make a record eligible."
+      },
+      "OrderedMemoryPage": {
+        "type": "object",
+        "properties": {
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "exhausted",
+              "record_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          },
+          "next_cursor": {
+            "$ref": "#/components/schemas/OrderedMemoryCursor"
+          },
+          "records": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/MemoryRecord"
+            }
+          }
+        },
+        "required": [
+          "stop_reason",
+          "evaluated_at_millis",
+          "scanned_records",
+          "record_bytes",
+          "dependency_work",
+          "next_cursor",
+          "records"
+        ],
+        "additionalProperties": false
+      },
+      "OrderedMemoryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/OrderedMemoryQuery"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "OrderedMemoryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "page": {
+            "$ref": "#/components/schemas/OrderedMemoryPage"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          }
+        },
+        "required": [
+          "contract_version",
+          "page",
+          "scope"
+        ],
+        "additionalProperties": false
+      },
+      "OrderedCompanyMemoryPage": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/OrderedCompanyMemoryEntry"
+            }
+          },
+          "stop_reason": {
+            "type": "string",
+            "enum": [
+              "exhausted",
+              "record_limit",
+              "scan_limit",
+              "byte_limit"
+            ]
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scanned_records": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "record_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8388608
+          },
+          "dependency_work": {
+            "$ref": "#/components/schemas/DependencyWork"
+          },
+          "next_cursor": {
+            "$ref": "#/components/schemas/OrderedMemoryCursor"
+          }
+        },
+        "required": [
+          "entries",
+          "stop_reason",
+          "evaluated_at_millis",
+          "scanned_records",
+          "record_bytes",
+          "dependency_work",
+          "next_cursor"
+        ],
+        "additionalProperties": false
+      },
+      "OrderedCompanyMemoryRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "query": {
+            "$ref": "#/components/schemas/OrderedMemoryQuery"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/CompanyMemorySelection"
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "current",
+              "retained"
+            ],
+            "default": "retained"
+          }
+        },
+        "required": [
+          "contract_version",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "OrderedCompanyMemoryResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "page": {
+            "$ref": "#/components/schemas/OrderedCompanyMemoryPage"
+          },
+          "company_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract_version",
+          "page",
+          "company_id"
+        ],
+        "additionalProperties": false
+      },
       "RelationChangeCursor": {
         "type": "object",
         "properties": {

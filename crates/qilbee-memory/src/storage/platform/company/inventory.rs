@@ -85,7 +85,7 @@ pub struct CompanyMemoryRelationRevision {
     pub history: MemoryRelationRevision,
 }
 impl CompanyMemoryQuery {
-    fn validate(&self) -> Result<()> {
+    pub(in crate::storage::platform) fn validate(&self) -> Result<()> {
         if !(1..=100).contains(&self.limit) || !(1..=10_000).contains(&self.scan_limit) {
             return Err(Error::ValidationError(
                 "Company inventory limit must be 1–100 and scan limit 1–10000".into(),
@@ -103,7 +103,7 @@ impl CompanyMemoryQuery {
         }
         Ok(())
     }
-    fn matches(&self, record: &MemoryRecord, needle: Option<&str>) -> bool {
+    pub(in crate::storage::platform) fn matches(&self, record: &MemoryRecord, needle: Option<&str>) -> bool {
         let Some(payload) = &record.payload else {
             return self.text_contains.is_none()
                 && self.tag.is_none()
@@ -349,7 +349,7 @@ impl RocksDbMemoryStorage {
     }
 }
 impl snapshot::MemorySnapshot<'_> {
-    fn company_entry(&self, namespace: &str, record: MemoryRecord) -> Result<CompanyMemoryEntry> {
+    pub(in crate::storage::platform) fn company_entry(&self, namespace: &str, record: MemoryRecord) -> Result<CompanyMemoryEntry> {
         let before = self.dependency_work();
         let mut eligibility = self.explain_eligibility(namespace, &record)?;
         // Entries report their own incremental dependency reads. The page reports

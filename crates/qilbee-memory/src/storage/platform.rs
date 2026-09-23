@@ -880,6 +880,8 @@ mod lexical;
 mod lexical_tests;
 mod snapshot;
 mod candidates;
+mod ordered;
+pub use ordered::*;
 #[cfg(test)]
 mod candidate_tests;
 pub use candidates::CANDIDATE_SELECTION_VERSION;
