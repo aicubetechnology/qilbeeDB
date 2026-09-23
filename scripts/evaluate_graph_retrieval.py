@@ -83,17 +83,35 @@ def request_for(method, query, fixture, state, protocol):
     }
 
 
+def evaluation_stage(protocol):
+    stages = {
+        "graph_multihop_compare_v1": "test",
+        "graph_multihop_development_v1": "development",
+    }
+    expected = stages.get(protocol.get("protocol_version"))
+    if expected is None or protocol.get("split") != expected:
+        raise ValueError("Protocol identity and evaluation split differ")
+    return "development" if expected == "development" else "reserved_comparison"
+
+
+def evaluation_queries(fixture, protocol):
+    evaluation_stage(protocol)
+    queries = {q["id"]: q for q in fixture["queries"] if q["split"] == protocol["split"]}
+    if not queries:
+        raise ValueError("The declared evaluation split has no queries")
+    return queries
+
+
 def verify_protocol(protocol, fixture, graph):
     verify_fixture_graph(fixture, graph)
+    evaluation_queries(fixture, protocol)
     if (
-        protocol["protocol_version"] != "graph_multihop_compare_v1"
-        or protocol["source_sha256"] != graph["source_sha256"]
+        protocol["source_sha256"] != graph["source_sha256"]
         or protocol["relations_sha256"] != graph["relations_sha256"]
         or protocol["graph_policy_sha256"] != graph["policy_sha256"]
         or protocol["k"] != 10
         or protocol["scan_limit"] != 10000
         or protocol["min_score"] != -1
-        or protocol["split"] != "test"
         or protocol["client_concurrency"] != 1
         or type(protocol["repetitions"]) is not int
         or not 1 <= protocol["repetitions"] <= 20
@@ -293,6 +311,7 @@ def evaluate(
     report = {
         "schema_version": 1,
         "status": "running",
+        "evaluation_stage": evaluation_stage(protocol),
         "started_at": datetime.now(timezone.utc).isoformat(),
         "plan": plan,
         "rows": [],
@@ -318,9 +337,7 @@ def evaluate(
             route, body = request_for(method, warmup, fixture, state, protocol)
             result, _, _ = client.call("POST", route, body)
             validate_page(result, fixture, state, warmup, method, protocol)
-        queries = {
-            q["id"]: q for q in fixture["queries"] if q["split"] == protocol["split"]
-        }
+        queries = evaluation_queries(fixture, protocol)
         jobs = [
             (qid, method, rep)
             for qid in sorted(queries)

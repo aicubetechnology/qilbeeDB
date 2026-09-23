@@ -285,3 +285,29 @@ frozen embedding receipt; a hybrid result without a semantic contribution must
 not attach one. See [semantic evidence verification](semantic-memory.md#verify-semantic-evidence-in-retrieval-comparisons)
 for tolerances and limits. This additional check does not establish global
 optimality of the ranking or validate omitted candidates.
+
+## Investigate changes on development queries
+
+**Availability: source preview for comparison tooling.** Use the separate
+`benchmarks/retrieval/graph-multihop-development-v1.json` protocol with
+`scripts/evaluate_graph_retrieval.py` to investigate the existing methods on the
+fixture's development split. The reserved comparison protocol remains unchanged.
+
+The development protocol retains the same eight methods, external vectors,
+server-owned ranking profiles, result count and work budgets. It changes the
+selected query split and the evidence stage. Its protocol identity cannot be
+combined with the test split. The runner rejects an empty selected split before
+query execution. Use new plan, state and report paths in an isolated authorized
+benchmark environment; preserve prior reports, including failures.
+
+Development reports and exports carry `evaluation_stage: development` and
+`default_admission: false`. An export rejects test-query rows or a missing or
+contradictory development-stage label. Existing reserved-comparison reports remain
+readable. Keep model/provider costs, graph construction, source verification and
+retrieval measurements distinct.
+
+Use development findings to form a candidate hypothesis. Freeze any new ranking
+method and its evaluation protocol before measuring a fresh reserved cohort.
+Previously published test queries may be used as regressions, but do not reuse
+them as independent confirmation after inspecting their results. A development
+gain is neither a production promotion nor evidence of better agent reasoning.
