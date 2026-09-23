@@ -527,3 +527,7 @@ separately. Its public-training origin, nonuniform selection and possible residu
 dependence remain limitations. Reserved status describes this experiment's use
 of the queries, not the official benchmark split or model-training exposure.
 No result automatically changes the default or establishes agent improvement.
+
+The [completed reserved comparison](../research/balanced-support-reserved-results.md)
+reports both complete-support gains and lost-support regressions. Its primary
+uncertainty interval includes zero, so it does not admit a new default.
