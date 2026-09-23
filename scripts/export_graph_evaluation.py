@@ -38,6 +38,10 @@ def export(report, fixture):
         verify_support_reserved(protocol, fixture)
     if report.get("evaluation_stage", "reserved_comparison") != stage:
         raise ValueError("Report mislabels its evaluation stage")
+    if report.get("scope_of_evidence") != protocol.get("scope_of_evidence"):
+        raise ValueError("Report evidence scope differs from the frozen protocol")
+    if report.get("default_admission", False) is not False or protocol.get("default_admission") is not False:
+        raise ValueError("Experimental evidence cannot admit a production default")
     queries = evaluation_queries(fixture, protocol)
     expected = {(qid, method) for qid in queries for method in protocol["methods"]}
     seen = set()

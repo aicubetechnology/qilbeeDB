@@ -12,6 +12,15 @@ CAPTURED_PROTOCOL = PROTOCOL.with_name('twowiki-captured1536-development-v1.json
 
 ROOT = Path(__file__).resolve().parents[1]
 RESERVED_PROTOCOL = PROTOCOL.with_name('twowiki-captured1536-reserved-v1.json')
+RESERVED_DATASET = (
+    '2WikiMultiHopQA corrected public development: 120 reserved confirmation queries; '
+    '40 development queries excluded from measured results'
+)
+RESERVED_SCOPE = (
+    'Reserved confirmation retrieval evaluation after captured1536 development. '
+    'No default admission, official hidden-test, model-unseen or agent-improvement claim.'
+)
+
 
 
 def verify_development_evidence(expected):
@@ -33,10 +42,11 @@ def verify_development_evidence(expected):
         raise ValueError('Development protocol identity differs')
     if prior.get('protocol_version') != 'twowiki_captured1536_development_v1':
         raise ValueError('Confirmation requires the captured1536 development protocol')
-    # Compare every field, including future fields, except the explicit role transition.
+    # Compare every field, including future fields, except the explicit role transition and its fixed audience labels.
     transitioned = copy.deepcopy(prior)
     transitioned.update(
         protocol_version='twowiki_captured1536_reserved_v1', split='test',
+        dataset=RESERVED_DATASET, scope_of_evidence=RESERVED_SCOPE,
         measured_query_ids=prior['reserved_query_ids'],
         development_query_ids=prior['measured_query_ids'],
         development_evidence=reference,

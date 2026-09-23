@@ -21,6 +21,7 @@ def expected_protocol():
     prior = report['plan']['protocol']
     expected = copy.deepcopy(prior)
     expected.update(protocol_version='twowiki_captured1536_reserved_v1', split='test',
+                    dataset=contract.RESERVED_DATASET, scope_of_evidence=contract.RESERVED_SCOPE,
                     measured_query_ids=prior['reserved_query_ids'],
                     development_query_ids=prior['measured_query_ids'],
                     development_evidence={'report': str(REPORT.relative_to(contract.ROOT)),
@@ -49,6 +50,8 @@ class ReservedGates(unittest.TestCase):
                        lambda p:p.update(generation_sha256='changed'),
                        lambda p:p.update(query_timing_status='numeric'),
                        lambda p:p.update(default_admission=True),
+                       lambda p:p.update(scope_of_evidence='Development-only results'),
+                       lambda p:p.update(dataset='Official hidden test'),
                        lambda p:p.update(undeclared_future_setting=True),
                        lambda p:p.update(primary_comparison={'candidate':'graph_hybrid_balanced','baseline':'weighted_rrf_v1'})):
             changed = copy.deepcopy(expected)

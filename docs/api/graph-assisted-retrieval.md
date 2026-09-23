@@ -658,7 +658,8 @@ confirmation and separate agent-task evaluation remain necessary.
 A reserved comparison must reference the exact completed development report and
 preserve its corpus, vectors, graph, ranking formulas, budgets and primary
 comparison. The evaluation tooling rejects changes to any protocol field except
-the explicit development-to-reserved role transition and evidence reference.
+the explicit development-to-reserved role transition, its fixed audience labels,
+and evidence reference.
 Unknown added settings are rejected too. A missing frozen confirmation protocol
 fails before HTTP requests. Reserved execution remains unavailable until that
 protocol is present; an accepted development run does not authorize it implicitly.
