@@ -506,3 +506,8 @@ replays exact source hashes and excludes shared questions, component IDs,
 intermediate answers and supporting paragraphs. Missing quotas fail explicitly;
 a public-training subset must not be described as an official held-out test set.
 Selection does not measure retrieval quality or establish agent improvement.
+
+The [corpus materialization workflow](../research/disjoint-cohort-selection.md#materialize-and-verify-a-corpus-bundle)
+reconstructs the selected documents and document-only relations with exact split
+provenance. Verify the completed bundle before generating external vectors;
+partial files or an unverified receipt are not a reproducible corpus.
