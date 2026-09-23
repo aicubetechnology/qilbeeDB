@@ -67,6 +67,115 @@ unused grant or a successful empty agent query does not create a memory workspac
 The [agent directory](agent-registration.md) records successful agent observations
 and has a different purpose.
 
+## List memories by creation date
+
+**Availability:** additive, unreleased endpoints. Confirm both ordered routes in
+`/openapi.json` before enabling a date-ordering interface. Existing UUID-based
+query routes keep their current behavior. This contract is the same for the
+managed platform and self-hosted installations that provide these endpoints.
+
+Use `POST /api/v1/company/memory/query/ordered` to list across the authorized
+company without downloading every workspace. The server orders records before
+pagination. For a human memory explorer, default to **Newest first**, offer
+**Oldest first**, and display the creation date with a recognizable time zone.
+
+```json
+{
+  "contract_version": 1,
+  "selection": {
+    "project_id": null,
+    "agent_id": null,
+    "workspace_id": null,
+    "visibility": null,
+    "private_subject_id": null
+  },
+  "view": "current",
+  "query": {
+    "order": "created_desc",
+    "limit": 40,
+    "scan_limit": 1000,
+    "cursor": null,
+    "text_contains": null,
+    "tag": null,
+    "episode_type": null
+  }
+}
+```
+
+Null or omitted selection fields leave that field unrestricted within the
+company. Non-null fields combine with AND. An exact workspace also selects its
+mission. A private-subject selection narrows an administrator's existing access;
+it cannot grant or override authority. `view` defaults to `retained`; choose
+`current` to suppress records that are currently ineligible.
+
+Each `page.entries` item contains its `workspace`, current canonical `record`,
+and `eligibility`. The page also contains `next_cursor`, `stop_reason`,
+`evaluated_at_millis`, `scanned_records`, `record_bytes`, and `dependency_work`.
+The company is derived exclusively from authentication.
+
+### Scoped application access
+
+An application gateway with `memory_read` uses
+`POST /api/v1/memory/query/ordered` with `contract_version`, its existing `scope`,
+and the same `query` object. Its response has `scope` and `page.records`, plus the
+same page metadata. It returns only currently eligible records in that exact
+scope. Private ownership comes from the credential. It needs no company
+administrator credential and cannot choose another private subject. Keep gateway
+credentials on the server; do not expose them to a browser.
+
+### Ordering, continuation, and changes
+
+`created_desc` is the default; `created_asc` reverses it. The key is immutable
+server `created_at_millis`, followed by workspace ID for company queries, then
+record UUID. Descending reverses this complete tuple. UUIDs break timestamp ties;
+event time and modification time do not determine the order. Updates, reviews,
+and retained deletion markers keep their creation position.
+
+Copy `next_cursor` unchanged into `query.cursor`. This opaque string is at most
+1,024 ASCII bytes. It binds the endpoint, company or exact scope, selection, view,
+order, and text/tag/type filters. Limits may change between pages. A cursor is a
+seek position, not authorization, a snapshot, or evidence that a memory is still
+safe to reuse. Restart the listing when changing filters or order. Invalid,
+mismatched, and unsupported cursors return HTTP 400 `invalid_request`; no
+clock-based cursor expiration is defined in this version.
+
+Each page uses a coherent snapshot, but the entire traversal is live. Records
+inserted before the continuation position require a refresh; records inserted
+after it may appear later. Each page reevaluates current contents, filters, and
+eligibility. Edits do not duplicate an immutable key already traversed. Refresh
+clears both results and cursor; it does not append a new first page to old rows.
+Before agent reuse, revalidate through the existing memory read APIs.
+
+### Bounded work and recovery
+
+Defaults are 40 results and 1,000 examined positions. Maximums are 100 results,
+10,000 positions, and 8 MiB of selected canonical record bytes per request.
+`scanned_records` counts traversed chronological index positions, including
+selection exclusions and tombstones. Selection is checked before reading payloads.
+Root byte counts exclude index values, dependency reads, lookahead, and serialized
+response overhead; they are not a total memory or response-size guarantee.
+Existing aggregate dependency limits still apply.
+
+`stop_reason` is `exhausted`, `record_limit`, `scan_limit`, or `byte_limit`.
+Only `exhausted` has a null continuation. An empty partial page means more
+positions remain; it does not mean the company is empty. Continue with its cursor.
+No total count or cross-page snapshot completeness is promised. A complete
+response is globally ordered across selected workspaces, even when directory
+selectors have not loaded every workspace.
+
+Busy servers return HTTP 503 `retrieval_busy`; retry with bounded backoff.
+Dependency-budget or integrity failures fail the whole request. Preserve the
+last confirmed cursor and rows after a failed read. HTTP 401 requires renewed
+authentication; HTTP 403 requires authorized scope/capability. Clear protected
+rows when access is lost. Offer a visible refresh action to recover from an
+invalid continuation, and never present a silently reordered partial page.
+
+For self-hosted upgrades, chronological projections are derived from canonical
+records before readiness. Bounded, synchronous batches make an interrupted
+backfill restartable. Subsequent writes update the projection in the same atomic
+batch as the record; older writers are detected by journal fingerprints on
+reopen. Keep a consistent backup and budget startup time for the first backfill.
+
 ## Query retained records
 
 Send `POST /api/v1/company/memory/query` with an ID returned by the directory:

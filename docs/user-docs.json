@@ -229,7 +229,7 @@
       "source": "docs/security/company-memory-administration.md",
       "file": "company-memory-administration.md",
       "title": "Company memory administration",
-      "description": "Discover retained company workspaces, inspect all private subjects, and distinguish administrative visibility from current memory eligibility.",
+      "description": "List company memories by creation date with bounded continuation, inspect private subjects, and distinguish administration from scoped agent access.",
       "order": 43
     },
     {

@@ -65,6 +65,7 @@ impl RocksDbMemoryStorage {
         batch: &mut rocksdb::WriteBatch,
     ) -> Result<()> {
         self.append_company_workspace(namespace, batch)?;
+        self.append_chronological_record(namespace, record, batch)?;
         let cf = self.cf(super::super::cf::EPISODE_INDEX)?;
         if let Some(old) = self.memory_snapshot().record(namespace, record.record_id)? {
             for key in keys(namespace, &old)? {

@@ -198,6 +198,7 @@ impl RocksDbMemoryStorage {
             consolidation_incarnation: uuid::Uuid::new_v4(),
         };
         storage.initialize_candidates()?;
+        storage.initialize_chronological_records()?;
         storage.initialize_relation_adjacency()?;
         Ok(storage)
     }

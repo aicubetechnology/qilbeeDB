@@ -196,6 +196,7 @@ impl RocksDbMemoryStorage {
         );
         let state_bytes = encode(&state)?;
         self.append_relation_projection_tip(namespace, &state_bytes, batch)?;
+        self.append_chronological_tip(namespace, &state_bytes, batch)?;
         batch.put_cf(
             self.cf(super::super::cf::EPISODE_INDEX)?,
             record_prefix(0x31, namespace),
