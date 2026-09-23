@@ -166,8 +166,11 @@ records ineligible on subsequent request snapshots. The
 [derived-memory contract](../api/derived-memory.md) documents graph and work
 bounds, snapshot semantics and the absence of descendant change events.
 
-The remaining work is to apply source eligibility to structured strategy admission
-and selection under the existing learning authority. Tests should race source
+The remaining integration work is to combine immutable experience-strategy
+evidence with mutable memory-source bindings in one explicitly versioned proposal.
+The current evidence-bound knowledge API already checks source eligibility; it
+does not retrofit the older strategy records. Preserve the existing qualification
+authority when connecting these contracts. Tests should race source
 changes and credential revocation with consolidation and selection, preserving
 the documented authorization and snapshot boundaries. Dependency metadata does
 not discover undeclared copies, erase external caches or retain historical source
