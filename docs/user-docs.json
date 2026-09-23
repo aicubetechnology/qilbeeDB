@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Use external embeddings and cosine search, distinguish captured-vector identities, and verify offline document-vector persistence.",
+      "description": "Attach external embeddings and retrieve current scoped memories with cosine scores, model identity and runtime integrity verification.",
       "order": 60
     },
     {
