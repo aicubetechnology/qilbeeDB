@@ -7,7 +7,7 @@ from pathlib import Path
 
 from evaluate_retrieval import digest, metrics, save
 from evaluate_graph_retrieval import summary, evaluation_stage, evaluation_queries
-from graph_report_evidence import categories, comparisons
+from graph_report_evidence import categories, comparisons, seed_comparisons
 from graph_measurement_evidence import validate_measurements
 
 
@@ -87,8 +87,17 @@ def export(report, fixture):
         raise ValueError("Category aggregates differ from verified query rows")
     if comparisons(rows, protocol, queries) != report["comparisons"]:
         raise ValueError("Paired comparisons differ from verified query rows")
+    extra = {}
+    if "seed_comparisons" in protocol:
+        expected_seed_comparisons = seed_comparisons(rows, protocol, queries)
+        if report.get("seed_comparisons") != expected_seed_comparisons:
+            raise ValueError("Paired seed comparisons differ from verified query rows")
+        extra["seed_comparisons"] = expected_seed_comparisons
+    elif "seed_comparisons" in report:
+        raise ValueError("Seed comparisons were not predeclared")
     resources = report["resources"]
     return {
+        **extra,
         "schema_version": 1,
         "status": "completed",
         "evaluation_stage": stage,

@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "protocol_version": "graph_seed_matrix_development_v1",
+  "frozen_before_retrieval": true,
+  "source_sha256": "175a05f5c2e1b1baaf165e17101afcc626524ac2678f352518b1e769adc642a7",
+  "graph_policy_sha256": "15e13a30ef90b01b1008371382a111769fbf26259b2005ff1b25467659a5bd0c",
+  "relations_sha256": "3e877bcac6ec9f21e696d27d737ef5ec37d40393feb2e9f5bb5dc4487d922e2e",
+  "dataset": "MuSiQue-Ans v1.0 identifier-selected 30 train development / 100 public-dev reserved queries",
+  "primary_comparison": {
+    "candidate": "graph_v1_balanced",
+    "baseline": "weighted_rrf_v1"
+  },
+  "methods": [
+    "lexical",
+    "semantic",
+    "weighted_rrf_v1",
+    "weighted_rrf_v2",
+    "graph_v1_balanced",
+    "graph_v1_entity",
+    "graph_v1_best_channel",
+    "graph_v1_depth_zero",
+    "graph_v2_balanced",
+    "graph_v2_entity",
+    "graph_v2_best_channel",
+    "graph_v2_depth_zero"
+  ],
+  "graph_profiles": {
+    "graph_v1_balanced": "typed_path_balanced_v1",
+    "graph_v1_entity": "typed_path_entity_v1",
+    "graph_v1_best_channel": "typed_path_best_channel_v1",
+    "graph_v1_depth_zero": "typed_path_balanced_v1",
+    "graph_v2_balanced": "typed_path_balanced_v1",
+    "graph_v2_entity": "typed_path_entity_v1",
+    "graph_v2_best_channel": "typed_path_best_channel_v1",
+    "graph_v2_depth_zero": "typed_path_balanced_v1"
+  },
+  "k": 10,
+  "scan_limit": 10000,
+  "scan_bytes_limit": 67108864,
+  "expansion": {
+    "direction": "both",
+    "max_depth": 2,
+    "node_limit": 128,
+    "edge_limit": 256,
+    "scan_limit": 1024,
+    "embedding_bytes_limit": 8388608
+  },
+  "min_score": -1.0,
+  "split": "development",
+  "repetitions": 3,
+  "warmup": "one fixed development query once per method; excluded from metrics",
+  "order": "seeded shuffle of all query, method and repetition jobs",
+  "seed": 20260921,
+  "client_concurrency": 1,
+  "cache": "RocksDB and OS caches retained; no result cache; no forced cold run",
+  "query_embeddings": "frozen once and reused by every vector mode; no encoder inside DB",
+  "reported_metrics": [
+    "nDCG@10",
+    "judged Recall@10",
+    "all labeled supports@10",
+    "no labeled support@10",
+    "per-category results",
+    "paired query bootstrap intervals",
+    "retrieval p50/p95",
+    "HTTP p50/p95",
+    "estimated external-embedding-plus-HTTP p50/p95",
+    "canonical payload bytes",
+    "response bytes",
+    "source, candidate, graph and affinity work",
+    "coverage cuts",
+    "failures",
+    "process CPU/RSS when observed"
+  ],
+  "default_admission": false,
+  "scope_of_evidence": "Development-only paired seed comparison on one database import. Three graph profiles use each of hybrid v1 and v2 seeds, with a depth-zero control per seed and four standalone baselines. Previously observed questions; no independent confirmation, default admission or agent efficacy claim.",
+  "graph_seeds": {
+    "graph_v1_balanced": "weighted_rrf_v1",
+    "graph_v1_entity": "weighted_rrf_v1",
+    "graph_v1_best_channel": "weighted_rrf_v1",
+    "graph_v1_depth_zero": "weighted_rrf_v1",
+    "graph_v2_balanced": "weighted_rrf_v2",
+    "graph_v2_entity": "weighted_rrf_v2",
+    "graph_v2_best_channel": "weighted_rrf_v2",
+    "graph_v2_depth_zero": "weighted_rrf_v2"
+  },
+  "seed_comparisons": [
+    {
+      "candidate": "graph_v1_balanced",
+      "baseline": "graph_v2_balanced"
+    },
+    {
+      "candidate": "graph_v1_entity",
+      "baseline": "graph_v2_entity"
+    },
+    {
+      "candidate": "graph_v1_best_channel",
+      "baseline": "graph_v2_best_channel"
+    }
+  ]
+}

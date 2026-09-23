@@ -10,7 +10,7 @@ import unittest
 from evaluate_retrieval import PROFILES, digest, metrics, source_payload
 from evaluate_graph_retrieval import request_for, summary, verify_protocol, evaluation_stage, evaluation_queries, verify_seed_baselines
 from export_graph_evaluation import export
-from graph_report_evidence import categories, comparisons
+from graph_report_evidence import categories, comparisons, seed_comparisons
 from graph_evaluation_contract import (
     fences,
     graph_profile,
@@ -552,6 +552,78 @@ class GraphPipelineChecks(unittest.TestCase):
                 bad["q", method]["work"]["seed"]["selected_anchors"] = [{"record_id": "c"}]
                 with self.assertRaises(ValueError):
                     verify_seed_baselines(bad, ["q"], protocol)
+
+    def test_seed_matrix_pins_arms_and_rejects_cross_version_overrides(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-seed-matrix-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(len(protocol["methods"]), 12)
+        mutations = [lambda p: p.update(split="test"),
+            lambda p: p.update(graph_seed_hybrid_version="weighted_rrf_v1"),
+            lambda p: p["graph_seeds"].update(graph_v2_balanced="weighted_rrf_v1"),
+            lambda p: p["graph_seeds"].pop("graph_v1_entity"),
+            lambda p: p["graph_profiles"].update(graph_v1_entity="typed_path_balanced_v1"),
+            lambda p: p["methods"].remove("graph_v2_depth_zero"),
+            lambda p: p["methods"].append("graph_v1_entity"),
+            lambda p: p["seed_comparisons"].reverse(),
+            lambda p: p.update(default_admission=True)]
+        for mutate in mutations:
+            changed = copy.deepcopy(protocol)
+            mutate(changed)
+            with self.assertRaises(ValueError):
+                verify_protocol(changed, value, graph)
+        legacy = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-best-channel-development-v1.json").read_text())
+        legacy.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"],
+            graph_seeds=protocol["graph_seeds"])
+        with self.assertRaises(ValueError):
+            verify_protocol(legacy, value, graph)
+
+    def test_matrix_requests_and_controls_bind_each_seed_independently(self):
+        value, _, state, _, _ = proof_fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-seed-matrix-development-v1.json").read_text())
+        rows = {}
+        for version in (1, 2):
+            ids = [f"v{version}-a", f"v{version}-b"]
+            rows["q", f"weighted_rrf_v{version}"] = {"ranked": ids,
+                "hits": [{"record": {"record_id": rid}} for rid in ids]}
+        for method, version in protocol["graph_seeds"].items():
+            _, body = request_for(method, value["queries"][1], value, state, protocol)
+            self.assertEqual(body["query"]["seed"]["ranking_version"], version)
+            self.assertEqual(body["query"]["ranking_version"], protocol["graph_profiles"][method])
+            self.assertEqual(body["query"]["expansion"]["max_depth"],
+                0 if method.endswith("depth_zero") else 2)
+            ids = rows["q", version]["ranked"]
+            rows["q", method] = {"ranked": ids, "work": {"seed": {
+                "selected_anchors": [{"record_id": rid} for rid in ids]}}}
+        verify_seed_baselines(rows, ["q"], protocol)
+        for method in protocol["graph_profiles"]:
+            changed = copy.deepcopy(rows)
+            changed["q", method]["work"]["seed"]["selected_anchors"] = []
+            with self.assertRaises(ValueError):
+                verify_seed_baselines(changed, ["q"], protocol)
+        for method in ("graph_v1_depth_zero", "graph_v2_depth_zero"):
+            changed = copy.deepcopy(rows)
+            changed["q", method]["ranked"] = ["wrong"]
+            with self.assertRaises(ValueError):
+                verify_seed_baselines(changed, ["q"], protocol)
+
+    def test_paired_seed_effects_use_query_pairs_not_unpaired_means(self):
+        protocol = {"seed": 42, "seed_comparisons": [{"candidate": "v1", "baseline": "v2"}]}
+        rows = [{"query_id": q, "method": method, "metrics": {
+            metric: value for metric in ("ndcg_at_10", "judged_recall_at_10", "all_labeled_supports_at_10")}}
+            for q, method, value in [("a", "v1", 1), ("a", "v2", 0), ("b", "v1", 0), ("b", "v2", 1)]]
+        result = seed_comparisons(rows, protocol, {"a": {}, "b": {}})
+        self.assertEqual(result, seed_comparisons(list(reversed(rows)), protocol, {"b": {}, "a": {}}))
+        metric = result[0]["metrics"]["ndcg_at_10"]
+        self.assertEqual((metric["mean_delta"], metric["wins"], metric["losses"], metric["ties"]), (0, 1, 1, 0))
+        self.assertLess(metric["paired_interval"]["low"], 0)
+        self.assertGreater(metric["paired_interval"]["high"], 0)
 
     def test_best_channel_uses_maximum_and_rejects_additive_or_weighted_scores(self):
         value, _, state, protocol, result = proof_fixture()

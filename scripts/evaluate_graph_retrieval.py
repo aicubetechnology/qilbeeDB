@@ -35,6 +35,7 @@ from evaluate_retrieval import (
 )
 from graph_evaluation_contract import (
     fences,
+    seed_version,
     graph_profile,
     prepare_relations,
     validate_page,
@@ -62,7 +63,7 @@ def request_for(method, query, fixture, state, protocol):
             mode="hybrid",
             space=fixture["space"],
             vector=query["vector"],
-            ranking_version=protocol["graph_seed_hybrid_version"],
+            ranking_version=seed_version(protocol, method),
             min_score=protocol["min_score"],
         )
     expansion = dict(protocol["expansion"])
@@ -86,6 +87,7 @@ def request_for(method, query, fixture, state, protocol):
 def evaluation_stage(protocol):
     stages = {
         "graph_multihop_compare_v1": "test",
+        "graph_seed_matrix_development_v1": "development",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
         "graph_best_channel_development_v1": "development",
@@ -121,6 +123,29 @@ def verify_protocol(protocol, fixture, graph):
         or not 1 <= protocol["repetitions"] <= 20
     ):
         raise ValueError("Protocol differs from supported frozen comparison")
+    if protocol["protocol_version"] == "graph_seed_matrix_development_v1":
+        profiles = {}
+        seeds = {}
+        for version in (1, 2):
+            for profile in ("balanced", "entity", "best_channel", "depth_zero"):
+                method = f"graph_v{version}_{profile}"
+                profiles[method] = f"typed_path_{'balanced' if profile == 'depth_zero' else profile}_v1"
+                seeds[method] = f"weighted_rrf_v{version}"
+        expected_methods = {"lexical", "semantic", "weighted_rrf_v1", "weighted_rrf_v2"} | set(profiles)
+        if (set(protocol["methods"]) != expected_methods
+            or len(protocol["methods"]) != len(expected_methods)
+            or protocol["graph_profiles"] != profiles
+            or protocol.get("graph_seeds") != seeds
+            or "graph_seed_hybrid_version" in protocol
+            or protocol["primary_comparison"] != {"candidate": "graph_v1_balanced", "baseline": "weighted_rrf_v1"}
+            or protocol.get("seed_comparisons") != [
+                {"candidate": f"graph_v1_{profile}", "baseline": f"graph_v2_{profile}"}
+                for profile in ("balanced", "entity", "best_channel")]
+            or protocol["default_admission"] is not False):
+            raise ValueError("Seed matrix differs from the frozen per-arm comparison")
+        return
+    if "graph_seeds" in protocol or "seed_comparisons" in protocol:
+        raise ValueError("Legacy protocol cannot override seeds per arm")
     required = {
         "lexical",
         "semantic",
@@ -172,29 +197,15 @@ def verify_protocol(protocol, fixture, graph):
 
 
 def verify_seed_baselines(rows, queries, protocol):
-    """Bind anchors and the depth-zero control to the declared seed policy."""
+    """Bind every graph arm's anchors and depth-zero control to its seed."""
     for qid in queries:
-        if (
-            rows[(qid, "graph_hybrid_depth_zero")]["ranked"]
-            != rows[(qid, protocol["graph_seed_hybrid_version"])]["ranked"]
-        ):
-            raise ValueError("Depth-zero ablation changed base result order")
         for method in protocol["graph_profiles"]:
-            baseline = (
-                "lexical"
-                if method == "graph_lexical_balanced"
-                else protocol["graph_seed_hybrid_version"]
-            )
-            expected = [
-                h["record"]["record_id"] for h in rows[(qid, baseline)]["hits"][:4]
-            ]
-            if [
-                r["record_id"]
-                for r in rows[(qid, method)]["work"]["seed"]["selected_anchors"]
-            ] != expected:
-                raise ValueError(
-                    "Graph anchors differ from independently retrieved baseline"
-                )
+            baseline = "lexical" if method == "graph_lexical_balanced" else seed_version(protocol, method)
+            if method.endswith("depth_zero") and rows[(qid, method)]["ranked"] != rows[(qid, baseline)]["ranked"]:
+                raise ValueError("Depth-zero ablation changed base result order")
+            expected = [h["record"]["record_id"] for h in rows[(qid, baseline)]["hits"][:4]]
+            if [r["record_id"] for r in rows[(qid, method)]["work"]["seed"]["selected_anchors"]] != expected:
+                raise ValueError("Graph anchors differ from independently retrieved baseline")
 
 
 class ProcessMonitor:
@@ -525,6 +536,9 @@ def evaluate(
                 "primary_predeclared": baseline == primary["baseline"],
                 "metrics": differences,
             }
+        if "seed_comparisons" in protocol:
+            from graph_report_evidence import seed_comparisons
+            report["seed_comparisons"] = seed_comparisons(report["rows"], protocol, queries)
         report.update(
             status="completed",
             comparisons=comparisons,
