@@ -627,3 +627,8 @@ export. Altering a count and its list of queries together cannot hide a loss.
 Examine these cases alongside relevance, cost, coverage and category results.
 An observed regression comparison can expose problems and guide development;
 independent confirmation still needs new, predeclared evaluation data.
+
+The [completed full-cohort regression report](../research/path-strength-regression-results.md)
+records every transition, the positive exploratory mean difference, remaining
+losses and local retrieval cost. It motivates a fresh comparison without
+establishing a preferred production method.
