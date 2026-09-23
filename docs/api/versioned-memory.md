@@ -21,6 +21,9 @@ wildcard. Private memory belongs to the authenticated subject. Shared memory is
 available to other subjects only with the same exact grant inside that tenant.
 No JSON field can override tenant, record author, revision or storage namespace.
 
+For application-mediated collaboration, follow the
+[shared observation workflow](shared-observations.md).
+
 ## Endpoint summary
 
 | Method and path | Capability | Success |
