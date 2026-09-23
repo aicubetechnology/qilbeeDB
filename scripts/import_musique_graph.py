@@ -162,6 +162,10 @@ def build(train, reserved, hashes):
     selected_development = select(
         train, "development", {r["question"].strip().casefold() for r in selected_test}
     )
+    return build_selected(selected_development, selected_test, hashes)
+
+
+def build_selected(selected_development, selected_test, hashes):
     documents = {}
     queries = []
     selection = {}

@@ -350,6 +350,39 @@ hybrid v2 as its primary comparison. Freeze a fresh reserved evaluation before
 using it to assess generalization; no improvement or default admission follows
 from adding this optional profile.
 
+## Prepare a fresh reserved graph comparison
+
+**Availability: source preview for evaluation tooling.** An explicit selected-ID
+manifest can preserve a reserved cohort before candidate scoring. Use
+`scripts/import_reserved_musique_graph.py` with the official source files, the
+previous text fixture and the frozen manifest. Choose new output paths; existing
+corpora and relations are not overwritten.
+
+The importer checks source digests, exact IDs, stratum quotas, prior query IDs,
+shared component IDs, and duplicate questions after trimming and case folding.
+It materializes the listed questions without replacing them according to observed
+results. It does not replay the original hash-selection procedure or establish
+that the manifest was created before any external experiment. Preserve its dated
+provenance and review that chronology separately. Relations still use document
+content only, excluding questions, answers and relevance judgments.
+
+Generate embeddings externally, then use the separately versioned
+`graph-base-preserving-reserved-v1.json` protocol. Its measured split is `test`;
+previous development questions are retained for warmup only. Keep all methods on
+the same database manifest, budgets and query vectors. Report truncation,
+coverage, uncertainty, category losses and operating cost. Public development
+questions are not a hidden test or proof of absence from model training, and
+retrieval results do not establish improved agent-task performance.
+
+### Reserved evidence for the optional profile
+
+The [200-question reserved comparison](../research/fresh-reserved-graph-results.md)
+did not demonstrate a relevance gain for `typed_path_base_preserving_v1` over
+hybrid v2. Some queries improved and others regressed; traversal and candidate
+limits affected coverage. The profile remains optional and experimental. Select
+a retrieval method using representative workload evaluation, including coverage
+and cost, and assess agent-task outcomes separately.
+
 ## Check latency and payload measurements
 
 **Availability: source preview for evaluation tooling.** Graph report exports

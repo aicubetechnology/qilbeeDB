@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Select graph retrieval profiles and verify ranking, aggregate, latency and payload evidence before comparing methods.",
+      "description": "Select graph profiles and verify ranking, coverage and measurement evidence in development and reserved comparisons.",
       "order": 208
     },
     {
