@@ -102,3 +102,7 @@ history, 9,217 records remain eligible against that history alone.
 Among 12,044 structurally valid projected records, 1,799 lack answer entity IDs
 and 4,331 have no evidence-identity triples. These annotation gaps remain in the
 report; no complete alias-coverage claim follows from these eligibility counts.
+
+The [cohort selector](cross-source-selection.md) applies the declared exclusions
+within and between development and confirmation roles, with explicit ordering,
+quotas and full-manifest replay. Capacity alone does not guarantee its success.
