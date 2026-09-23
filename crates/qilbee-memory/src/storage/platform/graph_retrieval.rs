@@ -236,8 +236,7 @@ impl MemorySnapshot<'_> {
                 continue;
             }
             work.current_bindings += 1;
-            let denominator =
-                query_norm * super::semantic::norm(&binding.vector, space.dimensions)?;
+            let denominator = query_norm * binding.validated_norm;
             let dot: f64 = vector
                 .iter()
                 .zip(&binding.vector)

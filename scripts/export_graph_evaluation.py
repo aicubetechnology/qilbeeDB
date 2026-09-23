@@ -8,6 +8,7 @@ from pathlib import Path
 from evaluate_retrieval import digest, metrics, save
 from evaluate_graph_retrieval import summary, evaluation_stage, evaluation_queries
 from graph_report_evidence import categories, comparisons
+from graph_measurement_evidence import validate_measurements
 
 
 def export(report, fixture):
@@ -49,9 +50,7 @@ def export(report, fixture):
             raise ValueError(
                 "Published metrics differ from recorded judgments and ranking"
             )
-        repetitions = [s["repetition"] for s in row["samples"]]
-        if sorted(repetitions) != list(range(protocol["repetitions"])):
-            raise ValueError("Incomplete or duplicated timing repetitions")
+        validate_measurements(row, protocol["repetitions"])
         rows.append(
             {
                 k: row[k]
