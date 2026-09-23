@@ -647,3 +647,8 @@ qualification alone provides no relevance or latency result.
 Evaluation tooling checks required per-query timing evidence before starting HTTP
 work. Missing generation observations must be represented honestly under a
 validated report contract; batch durations cannot substitute for query durations.
+
+The [1536-dimensional development results](../research/twowiki-captured1536-development-results.md)
+show a mean gain for graph retrieval with query-level regressions. Balanced
+outperformed strength on average; no production default changes. Reserved
+confirmation and separate agent-task evaluation remain necessary.

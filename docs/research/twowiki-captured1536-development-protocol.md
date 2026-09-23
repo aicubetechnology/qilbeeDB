@@ -1,8 +1,8 @@
 # Captured 1536-dimensional development protocol
 
-**Status: preparation only.** This protocol binds a new development comparison to
-an externally captured vector set. It does not contain measured retrieval results
-or qualify any ranking method as a production default.
+**Status: development comparison completed.** This protocol binds a new development comparison to
+an externally captured vector set. Measured results appear in the [development report](twowiki-captured1536-development-results.md).
+The experiment does not qualify any ranking method as a production default.
 
 The frozen protocol is
 `benchmarks/retrieval/twowiki-captured1536-development-v1.json`.
@@ -47,8 +47,8 @@ inputs, fill missing values with zero, or interpret retrieval-only latency as
 complete generation-to-response latency. For vector methods, both generation and combined generation-plus-HTTP durations
 are null with `embedding_timing_status: unavailable_batch_capture`. If any sample
 lacks combined timing, its aggregate p50/p95 remain null. Retrieval and HTTP
-observations remain numeric. Numeric historical reports remain valid. No timing or relevance conclusion is established by input
-qualification alone.
+observations remain numeric. Numeric historical reports remain valid. Input qualification alone establishes
+neither timing nor relevance conclusions.
 
 Report sparse judgment coverage, per-category results, candidate and graph
 truncation, response sizes, uncertainty and losses as well as average relevance.
@@ -57,6 +57,8 @@ and downstream agent-task evaluation before broader conclusions.
 
 The evaluator now validates its existing numeric per-query timing inputs before
 any HTTP request. Missing measured-query entries, mismatched fixture identity,
-non-finite or negative durations and batch-only timing input fail immediately.
-Reserved-query timings are not required for a development run. The frozen generation evidence binds batch-only availability to this protocol;
-vector measurements cannot silently substitute invented numeric durations.
+non-finite or negative durations fail immediately. Batch-only evidence is accepted
+only with its explicitly frozen availability status and matching generation hash;
+it cannot substitute for numeric per-query evidence in other protocols.
+Reserved-query timings are not required for a development run. Vector measurements
+in this protocol cannot silently substitute invented numeric durations.
