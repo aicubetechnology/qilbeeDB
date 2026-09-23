@@ -37,8 +37,11 @@ updates. Preserve the earlier event IDs and hashes. Do not rewrite a failed run
 as a successful retry: register a new attempt and, where appropriate, pin the
 original failure as its parent.
 
-Use explicit artifact bindings when stored tool bytes form part of the evidence.
-A binding verifies the stored artifact identity, not that execution occurred.
+Existing optional artifact bindings can pin historically stored tool bytes.
+They verify that stored identity, not that execution occurred, and are not a
+requirement for externally owned tools. Use explicit external implementation and
+environment identities in the evidence-bound knowledge contract when applicable;
+the consuming application retains tool publication and execution authority.
 Lineage preserves an exact historical branch; it does not supply counterfactual
 outcomes for branches that were never executed.
 
@@ -104,4 +107,8 @@ evidence rules or automatically activate a procedure. Retrieval ranking metrics
 and synthetic contract tests are separate from evidence of improved agent-task
 performance. The [research design](experience-memory-design.md) describes the
 implemented source-revision and [strategy candidate](../api/experience-strategies.md)
-foundations, plus remaining mutable-source eligibility and replay work.
+foundations. The separate [evidence-bound knowledge API](../agent-memory/evidence-bound-knowledge.md)
+already checks mutable memory revisions during inspection and selection. Existing
+experience strategies do not gain those bindings automatically. Linking both
+evidence types in one proposal, and executing discovery replay, remain separate
+work; neither is implied by an immutable experience export.

@@ -1,11 +1,12 @@
 # From retrieval to experience-driven memory
 
-Status: **research-informed design**, reviewed September 20, 2026. This document
+Status: **research-informed design**, capability map reviewed September 23, 2026. This document
 maps the supplied research to implemented foundations, remaining capabilities
 and acceptance evidence. Experience receipts are available in 0.7.0; revision-bound
 derived memories are available in 0.8.0. Structured experience-backed candidates are available in 0.10.0; extraction
-remains external. Discovery replay and mutable-source-aware strategy selection
-remain proposals. This document does not
+remains external. The 0.14.0 evidence-bound knowledge API adds revision-bound
+proposals and current source checks during inspection and selection. Discovery replay
+and retrofitting source bindings onto legacy strategy records remain proposals. This document does not
 reproduce third-party experiments or establish autonomous improvement.
 The [0.6.0 retrieval report](scifact-results.md) measures retrieval separately.
 The [graph memory evidence map](graph-memory-evidence.md) extends this review with
@@ -65,11 +66,34 @@ as separate experiments.
 
 | Research input | Foundation already available | Remaining engineering work | Evidence required before claiming benefit |
 | --- | --- | --- | --- |
-| ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, exact cohort exports and revision-bound derived records | The 0.10.0 strategy API implements structured candidates, exact immutable observations and the existing qualification path; mutable-memory source eligibility at selection remains future work | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
+| ReasoningBank: reusable strategies from successful and failed attempts | Immutable experience observations, structured strategies and the separate 0.14.0 source-aware knowledge path | Evaluate extraction and reuse on real tasks; legacy strategy records do not acquire mutable-memory source bindings automatically | Compare retrieval alone, success-only strategies and success-and-failure strategies with fixed task conditions; report repeated mistakes and task completion, including incomplete runs |
 | Dream-RSI: exploration over recorded discovery history | Parent-event bindings, bounded ancestry, version identities and exact observation exports | Define a frozen replay manifest and an external evaluator with prefix-limited visibility, versioned policy code and explicit unsupported transitions | Repeated replay must agree on decisions and accounting; a selected policy must face fresh online trials against fixed exploration under the same compute budget |
 | ZenBrain: routing, retention and consolidation | Scoped lexical, vector and hybrid retrieval; validity, review and transitive dependency checks | Evaluate routing and retention policies separately; preserve required counterexamples when consolidating | Ablate one mechanism at a time under equal storage/context budgets; measure old-task retention, retrieval quality and downstream task outcomes separately |
 | AI Meets Brain: memory lifecycle and security | Separate memory, experience, procedure and tool contracts with scoped access | Specify lifecycle transitions and evidence obligations between those contracts | Exercise contradictory, stale, poisoned and revoked evidence; verify that a derived claim cannot silently become an authenticated observation or approved procedure |
 | Perplexity Brain: source-linked, refreshed private context | Source revisions, transitive invalidation, change feeds and consumer checkpoints | Build a resumable external consolidation consumer; define audience and origin tracking for later shared releases | Restart and retry without duplicate effects; source changes suppress stale conclusions; copied evidence does not count as independent corroboration |
+
+### Implemented source-aware knowledge path
+
+The 0.14.0 [knowledge contract](../agent-memory/evidence-bound-knowledge.md)
+records immutable proposals with exact memory revisions and external tool
+identity declarations. It preserves original receipts while checking current
+source validity separately from qualification. Updating, deleting, rejecting or
+expiring a source can make qualified knowledge unavailable for reuse without
+erasing its audit history. A valid receipt is not a lease on source validity.
+
+The merged, **unreleased** selection v3 contract adds a scope-bound active index
+and the server-owned `active_knowledge_bound_v1` ordering. An unresolved higher
+candidate produces an incomplete decision instead of silently selecting a lower
+one. Explicit learning and dependency budgets bound work; they do not define
+agent autonomy. Version 2 retains its existing contract. Deployment and client
+opt-in must be verified separately from source availability.
+
+These capabilities address evidence lifecycle and bounded selection. They do not
+implement a replay evaluator, autonomous hypothesis generation or measured
+cross-agent learning. Preserve the source/qualification checks when evaluating
+future consolidation; compare actual task benefit separately from functional
+correctness. The research implications below remain hypotheses until those
+experiments are completed.
 
 ### Delivery order
 
@@ -78,7 +102,10 @@ errors supplies reliable evidence transport. It does not implement strategy
 learning. The 0.10.0 [strategy API](../api/experience-strategies.md) connects immutable
 experience observations to structured candidates and the existing qualification,
 selection and suspension authority. The next learning cycle must demonstrate
-task benefit and connect mutable-source eligibility to these decisions.
+task benefit. For mutable memory dependencies, use the separate
+[evidence-bound knowledge API](../agent-memory/evidence-bound-knowledge.md),
+which checks exact source revisions at inspection and selection. This does not
+retrofit existing experience-strategy records or prove extraction quality.
 Workers remain external and executions remain isolated.
 
 Replay follows that evidence and admission contract. It should not activate
@@ -105,8 +132,9 @@ identity is not proof of executable implementation identity. Generic
 [derived records](../api/derived-memory.md) also bind exact source revisions and
 check transitive eligibility. The [strategy API](../api/experience-strategies.md) now binds structured candidates
 to immutable experience observations. Its observations do not count as
-qualification trials. Mutable-memory source bindings for strategy selection,
-replay, shared release and retention remain proposals. Each extension needs its own validated feature PR.
+qualification trials. The separate evidence-bound knowledge API already binds mutable memory revisions
+and checks their current validity during selection. Retrofitting legacy strategy
+records, discovery replay, shared release and outcome-driven retention remain proposals. Each extension needs its own validated feature PR.
 
 | Extension | Proposed durable contract | Required acceptance evidence |
 | --- | --- | --- |
@@ -138,8 +166,11 @@ records ineligible on subsequent request snapshots. The
 [derived-memory contract](../api/derived-memory.md) documents graph and work
 bounds, snapshot semantics and the absence of descendant change events.
 
-The remaining work is to apply source eligibility to structured strategy admission
-and selection under the existing learning authority. Tests should race source
+The remaining integration work is to combine immutable experience-strategy
+evidence with mutable memory-source bindings in one explicitly versioned proposal.
+The current evidence-bound knowledge API already checks source eligibility; it
+does not retrofit the older strategy records. Preserve the existing qualification
+authority when connecting these contracts. Tests should race source
 changes and credential revocation with consolidation and selection, preserving
 the documented authorization and snapshot boundaries. Dependency metadata does
 not discover undeclared copies, erase external caches or retain historical source
@@ -168,8 +199,10 @@ any of these outcomes.
 Experience receipts and revisioned memory-source bindings provide the knowledge
 foundation. Existing tool artifact records are compatibility capabilities, not a
 requirement for future external-tool knowledge. Structured strategy candidates now bind exact experience evidence to that
-qualification authority. The next step is controlled task evaluation and
-mutable-source eligibility during strategy admission and selection. Replay
+qualification authority. Current source-aware inspection and selection are implemented in the separate
+evidence-bound knowledge API. Controlled task evaluation remains necessary;
+qualification and current source validity are separate checks, and neither proves
+that externally reported outcomes actually occurred. Replay
 and shared release depend on those contracts. Automatic selection can operate
 within an authorized policy after qualification; unmeasured candidates remain
 candidates, and a valid baseline remains available when evidence is rejected or

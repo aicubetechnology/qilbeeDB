@@ -17,6 +17,19 @@ become ineligible when a source changes, expires, is rejected or is deleted.
 Historical receipts remain immutable. A successful inspection is a time-bounded
 observation, not a reservation or permission to execute external actions.
 
+## Choose the appropriate evidence contract
+
+Use this API when reusable instructions depend on the current validity of
+specific memory revisions. Use [experience strategies](../api/experience-strategies.md)
+when a candidate cites immutable experience observations. Existing strategy or
+procedure records do not acquire memory-source bindings automatically; create a
+new evidence-bound proposal when those dependencies are required.
+
+An immutable observation records what an authenticated source reported. It does
+not independently verify the external outcome. Likewise, current source validity
+and an active qualification do not prove that the instructions will improve a
+new task. The consuming application owns that evaluation and the decision to act.
+
 ## Core operations
 
 All three operations use POST with `contract_version: 2` and an authorized `scope`.

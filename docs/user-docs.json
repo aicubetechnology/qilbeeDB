@@ -320,7 +320,7 @@
       "source": "docs/agent-memory/evidence-bound-knowledge.md",
       "file": "evidence-bound-knowledge.md",
       "title": "Evidence-bound knowledge",
-      "description": "Select and reinspect evidence-bound knowledge with the optional Python client, explicit scope, work limits and application-owned decisions.",
+      "description": "Choose revision-bound procedural knowledge, inspect current source validity and use bounded selection without transferring execution authority.",
       "order": 106
     },
     {
