@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Interpret graph scores, compare frozen seed policies on one import and verify ranking, coverage and measurement evidence.",
+      "description": "Interpret graph scores, compare frozen seed policies, control evaluation overlap and verify ranking, coverage and measurement evidence.",
       "order": 208
     },
     {
