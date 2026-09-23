@@ -165,3 +165,7 @@ measuring retrieval. Keep answer annotations out of graph construction and repor
 quarantined records. The [source-contract example](../research/twowiki-source-contract.md)
 illustrates these checks; structural validation alone does not establish an
 independent evaluation cohort.
+
+For evaluations that span datasets, preserve source-qualified identities and
+declared observation history. The [cross-source audit guide](../research/cross-source-capacity.md)
+shows how to report overlap and missing annotation coverage before selection.

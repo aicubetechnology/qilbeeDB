@@ -1,0 +1,91 @@
+{
+  "audit_version": "musique_twowiki_capacity_audit_v1",
+  "projection_policy": "musique_twowiki_overlap_projection_v1",
+  "normalization": {
+    "version": "nfkc_casefold_unicode_words_v1",
+    "rule": "NFKC casefold, Unicode word tokens joined by one space; punctuation-only text retains normalized literal"
+  },
+  "entity_annotation_rule": "Evidence endpoints and their aliases are annotated entities, not presumed intermediate answers; each compares against historical answers and annotated entities",
+  "source_records": 12576,
+  "source_categories": {
+    "bridge_comparison": 2751,
+    "comparison": 3040,
+    "compositional": 5236,
+    "inference": 1549
+  },
+  "structural_audit_sha256": "7afa1c2b6e6e7c1512ca1ecdf5eadc4b0ff9adad0ac06ba29fe3101a5b4b7233",
+  "structural_quarantined_records": 532,
+  "known_missing_alias_quarantine": [
+    {
+      "id": "806973d8097611ebbdb0ac1f6bf848b6",
+      "missing_alias_ids": [
+        "Q907112"
+      ]
+    }
+  ],
+  "previous_unique_queries": 470,
+  "history_projection_sha256": "46df1a64161969108aa99002842700f514fb0783f6c62db207ec7535308b4316",
+  "eligible_by_category": {
+    "bridge_comparison": 2296,
+    "comparison": 1665,
+    "compositional": 3765,
+    "inference": 1491
+  },
+  "nonexclusive_exclusions": {
+    "annotated_entity": 2821,
+    "answer": 1294,
+    "support_text": 2,
+    "support_title": 22
+  },
+  "exclusions_by_category": {
+    "bridge_comparison": {
+      "annotated_entity": 377,
+      "support_title": 2
+    },
+    "comparison": {
+      "annotated_entity": 1105,
+      "support_text": 1,
+      "support_title": 2
+    },
+    "compositional": {
+      "annotated_entity": 1315,
+      "answer": 1285,
+      "support_text": 1,
+      "support_title": 13
+    },
+    "inference": {
+      "annotated_entity": 24,
+      "answer": 9,
+      "support_title": 5
+    }
+  },
+  "annotation_coverage": {
+    "missing_answer_id": 1799,
+    "projected_records": 12044,
+    "without_evidence_id_triples": 4331
+  },
+  "selected_queries": 0,
+  "retrieval_performed": false,
+  "limits": [
+    "Capacity is against declared history only; within-cohort overlaps can reduce selection",
+    "Known missing alias entries are quarantined before overlap counting",
+    "Absent source entity annotations and undeclared aliases remain coverage limitations",
+    "Title-level exclusions are stronger than exact paragraph equality and change distribution",
+    "Conflict categories are nonexclusive and cannot be summed as unique excluded records",
+    "Public source data and disjoint identities do not prove model-training exclusion or statistical independence"
+  ],
+  "sources": {
+    "twowiki_archive_sha256": "95df2bf56fdabe034e27aebc580e02264232203cf52552f9efe8a919e5529eef",
+    "twowiki_development_sha256": "79f77ae104088ea8e25b1a65dbece768d45771194663bc5660ec9a98070dadf5",
+    "twowiki_aliases_sha256": "f08ffcb6c2cefca9bdbe86b4248d6ad7a7743762d3f7264c14ff0bae85726fb6",
+    "musique_source_sha256": {
+      "musique_ans_v1.0_train.jsonl": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+      "musique_ans_v1.0_dev.jsonl": "15fa63794d18a94ce12411aca6e2327e65b6e83b0b1490efab3f1962e48abf3b"
+    },
+    "prior_fixture_sha256": [
+      "1d95bc1da0739016d077c60c2e5498f86d3cc634768ca9a2e6340b68120984ac",
+      "4e677ab641c30888e2670c90f6d378c3baea85fe688c597e0017d57e0d560115",
+      "c2957b367b4c6350a858b7ac5582d0fd4b25a8eb490a4d770393d8eba3169b25"
+    ]
+  }
+}
