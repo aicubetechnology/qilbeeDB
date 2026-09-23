@@ -41,3 +41,21 @@ def comparisons(rows, protocol, queries):
             "metrics": values,
         }
     return result
+
+
+def seed_comparisons(rows, protocol, queries):
+    """Paired seed effects within the same graph profile and database import."""
+    lookup = {(row["query_id"], row["method"]): row for row in rows}
+    result = []
+    for pair in protocol["seed_comparisons"]:
+        values = {}
+        for metric in ("ndcg_at_10", "judged_recall_at_10", "all_labeled_supports_at_10"):
+            deltas = [float(lookup[qid, pair["candidate"]]["metrics"][metric])
+                - float(lookup[qid, pair["baseline"]]["metrics"][metric]) for qid in sorted(queries)]
+            values[metric] = {"mean_delta": statistics.mean(deltas),
+                "paired_interval": paired_interval(deltas, protocol["seed"]),
+                "wins": sum(d > 1e-12 for d in deltas),
+                "losses": sum(d < -1e-12 for d in deltas),
+                "ties": sum(abs(d) <= 1e-12 for d in deltas)}
+        result.append(dict(pair, metrics=values))
+    return result

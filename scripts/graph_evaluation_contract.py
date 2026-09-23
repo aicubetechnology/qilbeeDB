@@ -14,6 +14,13 @@ from semantic_evidence import validate_semantic_evidence
 from import_musique_graph import document_graph
 
 
+def seed_version(protocol, method):
+    """Resolve a frozen per-arm seed or the legacy shared seed."""
+    if "graph_seeds" in protocol:
+        return protocol["graph_seeds"][method]
+    return protocol["graph_seed_hybrid_version"]
+
+
 def graph_profile(version):
     weights = {
         "typed_path_balanced_v1": [1, 1, 1, 1, 1, 1],
@@ -251,7 +258,7 @@ def validate_page(result, fixture, state, query, method, protocol):
         if page["seed"]["mode"] != ("lexical" if graph_lexical else "hybrid"):
             raise ValueError("Graph seed method differs")
         if not graph_lexical and (
-            page["seed"]["hybrid_profile"] != PROFILES[protocol["graph_seed_hybrid_version"]]
+            page["seed"]["hybrid_profile"] != PROFILES[seed_version(protocol, method)]
             or page["seed"]["embedding_space"] != fixture["space"]
         ):
             raise ValueError("Graph seed profile or model space differs")

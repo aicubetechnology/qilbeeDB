@@ -478,3 +478,22 @@ claiming generalization.
 See the [development results and limitations](../research/graph-v1-seed-development-results.md)
 for the measured comparison; an optional profile is not an independently proven
 quality improvement.
+
+### Isolate seed effects on one import
+
+For development experiments, `graph-seed-matrix-development-v1.json` freezes
+per-arm seeds for balanced, entity and best-channel profiles, each paired under
+hybrid v1 and v2. A depth-zero control for each seed must reproduce its standalone
+hybrid baseline; each graph arm must use anchors from that same baseline.
+Requests and responses are checked against the declared per-arm version.
+
+The experiment also records four standalone baselines and paired seed effects
+on identical query IDs, vectors, corpus revisions, scopes and work limits.
+Swapping a seed, removing a control or changing the declared comparison invalidates
+the protocol. Earlier single-seed protocols reject per-arm overrides.
+This is development evidence; multiple exploratory comparisons and shared query
+components limit statistical conclusions. Keep agent-task evaluation separate.
+
+The [same-import development report](../research/graph-seed-matrix-development-results.md)
+records paired effects, regressions and uncertainty. Its development observations
+do not establish a preferred production seed policy.
