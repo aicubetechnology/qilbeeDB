@@ -493,3 +493,7 @@ Swapping a seed, removing a control or changing the declared comparison invalida
 the protocol. Earlier single-seed protocols reject per-arm overrides.
 This is development evidence; multiple exploratory comparisons and shared query
 components limit statistical conclusions. Keep agent-task evaluation separate.
+
+The [same-import development report](../research/graph-seed-matrix-development-results.md)
+records paired effects, regressions and uncertainty. Its development observations
+do not establish a preferred production seed policy.
