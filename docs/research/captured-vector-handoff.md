@@ -73,3 +73,42 @@ budgets; keep reserved results unopened until the development gate passes. A new
 embedding fixture cannot inherit confirmation from a different embedding model
 or dimension count. Record preparation costs separately from retrieval costs and
 state any amortization rule before interpreting downstream savings.
+
+## Verify persisted document values
+
+**Availability: source preview; operator-owned offline laboratory only.** The
+HTTP embedding receipt does not return the complete vector. To verify actual
+stored values, first complete the handoff verification above, import documents
+through the authenticated HTTP API using the frozen fixture, and preserve its
+preparation state. Stop the laboratory server and wait for its process to exit.
+Do not run this procedure against a live platform database.
+
+```bash
+cargo run --locked -p qilbee-memory --example verify_fixture_vectors -- \
+  /path/to/closed-laboratory/agent-memory \
+  /path/to/preparation-state.json \
+  /path/to/vector-input-manifest.json \
+  /path/to/new-readback-receipt.json
+```
+
+The example opens existing RocksDB column families read-only. It uses the
+preparation state's company, scope and private subject to reconstruct storage
+keys; this is an operator filesystem tool, not an authenticated application API.
+Run it only with authorized access to the laboratory files. Its format is coupled
+to the current storage implementation, not a stable external storage contract.
+
+Every document must have a distinct stored record and a matching manifest entry.
+The audit checks stored schema, namespace, record revision, complete embedding
+receipt, model identity, dimensions and the storage vector digest. It decodes the
+stored values as float32 and compares the hash of their little-endian bytes with
+the manifest. It writes a separate receipt only after all documents pass and
+refuses to overwrite an existing output. Missing records, changed expected
+values, wrong private subjects or invalid vectors fail without creating a
+successful receipt. Preserve the original manifest and the successful handoff
+receipt; the readback tool does not replace those independent input pins.
+
+A successful result verifies persisted document vectors after storage reopen.
+It does not persist query vectors, execute retrieval, confirm current memory
+eligibility, prove crash recovery or establish host power-loss durability.
+Validate those guarantees separately. Keep the original capture's roundtrip flag
+unchanged and associate the new readback receipt with the pinned fixture instead.

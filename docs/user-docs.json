@@ -47,7 +47,7 @@
       "source": "docs/api/semantic-memory.md",
       "file": "semantic-search.md",
       "title": "Semantic search",
-      "description": "Store external embeddings, preserve cosine semantics and distinguish model revisions from offline captured-vector evidence.",
+      "description": "Use external embeddings and cosine search, distinguish captured-vector identities, and verify offline document-vector persistence.",
       "order": 60
     },
     {

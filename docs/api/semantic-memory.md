@@ -229,3 +229,8 @@ vectors for an isolated reproducible experiment; it cannot establish compatibili
 with newly generated queries. See the [offline handoff verification guide](../research/captured-vector-handoff.md)
 for evidence checks, failure handling and the separate database roundtrip gate.
 The production model-space contract remains unchanged.
+
+For an operator-owned evaluation installation, the offline handoff guide also
+provides a read-only stored-vector audit after the laboratory server exits. This
+checks persisted document float32 values separately from HTTP write receipts;
+it is not a platform API or a substitute for current authorization and eligibility.
