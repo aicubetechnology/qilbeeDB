@@ -511,3 +511,23 @@ The [corpus materialization workflow](../research/disjoint-cohort-selection.md#m
 reconstructs the selected documents and document-only relations with exact split
 provenance. Verify the completed bundle before generating external vectors;
 partial files or an unverified receipt are not a reproducible corpus.
+
+### Freeze the reserved comparison
+
+`graph-balanced-v1-support-reserved-v1.json` fixes the balanced graph profile with
+hybrid v1 seeds against four standalone retrieval baselines and a depth-zero
+control. It binds 140 reserved query IDs, 30 existing warm-up IDs, corpus and
+selection digests, public-training provenance, work limits and three repetitions.
+The evaluator and exporter reject changes under that same protocol identity.
+The versioned protocol file belongs to the frozen tool revision; retain its hash
+alongside the code, corpus and externally generated vectors.
+
+The comparison gives each measured query equal weight and reports categories
+separately. Its public-training origin, nonuniform selection and possible residual
+dependence remain limitations. Reserved status describes this experiment's use
+of the queries, not the official benchmark split or model-training exposure.
+No result automatically changes the default or establishes agent improvement.
+
+The [completed reserved comparison](../research/balanced-support-reserved-results.md)
+reports both complete-support gains and lost-support regressions. Its primary
+uncertainty interval includes zero, so it does not admit a new default.

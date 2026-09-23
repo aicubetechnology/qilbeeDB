@@ -61,8 +61,10 @@ The [frozen manifest](https://github.com/aicubetechnology/qilbeeDB/blob/aicube/d
 selects 140 public-training questions: 80 two-hop, 40 three-hop and 20 four-hop.
 It excludes 330 unique questions from the two declared historical fixtures.
 The exact selector and an independent overlap projection both verified zero
-violations of the declared overlap policy. No retrieval quality has been measured
-on this selection, and no embeddings were generated during selection.
+violations of the declared overlap policy. Selection itself performed no retrieval
+or embedding generation. The subsequent [reserved comparison](balanced-support-reserved-results.md)
+now records quality measurements; this cohort must be treated as observed regression
+data for future tuning.
 
 After historical exclusions, the public development pool could not satisfy a
 four-hop quota under this policy. The selected public-training subset is new to
@@ -131,3 +133,7 @@ binds 3,175 deduplicated documents and 6,257 document-derived relations for this
 170-query bundle. A separate reconstruction from official source rows confirmed
 the exact query texts, split assignments, support judgments and document union.
 These are corpus-integrity results, not retrieval or agent-quality measurements.
+
+The materialization receipt describes that completed stage only. Subsequent
+embedding generation and retrieval have separate frozen inputs and evidence in
+the [reserved comparison](balanced-support-reserved-results.md).

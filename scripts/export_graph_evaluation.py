@@ -25,6 +25,9 @@ def export(report, fixture):
     if plan["protocol_sha256"] != digest(protocol):
         raise ValueError("Export protocol differs from the pinned plan")
     stage = evaluation_stage(protocol)
+    if protocol["protocol_version"] == "graph_balanced_v1_support_reserved_v1":
+        from support_reserved_contract import verify_support_reserved
+        verify_support_reserved(protocol, fixture)
     if report.get("evaluation_stage", "reserved_comparison") != stage:
         raise ValueError("Report mislabels its evaluation stage")
     queries = evaluation_queries(fixture, protocol)
