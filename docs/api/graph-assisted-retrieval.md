@@ -456,3 +456,21 @@ hybrid v2. Some queries improved and others regressed; traversal and candidate
 limits affected coverage. The profile remains optional and experimental. Select
 a retrieval method using representative workload evaluation, including coverage
 and cost, and assess agent-task outcomes separately.
+
+### Compare the graph seed policy explicitly
+
+The existing `typed_path_best_channel_v1` profile can use hybrid v1 or hybrid
+v2 seeds. Freeze both identities: changing the seed changes anchors and eligible
+paths even when the graph score formula stays the same. Do not compare results
+from different imports as a controlled seed experiment; UUID tie-breaks and
+bounded traversal can also change.
+
+The reproducible development protocol
+`benchmarks/retrieval/graph-best-channel-v1-seed-development-v1.json` evaluates
+hybrid v1 seeds against the hybrid v1 baseline. Its ten methods include the v2
+baseline, while all hybrid graph arms consistently use v1 seeds. The earlier
+v2-seed protocol remains unchanged. Both use previously observed development
+questions; neither authorizes a default change or establishes agent improvement.
+Protocol verification rejects a different seed, baseline, method set or reserved
+split under this identity. Use a fresh, independently frozen comparison before
+claiming generalization.

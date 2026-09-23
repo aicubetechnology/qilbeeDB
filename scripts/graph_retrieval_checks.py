@@ -489,6 +489,44 @@ class GraphPipelineChecks(unittest.TestCase):
             with self.assertRaises(ValueError):
                 verify_protocol(changed, value, graph)
 
+    def test_v1_seed_protocol_cannot_be_relabelled_as_v2_or_reserved(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-best-channel-v1-seed-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(protocol["primary_comparison"]["baseline"], "weighted_rrf_v1")
+        mutations = [lambda p: p.update(split="test"),
+            lambda p: p.update(protocol_version="graph_best_channel_development_v1"),
+            lambda p: p.update(graph_seed_hybrid_version="weighted_rrf_v2"),
+            lambda p: p["primary_comparison"].update(baseline="weighted_rrf_v2"),
+            lambda p: p["graph_profiles"].update(graph_hybrid_best_channel="typed_path_balanced_v1"),
+            lambda p: p["methods"].remove("weighted_rrf_v2"),
+            lambda p: p["methods"].append("graph_hybrid_best_channel"),
+            lambda p: p.update(default_admission=True)]
+        for mutate in mutations:
+            changed = copy.deepcopy(protocol)
+            mutate(changed)
+            with self.assertRaises(ValueError):
+                verify_protocol(changed, value, graph)
+
+    def test_seed_request_and_response_must_match_frozen_protocol(self):
+        value, _, state, protocol, result = proof_fixture()
+        method = "graph_hybrid_balanced"
+        for version in ("weighted_rrf_v1", "weighted_rrf_v2"):
+            protocol["graph_seed_hybrid_version"] = version
+            _, body = request_for(method, value["queries"][1], value, state, protocol)
+            self.assertEqual(body["query"]["seed"]["ranking_version"], version)
+            result["page"]["seed"].update(mode="hybrid", hybrid_profile=PROFILES[version],
+                embedding_space=value["space"])
+            validate_page(result, value, state, value["queries"][1], method, protocol)
+            changed = copy.deepcopy(result)
+            other = "weighted_rrf_v2" if version == "weighted_rrf_v1" else "weighted_rrf_v1"
+            changed["page"]["seed"]["hybrid_profile"] = PROFILES[other]
+            with self.assertRaises(ValueError):
+                validate_page(changed, value, state, value["queries"][1], method, protocol)
+
     def test_best_channel_uses_maximum_and_rejects_additive_or_weighted_scores(self):
         value, _, state, protocol, result = proof_fixture()
         method = "graph_lexical_balanced"
