@@ -311,3 +311,17 @@ method and its evaluation protocol before measuring a fresh reserved cohort.
 Previously published test queries may be used as regressions, but do not reuse
 them as independent confirmation after inspecting their results. A development
 gain is neither a production promotion nor evidence of better agent reasoning.
+
+## Verify comparison aggregates before sharing evidence
+
+**Availability: source preview for comparison tooling.** The graph report exporter
+recomputes category summaries and paired comparisons from verified query rows.
+Each row must retain its category from the frozen fixture. Mean differences,
+bootstrap intervals, win/loss/tie counts and the primary-comparison designation
+must agree with the declared protocol and measured rows.
+
+A mismatch stops the export; it is not silently repaired. Preserve the original
+report and investigate its producer or changes before producing a new export.
+This check detects inconsistent published conclusions. It does not establish
+that the dataset is representative, that judgments are exhaustive, or that a
+development improvement generalizes to a reserved evaluation or agent task.

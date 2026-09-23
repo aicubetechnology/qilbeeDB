@@ -7,6 +7,7 @@ from pathlib import Path
 
 from evaluate_retrieval import digest, metrics, save
 from evaluate_graph_retrieval import summary, evaluation_stage, evaluation_queries
+from graph_report_evidence import categories, comparisons
 
 
 def export(report, fixture):
@@ -37,6 +38,8 @@ def export(report, fixture):
             )
         seen.add(key)
         query = queries[row["query_id"]]
+        if row["category"] != query["category"]:
+            raise ValueError("Query category differs from the frozen fixture")
         recalculated = metrics(row["ranked"], query)
         supports = {did for did, grade in query["judgments"].items() if grade > 0}
         recalculated["all_labeled_supports_at_10"] = bool(supports) and supports <= set(
@@ -81,6 +84,10 @@ def export(report, fixture):
         m: summary([r for r in rows if r["method"] == m]) for m in protocol["methods"]
     } != report["summary"]:
         raise ValueError("Summary does not match the measured rows")
+    if categories(rows, protocol, queries) != report["categories"]:
+        raise ValueError("Category aggregates differ from verified query rows")
+    if comparisons(rows, protocol, queries) != report["comparisons"]:
+        raise ValueError("Paired comparisons differ from verified query rows")
     resources = report["resources"]
     return {
         "schema_version": 1,

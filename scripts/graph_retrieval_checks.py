@@ -10,6 +10,7 @@ import unittest
 from evaluate_retrieval import PROFILES, digest, metrics, source_payload
 from evaluate_graph_retrieval import request_for, summary, verify_protocol, evaluation_stage, evaluation_queries
 from export_graph_evaluation import export
+from graph_report_evidence import categories, comparisons
 from graph_evaluation_contract import (
     fences,
     graph_profile,
@@ -660,6 +661,9 @@ class GraphPipelineChecks(unittest.TestCase):
                 scope="not sampled",
             ),
         }
+        selected = {query["id"]: query}
+        report["categories"] = categories(rows, protocol, selected)
+        report["comparisons"] = comparisons(rows, protocol, selected)
         public = export(report, value)
         self.assertEqual(len(public["rows"]), len(protocol["methods"]))
         self.assertNotIn("documents", public["source_provenance"])
@@ -687,6 +691,12 @@ class GraphPipelineChecks(unittest.TestCase):
 
         mutations = [
             lambda r: r.update(status="failed"),
+            lambda r: r["rows"][0].update(category="fabricated"),
+            lambda r: r["categories"][query["category"]]["lexical"].update(ndcg_at_10=999),
+            lambda r: r["comparisons"]["weighted_rrf_v2"]["metrics"]["ndcg_at_10"].update(mean_delta=999),
+            lambda r: r["comparisons"]["weighted_rrf_v2"]["metrics"]["ndcg_at_10"].update(wins=999),
+            lambda r: r["comparisons"]["weighted_rrf_v2"].update(primary_predeclared=False),
+            lambda r: r["comparisons"]["weighted_rrf_v2"]["metrics"]["ndcg_at_10"].update(paired_interval={"forged": True}),
             lambda r: r.update(verified_fences_unchanged=False),
             lambda r: r["rows"].pop(),
             lambda r: r["rows"].append(copy.deepcopy(r["rows"][0])),
