@@ -19,6 +19,9 @@ version they run. Your organization controls its application credentials and
 access policies in either option. Model selection, external embeddings and agent
 execution remain responsibilities of your application.
 
+The [official source repository](https://github.com/aicubetechnology/qilbeeDB)
+provides the project overview, source code and contribution instructions.
+
 ## Start building
 
 - [What’s new in 0.14.0](../releases/0.14.0.md): review available capabilities, compatibility and upgrade requirements.

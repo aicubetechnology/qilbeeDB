@@ -5,7 +5,7 @@
 > and retain their known limitations. See the [migration and API contract](docs/api/platform-http.md).
 <div align="center">
 
-![QilbeeDB Logo](https://preview--agent-chronicle-db.lovable.app/assets/qilbee-logo-c3CsNydB.png)
+<img src="docs/assets/qilbeedb-logo.png" alt="QilbeeDB" width="560">
 
 **Graph Database and Evidence-Driven Memory for AI Agents**
 
