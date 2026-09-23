@@ -214,52 +214,55 @@ fn payload_filters_apply_before_expansion_and_cannot_bridge_through_excluded_rec
 
 #[test]
 fn one_snapshot_preserves_revision_paths_while_live_updates_and_deletions_invalidate_them() {
-    let dir = TempDir::new().unwrap();
-    let db = open(dir.path());
-    let a = create(&db, "scope", "anchor");
-    let b = create(&db, "scope", "neighbor");
-    link(&db, &a, &b, MemoryRelationKind::Supports, "ab");
-    let snapshot = db.memory_snapshot();
-    let q = query("anchor");
-    let before = snapshot.search_graph("scope", &q).unwrap();
-    let update = change(
-        &db,
-        MemoryOperation::Update {
-            record_id: b.record_id,
-            expected_revision: 1,
-            record: input("replaced"),
-        },
-        "update",
-    );
-    let old = snapshot.search_graph("scope", &q).unwrap();
-    assert_eq!(
-        serde_json::to_value(&before).unwrap(),
-        serde_json::to_value(old).unwrap()
-    );
-    assert_eq!(
-        ids(&db.search_memory_graph("scope", &q).unwrap()),
-        [a.record_id].into()
-    );
-    link(
-        &db,
-        &a,
-        &update,
-        MemoryRelationKind::Supports,
-        "updated-link",
-    );
-    assert_eq!(db.search_memory_graph("scope", &q).unwrap().hits.len(), 2);
-    change(
-        &db,
-        MemoryOperation::Delete {
-            record_id: b.record_id,
-            expected_revision: 2,
-        },
-        "delete",
-    );
-    assert_eq!(
-        ids(&db.search_memory_graph("scope", &q).unwrap()),
-        [a.record_id].into()
-    );
+    for version in GraphRankingVersion::ALL {
+        let dir = TempDir::new().unwrap();
+        let db = open(dir.path());
+        let a = create(&db, "scope", "anchor");
+        let b = create(&db, "scope", "neighbor");
+        link(&db, &a, &b, MemoryRelationKind::SameEntity, "ab");
+        let snapshot = db.memory_snapshot();
+        let mut q = query("anchor");
+        q.ranking_version = version;
+        let before = snapshot.search_graph("scope", &q).unwrap();
+        let update = change(
+            &db,
+            MemoryOperation::Update {
+                record_id: b.record_id,
+                expected_revision: 1,
+                record: input("replaced"),
+            },
+            "update",
+        );
+        let old = snapshot.search_graph("scope", &q).unwrap();
+        assert_eq!(
+            serde_json::to_value(&before).unwrap(),
+            serde_json::to_value(old).unwrap()
+        );
+        assert_eq!(
+            ids(&db.search_memory_graph("scope", &q).unwrap()),
+            [a.record_id].into()
+        );
+        link(
+            &db,
+            &a,
+            &update,
+            MemoryRelationKind::SameEntity,
+            "updated-link",
+        );
+        assert_eq!(db.search_memory_graph("scope", &q).unwrap().hits.len(), 2);
+        change(
+            &db,
+            MemoryOperation::Delete {
+                record_id: b.record_id,
+                expected_revision: 2,
+            },
+            "delete",
+        );
+        assert_eq!(
+            ids(&db.search_memory_graph("scope", &q).unwrap()),
+            [a.record_id].into()
+        );
+    }
 }
 
 #[test]

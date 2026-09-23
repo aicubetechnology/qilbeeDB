@@ -73,7 +73,7 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
     let catalog = http
         .call("GET", CATALOG, CATALOG, &key, Value::Null, 200)
         .await;
-    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 4);
+    assert_eq!(catalog["graph_profiles"].as_array().unwrap().len(), 5);
     for profile in catalog["graph_profiles"].as_array().unwrap() {
         for mode in ["lexical", "semantic", "hybrid"] {
             let mut body = query();
@@ -88,8 +88,35 @@ async fn graph_search_all_profiles_and_seed_modes_validate_against_served_openap
             let value = http.call("POST", SEARCH, SEARCH, &key, body, 200).await;
             let page = &value["page"];
             assert_eq!(page["ranking"], *profile);
+            for hit in page["hits"].as_array().unwrap() {
+                let contribution = |field: &str, weight: f64| {
+                    hit[field]
+                        .get("rank")
+                        .and_then(Value::as_u64)
+                        .map_or(0.0, |rank| weight / (2.0 + rank as f64))
+                };
+                let expected = contribution("base", profile["base_weight"].as_f64().unwrap())
+                    + contribution("graph", profile["graph_weight"].as_f64().unwrap());
+                assert!((hit["score"].as_f64().unwrap() - expected).abs() < 1e-12);
+            }
             assert_eq!(page["hits"].as_array().unwrap().len(), 2);
             assert_eq!(page["hits"][0]["score"], json!(1.0 / 3.0));
+            let schema = &http.api["paths"][SEARCH]["post"]["responses"]["200"]["content"]["application/json"]
+                ["schema"];
+            let validator = jsonschema::draft202012::options()
+                .build(&json!({"allOf":[schema], "components":http.api["components"]}))
+                .unwrap();
+            let mut invalid = value.clone();
+            let limited_channel = if profile["version"] == "typed_path_base_preserving_v1" {
+                "graph"
+            } else {
+                "base"
+            };
+            invalid["page"]["hits"][0][limited_channel]["contribution"] = json!(0.1);
+            assert!(
+                !validator.is_valid(&invalid),
+                "Profile-specific contribution bound must be enforced"
+            );
             assert_eq!(
                 page["hits"][1]["graph"]["steps"][0]["relation_id"],
                 edge["receipt"]["relation_id"]

@@ -325,3 +325,27 @@ report and investigate its producer or changes before producing a new export.
 This check detects inconsistent published conclusions. It does not establish
 that the dataset is representative, that judgments are exhaustive, or that a
 development improvement generalizes to a reserved evaluation or agent task.
+
+## Evaluate the base-preserving profile
+
+**Availability: source preview; experimental and opt-in.** Select
+`typed_path_base_preserving_v1` explicitly in a graph search request. It uses the
+same traversal and relation weights as `typed_path_balanced_v1`, with a base
+contribution of `0.75 / (2 + base_rank)` and a graph contribution of
+`0.25 / (2 + graph_rank)`. An absent contribution is zero. The maximum combined
+score is `1/3`; this is neither cosine nor a probability. Equal scores retain the
+existing record-ID tie-break. Existing profiles and defaults remain unchanged.
+
+The profile gives more weight to seed ordering. Its name does not guarantee that
+a particular result remains in the final list, nor that retrieval quality improves.
+The company or agent application chooses whether to request it; the database
+enforces the versioned ranking, authorized scope, current-source checks and work
+limits. Clients should validate both contributions against the selected version.
+
+Use `benchmarks/retrieval/graph-base-preserving-development-v1.json` to compare
+the candidate with the eight existing methods on the same development queries,
+external vectors and budgets. This separate protocol cannot be relabeled as the
+previous development or reserved protocol. It declares the new candidate versus
+hybrid v2 as its primary comparison. Freeze a fresh reserved evaluation before
+using it to assess generalization; no improvement or default admission follows
+from adding this optional profile.

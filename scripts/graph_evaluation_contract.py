@@ -17,6 +17,7 @@ from import_musique_graph import document_graph
 def graph_profile(version):
     weights = {
         "typed_path_balanced_v1": [1, 1, 1, 1, 1, 1],
+        "typed_path_base_preserving_v1": [1, 1, 1, 1, 1, 1],
         "typed_path_entity_v1": [0.5, 1, 0, 0, 0, 0],
     }[version]
     return {
@@ -27,8 +28,8 @@ def graph_profile(version):
         "base_candidate_limit": 100,
         "anchor_limit": 4,
         "rank_constant": 2,
-        "base_weight": 0.25,
-        "graph_weight": 0.75,
+        "base_weight": 0.75 if version == "typed_path_base_preserving_v1" else 0.25,
+        "graph_weight": 0.25 if version == "typed_path_base_preserving_v1" else 0.75,
         "hop_decay": 0.5,
         "cosine_affinity_floor": 0.5,
         "cosine_affinity_weight": 0.5,
@@ -343,7 +344,7 @@ def validate_page(result, fixture, state, query, method, protocol):
         if base:
             if type(base["rank"]) is not int or not 1 <= base["rank"] <= 100:
                 raise ValueError("Base rank exceeds the frozen candidate pool")
-            near(base["contribution"], 0.25 / (2 + base["rank"]))
+            near(base["contribution"], profile["base_weight"] / (profile["rank_constant"] + base["rank"]))
         if path:
             if (
                 type(path["rank"]) is not int
@@ -354,7 +355,7 @@ def validate_page(result, fixture, state, query, method, protocol):
                 "anchor_rank"
             ] <= len(page["seed"]["selected_anchors"]):
                 raise ValueError("Anchor rank exceeds the selected roots")
-            near(path["contribution"], 0.75 / (2 + path["rank"]))
+            near(path["contribution"], profile["graph_weight"] / (profile["rank_constant"] + path["rank"]))
             previous = path["anchor"]
             if (
                 previous != page["seed"]["selected_anchors"][path["anchor_rank"] - 1]

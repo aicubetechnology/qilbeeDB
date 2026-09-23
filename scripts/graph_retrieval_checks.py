@@ -349,6 +349,25 @@ class GraphPipelineChecks(unittest.TestCase):
         empty["queries"] = [q for q in empty["queries"] if q["split"] == "test"]
         with self.assertRaises(ValueError): evaluation_queries(empty, protocol)
 
+    def test_base_preserving_trial_is_separate_and_uses_immutable_profile(self):
+        value, graph = fixture()
+        protocol = json.loads((Path(__file__).resolve().parents[1] /
+            "benchmarks/retrieval/graph-base-preserving-development-v1.json").read_text())
+        protocol.update(source_sha256=graph["source_sha256"],
+            relations_sha256=graph["relations_sha256"], graph_policy_sha256=graph["policy_sha256"])
+        verify_protocol(protocol, value, graph)
+        self.assertEqual(len(protocol["methods"]), 9)
+        profile = graph_profile("typed_path_base_preserving_v1")
+        self.assertEqual((profile["base_weight"], profile["graph_weight"]), (0.75, 0.25))
+        old = graph_profile("typed_path_balanced_v1")
+        self.assertEqual((old["base_weight"], old["graph_weight"]), (0.25, 0.75))
+        for key in set(old) - {"version", "base_weight", "graph_weight"}:
+            self.assertEqual(profile[key], old[key])
+        for change in ({"split": "test"}, {"protocol_version": "graph_multihop_development_v1"},
+            {"primary_comparison": {"candidate": "graph_hybrid_balanced", "baseline": "weighted_rrf_v2"}}):
+            with self.assertRaises(ValueError):
+                verify_protocol(dict(protocol, **change), value, graph)
+
     def test_all_requests_use_the_same_frozen_vectors_scope_and_result_limit(self):
         value, graph = fixture()
         protocol = json.loads(
@@ -447,6 +466,26 @@ class GraphPipelineChecks(unittest.TestCase):
             with self.assertRaises(ValueError):
                 near(bad, 0.5)
         near(0.50000000001, 0.5)
+
+    def test_new_profile_checks_both_contributions_and_rejects_legacy_weights(self):
+        value, _, state, protocol, result = proof_fixture()
+        method = "graph_lexical_balanced"
+        protocol["graph_profiles"][method] = "typed_path_base_preserving_v1"
+        result["page"]["ranking"] = graph_profile("typed_path_base_preserving_v1")
+        hit = result["page"]["hits"][0]
+        hit["graph"]["contribution"] = 0.25 / 3
+        hit["base"] = {"rank": 2, "contribution": 0.75 / 4}
+        hit["score"] = 0.25 / 3 + 0.75 / 4
+        def check(candidate):
+            return validate_page(candidate, value, state, value["queries"][1], method, protocol)
+        self.assertEqual(len(check(result)), 1)
+        for channel, wrong in [("base", 0.25 / 4), ("graph", 0.75 / 3)]:
+            forged = copy.deepcopy(result)
+            changed = forged["page"]["hits"][0]
+            changed[channel]["contribution"] = wrong
+            changed["score"] = changed["base"]["contribution"] + changed["graph"]["contribution"]
+            with self.subTest(channel=channel), self.assertRaises(ValueError):
+                check(forged)
 
     def test_frozen_proof_rejects_forgery_stale_revisions_and_scope_drift(self):
         value, _, state, protocol, result = proof_fixture()
