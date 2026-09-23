@@ -77,3 +77,7 @@ Keep any inspected relevance results in the observation history. Sentence suppor
 labels do not exhaustively judge other documents in a merged retrieval corpus.
 Public data may also appear in model training. Retrieval gains and agent-task
 gains remain separate hypotheses requiring their own measurements.
+
+The [cross-source capacity audit](cross-source-capacity.md) adds replayable checks
+against declared MuSiQue history while preserving separate answer and annotated
+entity conflicts. It does not select or activate a confirmation cohort.
