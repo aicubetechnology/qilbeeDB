@@ -65,6 +65,31 @@ and balanced hybrid graph report traversal cuts on 192/200 questions; all hybrid
 methods report candidate cuts. A completed source scan is not exhaustive ranking
 or graph exploration. These budgets describe the experiment, not tenant policy.
 
+## Post-publication diagnosis and next hypothesis
+
+A separate, post-hoc comparison of the recorded top-ten lists finds membership
+changes on 83/200 queries: 101 query-document entries enter and 101 leave.
+Six entering entries have labeled support and seven departing entries have
+labeled support. Unjudged entries are not established irrelevant. Examination
+of the retained path evidence shows that all 101 promoted entries already have
+a base-channel contribution; 61 use a one-hop proof and 40 a two-hop proof.
+Thus, in this run, top-ten turnover promotes lower-ranked base candidates rather
+than discovering results outside the retained base channel. This is diagnostic
+attribution, not a new held-out evaluation or a proof of the cause of every loss.
+
+[MAGMA](https://arxiv.org/html/2601.03236v2) motivates a distinct hypothesis:
+query-conditioned traversal can prioritize useful relational paths instead of
+only changing final fusion weights. QilbeeDB's current implementation selects a
+bounded neighborhood before affinity-based path scoring. Changing that ordering
+would require a new, immutable server policy with explicit work accounting and
+an independent evaluation. The paper's results do not validate that change in
+QilbeeDB. Query-intent extraction and business interpretation remain application
+responsibilities; a shared extension requires an explicit ownership agreement.
+
+Do not select new weights or report new confirmation on this already observed
+cohort. Use it for regression analysis, qualify candidate policies on development,
+then freeze a new comparison and assess downstream effects separately.
+
 ## Cost and evidence limits
 
 Observed candidate retrieval p95 is 350.39 ms versus hybrid v2's 274.39 ms,
