@@ -92,6 +92,7 @@ def evaluation_stage(protocol):
         "graph_path_strength_development_v1": "development",
         "twowiki_strength_development_v1": "development",
         "twowiki_captured1536_development_v1": "development",
+        "twowiki_captured1536_reserved_v1": "test",
         "graph_path_strength_regression_v1": "test",
         "graph_multihop_development_v1": "development",
         "graph_base_preserving_development_v1": "development",
@@ -130,7 +131,7 @@ def verify_protocol(protocol, fixture, graph):
         or not 1 <= protocol["repetitions"] <= 20
     ):
         raise ValueError("Protocol differs from supported frozen comparison")
-    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1"):
+    if protocol["protocol_version"] in ("twowiki_strength_development_v1", "twowiki_captured1536_development_v1", "twowiki_captured1536_reserved_v1"):
         from twowiki_evaluation_contract import verify_twowiki_protocol
         verify_twowiki_protocol(protocol, fixture, graph)
         return

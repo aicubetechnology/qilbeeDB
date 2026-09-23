@@ -652,3 +652,18 @@ The [1536-dimensional development results](../research/twowiki-captured1536-deve
 show a mean gain for graph retrieval with query-level regressions. Balanced
 outperformed strength on average; no production default changes. Reserved
 confirmation and separate agent-task evaluation remain necessary.
+
+### Confirming a development result
+
+A reserved comparison must reference the exact completed development report and
+preserve its corpus, vectors, graph, ranking formulas, budgets and primary
+comparison. The evaluation tooling rejects changes to any protocol field except
+the explicit development-to-reserved role transition and evidence reference.
+Unknown added settings are rejected too. A missing frozen confirmation protocol
+fails before HTTP requests. Reserved execution remains unavailable until that
+protocol is present; an accepted development run does not authorize it implicitly.
+
+Use separate confirmation evidence before changing a ranking default. If you
+retune a method after inspecting development losses, start a new development
+protocol and identify which reserved questions remain unobserved. Neither a
+confirmation label nor a higher development mean proves improved agent outcomes.
