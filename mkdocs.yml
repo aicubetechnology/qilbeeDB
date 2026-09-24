@@ -208,6 +208,7 @@ nav:
     - Monitoring: operations/monitoring.md
     - Graceful Shutdown: operations/graceful-shutdown.md
     - Backup & Recovery: operations/backup.md
+    - Store Verification: operations/store-verification.md
     - Performance Tuning: operations/performance.md
   - Learn More:
     - Use Cases:

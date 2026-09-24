@@ -460,3 +460,4 @@ pub mod knowledge_origin;
 pub mod knowledge_selection;
 
 mod knowledge_index;
+pub mod verification;

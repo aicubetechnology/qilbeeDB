@@ -27,6 +27,18 @@ async fn main() {
             std::process::exit(1);
         }
     }
+    match qilbee_server::store_verification::verify_store_command(&args) {
+        Ok(Some(report)) => {
+            // Complete verification report; a failure never prints a partial one.
+            println!("{}", report);
+            return;
+        }
+        Ok(None) => {}
+        Err(error) => {
+            eprintln!("Store verification failed: {}", error);
+            std::process::exit(1);
+        }
+    }
 
     // Initialize logging
     tracing_subscriber::fmt()

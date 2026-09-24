@@ -2,8 +2,8 @@
 use super::knowledge::{KnowledgeReceipt, has_knowledge_binding_marker};
 use super::*;
 
-const INDEX_ROOT: &[u8] = b"\0knowledge-selection-v3/";
-const GENERATION_KEY: &[u8] = b"\0knowledge-selection-v3-generation";
+pub(super) const INDEX_ROOT: &[u8] = b"\0knowledge-selection-v3/";
+pub(super) const GENERATION_KEY: &[u8] = b"\0knowledge-selection-v3-generation";
 const CHUNK_ENTRIES: usize = 128;
 // Flush after crossing this threshold: one encoded entry may exceed it.
 // This bounds batching overhead, not total ledger size or a single record.
@@ -25,7 +25,7 @@ impl LearningMemory {
         key
     }
 
-    fn locator_key(&self, record: &ProcedureRecord) -> Vec<u8> {
+    pub(super) fn locator_key(&self, record: &ProcedureRecord) -> Vec<u8> {
         let mut key = self.generation_prefix(0);
         key.extend_from_slice(&procedure_key(&record.scope, &record.proposal.id));
         key
@@ -105,19 +105,24 @@ impl LearningMemory {
         Ok(key)
     }
 
-    pub(super) fn put_knowledge_locator(
-        &self,
-        batch: &mut WriteBatch,
-        receipt: &KnowledgeReceipt,
-    ) -> Result<()> {
-        batch.put(
+    fn locator_entry(&self, receipt: &KnowledgeReceipt) -> Result<(Vec<u8>, Vec<u8>)> {
+        Ok((
             self.locator_key(&receipt.record),
             encode(&KnowledgeLocator {
                 tenant: receipt.tenant.clone(),
                 namespace: receipt.namespace.clone(),
                 id: receipt.request.id.clone(),
             })?,
-        );
+        ))
+    }
+
+    pub(super) fn put_knowledge_locator(
+        &self,
+        batch: &mut WriteBatch,
+        receipt: &KnowledgeReceipt,
+    ) -> Result<()> {
+        let (key, value) = self.locator_entry(receipt)?;
+        batch.put(key, value);
         Ok(())
     }
 
@@ -158,39 +163,15 @@ impl LearningMemory {
         Ok(())
     }
 
-    /// Called before publishing the opened handle; no writer can observe a partial generation.
-    pub(super) fn rebuild_knowledge_index(&self) -> Result<()> {
-        // Older binaries ignore this prefix. Every open discards all derived generations,
-        // including interrupted builds, with bounded batches; authoritative data is untouched.
-        let mut batch = WriteBatch::default();
-        let mut count = 0;
-        for item in self
-            .inner
-            .db
-            .iterator(IteratorMode::From(INDEX_ROOT, Direction::Forward))
-        {
-            let (key, _) = item.map_err(storage_error)?;
-            if !key.starts_with(INDEX_ROOT) {
-                break;
-            }
-            batch.delete(&key);
-            count += 1;
-            if count == CHUNK_ENTRIES || batch.size_in_bytes() >= CHUNK_BYTES {
-                self.inner
-                    .db
-                    .write_opt(batch, &write_options())
-                    .map_err(storage_error)?;
-                batch = WriteBatch::default();
-                count = 0;
-            }
-        }
-        self.inner
-            .db
-            .write_opt(batch, &write_options())
-            .map_err(storage_error)?;
-        batch = WriteBatch::default();
-        count = 0;
-        let mut receipts_rebuilt = 0usize;
+    /// Enumerate every derived entry implied by the authoritative ledgers while
+    /// auditing receipts, origins and bound procedures. Rebuilding persists the
+    /// emitted entries; offline verification compares them with the persisted
+    /// generation. Both paths share this single reading of the key layout.
+    pub(super) fn audited_knowledge_entries(
+        &self,
+        sink: &mut dyn KnowledgeIndexSink,
+    ) -> Result<KnowledgeIndexSummary> {
+        let mut summary = KnowledgeIndexSummary::default();
         for item in self
             .inner
             .db
@@ -211,36 +192,25 @@ impl LearningMemory {
             let receipt = self
                 .knowledge_receipt_any_origin(&raw.tenant, &raw.namespace, &raw.request.id)?
                 .ok_or_else(|| {
-                    Error::DataCorruption("Knowledge receipt disappeared during rebuild".into())
+                    Error::DataCorruption("Knowledge receipt disappeared during audit".into())
                 })?;
             let current = self
                 .registered_procedure(&raw.tenant, &raw.namespace, &raw.request.id)?
                 .ok_or_else(|| {
-                    Error::DataCorruption("Knowledge procedure missing during rebuild".into())
+                    Error::DataCorruption("Knowledge procedure missing during audit".into())
                 })?;
-            self.put_knowledge_locator(&mut batch, &receipt)?;
+            let (key, value) = self.locator_entry(&receipt)?;
+            sink.entry(key, value)?;
             if current.record.state == ProcedureState::Active {
-                batch.put(
+                sink.entry(
                     self.active_key(&receipt, &current.record)?,
                     encode(&current.record)?,
-                );
+                )?;
+                summary.active_entries += 1;
             }
-            count += 1;
-            receipts_rebuilt += 1;
-            if count == CHUNK_ENTRIES || batch.size_in_bytes() >= CHUNK_BYTES {
-                self.inner
-                    .db
-                    .write_opt(batch, &write_options())
-                    .map_err(storage_error)?;
-                tracing::debug!(generation = %self.inner.knowledge_generation, receipts_rebuilt, "knowledge_index_rebuild_chunk_committed");
-                batch = WriteBatch::default();
-                count = 0;
-            }
+            summary.knowledge_receipts += 1;
         }
-        self.inner
-            .db
-            .write_opt(batch, &write_options())
-            .map_err(storage_error)?;
+        sink.receipts_complete()?;
         // Audit the reverse origin link, including orphaned origins whose
         // ordinary receipt was removed. Never publish an incomplete generation.
         for item in self
@@ -271,8 +241,9 @@ impl LearningMemory {
                 &raw.request.knowledge.id,
             )?
             .ok_or_else(|| {
-                Error::DataCorruption("Knowledge origin disappeared during rebuild".into())
+                Error::DataCorruption("Knowledge origin disappeared during audit".into())
             })?;
+            summary.combined_origins += 1;
         }
         // Also inspect authoritative procedures: missing receipts must not silently
         // turn active knowledge into an apparently empty derived index.
@@ -305,6 +276,47 @@ impl LearningMemory {
                 ));
             }
         }
+        Ok(summary)
+    }
+
+    /// Called before publishing the opened handle; no writer can observe a partial generation.
+    pub(super) fn rebuild_knowledge_index(&self) -> Result<()> {
+        // Older binaries ignore this prefix. Every open discards all derived generations,
+        // including interrupted builds, with bounded batches; authoritative data is untouched.
+        let mut batch = WriteBatch::default();
+        let mut count = 0;
+        for item in self
+            .inner
+            .db
+            .iterator(IteratorMode::From(INDEX_ROOT, Direction::Forward))
+        {
+            let (key, _) = item.map_err(storage_error)?;
+            if !key.starts_with(INDEX_ROOT) {
+                break;
+            }
+            batch.delete(&key);
+            count += 1;
+            if count == CHUNK_ENTRIES || batch.size_in_bytes() >= CHUNK_BYTES {
+                self.inner
+                    .db
+                    .write_opt(batch, &write_options())
+                    .map_err(storage_error)?;
+                batch = WriteBatch::default();
+                count = 0;
+            }
+        }
+        self.inner
+            .db
+            .write_opt(batch, &write_options())
+            .map_err(storage_error)?;
+        let mut writer = ChunkedIndexWriter {
+            store: self,
+            batch: WriteBatch::default(),
+            count: 0,
+            receipts_rebuilt: 0,
+        };
+        let summary = self.audited_knowledge_entries(&mut writer)?;
+        writer.flush()?;
         self.inner
             .db
             .put_opt(
@@ -313,7 +325,60 @@ impl LearningMemory {
                 &write_options(),
             )
             .map_err(storage_error)?;
-        tracing::debug!(generation = %self.inner.knowledge_generation, receipts_rebuilt, "knowledge_index_rebuild_published");
+        tracing::debug!(generation = %self.inner.knowledge_generation, receipts_rebuilt = summary.knowledge_receipts, "knowledge_index_rebuild_published");
         Ok(())
+    }
+}
+
+/// Counts observed while enumerating the derived knowledge index.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub(super) struct KnowledgeIndexSummary {
+    pub knowledge_receipts: u64,
+    pub combined_origins: u64,
+    pub active_entries: u64,
+}
+
+/// Receives derived index entries in enumeration order.
+pub(super) trait KnowledgeIndexSink {
+    fn entry(&mut self, key: Vec<u8>, value: Vec<u8>) -> Result<()>;
+    /// Every receipt-derived entry has been emitted. Locators must be readable
+    /// through the store before the procedure audit that follows.
+    fn receipts_complete(&mut self) -> Result<()>;
+}
+
+struct ChunkedIndexWriter<'a> {
+    store: &'a LearningMemory,
+    batch: WriteBatch,
+    count: usize,
+    receipts_rebuilt: usize,
+}
+
+impl ChunkedIndexWriter<'_> {
+    fn flush(&mut self) -> Result<()> {
+        let batch = std::mem::take(&mut self.batch);
+        self.store
+            .inner
+            .db
+            .write_opt(batch, &write_options())
+            .map_err(storage_error)?;
+        self.count = 0;
+        Ok(())
+    }
+}
+
+impl KnowledgeIndexSink for ChunkedIndexWriter<'_> {
+    fn entry(&mut self, key: Vec<u8>, value: Vec<u8>) -> Result<()> {
+        self.batch.put(key, value);
+        self.count += 1;
+        self.receipts_rebuilt += 1;
+        if self.count == CHUNK_ENTRIES || self.batch.size_in_bytes() >= CHUNK_BYTES {
+            self.flush()?;
+            tracing::debug!(generation = %self.store.inner.knowledge_generation, entries_rebuilt = self.receipts_rebuilt, "knowledge_index_rebuild_chunk_committed");
+        }
+        Ok(())
+    }
+
+    fn receipts_complete(&mut self) -> Result<()> {
+        self.flush()
     }
 }

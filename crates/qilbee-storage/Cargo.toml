@@ -17,6 +17,8 @@ rocksdb = { workspace = true }
 tokio = { workspace = true }
 async-trait = { workspace = true }
 tracing = { workspace = true }
+sha2 = "0.10"
+libc = "0.2"
 
 [dev-dependencies]
 tempfile = { workspace = true }

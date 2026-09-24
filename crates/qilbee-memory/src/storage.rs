@@ -203,6 +203,34 @@ impl RocksDbMemoryStorage {
         Ok(storage)
     }
 
+    /// Open a stopped memory store read-only for offline verification. No
+    /// projection is rebuilt; another process holding the store is rejected.
+    pub fn open_read_only(path: &Path) -> Result<Self> {
+        let db = qilbee_storage::verification::open_read_only(
+            path,
+            &["default", cf::EPISODES, cf::EPISODE_INDEX, cf::AGENT_META],
+        )?;
+        let config = MemoryStorageConfig {
+            path: path.to_string_lossy().into_owned(),
+            ..MemoryStorageConfig::default()
+        };
+        Ok(Self {
+            db: Arc::new(db),
+            config,
+            mutation_lock: Mutex::new(()),
+            consolidation_incarnation: uuid::Uuid::new_v4(),
+        })
+    }
+
+    /// Physical inventory of every column family, including derived projections
+    /// that a writable open rebuilds deterministically from the source rows.
+    pub fn inventory(&self) -> Result<Vec<qilbee_storage::FamilyInventory>> {
+        ["default", cf::EPISODES, cf::EPISODE_INDEX, cf::AGENT_META]
+            .into_iter()
+            .map(|family| qilbee_storage::verification::family_inventory(&self.db, family, |_| false))
+            .collect()
+    }
+
     fn validate_agent(agent_id: &str) -> Result<()> {
         if agent_id.is_empty() || agent_id.len() > u16::MAX as usize {
             return Err(Error::ValidationError(

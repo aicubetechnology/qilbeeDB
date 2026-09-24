@@ -380,6 +380,13 @@
       "order": 1064
     },
     {
+      "source": "docs/operations/store-verification.md",
+      "file": "store-verification.md",
+      "title": "Offline store verification",
+      "description": "Verify a stopped data directory, compare backup copies by digest and check the knowledge index before adopting a restore.",
+      "order": 1065
+    },
+    {
       "source": "docs/architecture/native-vector-integrity.md",
       "file": "native-vector-integrity.md",
       "title": "Native vector index integrity",
