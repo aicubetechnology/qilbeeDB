@@ -929,8 +929,6 @@ mod journal_audit;
 mod journal_verification;
 pub(in crate::storage) mod projection_verification;
 pub use projection_verification::MemoryProjectionVerification;
-#[cfg(test)]
-mod projection_verification_tests;
 pub use journal_verification::MemoryJournalVerification;
 #[cfg(test)]
 mod journal_verification_tests;
