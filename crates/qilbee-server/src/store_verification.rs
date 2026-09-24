@@ -9,7 +9,7 @@ use qilbee_core::{Error, Result};
 use qilbee_memory::RocksDbMemoryStorage;
 use qilbee_memory::learning::LearningMemory;
 use qilbee_storage::StorageEngine;
-use qilbee_storage::verification::require_stopped;
+use qilbee_storage::verification::WriterExclusion;
 use serde_json::{Value, json};
 use std::path::Path;
 
@@ -88,8 +88,11 @@ pub fn compare_data_directories(candidate: &Path, source: &Path) -> Result<Value
                 .into(),
         ));
     }
-    let source_report = verify_data_directory(&source_path)?;
-    let candidate_report = verify_data_directory(&candidate_path)?;
+    let mut paths = store_paths(&source_path);
+    paths.extend(store_paths(&candidate_path));
+    let mut guard = WriterExclusion::acquire(&paths)?;
+    let source_report = verify_data_directory_guarded(&source_path, &mut guard)?;
+    let candidate_report = verify_data_directory_guarded(&candidate_path, &mut guard)?;
     let mut differences = Vec::new();
     let mut compared = 0u64;
     for store in STORES {
@@ -133,6 +136,7 @@ pub fn compare_data_directories(candidate: &Path, source: &Path) -> Result<Value
             differences.join(", ")
         )));
     }
+    guard.finish()?;
     Ok(json!({
         "contract_version": 1,
         "status": "verified_equal",
@@ -150,25 +154,42 @@ pub fn compare_data_directories(candidate: &Path, source: &Path) -> Result<Value
 /// Verify every store of a stopped platform data directory.
 pub fn verify_data_directory(data_directory: &Path) -> Result<Value> {
     let data_directory = canonical(data_directory)?;
+    let mut guard = WriterExclusion::acquire(&store_paths(&data_directory))?;
+    let report = verify_data_directory_guarded(&data_directory, &mut guard)?;
+    guard.finish()?;
+    Ok(report)
+}
+
+fn store_paths(directory: &Path) -> Vec<std::path::PathBuf> {
+    vec![
+        directory.to_owned(),
+        directory.join(AGENT_MEMORY_DIRECTORY),
+        directory.join(PROCEDURAL_LEARNING_DIRECTORY),
+    ]
+}
+
+/// Verify using an existing exclusion spanning every source and candidate store.
+/// The caller must successfully finish the guard before publishing this report.
+pub fn verify_data_directory_guarded(
+    data_directory: &Path,
+    guard: &mut WriterExclusion,
+) -> Result<Value> {
+    let data_directory = canonical(data_directory)?;
     let memory_path = data_directory.join(AGENT_MEMORY_DIRECTORY);
     let learning_path = data_directory.join(PROCEDURAL_LEARNING_DIRECTORY);
-    // Probe every store before opening any: a partially verified directory is
-    // not a result, and a live server must be reported before any inventory.
-    for path in [&data_directory, &memory_path, &learning_path] {
-        require_stopped(path)?;
-    }
-    let graph = StorageEngine::open_read_only(&data_directory)?;
+    let graph = StorageEngine::open_read_only_guarded(&data_directory, guard)?;
     let graph_families = graph.inventory()?;
     drop(graph);
-    let memory = RocksDbMemoryStorage::open_read_only(&memory_path)?;
+    let memory = RocksDbMemoryStorage::open_read_only_guarded(&memory_path, guard)?;
     let memory_families = memory.inventory()?;
     let memory_journals = memory.verify_memory_journals()?;
     let memory_projections = memory.verify_memory_projections()?;
     drop(memory);
-    let learning = LearningMemory::open_read_only(&learning_path)?;
+    let learning = LearningMemory::open_read_only_guarded(&learning_path, guard)?;
     let learning_families = learning.inventory()?;
     let knowledge_index = learning.verify_knowledge_index()?;
     drop(learning);
+    guard.check()?;
     Ok(json!({
         "contract_version": 1,
         "status": "verified",
@@ -330,7 +351,10 @@ mod tests {
         assert_eq!(stores["agent_memory"]["journals"]["namespaces"], 0);
         assert_eq!(stores["agent_memory"]["journals"]["links_checked"], 0);
         assert_eq!(stores["agent_memory"]["projections"]["namespaces"], 0);
-        assert_eq!(stores["agent_memory"]["projections"]["candidate_entries"], 0);
+        assert_eq!(
+            stores["agent_memory"]["projections"]["candidate_entries"],
+            0
+        );
         let learning = &stores["procedural_learning"];
         assert_eq!(learning["families"].as_array().unwrap().len(), 1);
         assert_eq!(learning["knowledge_index"]["knowledge_receipts"], 0);

@@ -222,6 +222,28 @@ impl RocksDbMemoryStorage {
         })
     }
 
+    /// Open under a retained writer exclusion; the caller must finish it before publishing results.
+    pub fn open_read_only_guarded(
+        path: &Path,
+        guard: &mut qilbee_storage::verification::WriterExclusion,
+    ) -> Result<Self> {
+        let db = qilbee_storage::verification::open_read_only_guarded(
+            path,
+            &["default", cf::EPISODES, cf::EPISODE_INDEX, cf::AGENT_META],
+            guard,
+        )?;
+        let config = MemoryStorageConfig {
+            path: path.to_string_lossy().into_owned(),
+            ..MemoryStorageConfig::default()
+        };
+        Ok(Self {
+            db: Arc::new(db),
+            config,
+            mutation_lock: Mutex::new(()),
+            consolidation_incarnation: uuid::Uuid::new_v4(),
+        })
+    }
+
     /// Authoritative inventory of every column family. Projections that a
     /// writable open rebuilds from the source rows and the offline verifier
     /// independently re-derives (candidate and chronological entries) are
