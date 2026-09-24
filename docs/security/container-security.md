@@ -16,6 +16,24 @@ finding affects your deployment, apply an available supported update or mitigati
 and repeat your integration and recovery checks. Retain package metadata so your
 scanner can identify installed dependencies.
 
+## Verify application dependencies
+
+An operating-system package scan may not identify Rust dependencies compiled
+into the server. For a self-hosted build, retain the exact source revision and
+`Cargo.lock`, build with `--locked`, and examine both the image and its application
+dependencies. Match findings to the target operating system and enabled features:
+a dependency selected on Linux may differ from one selected on macOS.
+
+Use a supported release containing the required fixes rather than replacing
+libraries inside a running container. Validate the rebuilt artifact's
+authentication, authorized reads and writes, and recovery behavior before
+adoption. A clean lockfile scan alone does not prove that an image is safe.
+
+Managed-platform customers should use the platform's supported release and
+security-update guidance; they do not need access to its host or build tools.
+Keep client credentials scoped and update self-managed clients as required by
+their own dependency advisories.
+
 ## Limit runtime privileges
 
 Run the server as a non-root user. Keep the root filesystem read-only, drop
