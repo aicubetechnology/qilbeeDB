@@ -3,9 +3,9 @@ use super::*;
 mod query;
 pub use query::*;
 
-const COMPANY_ROW: u8 = 0xa0;
-const SCOPE_ROW: u8 = 0xa1;
-const TIP: u8 = 0xa2;
+pub(super) const COMPANY_ROW: u8 = 0xa0;
+pub(super) const SCOPE_ROW: u8 = 0xa1;
+pub(super) const TIP: u8 = 0xa2;
 
 fn successor(mut prefix: Vec<u8>) -> Vec<u8> {
     while let Some(byte) = prefix.pop() {
@@ -22,14 +22,14 @@ fn timestamp_key(timestamp: i64) -> [u8; 8] {
     ((timestamp as u64) ^ (1 << 63)).to_be_bytes()
 }
 
-fn scope_key(namespace: &str, record: &MemoryRecord) -> Vec<u8> {
+pub(super) fn scope_key(namespace: &str, record: &MemoryRecord) -> Vec<u8> {
     let mut key = record_prefix(SCOPE_ROW, namespace);
     key.extend(timestamp_key(record.created_at_millis));
     key.extend(record.record_id.as_bytes());
     key
 }
 
-fn company_key(address: &CompanyMemoryAddress, record: &MemoryRecord) -> Result<Vec<u8>> {
+pub(super) fn company_key(address: &CompanyMemoryAddress, record: &MemoryRecord) -> Result<Vec<u8>> {
     let mut key = record_prefix(COMPANY_ROW, &address.company_id);
     key.extend(timestamp_key(record.created_at_millis));
     key.extend(address.workspace_id()?.as_bytes());
