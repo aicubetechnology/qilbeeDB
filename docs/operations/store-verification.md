@@ -14,15 +14,26 @@ The command opens the three stores of a platform data directory read-only:
 | Store | Directory | Checks |
 | --- | --- | --- |
 | Graph and identity | `<data-directory>` | Exact column families, physical inventory |
-| Agent memory | `<data-directory>/agent-memory` | Exact column families, physical inventory, journal chain verification |
+| Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, journal chain verification, projection re-derivation |
 | Procedural learning | `<data-directory>/procedural-learning` | Schema marker, authoritative inventory, knowledge index consistency |
 
 For every column family it reports the number of records and a SHA-256 digest
 over the record bytes. The digest is deterministic for the same records
 regardless of write order, compaction or file layout, so two reports compare a
-source with its copy. Learning-store entries that the server derives on start
-(the active knowledge index and its generation marker) are counted separately
-and excluded from the digest; that digest therefore stays equal across restarts.
+source with its copy. Independently verified derived entries are counted as
+`derived_entries` and excluded from the digest: in the learning store the
+active knowledge index and its generation marker; in the agent-memory store the
+candidate and chronological projection rows and tips. Workspace membership and
+relation heads remain included in the digest because this command does not
+independently re-derive their contents.
+
+The projection check re-derives the candidate and chronological projections
+of every namespace from the canonical records with the same key and value
+builders the server uses. Each implied row must exist with identical bytes,
+each namespace's projection tips must equal the digest of its journal state,
+and the persisted row counts must equal the implied counts, so an extra or
+stale row fails, including rows in namespaces with no canonical records.
+Relation heads are counted, not re-derived.
 
 The journal check visits every namespace that owns a journal state, a change
 record or an anchor. It validates the legacy change journal (last change digest
@@ -70,7 +81,8 @@ Success prints one JSON document and exits with status 0:
     "agent_memory": {
       "path": "/data/agent-memory",
       "families": ["…"],
-      "journals": {"namespaces": 3, "legacy_journals": 3, "verified_journals": 3, "links_checked": 128}
+      "journals": {"namespaces": 3, "legacy_journals": 3, "verified_journals": 3, "links_checked": 128},
+      "projections": {"namespaces": 3, "candidate_entries": 256, "chronological_scope_entries": 128, "chronological_company_entries": 128, "relation_head_entries": 40}
     },
     "procedural_learning": {
       "path": "/data/procedural-learning",
@@ -120,11 +132,11 @@ with a message naming each differing store and family, for example
 `agent_memory/memory_agent_meta, agent_memory/journals`, and prints no report.
 The two paths must be distinct and must not contain each other.
 
-Graph and agent-memory digests include the projections that a writable start
-rebuilds deterministically, so they match between faithful copies of the same
-binary version. After upgrading the binary those projections may legitimately
-change while the learning store's authoritative digest must not; comparing
-across an upgrade therefore still needs a review of the named differences.
+Only independently verified derived projections are excluded from digests.
+Other projections remain byte-compared; differences after an upgrade require
+review rather than an assumption of equivalence. Graph digests include the
+property index that a writable
+start maintains, so a named `graph/` difference after an upgrade needs review.
 Keep the comparison report with the backup manifest.
 
 ## Limits
@@ -132,7 +144,8 @@ Keep the comparison report with the backup manifest.
 The command validates structure and integrity, not business meaning: it does
 not prove that retained memories are the ones an application expects, that a
 backup is recent enough, or that retrieval quality is unchanged. Agent-memory
-journal chains are re-walked; checkpoints, consolidation ledgers and derived
-projections are inventoried, not re-derived. Cloud snapshot consistency, freeze handling and access control for
+journal chains are re-walked and candidate and chronological projections are
+re-derived; checkpoints, consolidation ledgers, relation heads and vector
+indexes are inventoried, not re-derived. Cloud snapshot consistency, freeze handling and access control for
 the copy remain operator procedures described in
 [backup and recovery](backup.md).

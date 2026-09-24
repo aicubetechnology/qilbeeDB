@@ -163,6 +163,7 @@ pub fn verify_data_directory(data_directory: &Path) -> Result<Value> {
     let memory = RocksDbMemoryStorage::open_read_only(&memory_path)?;
     let memory_families = memory.inventory()?;
     let memory_journals = memory.verify_memory_journals()?;
+    let memory_projections = memory.verify_memory_projections()?;
     drop(memory);
     let learning = LearningMemory::open_read_only(&learning_path)?;
     let learning_families = learning.inventory()?;
@@ -182,6 +183,7 @@ pub fn verify_data_directory(data_directory: &Path) -> Result<Value> {
                 "path": memory_path,
                 "families": memory_families,
                 "journals": memory_journals,
+                "projections": memory_projections,
             },
             "procedural_learning": {
                 "path": learning_path,
@@ -327,6 +329,8 @@ mod tests {
         );
         assert_eq!(stores["agent_memory"]["journals"]["namespaces"], 0);
         assert_eq!(stores["agent_memory"]["journals"]["links_checked"], 0);
+        assert_eq!(stores["agent_memory"]["projections"]["namespaces"], 0);
+        assert_eq!(stores["agent_memory"]["projections"]["candidate_entries"], 0);
         let learning = &stores["procedural_learning"];
         assert_eq!(learning["families"].as_array().unwrap().len(), 1);
         assert_eq!(learning["knowledge_index"]["knowledge_receipts"], 0);

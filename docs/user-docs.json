@@ -383,7 +383,7 @@
       "source": "docs/operations/store-verification.md",
       "file": "store-verification.md",
       "title": "Offline store verification",
-      "description": "Verify a stopped data directory, compare backup copies by digest and check the knowledge index before adopting a restore.",
+      "description": "Verify stopped stores, compare backup copies, and check memory projections, journal chains and the knowledge index before adopting a restore.",
       "order": 1065
     },
     {

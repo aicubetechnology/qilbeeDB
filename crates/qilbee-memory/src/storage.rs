@@ -222,12 +222,19 @@ impl RocksDbMemoryStorage {
         })
     }
 
-    /// Physical inventory of every column family, including derived projections
-    /// that a writable open rebuilds deterministically from the source rows.
+    /// Authoritative inventory of every column family. Projections that a
+    /// writable open rebuilds from the source rows and the offline verifier
+    /// independently re-derives (candidate and chronological entries) are
+    /// counted as derived and excluded from the digest. Other entries remain
+    /// covered by the byte inventory.
     pub fn inventory(&self) -> Result<Vec<qilbee_storage::FamilyInventory>> {
         ["default", cf::EPISODES, cf::EPISODE_INDEX, cf::AGENT_META]
             .into_iter()
-            .map(|family| qilbee_storage::verification::family_inventory(&self.db, family, |_| false))
+            .map(|family| {
+                qilbee_storage::verification::family_inventory(&self.db, family, |key| {
+                    platform::projection_verification::derived_entry(family, key)
+                })
+            })
             .collect()
     }
 
