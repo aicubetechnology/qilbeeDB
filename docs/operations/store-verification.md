@@ -89,6 +89,7 @@ never creates a missing directory.
 
 | Message | Meaning and next step |
 | --- | --- |
+| `differs from source … in:` | The copy and the source are not the same data; the message lists each store and family. Do not adopt the copy as equivalent. |
 | `open by process <pid>` | A server or another tool holds the store. Stop it; do not verify a live store. |
 | `column families … expects …` | The directory was written by a different version or is not this kind of store. Use the matching binary. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
@@ -102,12 +103,29 @@ writing inside the same process is the caller's error and is not detected.
 
 ## Compare a source with a copy
 
-Run the command on the stopped source and on the stopped copy, then compare
-`records` and `sha256` per family. Graph and agent-memory digests include the
-projections that a writable start rebuilds deterministically, so they match
-between faithful copies of the same version; after upgrading the binary those
-projections may legitimately change, while the learning store's authoritative
-digest must not. Keep both reports with the backup manifest.
+Pass the stopped source with `--source` to verify both directories in one run
+and require that they hold the same data:
+
+```sh
+qilbeedb verify-store /restore/data --source /srv/qilbeedb/data
+```
+
+Both directories are verified exactly as in the single-directory form. The
+command then requires equal record counts and digests for every column family
+of the three stores, equal memory journal counts and equal knowledge index
+counts; knowledge index generations may differ because each writable start
+republishes one. Success prints a report with `status` `verified_equal`, both
+full reports and a `comparison` summary, and exits 0. Any difference exits 1
+with a message naming each differing store and family, for example
+`agent_memory/memory_agent_meta, agent_memory/journals`, and prints no report.
+The two paths must be distinct and must not contain each other.
+
+Graph and agent-memory digests include the projections that a writable start
+rebuilds deterministically, so they match between faithful copies of the same
+binary version. After upgrading the binary those projections may legitimately
+change while the learning store's authoritative digest must not; comparing
+across an upgrade therefore still needs a review of the named differences.
+Keep the comparison report with the backup manifest.
 
 ## Limits
 

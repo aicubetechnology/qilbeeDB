@@ -18,10 +18,11 @@ procedure for the deployed version.
    files or assume that separate copies of active stores form one consistent set.
 4. Record the deployed image digest, schema/storage versions, snapshot identity,
    capture time and integrity manifest. Keep the retained source unchanged.
-5. Run [`qilbeedb verify-store`](store-verification.md) on the stopped source
-   and on the copy with the same binary version, and keep both reports with the
-   manifest. Matching family digests confirm a faithful copy; the learning
-   store's knowledge index is checked against its ledgers.
+5. Run [`qilbeedb verify-store <copy> --source <source>`](store-verification.md)
+   with the same binary version while both are stopped, and keep the report
+   with the manifest. It verifies each directory, checks the learning store's
+   knowledge index and memory journals, and confirms that every family digest
+   matches; a named difference means the copy is not faithful.
 6. Restore a copy to an isolated directory or volume and open it with the exact
    compatible binary. Verify authorized inventories, revisions, receipts and
    representative reads before considering the backup usable.
