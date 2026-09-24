@@ -5,8 +5,8 @@
 use super::snapshot::MemorySnapshot;
 use super::*;
 
-const ROW: u8 = 0x30;
-const TIP: u8 = 0x31;
+pub(super) const ROW: u8 = 0x30;
+pub(super) const TIP: u8 = 0x31;
 pub const CANDIDATE_SELECTION_VERSION: &str = "current_records_v1";
 
 pub(super) fn prefix(
@@ -27,7 +27,7 @@ fn successor(mut prefix: Vec<u8>) -> Vec<u8> {
     }
     unreachable!("candidate prefixes have a successor")
 }
-fn keys(namespace: &str, record: &MemoryRecord) -> Result<Vec<Vec<u8>>> {
+pub(super) fn keys(namespace: &str, record: &MemoryRecord) -> Result<Vec<Vec<u8>>> {
     let Some(input) = &record.payload else {
         return Ok(vec![]);
     };
@@ -51,7 +51,7 @@ fn keys(namespace: &str, record: &MemoryRecord) -> Result<Vec<Vec<u8>>> {
     }
     Ok(keys)
 }
-fn value(record: &MemoryRecord) -> Result<Vec<u8>> {
+pub(super) fn value(record: &MemoryRecord) -> Result<Vec<u8>> {
     let mut value = record.revision.to_be_bytes().to_vec();
     value.extend_from_slice(&digest(&encode(record)?));
     Ok(value)

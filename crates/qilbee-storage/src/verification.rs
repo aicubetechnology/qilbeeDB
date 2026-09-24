@@ -118,6 +118,20 @@ pub fn require_families(path: &Path, expected: &[&str]) -> Result<Vec<String>> {
 /// Open a stopped store read-only with the exact expected column families.
 pub fn open_read_only(path: &Path, expected: &[&str]) -> Result<DB> {
     require_stopped(path)?;
+    open_read_only_unprobed(path, expected)
+}
+
+/// Open without a second lock probe while a retained helper excludes writers.
+pub fn open_read_only_guarded(
+    path: &Path,
+    expected: &[&str],
+    guard: &mut WriterExclusion,
+) -> Result<DB> {
+    guard.check_path(path)?;
+    open_read_only_unprobed(path, expected)
+}
+
+fn open_read_only_unprobed(path: &Path, expected: &[&str]) -> Result<DB> {
     let families = require_families(path, expected)?;
     let mut options = Options::default();
     options.create_if_missing(false);
@@ -374,3 +388,49 @@ mod tests {
         assert!(inventory.iter().all(|f| f.derived_entries == 0));
     }
 }
+
+#[cfg(unix)]
+mod writer_exclusion;
+#[cfg(unix)]
+pub use writer_exclusion::{WriterExclusion, writer_exclusion_helper_command};
+
+#[cfg(not(unix))]
+mod unsupported_writer_exclusion {
+    use super::*;
+    use std::path::PathBuf;
+    fn unsupported<T>() -> Result<T> {
+        Err(Error::Configuration(
+            "Offline writer exclusion requires a POSIX platform".into(),
+        ))
+    }
+    pub struct WriterExclusion;
+    impl WriterExclusion {
+        pub fn acquire(_: &[PathBuf]) -> Result<Self> {
+            unsupported()
+        }
+        pub fn acquire_with_executable(_: &[PathBuf], _: &Path) -> Result<Self> {
+            unsupported()
+        }
+        pub fn helper_pid(&self) -> u32 {
+            0
+        }
+        pub fn check(&mut self) -> Result<()> {
+            unsupported()
+        }
+        pub(super) fn check_path(&mut self, _: &Path) -> Result<()> {
+            unsupported()
+        }
+        pub fn finish(self) -> Result<()> {
+            unsupported()
+        }
+    }
+    pub fn writer_exclusion_helper_command(args: &[String]) -> Result<bool> {
+        if args.first().map(String::as_str) == Some("__store-writer-exclusion") {
+            unsupported()
+        } else {
+            Ok(false)
+        }
+    }
+}
+#[cfg(not(unix))]
+pub use unsupported_writer_exclusion::{WriterExclusion, writer_exclusion_helper_command};

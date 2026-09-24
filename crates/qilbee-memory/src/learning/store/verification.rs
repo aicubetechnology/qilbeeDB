@@ -63,6 +63,49 @@ impl LearningMemory {
         })
     }
 
+    /// Open under a retained writer exclusion; the caller must finish it before publishing results.
+    pub fn open_read_only_guarded(
+        path: impl AsRef<Path>,
+        guard: &mut qilbee_storage::verification::WriterExclusion,
+    ) -> Result<Self> {
+        let db = offline::open_read_only_guarded(path.as_ref(), &["default"], guard)?;
+        match db.get(SCHEMA_KEY).map_err(storage_error)? {
+            Some(version) if version.as_slice() == SCHEMA_VERSION => {}
+            Some(_) => {
+                return Err(Error::Configuration(
+                    "Unsupported learning schema version".into(),
+                ));
+            }
+            None => {
+                return Err(Error::Configuration(
+                    "Not a learning store: schema marker is missing".into(),
+                ));
+            }
+        }
+        let generation = db
+            .get(GENERATION_KEY)
+            .map_err(storage_error)?
+            .ok_or_else(|| {
+                Error::DataCorruption(
+                    "Knowledge index generation is missing; the store was never published by a compatible binary".into(),
+                )
+            })?;
+        let generation = uuid::Uuid::from_slice(&generation)
+            .map_err(|_| Error::DataCorruption("Knowledge index generation is malformed".into()))?;
+        if generation.get_version_num() != 4 {
+            return Err(Error::DataCorruption(
+                "Knowledge index generation has an unexpected format".into(),
+            ));
+        }
+        Ok(Self {
+            inner: Arc::new(Inner {
+                knowledge_generation: generation,
+                db,
+                mutation_lock: Mutex::new(()),
+            }),
+        })
+    }
+
     /// Authoritative inventory: derived knowledge index entries and the
     /// generation marker are counted separately and excluded from the digest,
     /// so digests compare across index generations.
