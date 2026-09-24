@@ -4,7 +4,7 @@ Contributing to QilbeeDB requires setting up a Rust development environment.
 
 ## Prerequisites
 
-- Rust 1.70+ ([Install Rust](https://rustup.rs/))
+- Rust 1.93.1 ([Install Rust](https://rustup.rs/)), matching the container build toolchain. The locked dependencies require at least Rust 1.88; older toolchains are not supported by this dependency set.
 - Git
 - Build tools (gcc/clang, make)
 

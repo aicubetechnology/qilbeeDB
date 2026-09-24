@@ -187,7 +187,7 @@
       "source": "docs/security/container-security.md",
       "file": "container-security.md",
       "title": "Container security",
-      "description": "Protect your container runtime, credentials, network access and persistent data.",
+      "description": "Protect runtime and application dependencies, credentials, network access and persistent data.",
       "order": 27
     },
     {
