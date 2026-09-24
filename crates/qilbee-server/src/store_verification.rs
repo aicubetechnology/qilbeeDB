@@ -2,8 +2,8 @@
 //!
 //! `qilbeedb verify-store <data-directory>` opens the graph, agent-memory and
 //! procedural-learning stores read-only, reports deterministic per-family
-//! inventories and checks the learning store's derived knowledge index against
-//! its authoritative ledgers. It never writes, never repairs, and refuses a
+//! inventories, walks every memory journal chain and checks the learning
+//! store's derived knowledge index against its authoritative ledgers. It never writes, never repairs, and refuses a
 //! directory that another process holds open. A failure produces no report.
 use qilbee_core::{Error, Result};
 use qilbee_memory::RocksDbMemoryStorage;
@@ -56,6 +56,7 @@ pub fn verify_data_directory(data_directory: &Path) -> Result<Value> {
     drop(graph);
     let memory = RocksDbMemoryStorage::open_read_only(&memory_path)?;
     let memory_families = memory.inventory()?;
+    let memory_journals = memory.verify_memory_journals()?;
     drop(memory);
     let learning = LearningMemory::open_read_only(&learning_path)?;
     let learning_families = learning.inventory()?;
@@ -74,6 +75,7 @@ pub fn verify_data_directory(data_directory: &Path) -> Result<Value> {
             "agent_memory": {
                 "path": memory_path,
                 "families": memory_families,
+                "journals": memory_journals,
             },
             "procedural_learning": {
                 "path": learning_path,
@@ -124,6 +126,8 @@ mod tests {
             stores["agent_memory"]["families"].as_array().unwrap().len(),
             4
         );
+        assert_eq!(stores["agent_memory"]["journals"]["namespaces"], 0);
+        assert_eq!(stores["agent_memory"]["journals"]["links_checked"], 0);
         let learning = &stores["procedural_learning"];
         assert_eq!(learning["families"].as_array().unwrap().len(), 1);
         assert_eq!(learning["knowledge_index"]["knowledge_receipts"], 0);

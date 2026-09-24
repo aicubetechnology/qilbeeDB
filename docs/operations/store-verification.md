@@ -14,7 +14,7 @@ The command opens the three stores of a platform data directory read-only:
 | Store | Directory | Checks |
 | --- | --- | --- |
 | Graph and identity | `<data-directory>` | Exact column families, physical inventory |
-| Agent memory | `<data-directory>/agent-memory` | Exact column families, physical inventory |
+| Agent memory | `<data-directory>/agent-memory` | Exact column families, physical inventory, journal chain verification |
 | Procedural learning | `<data-directory>/procedural-learning` | Schema marker, authoritative inventory, knowledge index consistency |
 
 For every column family it reports the number of records and a SHA-256 digest
@@ -23,6 +23,14 @@ regardless of write order, compaction or file layout, so two reports compare a
 source with its copy. Learning-store entries that the server derives on start
 (the active knowledge index and its generation marker) are counted separately
 and excluded from the digest; that digest therefore stays equal across restarts.
+
+The journal check visits every namespace that owns a journal state, a change
+record or an anchor. It validates the legacy change journal (last change digest
+and no dangling successor), the verified journal state (baseline digest, tip
+anchor and no dangling successor) and walks the anchor chain from baseline to
+tip with the same digest and link checks that the verified change feed applies.
+The report counts namespaces, legacy journals, verified journals and links
+checked. Orphaned anchors or changes without their state record fail.
 
 The knowledge index check re-derives every locator and active ranking entry
 from the authoritative procedure, receipt and combined-origin ledgers with the
@@ -59,7 +67,11 @@ Success prints one JSON document and exits with status 0:
   "data_directory": "/data",
   "stores": {
     "graph": {"path": "/data", "families": [{"family": "nodes", "records": 12, "sha256": "…", "derived_entries": 0}]},
-    "agent_memory": {"path": "/data/agent-memory", "families": ["…"]},
+    "agent_memory": {
+      "path": "/data/agent-memory",
+      "families": ["…"],
+      "journals": {"namespaces": 3, "legacy_journals": 3, "verified_journals": 3, "links_checked": 128}
+    },
     "procedural_learning": {
       "path": "/data/procedural-learning",
       "families": [{"family": "default", "records": 41, "sha256": "…", "derived_entries": 9}],
@@ -80,6 +92,7 @@ never creates a missing directory.
 | `open by process <pid>` | A server or another tool holds the store. Stop it; do not verify a live store. |
 | `column families … expects …` | The directory was written by a different version or is not this kind of store. Use the matching binary. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
+| `Unsupported or inconsistent memory record, index or receipt` | A memory journal chain, anchor or change record does not verify. Keep the copy for inspection; do not adopt it. |
 | `Knowledge index entry is missing` / `differs` / `ledgers imply` | The derived index does not match the ledgers. Keep the copy for inspection; a writable start would rebuild the index, but the underlying cause must be understood first. |
 | `digest mismatch`, `key mismatch`, `origin` errors | Authoritative records were altered or partially copied. Do not adopt the copy. |
 | `Corruption` mentioning a log or SST file | RocksDB found damaged bytes. A copy with a damaged write-ahead log is rejected outright rather than silently reported as a shorter store. After a power loss the tail of the log may be torn: keep the original, start the matching server once on a copy so it recovers, then verify that copy. |
@@ -101,7 +114,7 @@ digest must not. Keep both reports with the backup manifest.
 The command validates structure and integrity, not business meaning: it does
 not prove that retained memories are the ones an application expects, that a
 backup is recent enough, or that retrieval quality is unchanged. Agent-memory
-journal chains, checkpoints and consolidation ledgers are inventoried, not
-re-derived. Cloud snapshot consistency, freeze handling and access control for
+journal chains are re-walked; checkpoints, consolidation ledgers and derived
+projections are inventoried, not re-derived. Cloud snapshot consistency, freeze handling and access control for
 the copy remain operator procedures described in
 [backup and recovery](backup.md).

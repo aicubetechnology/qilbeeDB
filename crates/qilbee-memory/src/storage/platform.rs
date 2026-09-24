@@ -926,6 +926,10 @@ mod checkpoint_tests;
 mod verified_changes;
 pub use verified_changes::*;
 mod journal_audit;
+mod journal_verification;
+pub use journal_verification::MemoryJournalVerification;
+#[cfg(test)]
+mod journal_verification_tests;
 pub use journal_audit::*;
 #[cfg(test)]
 mod journal_audit_tests;
