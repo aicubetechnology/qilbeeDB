@@ -26,7 +26,7 @@
       "source": "docs/api/platform-http.md",
       "file": "platform-http.md",
       "title": "HTTP API and credentials",
-      "description": "Authenticate requests, issue credentials and handle platform errors.",
+      "description": "Authenticate requests, distinguish platform credentials from legacy tokens, and handle errors.",
       "order": 30
     },
     {
