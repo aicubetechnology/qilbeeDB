@@ -8,6 +8,14 @@ use tracing_subscriber::EnvFilter;
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    match qilbee_storage::verification::writer_exclusion_helper_command(&args) {
+        Ok(true) => return,
+        Ok(false) => {}
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    }
     if args.first().map(String::as_str) == Some("health-check") {
         if args.len() != 1 || qilbee_server::health_probe::check().is_err() {
             eprintln!("QilbeeDB health check failed");

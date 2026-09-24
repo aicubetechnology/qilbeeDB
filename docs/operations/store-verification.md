@@ -102,7 +102,7 @@ never creates a missing directory.
 | Message | Meaning and next step |
 | --- | --- |
 | `differs from source … in:` | The copy and the source are not the same data; the message lists each store and family. Do not adopt the copy as equivalent. |
-| `open by process <pid>` | A server or another tool holds the store. Stop it; do not verify a live store. |
+| `Writer exclusion` | The command could not retain every store lock, the helper failed, or a lock file changed. Keep all source and candidate stores stopped, inspect the named path when provided, and retry only after resolving the cause. |
 | `column families … expects …` | The directory was written by a different version or is not this kind of store. Use the matching binary. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
 | `Unsupported or inconsistent memory record, index or receipt` | A memory journal chain, anchor or change record does not verify. Keep the copy for inspection; do not adopt it. |
@@ -110,8 +110,18 @@ never creates a missing directory.
 | `digest mismatch`, `key mismatch`, `origin` errors | Authoritative records were altered or partially copied. Do not adopt the copy. |
 | `Corruption` mentioning a log or SST file | RocksDB found damaged bytes. A copy with a damaged write-ahead log is rejected outright rather than silently reported as a shorter store. After a power loss the tail of the log may be torn: keep the original, start the matching server once on a copy so it recovers, then verify that copy. |
 
-The lock probe detects stores held by other processes only. A store opened for
-writing inside the same process is the caller's error and is not detected.
+Before reading, the command acquires the existing RocksDB locks for all three
+stores, or all six stores when comparing a source and a copy. It retains them
+until verification and comparison finish, then confirms their release before
+printing a success report. New cooperating writers are excluded throughout
+that interval. Partial acquisition or loss of the lock-holder process fails
+without a success report.
+
+Run on a local POSIX filesystem with working record locks and permissions to
+open the existing `LOCK` files for reading and writing. The command does not
+create missing lock files or modify database records. Do not replace directories,
+rename lock files, or bypass filesystem locking while verification runs.
+Directories sharing the same lock inode are rejected.
 
 ## Compare a source with a copy
 
