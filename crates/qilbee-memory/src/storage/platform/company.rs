@@ -5,7 +5,7 @@ mod inventory;
 pub use address::{CompanyMemoryAddress, MemoryResourceScope, MemoryVisibility};
 pub use inventory::*;
 
-const WORKSPACE: u8 = 0x41;
+pub(super) const WORKSPACE: u8 = 0x41;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
