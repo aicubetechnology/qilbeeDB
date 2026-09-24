@@ -380,6 +380,13 @@
       "order": 1064
     },
     {
+      "source": "docs/operations/store-verification.md",
+      "file": "store-verification.md",
+      "title": "Offline store verification",
+      "description": "Retain writer exclusion while verifying stopped stores, comparing backup copies and checking memory and knowledge integrity.",
+      "order": 1065
+    },
+    {
       "source": "docs/architecture/native-vector-integrity.md",
       "file": "native-vector-integrity.md",
       "title": "Native vector index integrity",

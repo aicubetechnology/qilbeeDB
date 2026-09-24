@@ -144,6 +144,49 @@ impl StorageEngine {
         Ok(engine)
     }
 
+    /// Open a stopped store read-only for offline verification.
+    ///
+    /// Refuses stores held open by another process and stores whose column
+    /// families differ from this binary's. Nothing is created or repaired;
+    /// the property index bootstrap performed by `open` is skipped.
+    pub fn open_read_only(path: &std::path::Path) -> Result<Self> {
+        let mut families = vec!["default"];
+        families.extend_from_slice(COLUMN_FAMILIES);
+        let db = crate::verification::open_read_only(path, &families)?;
+        let mut options = StorageOptions::new(path);
+        options.create_if_missing = false;
+        Ok(Self {
+            db: Arc::new(db),
+            options,
+            mutation_lock: Arc::new(Mutex::new(())),
+        })
+    }
+
+    /// Open under a retained writer exclusion; the caller must finish it before publishing results.
+    pub fn open_read_only_guarded(
+        path: &std::path::Path,
+        guard: &mut crate::verification::WriterExclusion,
+    ) -> Result<Self> {
+        let mut families = vec!["default"];
+        families.extend_from_slice(COLUMN_FAMILIES);
+        let db = crate::verification::open_read_only_guarded(path, &families, guard)?;
+        let mut options = StorageOptions::new(path);
+        options.create_if_missing = false;
+        Ok(Self {
+            db: Arc::new(db),
+            options,
+            mutation_lock: Arc::new(Mutex::new(())),
+        })
+    }
+
+    /// Physical inventory of every column family, including `default`.
+    pub fn inventory(&self) -> Result<Vec<crate::verification::FamilyInventory>> {
+        std::iter::once("default")
+            .chain(COLUMN_FAMILIES.iter().copied())
+            .map(|family| crate::verification::family_inventory(&self.db, family, |_| false))
+            .collect()
+    }
+
     /// Get a reference to a column family
     fn cf(&self, name: &str) -> Result<&ColumnFamily> {
         self.db

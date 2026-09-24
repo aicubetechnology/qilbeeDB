@@ -1,8 +1,8 @@
 //! Per-endpoint completeness checks, maintained atomically with relation indexes.
 use super::*;
 use std::collections::BTreeMap;
-const HEAD: u8 = 0x56;
-const TIP: u8 = 0x57;
+pub(in crate::storage::platform) const HEAD: u8 = 0x56;
+pub(in crate::storage::platform) const TIP: u8 = 0x57;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

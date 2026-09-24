@@ -149,7 +149,7 @@ impl KnowledgeProposal {
 }
 
 #[cfg(test)]
-mod tests;
+pub(super) mod tests;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]

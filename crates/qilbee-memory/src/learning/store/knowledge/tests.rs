@@ -9,7 +9,7 @@ fn tool(name: &str, implementation: Option<&str>) -> ExternalToolKnowledge {
         usage_contract: "Read one authorized document".into(),
     }
 }
-fn proposal() -> KnowledgeProposal {
+pub(crate) fn proposal() -> KnowledgeProposal {
     KnowledgeProposal {
         id: "knowledge-r1".into(),
         policy_id: "policy".into(),
@@ -191,7 +191,7 @@ fn knowledge_receipt_is_atomic_immutable_and_survives_reopen() {
     ));
 }
 
-fn install_contracts(db: &LearningMemory) {
+pub(crate) fn install_contracts(db: &LearningMemory) {
     use super::super::registry::{EvaluationContext, PolicyAlgorithm, PolicyDefinition};
     db.register_policy(
         "company",

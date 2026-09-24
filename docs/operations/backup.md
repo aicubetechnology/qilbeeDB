@@ -18,7 +18,12 @@ procedure for the deployed version.
    files or assume that separate copies of active stores form one consistent set.
 4. Record the deployed image digest, schema/storage versions, snapshot identity,
    capture time and integrity manifest. Keep the retained source unchanged.
-5. Restore a copy to an isolated directory or volume and open it with the exact
+5. Run [`qilbeedb verify-store <copy> --source <source>`](store-verification.md)
+   with the same binary version while both are stopped, and keep the report
+   with the manifest. It verifies each directory, checks the learning store's
+   knowledge index and memory journals, and confirms that every family digest
+   matches; a named difference means the copy is not faithful.
+6. Restore a copy to an isolated directory or volume and open it with the exact
    compatible binary. Verify authorized inventories, revisions, receipts and
    representative reads before considering the backup usable.
 
@@ -28,8 +33,9 @@ This guide does not introduce a cloud backup service or an online snapshot API.
 
 ## Restore or roll back
 
-Restore into a separate location first. Validate identity and authorization,
-retained memory, graph state and dependent learning evidence. Confirm the intended
+Restore into a separate location first. Verify the stopped copy with
+`qilbeedb verify-store` before starting a server on it, then validate identity
+and authorization, retained memory, graph state and dependent learning evidence. Confirm the intended
 service version and actual data mounts before routing traffic to the restored
 instance. Preserve the failed or newer data for reconciliation.
 
