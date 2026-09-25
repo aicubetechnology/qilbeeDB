@@ -3082,7 +3082,7 @@
       "post": {
         "operationId": "selectProcedure",
         "summary": "Select a qualified compatible procedure or exact baseline",
-        "description": "Requires memory_read and an exact scope grant. Budget counts UTF-8 instruction bytes, not tokens. Context and policy identities must match qualification exactly.",
+        "description": "Requires memory_read and an exact scope grant. Budget counts UTF-8 instruction bytes, not tokens. Context and policy identities must match qualification exactly. Current reuse guard excludes ordinary registered strategies with exact withdrawn dependencies. The existing successful v1 response shape and ranking among remaining eligible candidates are unchanged. Fixed aggregate limit: 1000 procedure entries, 4096 logical learning examinations and 16,777,216 encoded bytes; 65,536 instruction bytes remains unchanged. Exhaustion returns 422 experience_reuse_limit_exceeded without a partial winner or baseline fallback. Arbitrary evidence strings and parent_attempt_id do not create dependencies.",
         "tags": [
           "Learning"
         ],
@@ -3215,6 +3215,42 @@
           },
           "500": {
             "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -9912,7 +9948,7 @@
       "post": {
         "operationId": "proposeExperienceStrategy",
         "summary": "Register a strategy candidate from exact experience observations",
-        "description": "Requires procedure_propose and experience_read for the exact scope. Validates 1-16 distinct immutable development observations and registers the strategy and procedure atomically. Does not admit evaluation evidence or activate a procedure. Extraction remains external.",
+        "description": "Requires procedure_propose and experience_read for the exact scope. Validates 1-16 distinct immutable development observations and registers the strategy and procedure atomically. Does not admit evaluation evidence or activate a procedure. Extraction remains external. New admission rejects withdrawn registered experience dependencies with 409 experience_evidence_withdrawn. Exact historical replays preserve original receipts and do not certify current reuse. One request-wide limit of 4096 logical source records and 33,554,432 encoded bytes covers validation and replay; exhaustion returns 422 before any partial commit. Retrieval admission is acquired after authorization.",
         "tags": [
           "Learning"
         ],
@@ -10008,7 +10044,7 @@
             }
           },
           "409": {
-            "description": "Changed immutable candidate, conflicting procedure ID, or mismatched evidence/context digest.",
+            "description": "Changed immutable candidate, conflicting procedure ID, or mismatched evidence/context digest. Also experience_evidence_withdrawn for a new derivation using withdrawn evidence.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -10045,6 +10081,42 @@
           },
           "500": {
             "description": "Internal failure or explicit stored-version inconsistency",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -22433,7 +22505,7 @@
       "post": {
         "operationId": "knowledgeSelect",
         "summary": "Select compatible evidence-bound knowledge with explicit coverage",
-        "description": "Explicit contract versions 2, 3 and 4. Combined-origin version 4 is unreleased. Requires memory_read in the exact scope. Version 2 preserves history scanning; version 3 uses active_knowledge_bound_v1 and remains ordinary-only; version 4 uses active_knowledge_origin_bound_v1 with explicit accepted_origin_kinds. Version 4 work counters aggregate admitted authoritative reads and projection frontiers across requested origins. Fixed policy/context bootstrap reads precede candidate counters, as in version 3. No code execution or execution authorization is provided. Incomplete coverage must not be treated as a verified selection. Errors retain the platform version 1 envelope.",
+        "description": "Explicit contract versions 2, 3 and 4. Combined-origin version 4 is unreleased. Requires memory_read in the exact scope. Version 2 preserves history scanning; version 3 uses active_knowledge_bound_v1 and remains ordinary-only; version 4 uses active_knowledge_origin_bound_v1 with explicit accepted_origin_kinds. Version 4 work counters aggregate admitted authoritative reads and projection frontiers across requested origins. Fixed policy/context bootstrap reads precede candidate counters, as in version 3. No code execution or execution authorization is provided. Incomplete coverage must not be treated as a verified selection. Errors retain the platform version 1 envelope. Experience withdrawal does not change v2 memory-only or v3 origin boundaries. Combined v4 selection checks registered experience withdrawals within its existing aggregate work budgets; incomplete verification cannot select a candidate. No fallback to legacy selection occurs.",
         "tags": [
           "Learning"
         ],
@@ -23020,7 +23092,7 @@
       "post": {
         "operationId": "combinedKnowledgePropose",
         "summary": "Create combined knowledge with procedure_propose, memory_read and experience_read in the same exact scope.",
-        "description": "Unreleased. Create combined knowledge with procedure_propose, memory_read and experience_read in the same exact scope. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission.",
+        "description": "Unreleased. Create combined knowledge with procedure_propose, memory_read and experience_read in the same exact scope. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission. New admission rejects withdrawn registered experience dependencies with 409 experience_evidence_withdrawn. Exact historical replays preserve original receipts and do not certify current reuse. One request-wide limit of 4096 logical source records and 33,554,432 encoded bytes covers validation and replay; exhaustion returns 422 before any partial commit. Retrieval admission is acquired after authorization.",
         "tags": [
           "Learning"
         ],
@@ -23116,7 +23188,7 @@
             }
           },
           "409": {
-            "description": "Idempotency payload or expected revision conflict",
+            "description": "Idempotency payload or expected revision conflict Also experience_evidence_withdrawn for a new derivation using withdrawn evidence.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -23170,7 +23242,7 @@
             }
           },
           "503": {
-            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -23182,7 +23254,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RetrievalBusyError"
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -23388,7 +23478,7 @@
       "post": {
         "operationId": "combinedKnowledgeInspect",
         "summary": "Inspect eligibility and minimal origin with memory_read; protected experience summaries are not returned.",
-        "description": "Unreleased. Inspect eligibility and minimal origin with memory_read; protected experience summaries are not returned. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission.",
+        "description": "Unreleased. Inspect eligibility and minimal origin with memory_read; protected experience summaries are not returned. Contract version 1. Errors retain the platform version 1 envelope. An observation never grants action permission. Current inspection additionally enforces registered experience withdrawals without exposing protected withdrawal details. Fixed bound: 512 logical learning records and 16,777,216 encoded bytes; exhaustion returns 422 experience_reuse_limit_exceeded, not an eligibility result.",
         "tags": [
           "Learning"
         ],
@@ -23545,7 +23635,7 @@
             }
           },
           "503": {
-            "description": "Retrieval capacity is occupied; retry after backoff.",
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -23557,7 +23647,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RetrievalBusyError"
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -23569,6 +23677,576 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OriginCombinedInspectionRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiences/withdrawals": {
+      "post": {
+        "operationId": "withdrawExperienceObservation",
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Withdraw one exact experience observation",
+        "description": "Requires experience_evidence_admin AND experience_read for the exact scope. Monotonic withdrawal preserves historical event, export, proposal and evaluation bytes and digests. The idempotency key binds namespace, authenticated actor and exact command. An exact authorized replay returns the original receipt; another key for the same target conflicts. Unknown write outcome: retry the same key or inspect; never assume failure. Fixed bound: 32 logical learning-record examinations and 2,097,152 encoded bytes, before decoding. Existing write admission applies; this route does not acquire the retrieval permit. No cross-private-subject override.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceWithdrawalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful scoped observation; no execution permission is granted.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceWithdrawalResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_request: invalid version, unknown fields, scope, identifier, digest or body contract.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized: missing, invalid, expired or revoked credential.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden: required capability or exact scope not granted; authorization precedes target lookup.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "record_not_found: authorized target event or strategy does not exist.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "experience_reference_conflict for wrong event digest; idempotency_conflict for changed command under the scoped actor key; experience_already_withdrawn for a different command identity targeting an already-withdrawn observation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 16,384 bytes.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "storage_inconsistency for corrupt stored identities, digests or links; internal_error for other internal failures. A write outcome may require reconciliation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experiences/withdrawals/inspect": {
+      "post": {
+        "operationId": "inspectExperienceWithdrawal",
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Inspect exact observation withdrawal status",
+        "description": "Requires experience_read in the exact scope. Returns original withdrawal details only to authorized readers. not_withdrawn is not a general qualification or reuse guarantee. Fixed bound: 32 logical learning records and 2,097,152 encoded bytes. Acquires retrieval admission after authorization.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperienceWithdrawalInspectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful scoped observation; no execution permission is granted.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceWithdrawalInspection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_request: invalid version, unknown fields, scope, identifier, digest or body contract.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized: missing, invalid, expired or revoked credential.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden: required capability or exact scope not granted; authorization precedes target lookup.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "record_not_found: authorized target event or strategy does not exist.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "experience_reference_conflict: supplied event digest differs from the retained event.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 16,384 bytes.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "storage_inconsistency for corrupt stored identities, digests or links; internal_error for other internal failures. A write outcome may require reconciliation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/learning/strategies/inspect": {
+      "post": {
+        "operationId": "inspectStrategyReuse",
+        "tags": [
+          "Learning"
+        ],
+        "summary": "Inspect current strategy reuse eligibility",
+        "description": "Requires memory_read in the exact scope and acquires retrieval admission after authorization. Returns only current eligibility, a generic reason and aggregate work; no observation contents, withdrawal reason, actor, target references or withdrawal identifiers. Fixed bound: 256 logical learning records and 8,388,608 encoded bytes. Incomplete verification returns 422, never eligible=false as a substitute for failure. Recheck before cached reuse and after reconnect; historical receipts do not certify current eligibility. This observation does not authorize an agent action.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StrategyReuseInspectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful scoped observation; no execution permission is granted.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StrategyReuseInspection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_request: invalid version, unknown fields, scope, identifier, digest or body contract.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized: missing, invalid, expired or revoked credential.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden: required capability or exact scope not granted; authorization precedes target lookup.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "record_not_found: authorized target event or strategy does not exist.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "experience_reuse_limit_exceeded: bounded verification cannot complete; no partial result or automatic fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "storage_inconsistency for corrupt stored identities, digests or links; internal_error for other internal failures. A write outcome may require reconciliation.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "retrieval_busy: retrieval admission unavailable; no fallback.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
               }
             }
           }
@@ -26207,8 +26885,10 @@
           "experience_report",
           "memory_review",
           "memory_checkpoint",
-          "learning_metadata_read"
-        ]
+          "learning_metadata_read",
+          "experience_evidence_admin"
+        ],
+        "description": " experience_evidence_admin authorizes exact-observation withdrawal only together with experience_read in the same granted scope; it grants no cross-subject access."
       },
       "Visibility": {
         "type": "string",
@@ -27167,7 +27847,11 @@
                   "tenant_not_found",
                   "invalid_login",
                   "login_rate_limited",
-                  "login_busy"
+                  "login_busy",
+                  "experience_reference_conflict",
+                  "experience_already_withdrawn",
+                  "experience_evidence_withdrawn",
+                  "experience_reuse_limit_exceeded"
                 ]
               },
               "message": {
@@ -44837,13 +45521,6 @@
                 }
               }
             },
-            "then": {
-              "properties": {
-                "eligible_for_knowledge_reuse": {
-                  "const": true
-                }
-              }
-            },
             "else": {
               "properties": {
                 "eligible_for_knowledge_reuse": {
@@ -47836,6 +48513,329 @@
         ],
         "additionalProperties": false,
         "description": "The addressed knowledge origin requires a different explicit contract. No automatic downgrade is performed."
+      },
+      "ExperienceWithdrawalObservation": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 512 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          },
+          "event_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 512 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          },
+          "event_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "event_id",
+          "event_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceWithdrawalRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 128 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          },
+          "observation": {
+            "$ref": "#/components/schemas/ExperienceWithdrawalObservation"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 2048 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "idempotency_key",
+          "observation",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceWithdrawalInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "observation": {
+            "$ref": "#/components/schemas/ExperienceWithdrawalObservation"
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "observation"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceWithdrawalReceipt": {
+        "type": "object",
+        "properties": {
+          "withdrawal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observation": {
+            "$ref": "#/components/schemas/ExperienceWithdrawalObservation"
+          },
+          "status": {
+            "type": "string",
+            "const": "withdrawn"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 2048 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          },
+          "actor": {
+            "$ref": "#/components/schemas/ExperienceActor"
+          },
+          "committed_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receipt_digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "withdrawal_id",
+          "observation",
+          "status",
+          "reason",
+          "actor",
+          "committed_at_millis",
+          "receipt_digest"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceWithdrawalResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/ExperienceWithdrawalReceipt"
+          }
+        },
+        "required": [
+          "contract_version",
+          "receipt"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceWithdrawalInspection": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "observation": {
+            "$ref": "#/components/schemas/ExperienceWithdrawalObservation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_withdrawn",
+              "withdrawn"
+            ]
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExperienceWithdrawalReceipt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "contract_version",
+          "evaluated_at_millis",
+          "observation",
+          "status",
+          "receipt"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "not_withdrawn"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "receipt": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "receipt": {
+                  "$ref": "#/components/schemas/ExperienceWithdrawalReceipt"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "StrategyReuseInspectRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Scope"
+          },
+          "strategy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 512 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          }
+        },
+        "required": [
+          "contract_version",
+          "scope",
+          "strategy_id"
+        ],
+        "additionalProperties": false
+      },
+      "ExperienceReuseWork": {
+        "type": "object",
+        "properties": {
+          "learning_records_examined": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "learning_bytes_inspected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lookahead_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "learning_records_examined",
+          "learning_bytes_inspected",
+          "lookahead_bytes"
+        ],
+        "additionalProperties": false
+      },
+      "StrategyReuseInspection": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "integer",
+            "const": 1
+          },
+          "strategy_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+            "description": "Nonblank and without control characters; at most 512 UTF-8 bytes. The server enforces byte limits, not Unicode character counts."
+          },
+          "evaluated_at_millis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "qualification_active": {
+            "type": "boolean"
+          },
+          "eligible_for_knowledge_reuse": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "qualification_inactive",
+              "experience_evidence_withdrawn",
+              "eligible"
+            ]
+          },
+          "coverage": {
+            "type": "object",
+            "properties": {
+              "complete": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "complete"
+            ],
+            "additionalProperties": false
+          },
+          "work": {
+            "$ref": "#/components/schemas/ExperienceReuseWork"
+          }
+        },
+        "required": [
+          "contract_version",
+          "strategy_id",
+          "evaluated_at_millis",
+          "qualification_active",
+          "eligible_for_knowledge_reuse",
+          "reason",
+          "coverage",
+          "work"
+        ],
+        "additionalProperties": false
       }
     }
   }

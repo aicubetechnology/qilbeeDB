@@ -6,6 +6,14 @@ use qilbee_memory::learning::*;
 pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .route("/api/v1/experiences", post(create))
+        .route(
+            "/api/v1/experiences/withdrawals",
+            post(withdraw).layer(axum::extract::DefaultBodyLimit::max(16_384)),
+        )
+        .route(
+            "/api/v1/experiences/withdrawals/inspect",
+            post(inspect_withdrawal).layer(axum::extract::DefaultBodyLimit::max(16_384)),
+        )
         .route("/api/v1/experiences/read", post(read))
         .route("/api/v1/experiences/events", post(observe))
         .route("/api/v1/experiences/events/read", post(event))
@@ -350,6 +358,85 @@ async fn export(
                 )
                 .map_err(ApiError::operation)?;
             Ok(Json(json!({"contract_version":1,"export":export})))
+        })
+        .await
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WithdrawRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+    idempotency_key: String,
+    observation: ExperienceExportRef,
+    reason: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct InspectWithdrawalRequest {
+    contract_version: u32,
+    scope: ResourceScope,
+    observation: ExperienceExportRef,
+}
+async fn withdraw(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<WithdrawRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let store = state.learning.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::ExperienceEvidenceAdmin, &request.scope)
+                .map_err(ApiError::operation)?;
+            identity
+                .authorize(token, Capability::ExperienceRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let actor = author(&scope);
+            let receipt = store
+                .withdraw_experience(
+                    &scope.tenant_id,
+                    &scope.storage_namespace,
+                    ExperienceWithdrawalCommand {
+                        idempotency_key: request.idempotency_key,
+                        observation: request.observation,
+                        reason: request.reason,
+                    },
+                    &actor,
+                )
+                .map_err(ApiError::operation)?;
+            Ok(Json(json!({"contract_version":1,"receipt":receipt})))
+        })
+        .await
+}
+async fn inspect_withdrawal(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<InspectWithdrawalRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let store = state.learning.clone();
+    let limits = state.retrieval_limits.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::ExperienceRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let _permit = limits.acquire()?;
+            let inspection = store
+                .inspect_experience_withdrawal(
+                    &scope.tenant_id,
+                    &scope.storage_namespace,
+                    request.observation,
+                )
+                .map_err(ApiError::operation)?;
+            Ok(Json(json!({"contract_version":1,
+            "evaluated_at_millis":inspection.evaluated_at_millis,
+            "observation":inspection.observation,"status":inspection.status,
+            "receipt":inspection.receipt})))
         })
         .await
 }

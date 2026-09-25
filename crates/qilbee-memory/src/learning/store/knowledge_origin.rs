@@ -308,21 +308,37 @@ impl LearningMemory {
     /// Preparation only: caller must reject existing identities, hold the writer
     /// lock and atomically persist the complete linked set with its projections.
     pub(super) fn prepare_combined_knowledge_receipt(
-        &self,
-        tenant: &str,
-        namespace: &str,
-        request: CombinedKnowledgeProposal,
-        actor: &str,
+        &self, tenant: &str, namespace: &str, request: CombinedKnowledgeProposal,
+        actor: &str, budget: &mut super::experience_withdrawal::ExperienceReuseBudget,
     ) -> Result<(super::bound::ProposalReceipt, CombinedKnowledgeReceipt)> {
-        let origin = self.resolve_knowledge_origin(tenant, namespace, request)?;
+        let export = self.strategy_export_budgeted(tenant, namespace, &request.experience_selection, budget)?;
+        if export.export_digest != request.expected_export_digest {
+            return Err(Error::ConstraintViolation("Combined export differs".into()));
+        }
+        if self.combined_withdrawn_budgeted(tenant, namespace, &request.experience_selection.events, budget)? {
+            return Err(Error::ExperienceEvidenceWithdrawn);
+        }
+        let origin = KnowledgeOriginPayload { schema_version: 1, method_version: "qilbee.experience-knowledge.v1".into(),
+            tenant: tenant.into(), namespace: namespace.into(), request, export_digest: export.export_digest, summary: export.summary };
         let origin_digest = origin.digest()?;
-        let (binding, knowledge_receipt) = self.prepare_knowledge_receipt(
-            tenant,
-            namespace,
-            origin.request.knowledge.clone(),
-            actor,
-            Some(&origin_digest),
-        )?;
+        let request = origin.request.knowledge.clone();
+        let (_, context) = self.contracts_budgeted(tenant, namespace, &request.policy_id, &request.context_id, budget)?;
+        for tool in &request.external_tools {
+            if context.payload.tools.get(&tool.name) != Some(&tool.schema_revision)
+                || tool.environment_revision.as_ref().is_some_and(|v| v != &context.payload.environment_revision) {
+                return Err(Error::ValidationError("External tool identity differs from evaluation context".into()));
+            }
+        }
+        let binding = self.prepare_registered_proposal_budgeted(tenant, namespace,
+            super::bound::RegisteredProposal { id: request.id.clone(), policy_id: request.policy_id.clone(),
+                context_id: request.context_id.clone(), instructions: request.instructions.clone(),
+                source_refs: vec![format!("qilbee-knowledge-v2:{}", super::registry::digest(&request)?),
+                    format!("qilbee-experience-knowledge-v1:{origin_digest}")] }, actor, budget)?;
+        let mut knowledge_receipt = super::knowledge::KnowledgeReceipt {
+            schema_version: 2, tenant: tenant.into(), namespace: namespace.into(), request,
+            policy_digest: binding.policy_digest.clone(), context_digest: binding.context_digest.clone(),
+            actor: actor.into(), record: binding.record.clone(), receipt_digest: String::new() };
+        knowledge_receipt.receipt_digest = knowledge_receipt.digest()?;
         if knowledge_receipt.context_digest != origin.request.experience_selection.context_digest {
             return Err(Error::ConstraintViolation(
                 "Knowledge and experience evidence must use the same registered context".into(),
@@ -427,6 +443,7 @@ impl LearningMemory {
     /// The host must authorize proposal, memory and experience access first.
     pub fn propose_combined_knowledge(
         &self,
+        memory: &crate::RocksDbMemoryStorage,
         tenant: &str,
         namespace: &str,
         request: CombinedKnowledgeInput,
@@ -441,8 +458,9 @@ impl LearningMemory {
             .mutation_lock
             .lock()
             .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
+        let mut budget = super::experience_withdrawal::ExperienceReuseBudget::new(4096, 32 * 1024 * 1024);
         if let Some(receipt) =
-            self.combined_knowledge_receipt(tenant, namespace, &request.knowledge.id)?
+            self.combined_receipt_budgeted(tenant, namespace, &request.knowledge.id, &mut budget)?
         {
             return if receipt.request == request {
                 Ok(receipt)
@@ -452,22 +470,15 @@ impl LearningMemory {
                 ))
             };
         }
-        if self
-            .inner
-            .db
-            .get(&knowledge_key)
-            .map_err(storage_error)?
-            .is_some()
-            || self
-                .registered_procedure(tenant, namespace, &request.knowledge.id)?
-                .is_some()
-        {
-            return Err(Error::ConstraintViolation(
-                "Existing knowledge or procedures cannot acquire an origin binding".into(),
-            ));
+        let linked: Option<super::knowledge::KnowledgeReceipt> = budget.read(self, knowledge_key.clone())?;
+        if linked.is_some() || self.registered_procedure_budgeted(tenant, namespace, &request.knowledge.id, &mut budget)?.is_some() {
+            return Err(Error::ConstraintViolation("Existing knowledge cannot acquire origin binding".into()));
         }
-        let (binding, receipt) =
-            self.prepare_combined_knowledge_receipt(tenant, namespace, request, actor)?;
+        let evidence = self.combined_memory_budgeted(memory, namespace, &request.knowledge.memory_sources, &mut budget)?;
+        if !evidence.eligible || !evidence.all_dependencies_checked {
+            return Err(Error::ConstraintViolation("Combined memory evidence is not eligible".into()));
+        }
+        let (binding, receipt) = self.prepare_combined_knowledge_receipt(tenant, namespace, request, actor, &mut budget)?;
         let mut batch = WriteBatch::default();
         Self::put_registered_proposal(&mut batch, &binding)?;
         self.put_knowledge_locator(&mut batch, &receipt.knowledge_receipt)?;
@@ -559,7 +570,17 @@ impl LearningMemory {
             .mutation_lock
             .lock()
             .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
-        let Some(receipt) = self.knowledge_receipt_any_origin(tenant, namespace, id)? else {
+        let mut budget = super::experience_withdrawal::ExperienceReuseBudget::new(512, 16 * 1024 * 1024);
+        let combined = self.combined_receipt_budgeted(tenant, namespace, id, &mut budget)?;
+        let withdrawn = match &combined {
+            Some(value) => self.combined_withdrawn_budgeted(tenant, namespace, &value.request.experience_selection.events, &mut budget)?,
+            None => false,
+        };
+        let receipt = match combined {
+            Some(value) => Some(value.knowledge_receipt),
+            None => budget.read(self, super::knowledge::key(tenant, namespace, id)?)?,
+        };
+        let Some(receipt) = receipt else {
             return Ok(None);
         };
         let origin = if has_origin_marker(&receipt.record.proposal.source_refs) {
@@ -582,13 +603,16 @@ impl LearningMemory {
             KnowledgeOriginDescriptor::MemoryOnly
         };
         let procedure = self
-            .registered_procedure(tenant, namespace, id)?
+            .registered_procedure_budgeted(tenant, namespace, id, &mut budget)?
             .ok_or_else(|| Error::DataCorruption("Knowledge procedure is missing".into()))?;
+        if matches!(origin, KnowledgeOriginDescriptor::MemoryOnly) {
+            Self::validate_knowledge_binding(tenant, namespace, id, &receipt, &procedure)?;
+        }
         let evidence =
-            memory.inspect_memory_evidence(namespace, &receipt.request.memory_sources)?;
+            self.combined_memory_budgeted(memory, namespace, &receipt.request.memory_sources, &mut budget)?;
         let qualification_active = procedure.record.state == ProcedureState::Active;
         let eligible_for_knowledge_reuse =
-            qualification_active && evidence.eligible && evidence.all_dependencies_checked;
+            qualification_active && !withdrawn && evidence.eligible && evidence.all_dependencies_checked;
         Ok(Some((
             super::knowledge::KnowledgeInspection {
                 receipt,
@@ -696,7 +720,7 @@ impl LearningMemory {
         procedure: &super::bound::RegisteredProcedure,
         context: &super::registry::RegistryEntry<super::registry::EvaluationContext>,
         budget: &mut OriginReadBudget,
-    ) -> Result<Option<KnowledgeOriginDescriptor>> {
+    ) -> Result<Option<(KnowledgeOriginDescriptor, bool)>> {
         use super::experience::{ExperienceEvent, ExperienceRecord};
         let Some(receipt): Option<CombinedKnowledgeReceipt> =
             budget.read_record(self, origin_key(tenant, namespace, id)?)?
@@ -811,6 +835,89 @@ impl LearningMemory {
                 format!("qilbee-experience-knowledge-v1:{}", receipt.origin_digest),
             ],
         )?;
-        descriptor_from_verified_receipt(linked).map(Some)
+        let mut status_budget = super::experience_withdrawal::ExperienceReuseBudget::new(
+            budget.record_limit.saturating_sub(budget.records_examined),
+            budget.byte_limit.saturating_sub(budget.bytes_examined));
+        let withdrawn = self.combined_withdrawn_budgeted(tenant, namespace, &origin.request.experience_selection.events, &mut status_budget);
+        budget.records_examined += status_budget.work.learning_records_examined;
+        budget.bytes_examined += status_budget.work.learning_bytes_inspected;
+        budget.lookahead_bytes = status_budget.work.lookahead_bytes;
+        let withdrawn = match withdrawn {
+            Ok(value) => value,
+            Err(Error::ExperienceReuseLimitExceeded) => {
+                budget.stop = Some(if status_budget.work.lookahead_bytes > 0 { OriginBudgetStop::Bytes } else { OriginBudgetStop::Records });
+                return Ok(None);
+            }
+            Err(error) => return Err(error),
+        };
+        Ok(Some((descriptor_from_verified_receipt(linked)?, withdrawn)))
+    }
+}
+
+impl LearningMemory {
+    fn combined_receipt_budgeted(
+        &self, tenant: &str, namespace: &str, id: &str,
+        budget: &mut super::experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<Option<CombinedKnowledgeReceipt>> {
+        let stored: Option<CombinedKnowledgeReceipt> = budget.read(self, origin_key(tenant, namespace, id)?)?;
+        let Some(receipt) = stored else {
+            let linked: Option<super::knowledge::KnowledgeReceipt> = budget.read(self, super::knowledge::key(tenant, namespace, id)?)?;
+            let procedure = self.registered_procedure_budgeted(tenant, namespace, id, budget)?;
+            if linked.as_ref().is_some_and(|r| has_origin_marker(&r.record.proposal.source_refs))
+                || procedure.as_ref().is_some_and(|r| has_origin_marker(&r.record.proposal.source_refs)) {
+                return Err(Error::DataCorruption("Mandatory combined origin missing".into()));
+            }
+            return Ok(None);
+        };
+        let request = receipt.request.clone().canonicalize().map_err(|_| Error::DataCorruption("Invalid combined historical request".into()))?;
+        let export = self.strategy_export_budgeted(tenant, namespace, &request.experience_selection, budget)
+            .map_err(|error| match error {
+                Error::ExperienceReuseLimitExceeded => error,
+                _ => Error::DataCorruption("Combined historical origin cannot be verified".into()),
+            })?;
+        if export.export_digest != request.expected_export_digest {
+            return Err(Error::DataCorruption("Combined historical export differs".into()));
+        }
+        let origin = KnowledgeOriginPayload { schema_version: 1,
+            method_version: "qilbee.experience-knowledge.v1".into(), tenant: tenant.into(), namespace: namespace.into(),
+            request, export_digest: export.export_digest, summary: export.summary };
+        receipt.validate_origin_link(tenant, namespace, id, &origin)?;
+        let linked: super::knowledge::KnowledgeReceipt = budget.read(self, super::knowledge::key(tenant, namespace, id)?)?
+            .ok_or_else(|| Error::DataCorruption("Combined linked receipt missing".into()))?;
+        if linked != receipt.knowledge_receipt { return Err(Error::DataCorruption("Combined linked receipt differs".into())); }
+        let procedure = self.registered_procedure_budgeted(tenant, namespace, id, budget)?
+            .ok_or_else(|| Error::DataCorruption("Combined procedure missing".into()))?;
+        Self::validate_knowledge_binding_sources(tenant, namespace, id, &linked, &procedure,
+            &[format!("qilbee-knowledge-v2:{}", super::registry::digest(&linked.request)?),
+              format!("qilbee-experience-knowledge-v1:{}", receipt.origin_digest)])?;
+        Ok(Some(receipt))
+    }
+
+    fn combined_withdrawn_budgeted(&self, tenant: &str, namespace: &str,
+        references: &[super::experience_export::ExperienceExportRef],
+        budget: &mut super::experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<bool> {
+        let mut withdrawn = false;
+        for reference in references {
+            // Historical integrity is verified separately; this reads current status only.
+            withdrawn |= self.withdrawal_with_budget(tenant, namespace, reference, budget)?.is_some();
+        }
+        Ok(withdrawn)
+    }
+
+    fn combined_memory_budgeted(&self, memory: &crate::RocksDbMemoryStorage, namespace: &str,
+        sources: &[crate::storage::platform::MemorySourceRef],
+        budget: &mut super::experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<crate::storage::platform::MemoryEvidenceEligibility> {
+        let records = budget.remaining_records().min(4096);
+        let bytes = budget.remaining_bytes().min(16 * 1024 * 1024);
+        if records == 0 || bytes == 0 { return Err(Error::ExperienceReuseLimitExceeded); }
+        let view = memory.evidence_view().with_work_limits(records, bytes)?;
+        let result = view.inspect(namespace, sources);
+        let (work, lookahead, stop) = view.bounded_work();
+        for _ in 0..work.records_examined { budget.charge_record()?; }
+        budget.charge_bytes(work.bytes_examined)?;
+        if stop.is_some() { budget.work.lookahead_bytes = lookahead; return Err(Error::ExperienceReuseLimitExceeded); }
+        result
     }
 }

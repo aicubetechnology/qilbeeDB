@@ -382,6 +382,26 @@ impl ApiError {
                 "unsupported_knowledge_origin",
                 "This knowledge origin requires a compatible contract version",
             ),
+            Error::ExperienceReferenceConflict => Self::new(
+                StatusCode::CONFLICT,
+                "experience_reference_conflict",
+                "The experience reference does not match the retained observation",
+            ),
+            Error::ExperienceAlreadyWithdrawn => Self::new(
+                StatusCode::CONFLICT,
+                "experience_already_withdrawn",
+                "The observation was already withdrawn by another command",
+            ),
+            Error::ExperienceEvidenceWithdrawn => Self::new(
+                StatusCode::CONFLICT,
+                "experience_evidence_withdrawn",
+                "A registered experience dependency is withdrawn",
+            ),
+            Error::ExperienceReuseLimitExceeded => Self::new(
+                StatusCode::UNPROCESSABLE_ENTITY,
+                "experience_reuse_limit_exceeded",
+                "Experience reuse verification could not complete within its work limit",
+            ),
             Error::ConstraintViolation(_) => Self::new(
                 StatusCode::CONFLICT,
                 "idempotency_conflict",

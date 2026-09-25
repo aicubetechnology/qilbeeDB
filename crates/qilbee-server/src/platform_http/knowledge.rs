@@ -232,6 +232,7 @@ async fn propose_combined(
     body: Result<Json<CombinedProposalRequest>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let learning = state.learning.clone();
+    let memory = state.memory.clone();
     let limits = state.retrieval_limits.clone();
     state
         .run(headers, move |identity, token, _| {
@@ -249,6 +250,7 @@ async fn propose_combined(
             let _permit = limits.acquire()?;
             let receipt = learning
                 .propose_combined_knowledge(
+                    memory.as_ref(),
                     &scope.tenant_id,
                     &scope.storage_namespace,
                     request.proposal,

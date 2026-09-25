@@ -299,10 +299,12 @@ async fn select(
     body: Result<Json<SelectRequest>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let learning = state.learning.clone();
+    let limits = state.retrieval_limits.clone();
     state.run(headers,move|identity,token,_| {
         let request=json_body(body)?;version(request.contract_version)?;
         if request.max_instruction_bytes>64*1024 { return Err(ApiError::new(StatusCode::BAD_REQUEST,"invalid_request","Instruction byte budget must be at most 65536")); }
         let scope=identity.authorize(token,Capability::MemoryRead,&request.scope).map_err(ApiError::operation)?;
+        let _permit=limits.acquire()?;
         let selected=learning.select_registered(&scope.tenant_id,&scope.storage_namespace,&request.policy_id,&request.context_id,request.max_instruction_bytes).map_err(ApiError::operation)?;
         let selection=match selected {
             Some(procedure)=>json!({"type":"procedure","procedure":procedure}),
