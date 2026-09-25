@@ -572,6 +572,7 @@ impl LearningMemory {
                 receipt: binding,
                 record: current,
             };
+            let mut experience_withdrawn = false;
             let origin = if request.accepted_origin_kinds[position]
                 == KnowledgeOriginKind::ExperienceMemory
             {
@@ -598,7 +599,7 @@ impl LearningMemory {
                 work.learning_bytes_inspected += origin_budget.bytes_examined;
                 work.learning_lookahead_bytes = origin_budget.lookahead_bytes;
                 match verified {
-                    Some(origin) => origin,
+                    Some((origin, withdrawn)) => { experience_withdrawn = withdrawn; origin },
                     None => {
                         stop = match origin_budget.stop {
                             Some(super::knowledge_origin::OriginBudgetStop::Records) => {
@@ -661,6 +662,11 @@ impl LearningMemory {
                 return Err(Error::DataCorruption(
                     "Knowledge index differs from authoritative bindings".into(),
                 ));
+            }
+            if experience_withdrawn {
+                iterator.next();
+                admitted_heads[position] = false;
+                continue;
             }
             if receipt.request.instructions.len() > request.max_instruction_bytes {
                 iterator.next();

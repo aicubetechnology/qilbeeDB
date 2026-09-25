@@ -232,7 +232,7 @@ Server receipt/event digests identify serialized records; use the returned value
 as opaque identities rather than reimplementing their serialization in clients.
 They detect inconsistent records, not malicious filesystem operators or false
 external evidence. This release has no experience deletion, retention policy,
-source-revocation propagation, evidence deduplication, independent execution
+automatic source-revocation inference, evidence deduplication, independent execution
 verification or automatic strategy extraction. See the
 [experience-memory design](../research/experience-memory-design.md) for the
 separate acceptance criteria for those extensions.
@@ -415,3 +415,95 @@ sample or independently verified trials. Artifact bindings and ancestors are
 available through their own endpoints; the export does not implicitly include
 them. See [evaluate experience evidence](../research/experience-evaluation.md)
 for a reproducible comparison workflow and the limits of these summaries.
+
+
+## Withdraw an observation from future reuse
+
+An authorized operator can withdraw an exact observation without erasing its
+history. Use the same API on the managed platform or your self-hosted instance.
+The company decides whether evidence should be withdrawn; QilbeeDB records that
+decision and enforces it through registered dependencies. It does not judge the
+truth of the observation or cancel an agent action already in progress.
+
+Send `POST /api/v1/experiences/withdrawals` with `contract_version: 1`, the exact
+`scope`, an `idempotency_key`, an `observation` containing `attempt_id`, `event_id`
+and the server-returned `event_digest`, and a nonblank `reason`. This requires
+both `experience_evidence_admin` and `experience_read` for that scope. The new
+administrative capability must be granted explicitly. It does not permit access
+to another private subject's namespace.
+
+For both withdrawal endpoints, bodies exceeding 16,384 bytes return
+`413 invalid_request`. Within that limit, an unsupported contract version returns
+`400 unsupported_contract_version`; invalid JSON, fields or lengths return
+`400 invalid_request`. Clients must not silently downgrade the contract version.
+
+The request body is limited to 16,384 bytes. Idempotency keys allow 128 UTF-8
+bytes and reasons allow 2,048; neither accepts control characters. Retain the
+returned receipt. After a lost response, retry the exact command with the same
+key or call `POST /api/v1/experiences/withdrawals/inspect` with the scope and exact
+observation. Never assume a timeout means the write failed. Reusing a key with a
+different command is a conflict. A new key for an already withdrawn observation
+returns `409 experience_already_withdrawn`; inspect the existing receipt.
+
+Withdrawal is irreversible in this contract. Historical events, exports,
+proposal receipts and evaluation results retain their original contents and
+digests. An old receipt or an `Active` qualification is not proof that its
+evidence remains eligible for reuse. Parent-attempt links alone do not propagate
+withdrawal, and the database cannot identify copied evidence without registered
+lineage. Withdrawal is not physical deletion or a retention policy.
+
+Before reusing an ordinary strategy, call
+`POST /api/v1/learning/strategies/inspect` with `contract_version: 1`, `scope` and
+`strategy_id`, or perform current selection. Inspection requires `memory_read`
+and returns current eligibility without protected observation details, withdrawal
+reasons or actor identities. Repeat this check after reconnecting. The memory
+change feed does not replace experience eligibility checks.
+
+The server applies the following fixed logical-read budgets. These are request
+ceilings, not latency guarantees or measurements of physical disk traffic.
+
+| Operation | Logical records | Logical bytes |
+| --- | ---: | ---: |
+| Withdraw or inspect an exact observation | 32 | 2 MiB |
+| Admit or replay an ordinary or combined experience proposal | 4,096 | 32 MiB |
+| Inspect current ordinary strategy eligibility | 256 | 8 MiB |
+| Select through the legacy learning endpoint | 4,096 | 16 MiB |
+| Inspect current combined knowledge eligibility | 512 | 16 MiB |
+
+Admission budgets cover the whole request, including registered dependencies;
+combined admission also accounts for memory-origin validation. Legacy selection
+examines at most 1,000 procedure entries. Existing v4 knowledge-selection budgets
+remain in effect. JSON serialization can increase the stored size of escaped
+characters, so a limit on input string bytes does not equal a logical-read budget.
+Retained records exceeding a current verification budget remain stored; an
+incomplete check does not make them eligible for reuse.
+
+Current checks have bounded work. `422 experience_reuse_limit_exceeded` means
+verification is incomplete, not that no useful knowledge exists. Preserve the
+cached item as unavailable for reuse and investigate the limit; do not fall back
+to an old eligible response. `503 retrieval_busy` permits a later read retry
+with backoff. A selection observed before withdrawal commits may finish; a later
+observation excludes registered withdrawn evidence. Already delivered model
+context cannot be retracted by this API.
+
+
+### Self-hosted upgrade and retained evidence
+
+Upgrades build a derived locator for historical strategies so both native and
+HTTP selection can resolve their experience dependencies. Plan a maintenance
+window and keep exclusive ownership of the data directory until migration
+completes. Do not run an older binary or another writer between migration passes.
+
+Each pass is bounded by 100,000 receipts, 1 GiB of logical read bytes and
+4,000,000 logical reads. If a pass reaches its limit, startup stops with an
+explicit error and retains an acknowledged checkpoint. Restart the same version
+to continue after the last completed receipt. A single receipt still has its own
+verification budget; restarting cannot bypass an oversized or corrupt receipt.
+Completion publishes the locator marker atomically and clears the checkpoint.
+
+The checkpoint verifies its last receipt and locator; it is not protection
+against an external writer changing earlier records. If another version wrote
+to the store during the upgrade, do not assume the checkpoint is safe to resume.
+Use a verified backup and reconcile the interrupted migration. The offline store
+verifier rejects incomplete locator migrations rather than reporting a complete
+store. Managed-platform users do not perform this local maintenance procedure.

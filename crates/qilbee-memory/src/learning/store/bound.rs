@@ -56,18 +56,26 @@ impl LearningMemory {
             .mutation_lock
             .lock()
             .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
-        let (policy, context) = self.contracts(tenant, namespace, policy_id, context_id)?;
+        let mut budget = experience_withdrawal::ExperienceReuseBudget::new(4096, 16_777_216);
+        let (policy, context) =
+            self.contracts_budgeted(tenant, namespace, policy_id, context_id, &mut budget)?;
         let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
-        self.select(
+        self.select_locked(
             &scope,
             &context.payload.task,
             &context.payload.baseline_revision,
             &context.payload.evaluation_contract,
             max_instruction_bytes,
+            &mut budget,
         )?
         .map(|selected| {
             let bound = self
-                .registered_procedure(tenant, namespace, &selected.proposal.id)?
+                .registered_procedure_budgeted(
+                    tenant,
+                    namespace,
+                    &selected.proposal.id,
+                    &mut budget,
+                )?
                 .ok_or_else(|| {
                     Error::DataCorruption(
                         "Selected procedure is missing its immutable binding".into(),
@@ -306,6 +314,127 @@ impl LearningMemory {
             ));
         }
         Ok(())
+    }
+}
+
+impl LearningMemory {
+    pub(super) fn contracts_budgeted(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        policy_id: &str,
+        context_id: &str,
+        budget: &mut experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<(
+        RegistryEntry<PolicyDefinition>,
+        RegistryEntry<EvaluationContext>,
+    )> {
+        validate_namespace(tenant, namespace)?;
+        let policy: RegistryEntry<PolicyDefinition> =
+            self.registry_budgeted(4, tenant, policy_id, budget)?;
+        let context: RegistryEntry<EvaluationContext> =
+            self.registry_budgeted(5, tenant, context_id, budget)?;
+        if policy.payload.parameters.evaluation_contract != context.payload.evaluation_contract {
+            return Err(Error::ValidationError("Policy and context differ".into()));
+        }
+        Ok((policy, context))
+    }
+    pub(super) fn registry_budgeted<T: Serialize + DeserializeOwned>(
+        &self,
+        kind: u8,
+        tenant: &str,
+        id: &str,
+        budget: &mut experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<RegistryEntry<T>> {
+        validate_text(id, "registry ID", 512)?;
+        let entry: RegistryEntry<T> = budget
+            .read(self, registry::registry_key(kind, tenant, id))?
+            .ok_or_else(|| Error::KeyNotFound("Registered contract".into()))?;
+        if entry.schema_version != 1
+            || entry.tenant != tenant
+            || entry.id != id
+            || entry.payload_digest != digest(&entry.payload)?
+        {
+            return Err(Error::DataCorruption("Invalid registered contract".into()));
+        }
+        Ok(entry)
+    }
+    pub(super) fn registered_procedure_budgeted(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        id: &str,
+        budget: &mut experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<Option<RegisteredProcedure>> {
+        validate_namespace(tenant, namespace)?;
+        validate_text(id, "procedure ID", 512)?;
+        let Some(receipt): Option<ProposalReceipt> =
+            budget.read(self, binding_key(tenant, namespace, id))?
+        else {
+            return Ok(None);
+        };
+        let (policy, context) = self.contracts_budgeted(
+            tenant,
+            namespace,
+            &receipt.request.policy_id,
+            &receipt.request.context_id,
+            budget,
+        )?;
+        let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
+        let record: ProcedureRecord = budget
+            .read(self, procedure_key(&scope, id))?
+            .ok_or_else(|| Error::DataCorruption("Registered procedure missing".into()))?;
+        Self::validate_registered_binding(
+            tenant, namespace, id, &receipt, &record, &policy, &context,
+        )?;
+        Ok(Some(RegisteredProcedure { receipt, record }))
+    }
+    pub(super) fn prepare_registered_proposal_budgeted(
+        &self,
+        tenant: &str,
+        namespace: &str,
+        request: RegisteredProposal,
+        actor: &str,
+        budget: &mut experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<ProposalReceipt> {
+        validate_namespace(tenant, namespace)?;
+        validate_text(&request.id, "procedure ID", 512)?;
+        validate_text(actor, "proposal actor", 512)?;
+        let (policy, context) = self.contracts_budgeted(
+            tenant,
+            namespace,
+            &request.policy_id,
+            &request.context_id,
+            budget,
+        )?;
+        let scope = Self::bound_scope(tenant, namespace, &policy, &context)?;
+        let proposal = ProcedureProposal {
+            id: request.id.clone(),
+            task: context.payload.task,
+            baseline_revision: context.payload.baseline_revision,
+            instructions: request.instructions.clone(),
+            source_refs: request.source_refs.clone(),
+            policy: policy.payload.parameters,
+        };
+        proposal.validate()?;
+        if budget
+            .read::<ProcedureRecord>(self, procedure_key(&scope, &request.id))?
+            .is_some()
+        {
+            return Err(Error::DataCorruption(
+                "Procedure exists without binding".into(),
+            ));
+        }
+        Ok(ProposalReceipt {
+            schema_version: 1,
+            tenant: tenant.into(),
+            namespace: namespace.into(),
+            request,
+            policy_digest: policy.payload_digest,
+            context_digest: context.payload_digest,
+            actor: actor.into(),
+            record: new_procedure_record(&scope, proposal),
+        })
     }
 }
 

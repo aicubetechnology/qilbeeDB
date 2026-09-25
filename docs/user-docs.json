@@ -96,7 +96,7 @@
       "source": "docs/api/experiences.md",
       "file": "experiences.md",
       "title": "Experience receipts",
-      "description": "Record scoped execution attempts, immutable observations and unknown consumption without automatically qualifying procedures.",
+      "description": "Record immutable scoped observations, withdraw evidence from future reuse and distinguish historical receipts from current eligibility.",
       "order": 95
     },
     {

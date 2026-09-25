@@ -29,6 +29,8 @@ pub enum Capability {
     ExperienceRead,
     ExperienceWrite,
     ExperienceReport,
+    /// Explicit authority to withdraw scoped experience evidence from future reuse.
+    ExperienceEvidenceAdmin,
     ToolRead,
     ToolDevelop,
     ToolReport,

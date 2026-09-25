@@ -325,7 +325,8 @@ impl LearningMemory {
             else {
                 return Ok(None);
             };
-            origin
+            // Catalog details describe retained provenance, not current reuse eligibility.
+            origin.0
         } else {
             Self::validate_knowledge_binding(company, &namespace, id, &receipt, &procedure)?;
             KnowledgeOriginDescriptor::MemoryOnly

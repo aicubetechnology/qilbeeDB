@@ -5,6 +5,7 @@ pub(super) fn routes() -> Router<PlatformState> {
     Router::new()
         .route("/api/v1/learning/strategies", post(create))
         .route("/api/v1/learning/strategies/read", post(read))
+        .route("/api/v1/learning/strategies/inspect", post(inspect_reuse))
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -26,6 +27,7 @@ async fn create(
     body: Result<Json<CreateRequest>, JsonRejection>,
 ) -> ApiResult<Json<Value>> {
     let store = state.learning.clone();
+    let limits = state.retrieval_limits.clone();
     state
         .run(headers, move |identity, token, actor| {
             let request = json_body(body)?;
@@ -36,6 +38,7 @@ async fn create(
             identity
                 .authorize(token, Capability::ExperienceRead, &request.scope)
                 .map_err(ApiError::operation)?;
+            let _permit = limits.acquire()?;
             let receipt = store
                 .propose_strategy(
                     &scope.tenant_id,
@@ -73,6 +76,38 @@ async fn read(
                 .map_err(ApiError::operation)?
                 .ok_or_else(missing)?;
             Ok(Json(json!({"contract_version":1,"receipt":receipt})))
+        })
+        .await
+}
+
+async fn inspect_reuse(
+    State(state): State<PlatformState>,
+    headers: HeaderMap,
+    body: Result<Json<ReadRequest>, JsonRejection>,
+) -> ApiResult<Json<Value>> {
+    let store = state.learning.clone();
+    let limits = state.retrieval_limits.clone();
+    state
+        .run(headers, move |identity, token, _| {
+            let request = json_body(body)?;
+            version(request.contract_version)?;
+            let scope = identity
+                .authorize(token, Capability::MemoryRead, &request.scope)
+                .map_err(ApiError::operation)?;
+            let _permit = limits.acquire()?;
+            let inspection = store
+                .inspect_strategy_reuse(
+                    &scope.tenant_id,
+                    &scope.storage_namespace,
+                    &request.strategy_id,
+                )
+                .map_err(ApiError::operation)?;
+            let mut value = serde_json::to_value(inspection).map_err(|_| ApiError::internal())?;
+            value
+                .as_object_mut()
+                .ok_or_else(ApiError::internal)?
+                .insert("contract_version".into(), json!(1));
+            Ok(Json(value))
         })
         .await
 }

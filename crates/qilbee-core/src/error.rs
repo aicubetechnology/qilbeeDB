@@ -50,6 +50,18 @@ pub enum Error {
     #[error("Knowledge origin requires a compatible negotiated contract")]
     UnsupportedKnowledgeOrigin,
 
+    #[error("Experience reference does not match the retained observation")]
+    ExperienceReferenceConflict,
+
+    #[error("Experience observation is already withdrawn")]
+    ExperienceAlreadyWithdrawn,
+
+    #[error("Experience evidence has been withdrawn from reuse")]
+    ExperienceEvidenceWithdrawn,
+
+    #[error("Experience reuse verification exceeded its work limit")]
+    ExperienceReuseLimitExceeded,
+
     #[error("Unique constraint violation on {property} for label {label}")]
     UniqueViolation { label: String, property: String },
 
@@ -181,13 +193,11 @@ mod tests {
 
     #[test]
     fn test_error_constraint_violation() {
-        assert!(
-            Error::UniqueViolation {
-                label: "User".to_string(),
-                property: "email".to_string()
-            }
-            .is_constraint_violation()
-        );
+        assert!(Error::UniqueViolation {
+            label: "User".to_string(),
+            property: "email".to_string()
+        }
+        .is_constraint_violation());
         assert!(!Error::NodeNotFound("123".to_string()).is_constraint_violation());
     }
 

@@ -39,3 +39,5 @@ pub use store::knowledge_selection::*;
 pub use store::knowledge_origin::{CombinedKnowledgeInput, CombinedKnowledgeProposal, CombinedKnowledgeReceipt, KnowledgeOriginDescriptor};
 
 pub use store::verification::KnowledgeIndexVerification;
+
+pub use store::experience_withdrawal::*;

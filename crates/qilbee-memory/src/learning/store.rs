@@ -108,6 +108,7 @@ impl LearningMemory {
             }),
         };
         storage.rebuild_knowledge_index()?;
+        storage.rebuild_strategy_locators()?;
         Ok(storage)
     }
 
@@ -301,22 +302,76 @@ impl LearningMemory {
         evaluation_contract: &str,
         max_instruction_bytes: usize,
     ) -> Result<Option<ProcedureRecord>> {
+        let _guard = self
+            .inner
+            .mutation_lock
+            .lock()
+            .map_err(|_| Error::Internal("Learning mutation lock poisoned".into()))?;
+        let mut budget = experience_withdrawal::ExperienceReuseBudget::new(4096, 16_777_216);
+        self.select_locked(
+            scope,
+            task,
+            baseline_revision,
+            evaluation_contract,
+            max_instruction_bytes,
+            &mut budget,
+        )
+    }
+    pub(super) fn select_locked(
+        &self,
+        scope: &LearningScope,
+        task: &str,
+        baseline_revision: &str,
+        evaluation_contract: &str,
+        max_instruction_bytes: usize,
+        budget: &mut experience_withdrawal::ExperienceReuseBudget,
+    ) -> Result<Option<ProcedureRecord>> {
+        if budget.read::<u32>(self, strategies::STRATEGY_LOCATOR_MARKER.to_vec())? != Some(1) {
+            return Err(Error::DataCorruption(
+                "Strategy locator migration incomplete".into(),
+            ));
+        }
+        if max_instruction_bytes > 65_536 {
+            return Err(Error::ValidationError(
+                "Instruction budget exceeds 65536 bytes".into(),
+            ));
+        }
+        let mut candidates = 0usize;
         scope.validate()?;
         validate_text(task, "task", 512)?;
         validate_text(baseline_revision, "baseline revision", 512)?;
         validate_text(evaluation_contract, "evaluation contract", 512)?;
         let prefix = scope_prefix(1, scope);
         let mut best: Option<ProcedureRecord> = None;
-        for item in self
-            .inner
-            .db
-            .iterator(IteratorMode::From(&prefix, Direction::Forward))
-        {
-            let (key, bytes) = item.map_err(storage_error)?;
+        let mut iterator = self.inner.db.raw_iterator();
+        iterator.seek(&prefix);
+        while iterator.valid() {
+            let key = iterator
+                .key()
+                .ok_or_else(|| Error::Storage("Missing iterator key".into()))?
+                .to_vec();
             if !key.starts_with(&prefix) {
                 break;
             }
+            if candidates >= 1000 {
+                return Err(Error::ExperienceReuseLimitExceeded);
+            }
+            candidates += 1;
+            budget.charge_record()?;
+            let bytes = iterator
+                .value()
+                .ok_or_else(|| Error::Storage("Missing iterator value".into()))?;
+            budget.charge_bytes(bytes.len())?;
             let record: ProcedureRecord = decode(&bytes)?;
+            iterator.next();
+            if &record.scope != scope
+                || key.as_slice() != procedure_key(scope, &record.proposal.id).as_slice()
+            {
+                return Err(Error::DataCorruption(
+                    "Selected procedure key or scope differs".into(),
+                ));
+            }
+
             if knowledge::has_knowledge_binding_marker(&record.proposal.source_refs)
                 || record.state != ProcedureState::Active
                 || record.proposal.task != task
@@ -324,6 +379,9 @@ impl LearningMemory {
                 || record.proposal.policy.evaluation_contract != evaluation_contract
                 || record.proposal.instructions.len() > max_instruction_bytes
             {
+                continue;
+            }
+            if !self.strategy_reusable_for_record(&record, budget)? {
                 continue;
             }
             // Equal bounds resolve deterministically by procedure ID.
@@ -336,6 +394,7 @@ impl LearningMemory {
                 best = Some(record);
             }
         }
+        iterator.status().map_err(storage_error)?;
         Ok(best)
     }
 }
@@ -454,10 +513,12 @@ pub mod experience_export;
 pub mod strategies;
 
 pub mod knowledge;
-mod knowledge_origin_hash;
 pub mod knowledge_origin;
+mod knowledge_origin_hash;
 
 pub mod knowledge_selection;
 
 mod knowledge_index;
 pub mod verification;
+
+pub mod experience_withdrawal;

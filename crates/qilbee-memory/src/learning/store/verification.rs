@@ -8,6 +8,10 @@ use super::knowledge_index::{GENERATION_KEY, INDEX_ROOT, KnowledgeIndexSink};
 use super::*;
 use qilbee_storage::verification::{self as offline, FamilyInventory};
 
+mod strategy_locators;
+mod withdrawals;
+pub use withdrawals::ExperienceWithdrawalVerification;
+
 /// Result of comparing the persisted derived index with the authoritative ledgers.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -110,10 +114,18 @@ impl LearningMemory {
     /// generation marker are counted separately and excluded from the digest,
     /// so digests compare across index generations.
     pub fn inventory(&self) -> Result<Vec<FamilyInventory>> {
+        self.verify_experience_withdrawals()?;
+        self.verify_strategy_locators()?;
         Ok(vec![offline::family_inventory(
             &self.inner.db,
             "default",
-            |key| key.starts_with(INDEX_ROOT) || key == GENERATION_KEY,
+            |key| {
+                key.starts_with(INDEX_ROOT)
+                    || key == GENERATION_KEY
+                    || key.first() == Some(&26)
+                    || key == super::strategies::STRATEGY_LOCATOR_MARKER
+                    || key == super::strategies::STRATEGY_LOCATOR_PROGRESS
+            },
         )?])
     }
 
@@ -121,6 +133,8 @@ impl LearningMemory {
     /// Every implied entry must exist with identical bytes, every persisted
     /// entry must belong to the published generation, and the counts must match.
     pub fn verify_knowledge_index(&self) -> Result<KnowledgeIndexVerification> {
+        self.verify_experience_withdrawals()?;
+        self.verify_strategy_locators()?;
         struct Comparator<'a> {
             db: &'a DB,
             expected: u64,
