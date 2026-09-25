@@ -13,10 +13,10 @@ RUN --mount=type=cache,id=qilbeedb-cargo-registry,target=/usr/local/cargo/regist
     cargo build --locked --release -p qilbee-server --bin qilbeedb && \
     install -m 0755 target/release/qilbeedb /usr/local/bin/qilbeedb
 
-FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS runtime
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates libssl3t64 libstdc++6 && rm -rf /var/lib/apt/lists/* && \
-    groupadd --gid 10001 qilbee && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin qilbee && \
-    install -d -o qilbee -g qilbee -m 0700 /data
+RUN install -d -m0700 /runtime-data
+
+FROM gcr.io/distroless/cc-debian13@sha256:54df941ed0d06a1bd95ef5e0ce391fd8d9f94b64782dc9a60062727849ee3f97 AS runtime
+COPY --from=build --chown=10001:10001 /runtime-data /data
 COPY --from=build /usr/local/bin/qilbeedb /usr/local/bin/qilbeedb
 COPY LICENSE /usr/share/doc/qilbeedb/LICENSE
 ARG VCS_REF=unknown

@@ -13,14 +13,25 @@ cd qilbeeDB
 QILBEE_REVISION="$(git rev-parse HEAD)" docker compose build
 ```
 
-The image uses a digest-pinned Rust 1.93.1 Bookworm build stage and Debian Trixie runtime, the committed
-Cargo lockfile, and a release build with thin LTO. Build concurrency is two jobs
-to fit local development machines. Dependency/target caches belong to BuildKit;
-the build context excludes local data, credentials, Git state and host targets.
-The runtime upgrades base packages before installing its required libraries. The first production qualification found security fixes available in Trixie that were absent from the Bookworm runtime; see the [container security qualification](../security/container-security.md).
+The image uses a digest-pinned Rust 1.93.1 Bookworm build stage and a
+Distroless Debian 13 C/C++ runtime, the committed Cargo lockfile, and a release
+build with thin LTO. Build concurrency is two jobs. Dependency/target caches
+belong to BuildKit; the build context excludes local data, credentials, Git state
+and host targets.
 
 The runtime includes the server, required native libraries, CA certificates,
-a built-in loopback health probe, and the license. It runs as UID/GID 10001.
+a built-in loopback health probe, and the license. It runs as UID/GID 10001,
+with `/data` owned by that user and initially restricted to mode 0700. Existing
+volumes retain their own permissions; verify access before starting the service.
+
+The service image does not include a shell, package manager or general-purpose
+backup utilities. Invoke native commands directly, for example
+`docker compose exec qilbeedb /usr/local/bin/qilbeedb health-check`.
+Use your host or separately maintained operator tools for volume preparation,
+backup transport and diagnostics. Scripts that depend on `docker exec ... sh`,
+`tar`, or package installation inside the service need updating before adoption.
+See [container security](../security/container-security.md) and
+[backup and recovery](backup.md).
 
 The resulting default image is `qilbeedb:local`. This builds locally; it does not
 publish an image to a registry. Use an explicit image tag and Git revision when
@@ -35,7 +46,7 @@ umask 077
 mkdir -p "$HOME/.config/qilbeedb/local"
 chmod 700 "$HOME/.config/qilbeedb/local"
 (set -C; docker compose run --rm --no-deps qilbeedb \
-  bootstrap-tenant /data qilbee-qmn-local platform-operator \
+  bootstrap-tenant /data example-company platform-operator \
   > "$HOME/.config/qilbeedb/local/admin.json")
 chmod 600 "$HOME/.config/qilbeedb/local/admin.json"
 ```
@@ -136,8 +147,7 @@ versions fail closed. Do not prune unrelated images, containers or volumes.
 ## Scope of the local deployment
 
 The local stack supports durable identity, scoped memory, model-bound semantic
-retrieval, procedural learning and learned-tool development receipts. Generation
-workers, isolated invocation transport and tool publication gates remain
-subsequent features under the [accepted architecture](../architecture/learned-tools.md).
+retrieval, provenance and observed experience. Tool implementation and execution
+remain with the consuming application and its execution infrastructure.
 This development deployment does not establish distributed availability,
 hardware power-loss behavior or comparative performance leadership.

@@ -53,6 +53,22 @@ an ephemeral `/tmp`, drops Linux capabilities and disables privilege escalation.
 A process health check does not verify your credential's scope or a complete
 application workflow; perform authenticated memory writes and reads as well.
 
+## Run operator commands
+
+The service image contains the database and its runtime dependencies, without a
+shell or package manager. Run native commands directly:
+
+```bash
+docker compose exec qilbeedb /usr/local/bin/qilbeedb health-check
+```
+
+Use separately maintained host or operator tools to prepare volumes, transfer
+backups and inspect files. Before adopting this image, update scripts that expect
+`sh`, `tar`, `curl` or package installation inside the database container.
+The host-side `curl` examples above are unchanged. Preserve numeric ownership and
+permissions when restoring a stopped volume, then verify the restored data before
+starting the service. See [backup and recovery](../operations/backup.md).
+
 ## Preserve data across updates
 
 Use an explicit image tag and record its Git revision for each validated build.
