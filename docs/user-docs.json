@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Retrieve scoped graph evidence with explicit ranking profiles, coverage limits and frozen development-to-confirmation evidence.",
+      "description": "Use scoped graph retrieval with explicit profiles, coverage limits and reserved confirmation evidence that preserves query-level losses.",
       "order": 208
     },
     {
