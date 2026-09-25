@@ -81,12 +81,14 @@ source validity separately from qualification. Updating, deleting, rejecting or
 expiring a source can make qualified knowledge unavailable for reuse without
 erasing its audit history. A valid receipt is not a lease on source validity.
 
-The merged, **unreleased** selection v3 contract adds a scope-bound active index
+The implemented selection v3 contract adds a scope-bound active index
 and the server-owned `active_knowledge_bound_v1` ordering. An unresolved higher
 candidate produces an incomplete decision instead of silently selecting a lower
 one. Explicit learning and dependency budgets bound work; they do not define
 agent autonomy. Version 2 retains its existing contract. Deployment and client
-opt-in must be verified separately from source availability.
+opt-in must be verified separately from source availability. Selection v4 also
+supports explicit `memory_only` and `experience_memory` origins through
+`active_knowledge_origin_bound_v1`; it does not infer support in older clients.
 
 These capabilities address evidence lifecycle and bounded selection. They do not
 implement a replay evaluator, autonomous hypothesis generation or measured
@@ -120,7 +122,7 @@ experiments. A quality report must identify the frozen baseline, candidate,
 evaluation population, resource budget, uncertainty and regressions. Update this
 map and the exported user guides as those capabilities become available.
 
-## Proposed contracts and acceptance criteria
+## Existing foundations and proposed extensions
 
 The [experience receipt API](../api/experiences.md) implements scoped attempts,
 immutable context and parent-event bindings, authenticated observations and
@@ -133,16 +135,18 @@ identity is not proof of executable implementation identity. Generic
 check transitive eligibility. The [strategy API](../api/experience-strategies.md) now binds structured candidates
 to immutable experience observations. Its observations do not count as
 qualification trials. The separate evidence-bound knowledge API already binds mutable memory revisions
-and checks their current validity during selection. Retrofitting legacy strategy
-records, discovery replay, shared release and outcome-driven retention remain proposals. Each extension needs its own validated feature PR.
+and checks their current validity during selection. New combined proposals bind
+both evidence types explicitly; legacy strategy records are not retrofitted.
+Discovery replay, shared release and outcome-driven retention remain proposals.
+Each extension needs its own validated feature PR.
 
-| Extension | Proposed durable contract | Required acceptance evidence |
+| Capability and status | Durable contract | Acceptance criteria |
 | --- | --- | --- |
 | Experience receipt (implemented foundation) | Attempt ID, parent attempt, exact context and artifact digests, authenticated reporter and declared evidence, resource consumption and idempotency key | Retried reports do not duplicate attempts; unknown completion or consumption remains unknown; scope and crash recovery preserve receipts |
-| Derived strategy | Source record IDs and revisions, extractor identity, success/failure classification, preconditions, counterexamples and candidate revision | A summary cannot silently become a verified observation; source edits, revocation and expiry invalidate affected serving decisions |
-| Discovery replay | Immutable attempt graph, recorded transitions, visibility at each step, frozen utility/cost formula and exact replay-engine version | Replay cannot inspect future scores or invent unobserved transitions; repeated runs yield the same decisions and accounting |
-| Shared knowledge release | Immutable candidate, evidence lineage, explicit audience, policy/context identity and a publication decision owned by the existing learning authority | Cross-tenant and cross-subject access fails before retrieval; copies of one source are not counted as independent corroboration; suspension reaches subsequent selections |
-| Retention policy | Versioned retention decision, reason, evidence obligations and eligible record classes | Storage savings are measured alongside old-task retention; counterexamples survive consolidation when required; deletion semantics are explicit |
+| Derived strategy and combined knowledge (implemented foundations) | Exact experience observations and, for combined proposals, memory revisions; extractor identity, preconditions, counterexamples and candidate revision | A summary cannot silently become a verified observation; bound memory changes and authorization affect subsequent eligibility checks |
+| Discovery replay (proposed) | Immutable attempt graph, recorded transitions, visibility at each step, frozen utility/cost formula and exact replay-engine version | Replay cannot inspect future scores or invent unobserved transitions; repeated runs yield the same decisions and accounting |
+| Shared knowledge release (proposed) | Immutable candidate, evidence lineage, explicit audience, policy/context identity and a publication decision owned by the existing learning authority | Cross-tenant and cross-subject access fails before retrieval; copies of one source are not counted as independent corroboration; suspension reaches subsequent selections |
+| Retention policy (proposed) | Versioned retention decision, reason, evidence obligations and eligible record classes | Storage savings are measured alongside old-task retention; counterexamples survive consolidation when required; deletion semantics are explicit |
 
 For the proposed replay contract, an unavailable branch returns an explicit
 unsupported transition. It must not receive a fabricated score or be counted as
@@ -166,15 +170,20 @@ records ineligible on subsequent request snapshots. The
 [derived-memory contract](../api/derived-memory.md) documents graph and work
 bounds, snapshot semantics and the absence of descendant change events.
 
-The remaining integration work is to combine immutable experience-strategy
-evidence with mutable memory-source bindings in one explicitly versioned proposal.
-The current evidence-bound knowledge API already checks source eligibility; it
-does not retrofit the older strategy records. Preserve the existing qualification
-authority when connecting these contracts. Tests should race source
-changes and credential revocation with consolidation and selection, preserving
-the documented authorization and snapshot boundaries. Dependency metadata does
-not discover undeclared copies, erase external caches or retain historical source
-payloads. A shared release must not promise those properties implicitly.
+The implemented [combined knowledge contract](../agent-memory/evidence-bound-knowledge.md)
+binds exact experience observations and current memory-source revisions in one
+versioned proposal. It preserves the existing qualification authority and does
+not retrofit older strategy records. Source-aware selection checks current
+eligibility separately from immutable evidence history.
+
+[External graph consolidation](../api/graph-consolidation.md) also provides durable
+jobs, credential-bound leases and atomic assertion publication for external
+workers. These are implemented coordination contracts, not an autonomous replay
+evaluator or evidence of improved reasoning. Future work on shared publication
+and replay must preserve the documented authorization and snapshot boundaries.
+Dependency metadata does not discover undeclared copies, erase external caches
+or retain historical source payloads. A shared release must not promise those
+properties implicitly.
 
 ## Evaluation before automatic publication
 

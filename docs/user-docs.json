@@ -310,6 +310,13 @@
       "order": 515
     },
     {
+      "source": "docs/agent-memory/consolidation.md",
+      "file": "memory-consolidation.md",
+      "title": "Memory consolidation",
+      "description": "Choose graph or knowledge consolidation contracts and understand evidence, worker responsibilities and current limits.",
+      "order": 69.4
+    },
+    {
       "source": "docs/api/graph-consolidation.md",
       "file": "graph-consolidation.md",
       "title": "External graph consolidation",
