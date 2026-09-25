@@ -44,7 +44,6 @@ sha2 = "0.10"
 hmac = "0.12"
 chrono = { workspace = true }
 rpassword = "7.3"
-atty = "0.2"
 
 [dev-dependencies]
 tempfile = { workspace = true }
