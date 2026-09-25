@@ -487,6 +487,15 @@ observation excludes registered withdrawn evidence. Already delivered model
 context cannot be retracted by this API.
 
 
+### Native Rust integration
+
+Native callers of `LearningMemory::propose_combined_knowledge` must now pass
+`&RocksDbMemoryStorage` immediately after `&self`. Supply the memory store that
+owns the referenced namespace so admission can validate memory dependencies
+within the request-wide budget. This is a Rust source compatibility change;
+the HTTP proposal request shape is unchanged. Native hosts remain responsible
+for authorizing the caller before invoking the trusted library API.
+
 ### Self-hosted upgrade and retained evidence
 
 Upgrades build a derived locator for historical strategies so both native and
