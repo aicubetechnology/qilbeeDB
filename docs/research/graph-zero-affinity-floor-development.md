@@ -39,7 +39,7 @@ was specified for this small screening result.
 The server source began at `d6503f21934e4042006f114ac79f4ed8a917cac7`; private
 instrumentation changed the candidate parameters and recorded both server-side
 rankings without changing the published response. The
-[machine-readable report](https://github.com/aicubetechnology/qilbeeDB/blob/aicube/graph-affinity-development-report/benchmarks/retrieval/graph-zero-affinity-floor-development-report.json)
+[machine-readable report](https://github.com/aicubetechnology/qilbeeDB/blob/d11de959c0788dc222d09fb586315b8b624e40ca/benchmarks/retrieval/graph-zero-affinity-floor-development-report.json)
 contains per-query rankings, metrics, exact input digests and the frozen protocol
 digest. It supports inspection of the observations; it is not a packaged runner
 for reproducing the private instrumentation.
