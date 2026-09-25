@@ -16,6 +16,12 @@ finding affects your deployment, apply an available supported update or mitigati
 and repeat your integration and recovery checks. Retain package metadata so your
 scanner can identify installed dependencies.
 
+The service runtime omits a shell and package manager. Update it by rebuilding or
+selecting a supported image, rather than installing packages in a running
+container. Removing utilities reduces dependencies but does not prove the
+remaining components have no vulnerabilities. Keep external diagnostic and
+backup tools in your security inventory too.
+
 ## Verify application dependencies
 
 An operating-system package scan may not identify Rust dependencies compiled
