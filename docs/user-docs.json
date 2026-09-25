@@ -383,7 +383,7 @@
       "source": "docs/operations/store-verification.md",
       "file": "store-verification.md",
       "title": "Offline store verification",
-      "description": "Retain writer exclusion while verifying stopped stores, comparing backup copies and checking memory and knowledge integrity.",
+      "description": "Retain writer exclusion while checking graph property indexes, memory and knowledge integrity, and comparing backup copies.",
       "order": 1065
     },
     {

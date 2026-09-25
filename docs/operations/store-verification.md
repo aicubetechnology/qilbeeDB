@@ -13,7 +13,7 @@ The command opens the three stores of a platform data directory read-only:
 
 | Store | Directory | Checks |
 | --- | --- | --- |
-| Graph and identity | `<data-directory>` | Exact column families, physical inventory |
+| Graph and identity | `<data-directory>` | Exact column families, physical inventory, property-index reconstruction |
 | Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, journal chain verification, projection re-derivation |
 | Procedural learning | `<data-directory>/procedural-learning` | Schema marker, authoritative inventory, knowledge index consistency |
 
@@ -26,6 +26,26 @@ active knowledge index and its generation marker; in the agent-memory store the
 candidate and chronological projection rows and tips. Workspace membership and
 relation heads remain included in the digest because this command does not
 independently re-derive their contents.
+
+The graph property-index check reconstructs the expected index from stored nodes
+using a verification-specific implementation of the canonical fingerprint. It
+checks node identities, the supported index format, expected keys and values,
+and unexpected entries. Floating-point bit patterns and nested property values
+are preserved in the comparison. Two copies containing the same invalid index
+must fail verification, even when their raw inventories match. The report adds
+`stores.graph.property_index` with `nodes` and `index_entries` counts.
+
+This check does not rebuild an index or exempt graph records from byte comparison.
+The audit refuses values over 16 MiB, more than 1 GiB of examined key/value
+bytes, more than two million nodes or expected entries, or more than 256 MiB
+of retained expected keys. Serialized property nesting is limited to 64 levels
+and collection items to one million per decoded record. These are verifier work
+limits, not database storage quotas; exceeding one produces no success report.
+RocksDB materializes each returned value before its size is checked, so these
+limits are not a hard ceiling on process memory.
+
+It verifies the current format; it does not authorize a migration from an older
+index format. Keep the original data and qualify any format migration separately.
 
 The projection check re-derives the candidate and chronological projections
 of every namespace from the canonical records with the same key and value
@@ -104,6 +124,7 @@ never creates a missing directory.
 | `differs from source … in:` | The copy and the source are not the same data; the message lists each store and family. Do not adopt the copy as equivalent. |
 | `Writer exclusion` | The command could not retain every store lock, the helper failed, or a lock file changed. Keep all source and candidate stores stopped, inspect the named path when provided, and retry only after resolving the cause. |
 | `column families … expects …` | The directory was written by a different version or is not this kind of store. Use the matching binary. |
+| `Property index is inconsistent or exceeds offline verification limits` | The graph index format, node identity, reconstructed keys/values, or verification budget did not pass. Keep the stopped data for diagnosis; the verifier does not repair or silently truncate. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
 | `Unsupported or inconsistent memory record, index or receipt` | A memory journal chain, anchor or change record does not verify. Keep the copy for inspection; do not adopt it. |
 | `Knowledge index entry is missing` / `differs` / `ledgers imply` | The derived index does not match the ledgers. Keep the copy for inspection; a writable start would rebuild the index, but the underlying cause must be understood first. |

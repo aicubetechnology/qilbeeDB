@@ -178,6 +178,7 @@ pub fn verify_data_directory_guarded(
     let memory_path = data_directory.join(AGENT_MEMORY_DIRECTORY);
     let learning_path = data_directory.join(PROCEDURAL_LEARNING_DIRECTORY);
     let graph = StorageEngine::open_read_only_guarded(&data_directory, guard)?;
+    let graph_property_index = graph.verify_property_index()?;
     let graph_families = graph.inventory()?;
     drop(graph);
     let memory = RocksDbMemoryStorage::open_read_only_guarded(&memory_path, guard)?;
@@ -199,6 +200,7 @@ pub fn verify_data_directory_guarded(
             "graph": {
                 "path": data_directory,
                 "families": graph_families,
+                "property_index": graph_property_index,
             },
             "agent_memory": {
                 "path": memory_path,

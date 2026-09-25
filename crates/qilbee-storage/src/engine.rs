@@ -26,6 +26,10 @@ fn ordered_meta_key(key: &str) -> Vec<u8> {
 mod property_index;
 use property_index::hash_property_value;
 
+#[path = "property_index_verification.rs"]
+mod property_index_verification;
+pub use property_index_verification::PropertyIndexVerification;
+
 /// Compare two property values for ordering
 /// Returns -1 if a < b, 0 if a == b, 1 if a > b
 /// For incompatible types, returns 0 (equal)
