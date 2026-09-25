@@ -271,7 +271,7 @@
       "source": "docs/api/graph-assisted-retrieval.md",
       "file": "graph-assisted-retrieval.md",
       "title": "Experimental graph-assisted retrieval",
-      "description": "Use scoped graph retrieval with explicit profiles, coverage limits and reserved confirmation evidence that preserves query-level losses.",
+      "description": "Retrieve current scoped memories through typed graph paths, interpret experimental scores and coverage, and assess corpus-specific evidence before choosing a profile.",
       "order": 208
     },
     {
