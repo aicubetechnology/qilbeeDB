@@ -161,6 +161,12 @@ namespaces do not acquire platform guarantees. The legacy `auth_enabled` setting
 controls only legacy bootstrap; setting it to false never disables platform auth.
 There is no automatic tenant ownership inference or migration of legacy records.
 
+The separate legacy bootstrap prompts interactively only when both standard input
+and standard output are terminals. With either stream redirected, it uses its
+non-interactive configuration path. First-time setup reports missing configuration
+as an error; an existing completed bootstrap state does not prompt again.
+Terminal detection never switches the platform router to legacy mode.
+
 Platform API credentials and human login sessions are opaque tokens, not legacy
 JWTs. Do not pass a legacy JWT as a platform credential. Updating the legacy JWT
 library does not migrate accounts, add resource authorization, or make the legacy

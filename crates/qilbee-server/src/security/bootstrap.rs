@@ -4,7 +4,7 @@
 
 use super::{UserService, Role};
 use qilbee_core::Result;
-use std::io::{self, Write};
+use std::io::{self, IsTerminal, Write};
 use std::path::{Path, PathBuf};
 use std::fs;
 use tracing::{info, warn};
@@ -276,7 +276,7 @@ impl BootstrapService {
         }
 
         // Check if we're in an interactive terminal
-        if atty::is(atty::Stream::Stdin) && atty::is(atty::Stream::Stdout) {
+        if io::stdin().is_terminal() && io::stdout().is_terminal() {
             // Interactive mode
             self.run_interactive()
         } else {
