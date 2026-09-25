@@ -673,3 +673,19 @@ A [real-container evaluation](../research/twowiki-captured1536-docker-developmen
 illustrates why reproducing text and vectors alone is insufficient: fresh record
 identifiers can change ties. Preserve the import manifest and revisions when
 confirming a ranking result, and report cross-import results separately.
+
+
+## Reserved confirmation evidence
+
+A frozen 120-question 2WikiMultiHopQA confirmation compared seven retrieval
+methods using the same 1,148 documents, 328 relations and externally captured
+1,536-dimensional embeddings. The predeclared strength profile achieved
+nDCG@10 of 0.8799 versus 0.8105 for hybrid V1, with 55 query-level wins, one loss
+and 64 ties. Balanced graph retrieval had a higher mean of 0.9105.
+
+This evidence supports graph-assisted retrieval on that corpus; it does not
+promote a default, establish exhaustive relevance or demonstrate improved agent
+task completion. Select profiles using your own authorized evaluation data and
+retain coverage limits and losses in the comparison. See the
+[reserved confirmation report](../research/twowiki-captured1536-reserved-results.md)
+for the frozen protocol, uncertainty and limitations.
