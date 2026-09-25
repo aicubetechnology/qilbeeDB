@@ -26,7 +26,7 @@ pub mod options;
 pub mod transaction;
 pub mod verification;
 
-pub use engine::{GraphIdentity, StorageEngine};
+pub use engine::{GraphIdentity, PropertyIndexVerification, StorageEngine};
 pub use options::StorageOptions;
 pub use transaction::Transaction;
 pub use verification::FamilyInventory;
