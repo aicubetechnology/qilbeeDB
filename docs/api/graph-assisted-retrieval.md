@@ -689,3 +689,12 @@ task completion. Select profiles using your own authorized evaluation data and
 retain coverage limits and losses in the comparison. See the
 [reserved confirmation report](../research/twowiki-captured1536-reserved-results.md)
 for the frozen protocol, uncertainty and limitations.
+
+## Avoid assuming stronger affinity improves ranking
+
+A development comparison that removed the positive query-affinity floor from
+typed paths slightly reduced mean relevance while leaving judged recall unchanged.
+The candidate was rejected; the published strength profile is unchanged. See the
+[zero-floor development report](../research/graph-zero-affinity-floor-development.md).
+Evaluate scoring changes separately from candidate selection, and require new
+independent evidence before promoting a revised policy.

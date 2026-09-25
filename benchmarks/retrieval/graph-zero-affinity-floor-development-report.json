@@ -1,0 +1,1705 @@
+{
+  "status": "completed",
+  "artifact_analysis_of_real_execution": true,
+  "rows": [
+    {
+      "query_id": "2hop__107346_3836",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.6131471927654584,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.6131471927654584,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-fc64a6121503dcd558ce8dff00423506f858433c7295639fb56d749c3be6837e",
+          "musique-0278c065409013b13fc8535deb3fe3245b9de020792f30fd9a2574bca4b69c55",
+          "musique-64d99ada8f0de1b7a9a52fdfdbb67ba1a1f98ec278be01e9979e2ecd26b7c6fa",
+          "musique-a217cf6cecac8b3f5968070524358d715895a0f59cb23c13bbc5ab9ad0293b4d",
+          "musique-26ee48b3218ef8de1226d3ff581a97255d2a02b79f3be755662f14f7c4bb04b2",
+          "musique-dc1dff678387aea75e5d98c26e50d9f304d9bdaa790c064582a4f329e0fa0df7",
+          "musique-9a4d8f8ef1675aca90ed0bc6926f99019703184c1eff58396e1a5a34794840b9",
+          "musique-b5136b548feabebcef4076a88be4ba41eccb8750cfe3ce8f46690498aeea620e",
+          "musique-c18302821cabdbe138555e93ef0f9935c90bbb92821b8ba322881e3ec2c7167a",
+          "musique-c74e6d3c069d6ac2b6572349756f6c7beb025854d8d4d6dfc66c1e58535872a5"
+        ],
+        "candidate": [
+          "musique-fc64a6121503dcd558ce8dff00423506f858433c7295639fb56d749c3be6837e",
+          "musique-0278c065409013b13fc8535deb3fe3245b9de020792f30fd9a2574bca4b69c55",
+          "musique-64d99ada8f0de1b7a9a52fdfdbb67ba1a1f98ec278be01e9979e2ecd26b7c6fa",
+          "musique-a217cf6cecac8b3f5968070524358d715895a0f59cb23c13bbc5ab9ad0293b4d",
+          "musique-26ee48b3218ef8de1226d3ff581a97255d2a02b79f3be755662f14f7c4bb04b2",
+          "musique-dc1dff678387aea75e5d98c26e50d9f304d9bdaa790c064582a4f329e0fa0df7",
+          "musique-9a4d8f8ef1675aca90ed0bc6926f99019703184c1eff58396e1a5a34794840b9",
+          "musique-b5136b548feabebcef4076a88be4ba41eccb8750cfe3ce8f46690498aeea620e",
+          "musique-c18302821cabdbe138555e93ef0f9935c90bbb92821b8ba322881e3ec2c7167a",
+          "musique-c74e6d3c069d6ac2b6572349756f6c7beb025854d8d4d6dfc66c1e58535872a5"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__142927_70019",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.9197207891481876,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.9197207891481876,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-f87a4acd1170164a36562cdd6ab80d3a1c6ec158d381c6f07e6722421f536ef4",
+          "musique-a5c7308f01dc56220639a0c25faacc3437af4f38fac3251ed7406d1098468b87",
+          "musique-943b9ffadb52b75ef1dc477f69d5a2add7603de0d0605ba02e76d2ca4167e1f5",
+          "musique-8a1ccbca473d4e5334a675a340577734742a712e0a507118c82e2fe435b51b49",
+          "musique-a9c605ef25daa67ed469106af4226583f17c212846e1187ded4bf4ef673e882b",
+          "musique-e9ec846fb6c0a29fb8d3787519d3390440037262168ae64cc940686db686cdb7",
+          "musique-df0340f04dd56cb51ae51ab726393f613cbda41980c13d08c0aa0e3f304dd341",
+          "musique-e88d3e36b3bb3cdf1268bb5e8b4764e2a8a39b3079bd550f0894e1bba0697642",
+          "musique-2b8f7c5edffe7fae42b58d5eea7b7ce8cdf43c0e165b933170b7fd85bad5edcc",
+          "musique-07c2ce50057dadc18cfe59fc7438a911bb319d00678f3d2d9984ddadea1c5c76"
+        ],
+        "candidate": [
+          "musique-f87a4acd1170164a36562cdd6ab80d3a1c6ec158d381c6f07e6722421f536ef4",
+          "musique-a5c7308f01dc56220639a0c25faacc3437af4f38fac3251ed7406d1098468b87",
+          "musique-943b9ffadb52b75ef1dc477f69d5a2add7603de0d0605ba02e76d2ca4167e1f5",
+          "musique-8a1ccbca473d4e5334a675a340577734742a712e0a507118c82e2fe435b51b49",
+          "musique-a9c605ef25daa67ed469106af4226583f17c212846e1187ded4bf4ef673e882b",
+          "musique-e9ec846fb6c0a29fb8d3787519d3390440037262168ae64cc940686db686cdb7",
+          "musique-df0340f04dd56cb51ae51ab726393f613cbda41980c13d08c0aa0e3f304dd341",
+          "musique-e88d3e36b3bb3cdf1268bb5e8b4764e2a8a39b3079bd550f0894e1bba0697642",
+          "musique-2b8f7c5edffe7fae42b58d5eea7b7ce8cdf43c0e165b933170b7fd85bad5edcc",
+          "musique-07c2ce50057dadc18cfe59fc7438a911bb319d00678f3d2d9984ddadea1c5c76"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__161955_51268",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-85a633688a02b11a8cdbc17c4d118f1bcda90d49ed81031bf73503b77d660c7d",
+          "musique-b85c75102f24ee5c1083bc55e7a34363cc3d8d89a97722a519b03143f2564531",
+          "musique-5d921b4d5422f515419339963fae935d3e6443632d64ef3aaae3310d0e5e5c7d",
+          "musique-2d6233015348cc12125529480e50a00cb4eb6ed4a8f3fc8808ee75edf3191de9",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-e35cd7c5e862ca34e6e9f02bf2a17b89cdb847491c66efe8f7bd9e942457f13a",
+          "musique-ccf79909abc536988d81293585975bb7bce350209e7c83cc19c17b3a56ed4090",
+          "musique-17dc5ad9baace866eb40542158dea705545cbd598377a152737ad7a362340364",
+          "musique-7cc28d13d6f52ffe29ab57dd749005e98d0fe292dbdc8b1605f9e104a4b9389e",
+          "musique-6f134f2f7cc001843a2753ee4ea8ae7740a1a1c0d0656513608fca85f816c088"
+        ],
+        "candidate": [
+          "musique-85a633688a02b11a8cdbc17c4d118f1bcda90d49ed81031bf73503b77d660c7d",
+          "musique-b85c75102f24ee5c1083bc55e7a34363cc3d8d89a97722a519b03143f2564531",
+          "musique-5d921b4d5422f515419339963fae935d3e6443632d64ef3aaae3310d0e5e5c7d",
+          "musique-2d6233015348cc12125529480e50a00cb4eb6ed4a8f3fc8808ee75edf3191de9",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-e35cd7c5e862ca34e6e9f02bf2a17b89cdb847491c66efe8f7bd9e942457f13a",
+          "musique-ccf79909abc536988d81293585975bb7bce350209e7c83cc19c17b3a56ed4090",
+          "musique-17dc5ad9baace866eb40542158dea705545cbd598377a152737ad7a362340364",
+          "musique-7cc28d13d6f52ffe29ab57dd749005e98d0fe292dbdc8b1605f9e104a4b9389e",
+          "musique-6f134f2f7cc001843a2753ee4ea8ae7740a1a1c0d0656513608fca85f816c088"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__329075_638959",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.8315546295836225,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.8175295903539445,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-9f384b47ea32c5cd82de48cb5613a1861d6ce2e07250fa6fa870efbf2e966acc",
+          "musique-ca3dda7e0fcc742bb36bf106c0efc63407333b923e70030b1894dddfc329f586",
+          "musique-d51f5404804b92f3810d32f328047fee812a86fd1853f038f050ce8f71c4cdcf",
+          "musique-dd720d3928480d15ada63ec2c643186cca35546999fd062a1df3f74bf2ec20ec",
+          "musique-898adb5185f07e73f9b48152570e69d7c4eb47560d52b5928ba6ceef7a659752",
+          "musique-31d563a385c453981fd2ee56974d05ae5b40f2a81e1b1a9b00b76be93e8a9548",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-008ec1f3eea01f5cc4c0294eedd5c273d95e126dd734a164ad0a9005be664d2a",
+          "musique-ce19ab4d0ee3b1df5293a50dbe33604baa9477d22bb42dbab2780987523946ea",
+          "musique-7b7131b49d7aa904c85ec3c3b7e3e03c0042d05bf7d56a56f8fd4ca37f3b472e"
+        ],
+        "candidate": [
+          "musique-9f384b47ea32c5cd82de48cb5613a1861d6ce2e07250fa6fa870efbf2e966acc",
+          "musique-ca3dda7e0fcc742bb36bf106c0efc63407333b923e70030b1894dddfc329f586",
+          "musique-d51f5404804b92f3810d32f328047fee812a86fd1853f038f050ce8f71c4cdcf",
+          "musique-dd720d3928480d15ada63ec2c643186cca35546999fd062a1df3f74bf2ec20ec",
+          "musique-898adb5185f07e73f9b48152570e69d7c4eb47560d52b5928ba6ceef7a659752",
+          "musique-008ec1f3eea01f5cc4c0294eedd5c273d95e126dd734a164ad0a9005be664d2a",
+          "musique-31d563a385c453981fd2ee56974d05ae5b40f2a81e1b1a9b00b76be93e8a9548",
+          "musique-ce19ab4d0ee3b1df5293a50dbe33604baa9477d22bb42dbab2780987523946ea",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-7b7131b49d7aa904c85ec3c3b7e3e03c0042d05bf7d56a56f8fd4ca37f3b472e"
+        ]
+      },
+      "ndcg_delta": -0.014025039229678016,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__37046_47824",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.6131471927654584,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.6131471927654584,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-2e26d47a6317a165d45ca7c72e84c41402ce8a356485cbcd904e28087e9e69b3",
+          "musique-8f1a0d942de446e556221669b48bbee282e9dbf0380612def8d3cff2de577884",
+          "musique-a22fa73c6ea50eb2c93972c60f655274322f9c56444de0b294870b2108acf48b",
+          "musique-12b8c544ff18a58c5fef8522fd9df62f1c7cec4017fb815a623e1c3c7fe3fcd7",
+          "musique-b6de8bba40dcf9b04e4739699f241332314b0df71a6f58f8366e7bd9fdab7bc1",
+          "musique-99a5e531649f195f7c9dd883a3cd7b97d9f7cc4ad0a903a00993f26a8fdf49b2",
+          "musique-4f876d13ed2b7fc017951568d47884a346c90c0a147e61375e549de20946a2c5",
+          "musique-ee12918ba0657e5a3e3fa0b17b8670838389157bdb77d7f8c9c016ff6f93f65f",
+          "musique-6044e2c1b86a4c94945b77103ea00c3949ef527e19cdec4ccde3b84fa8eaf188",
+          "musique-a9f21701ecd3335f606f9b76fc7a8bd53cd0b31d1387aa290f1023e533e606e8"
+        ],
+        "candidate": [
+          "musique-2e26d47a6317a165d45ca7c72e84c41402ce8a356485cbcd904e28087e9e69b3",
+          "musique-8f1a0d942de446e556221669b48bbee282e9dbf0380612def8d3cff2de577884",
+          "musique-a22fa73c6ea50eb2c93972c60f655274322f9c56444de0b294870b2108acf48b",
+          "musique-12b8c544ff18a58c5fef8522fd9df62f1c7cec4017fb815a623e1c3c7fe3fcd7",
+          "musique-b6de8bba40dcf9b04e4739699f241332314b0df71a6f58f8366e7bd9fdab7bc1",
+          "musique-99a5e531649f195f7c9dd883a3cd7b97d9f7cc4ad0a903a00993f26a8fdf49b2",
+          "musique-4f876d13ed2b7fc017951568d47884a346c90c0a147e61375e549de20946a2c5",
+          "musique-ee12918ba0657e5a3e3fa0b17b8670838389157bdb77d7f8c9c016ff6f93f65f",
+          "musique-6044e2c1b86a4c94945b77103ea00c3949ef527e19cdec4ccde3b84fa8eaf188",
+          "musique-a9f21701ecd3335f606f9b76fc7a8bd53cd0b31d1387aa290f1023e533e606e8"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__3880_26537",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-22203ff37fac701afeb140d464d6023620f3d2861b95c881a2d6bbffe64f6a86",
+          "musique-16649c92f6d688a501276326d1cc0a0c5f9f5064e1d1c7cb84161ff424fcf462",
+          "musique-a9c605ef25daa67ed469106af4226583f17c212846e1187ded4bf4ef673e882b",
+          "musique-fb12c35cf6d57309ad2b9e7482f0d67ace946c9d9920748848a912024143c897",
+          "musique-a30eee7fae88d365c9efd59b4a7917b17258d46ba325829512ed943de50bc7ca",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0",
+          "musique-b5136b548feabebcef4076a88be4ba41eccb8750cfe3ce8f46690498aeea620e",
+          "musique-1a2b80ce58e77cf92fd81c3d70f6ad47309a7c5e09e1ba222510397cec4f374b",
+          "musique-dc1dff678387aea75e5d98c26e50d9f304d9bdaa790c064582a4f329e0fa0df7",
+          "musique-9a4d8f8ef1675aca90ed0bc6926f99019703184c1eff58396e1a5a34794840b9"
+        ],
+        "candidate": [
+          "musique-22203ff37fac701afeb140d464d6023620f3d2861b95c881a2d6bbffe64f6a86",
+          "musique-16649c92f6d688a501276326d1cc0a0c5f9f5064e1d1c7cb84161ff424fcf462",
+          "musique-a9c605ef25daa67ed469106af4226583f17c212846e1187ded4bf4ef673e882b",
+          "musique-fb12c35cf6d57309ad2b9e7482f0d67ace946c9d9920748848a912024143c897",
+          "musique-a30eee7fae88d365c9efd59b4a7917b17258d46ba325829512ed943de50bc7ca",
+          "musique-07c2ce50057dadc18cfe59fc7438a911bb319d00678f3d2d9984ddadea1c5c76",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0",
+          "musique-b5136b548feabebcef4076a88be4ba41eccb8750cfe3ce8f46690498aeea620e",
+          "musique-1a2b80ce58e77cf92fd81c3d70f6ad47309a7c5e09e1ba222510397cec4f374b",
+          "musique-dc1dff678387aea75e5d98c26e50d9f304d9bdaa790c064582a4f329e0fa0df7"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__799719_541630",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 1.0,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-a07262d0dddd91c751f02fd90ef93a74ab17dfc8f41c0ee1f6529de0442af4d4",
+          "musique-5cd292d2fbfa33c0d63a7271df88465b2d5bcda5d47f67d9044cae7af813efbd",
+          "musique-012a7f95b7ff7a0739c0229fe76df6820826dab39dc714afd57988f96f33cfc2",
+          "musique-4f795981203c45679a42eccc112b0425358d35088eac685268fac0ff73991b8b",
+          "musique-a819f13cc4b8658f7019732e9c6ad8c0e2701baadc609647a44e429b755e95c3",
+          "musique-44c2ac5cbad32c0410124fef173aa2195f142ba84e77d4e168f9b833c0cc498f",
+          "musique-04e4b310841161ab9fac5b909eaae1297dbf6fa4a7ba2f27e36c1e48787ad08c",
+          "musique-7ea012b281c59fd81ecf164404b59b67e452cf073df802031bdc566960af1e2d",
+          "musique-a164b340b02c58200c9e3ff9a9bb1f9e66debbe6eded6bc05cb22017ef841367",
+          "musique-21e4ebb7a73954aa8d9752ca1bdb5b340afecf5b9b55f609a3532fa634747412"
+        ],
+        "candidate": [
+          "musique-a07262d0dddd91c751f02fd90ef93a74ab17dfc8f41c0ee1f6529de0442af4d4",
+          "musique-5cd292d2fbfa33c0d63a7271df88465b2d5bcda5d47f67d9044cae7af813efbd",
+          "musique-012a7f95b7ff7a0739c0229fe76df6820826dab39dc714afd57988f96f33cfc2",
+          "musique-4f795981203c45679a42eccc112b0425358d35088eac685268fac0ff73991b8b",
+          "musique-a819f13cc4b8658f7019732e9c6ad8c0e2701baadc609647a44e429b755e95c3",
+          "musique-04e4b310841161ab9fac5b909eaae1297dbf6fa4a7ba2f27e36c1e48787ad08c",
+          "musique-44c2ac5cbad32c0410124fef173aa2195f142ba84e77d4e168f9b833c0cc498f",
+          "musique-a164b340b02c58200c9e3ff9a9bb1f9e66debbe6eded6bc05cb22017ef841367",
+          "musique-7ea012b281c59fd81ecf164404b59b67e452cf073df802031bdc566960af1e2d",
+          "musique-21e4ebb7a73954aa8d9752ca1bdb5b340afecf5b9b55f609a3532fa634747412"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__832123_126102",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.8503449055347546,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.8175295903539445,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-e1e0a6dd3d76b2e0da4b182bd3a158ace84554866d9ab9aedd416b11196de9af",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-0001fbd98f487228b7df2c00bcc2d743447371fe4a253b028c9205913e78e64a",
+          "musique-7b8e6676c72eb0a148a18af26717dc20b411b1093a1d41d9609f83754f49281f",
+          "musique-353db0d4ff912a6dbcbcaa3ddd13c61e863d3eabc5a629c567d9c6d62b9b1c2f",
+          "musique-d7a703a72f2c945d9f3dd91724ceaf05765ac631ac51992c4d9fdefb240c7a93",
+          "musique-c15ab56a037c0d586fd8b136d5dea75a81e54c55bbcd4c9ca6bc8954ac6b6a3d",
+          "musique-92bb1a6ab1ab006e5af3f9be9acb54a2adb798b0ac426f515957482dbed613c3",
+          "musique-aa4302d9fe1d52f75cdf6f55c0a13a6301e2031ddcc11ef786d1664118621d19",
+          "musique-1a4c1b1eeffc51e9e44fec20cc49e52073490afb07578154f9f136b3d2e94b5a"
+        ],
+        "candidate": [
+          "musique-e1e0a6dd3d76b2e0da4b182bd3a158ace84554866d9ab9aedd416b11196de9af",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-0001fbd98f487228b7df2c00bcc2d743447371fe4a253b028c9205913e78e64a",
+          "musique-7b8e6676c72eb0a148a18af26717dc20b411b1093a1d41d9609f83754f49281f",
+          "musique-d7a703a72f2c945d9f3dd91724ceaf05765ac631ac51992c4d9fdefb240c7a93",
+          "musique-c15ab56a037c0d586fd8b136d5dea75a81e54c55bbcd4c9ca6bc8954ac6b6a3d",
+          "musique-353db0d4ff912a6dbcbcaa3ddd13c61e863d3eabc5a629c567d9c6d62b9b1c2f",
+          "musique-92bb1a6ab1ab006e5af3f9be9acb54a2adb798b0ac426f515957482dbed613c3",
+          "musique-aa4302d9fe1d52f75cdf6f55c0a13a6301e2031ddcc11ef786d1664118621d19",
+          "musique-1a4c1b1eeffc51e9e44fec20cc49e52073490afb07578154f9f136b3d2e94b5a"
+        ]
+      },
+      "ndcg_delta": -0.032815315180810156,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__85503_442521",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.3065735963827292,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.3065735963827292,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-9854f1e1caa2594e462e7f0a63da0a6bf00b03ad66524a932fda6abac16a9e98",
+          "musique-d17ce8dd4cfaa5e6898ecdd18c40b04ffcbade0ce0ec17b91b9753b0523b23f7",
+          "musique-0c0dce07e6df6174bc5d105e79d1ac453666a54a2afebe0cbdec0faeefa07b78",
+          "musique-ce19ab4d0ee3b1df5293a50dbe33604baa9477d22bb42dbab2780987523946ea",
+          "musique-24fd191b05f4a320aba1c8cd1c2e054e3447f6a8dd8032c0b7da9384ce31135f",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-538ce38c8693e59dbb69488bb2e841856f32a8f421f5c9073c3f44bb15e54c17",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511",
+          "musique-81796b42dd590796be1d5c92e98b1c176f236d716fa6a40d5a0e726ad84a6781",
+          "musique-137533bce17a29be751841633504c13a2f3e13d56a4c480acd6039aca4ede4b7"
+        ],
+        "candidate": [
+          "musique-9854f1e1caa2594e462e7f0a63da0a6bf00b03ad66524a932fda6abac16a9e98",
+          "musique-d17ce8dd4cfaa5e6898ecdd18c40b04ffcbade0ce0ec17b91b9753b0523b23f7",
+          "musique-0c0dce07e6df6174bc5d105e79d1ac453666a54a2afebe0cbdec0faeefa07b78",
+          "musique-ce19ab4d0ee3b1df5293a50dbe33604baa9477d22bb42dbab2780987523946ea",
+          "musique-24fd191b05f4a320aba1c8cd1c2e054e3447f6a8dd8032c0b7da9384ce31135f",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-04de4bc2cbe0894d83563ad9d7d568403671dcbca21dbb7c2bd516ed82b5a65c",
+          "musique-c44b682b9a65b520d86ed5d749067c4d8e83083128f54a2999c602d1f873269b",
+          "musique-538ce38c8693e59dbb69488bb2e841856f32a8f421f5c9073c3f44bb15e54c17",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "2hop__861128_1136",
+      "category": "2hop",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5802792108518124,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.5802792108518124,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-e90208dadd19649c8c8989b7c9b74e322e7496a629644310e7a177fa2f56733e",
+          "musique-80073fd516ad2f250d8436cb160fdaedc5711c6c05c181753f30c55909c00ed8",
+          "musique-1808af36f4949fbf28776894cc836c9c5a735aaddddbc30d3c131b3f32d628dd",
+          "musique-d5ef300d1646270654b1ed43f55ad0553abd6dea3e0c442c331ae7e5df0eaba1",
+          "musique-318332fedd27ba10ed6ba7addfe65c1a4907192bc3c2ef96b443077625e8b1d6",
+          "musique-a8d52c459282922a9d1c6ef73b573e7f6639077761d0af00688469473013a932",
+          "musique-d61c86c06635a037baebcd243a5e6b5d3f0957bb1ed60945e353ca98ebb61983",
+          "musique-160762a549b2ca1fc07d94a83a0bd97d8003b98d02a685ab98b9dab52996378d",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0",
+          "musique-29222bc4a7d5a2ad8597129e81c99d2c01935f7c37e8ac80699e5df46a5b402b"
+        ],
+        "candidate": [
+          "musique-e90208dadd19649c8c8989b7c9b74e322e7496a629644310e7a177fa2f56733e",
+          "musique-80073fd516ad2f250d8436cb160fdaedc5711c6c05c181753f30c55909c00ed8",
+          "musique-1808af36f4949fbf28776894cc836c9c5a735aaddddbc30d3c131b3f32d628dd",
+          "musique-d5ef300d1646270654b1ed43f55ad0553abd6dea3e0c442c331ae7e5df0eaba1",
+          "musique-318332fedd27ba10ed6ba7addfe65c1a4907192bc3c2ef96b443077625e8b1d6",
+          "musique-a8d52c459282922a9d1c6ef73b573e7f6639077761d0af00688469473013a932",
+          "musique-d61c86c06635a037baebcd243a5e6b5d3f0957bb1ed60945e353ca98ebb61983",
+          "musique-160762a549b2ca1fc07d94a83a0bd97d8003b98d02a685ab98b9dab52996378d",
+          "musique-314ac2acd3f4b69be40c47912e5e2df00ca7563b3ca084e407cf8d152be7e148",
+          "musique-29222bc4a7d5a2ad8597129e81c99d2c01935f7c37e8ac80699e5df46a5b402b"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__108542_305746_691523",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.6508205185601091,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.6508205185601091,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-8a68ed13bc657af2efda59c15838fc171f3a65b2fe5ae2cc0498086539d85e5f",
+          "musique-569487d23cecade73e3dbbb657f610c6d56701aedb198f5e9fc6d339b4d3b22f",
+          "musique-01b4ea1b1b04f71c83de0177fbe292d73d2bb7e57f291a3bfd4e973f335a9946",
+          "musique-234b1d3fe8f98b66ebae250fb66bcea96a8ba536775404a8f99369a2c2c91b25",
+          "musique-27a14e9c271dd5c9c8138cd4431143777438f6d082f3f9e71f9ccef86b6c4c64",
+          "musique-44f14662165bd3685aaa6ada10657a9bd948c1adefb5ba60bbfa586e83a4daad",
+          "musique-a92e30b3f793fcd56b43579538e185a5ee0310825d469c1d01f8f7033cdc4a56",
+          "musique-8535c6737fd5a2d3861be262ba27ab28b9fb32ea48dba0dad872ade125b3f098",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0",
+          "musique-0d50af80276e09c73d4fdecdad20017544271a2ab71f4d72c7ecd14fab8d03e3"
+        ],
+        "candidate": [
+          "musique-8a68ed13bc657af2efda59c15838fc171f3a65b2fe5ae2cc0498086539d85e5f",
+          "musique-569487d23cecade73e3dbbb657f610c6d56701aedb198f5e9fc6d339b4d3b22f",
+          "musique-01b4ea1b1b04f71c83de0177fbe292d73d2bb7e57f291a3bfd4e973f335a9946",
+          "musique-234b1d3fe8f98b66ebae250fb66bcea96a8ba536775404a8f99369a2c2c91b25",
+          "musique-27a14e9c271dd5c9c8138cd4431143777438f6d082f3f9e71f9ccef86b6c4c64",
+          "musique-44f14662165bd3685aaa6ada10657a9bd948c1adefb5ba60bbfa586e83a4daad",
+          "musique-a92e30b3f793fcd56b43579538e185a5ee0310825d469c1d01f8f7033cdc4a56",
+          "musique-8535c6737fd5a2d3861be262ba27ab28b9fb32ea48dba0dad872ade125b3f098",
+          "musique-0d50af80276e09c73d4fdecdad20017544271a2ab71f4d72c7ecd14fab8d03e3",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__156060_561308_65517",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.40179981797758046,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.40179981797758046,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-4f2e1298106071d4ce5240d76344414ea56d7bc1c142909e0ba33caa15a5d2a5",
+          "musique-50d35781c6df33746f388519019138a8ce559fb9708a5c0ae5a0b299ee0afb50",
+          "musique-fda49cc1a65a64419c57a38b6cc470d74ccb4f71434ec881c81aaec02afb6a7f",
+          "musique-cff259f81105c25cbf5917cf43747f26358519fd0483f586af945b7bf99ccde7",
+          "musique-122170fbfe43c963d64a09ba6328df20d2c6278a9bb1cdeeafc6945fcc6733d2",
+          "musique-c9373c41375d07ccb5538003603daa55f060c4b6d06dc2edbb79d1d32583ebc4",
+          "musique-77186d234f43ce33e5a3c6a0dee1f24fcee7950339398aac3592d38ccc655aca",
+          "musique-2c85749f19a0797bd94606bad0cdc70ffc13b0ddc293d6092ff69cfa2526bb12",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-3fa9250a21be4c7c3a94b4e16b8563fc3c617950079cf9618911f451a32aebb3"
+        ],
+        "candidate": [
+          "musique-4f2e1298106071d4ce5240d76344414ea56d7bc1c142909e0ba33caa15a5d2a5",
+          "musique-50d35781c6df33746f388519019138a8ce559fb9708a5c0ae5a0b299ee0afb50",
+          "musique-fda49cc1a65a64419c57a38b6cc470d74ccb4f71434ec881c81aaec02afb6a7f",
+          "musique-cff259f81105c25cbf5917cf43747f26358519fd0483f586af945b7bf99ccde7",
+          "musique-122170fbfe43c963d64a09ba6328df20d2c6278a9bb1cdeeafc6945fcc6733d2",
+          "musique-c9373c41375d07ccb5538003603daa55f060c4b6d06dc2edbb79d1d32583ebc4",
+          "musique-77186d234f43ce33e5a3c6a0dee1f24fcee7950339398aac3592d38ccc655aca",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-2c85749f19a0797bd94606bad0cdc70ffc13b0ddc293d6092ff69cfa2526bb12",
+          "musique-3fa9250a21be4c7c3a94b4e16b8563fc3c617950079cf9618911f451a32aebb3"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__35485_50615_789589",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.23463936301137822,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.23463936301137822,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-bc3bf5ad35abd249a5b2c65ba05c9a0e7ac7d4952e55a84676571a50bdbdd1fa",
+          "musique-d2e925312946e7e7cc6b32788813d67b38be2a740be203e289655878026b7054",
+          "musique-f8797a352347fe01f44d69d6640cb48d777f61ed4a2218149103864593ec3587",
+          "musique-8baed956ea1b6bd75ebeb4d38fc354784cc3331aa2b859b5202800e11462f2ee",
+          "musique-9fc20546f5105a97eab45800ada9f9659a1919edc002cf3ed6212feb7e02f5c6",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-db4d5400cfb94afec7a87028a9a8308d80560eac6c28618ac3d229c8e265ec17",
+          "musique-b3e2e42201be6a1399637243687bc1e89df45b9e458a90877f9fe15283d86768",
+          "musique-70acbc08753a1ed1b1a5cf358392e4c4b1651995ae4b8a499e3c6ec3b8591766"
+        ],
+        "candidate": [
+          "musique-bc3bf5ad35abd249a5b2c65ba05c9a0e7ac7d4952e55a84676571a50bdbdd1fa",
+          "musique-d2e925312946e7e7cc6b32788813d67b38be2a740be203e289655878026b7054",
+          "musique-f8797a352347fe01f44d69d6640cb48d777f61ed4a2218149103864593ec3587",
+          "musique-8baed956ea1b6bd75ebeb4d38fc354784cc3331aa2b859b5202800e11462f2ee",
+          "musique-9fc20546f5105a97eab45800ada9f9659a1919edc002cf3ed6212feb7e02f5c6",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-b3e2e42201be6a1399637243687bc1e89df45b9e458a90877f9fe15283d86768",
+          "musique-db4d5400cfb94afec7a87028a9a8308d80560eac6c28618ac3d229c8e265ec17",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-70acbc08753a1ed1b1a5cf358392e4c4b1651995ae4b8a499e3c6ec3b8591766"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__441916_470455_366897",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.7653606369886217,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.7653606369886217,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-6c645ac8b07beca59463e0b256fcfe29d1c3a457fc0b2f9ba85963784a680db4",
+          "musique-b0a6e02f3741e0be6adb2104c995415e6fafc39a22f7578d11cdb5e78df5323c",
+          "musique-1a4c1b1eeffc51e9e44fec20cc49e52073490afb07578154f9f136b3d2e94b5a",
+          "musique-c0006e90352d33ff866d6455795cf479684e3001624e1a149f4b68ca3421083c",
+          "musique-41de7e9935ac97999ea28ea5ce09900bd39f1fc5af7fdd3ace0b8a19c2f12a8f",
+          "musique-78a55ae6f8e205c3fa46fde1595610b863f0275068e2d088e28c83b7c814ba52",
+          "musique-5b6c42883837a040f088fec6bd1becd621d15505c797d6c98458507d47443f45",
+          "musique-9844a193f273dfb308af041ad7fbab87f56cbaed07425f273c850a84bf6e88b0",
+          "musique-aa4302d9fe1d52f75cdf6f55c0a13a6301e2031ddcc11ef786d1664118621d19",
+          "musique-65eff39686bcc7b3fcbb8c720ce0818d96379391193a2b65b04d2b8560b10f04"
+        ],
+        "candidate": [
+          "musique-6c645ac8b07beca59463e0b256fcfe29d1c3a457fc0b2f9ba85963784a680db4",
+          "musique-b0a6e02f3741e0be6adb2104c995415e6fafc39a22f7578d11cdb5e78df5323c",
+          "musique-1a4c1b1eeffc51e9e44fec20cc49e52073490afb07578154f9f136b3d2e94b5a",
+          "musique-c0006e90352d33ff866d6455795cf479684e3001624e1a149f4b68ca3421083c",
+          "musique-41de7e9935ac97999ea28ea5ce09900bd39f1fc5af7fdd3ace0b8a19c2f12a8f",
+          "musique-78a55ae6f8e205c3fa46fde1595610b863f0275068e2d088e28c83b7c814ba52",
+          "musique-5b6c42883837a040f088fec6bd1becd621d15505c797d6c98458507d47443f45",
+          "musique-eaaa0ecb0eb26e3f2c5f18782300277511687704c26256c309d4f44af0d96ad0",
+          "musique-aa4302d9fe1d52f75cdf6f55c0a13a6301e2031ddcc11ef786d1664118621d19",
+          "musique-c37e259652822916b4d3939446ce5fdc468601262ef13d38e710f277bfd58158"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__48097_300878_161879",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.617319681505689,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.617319681505689,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-7e743d4f2652e6dc68c2bacc44de3784db9ef9ae9759ca35ad7e485850de11ec",
+          "musique-069b0c36854c752e3211d3e5895794d5e1470ce42e5801029feed2ee36812bc5",
+          "musique-f4e8d54701719dd8429bf47065d7cabf4acc13873b00e209994475e74933ed30",
+          "musique-8ae7d53d8600b8208ce7eaed611db64d8c963d033ae9b0ecbb2ecf7d5befa98d",
+          "musique-36eeee22dcdc8045b8de18532f801ff83bd34b058283f5b985721e926fe14cd6",
+          "musique-991a315d2029b1dc0068215b7f232483f1aedea899ab52e5b18c7dd8c18bc825",
+          "musique-34d8c341709f8ebfbd1991db48f37c10baf8450352e56bfd2f9f41ae390bfa68",
+          "musique-d7e33682f61a02f6b233d7d999049941d897a02bcd62755a9acf974f8a3bad47",
+          "musique-636b6f7d61f82cf5f1db3ef067d8b8c570e7df98c282ecec4db67ed6b6cddb8e",
+          "musique-d0ae0150ec904aa7e643279dad5e453bc54063d44af9e7182dbe8f043076d64c"
+        ],
+        "candidate": [
+          "musique-7e743d4f2652e6dc68c2bacc44de3784db9ef9ae9759ca35ad7e485850de11ec",
+          "musique-069b0c36854c752e3211d3e5895794d5e1470ce42e5801029feed2ee36812bc5",
+          "musique-f4e8d54701719dd8429bf47065d7cabf4acc13873b00e209994475e74933ed30",
+          "musique-8ae7d53d8600b8208ce7eaed611db64d8c963d033ae9b0ecbb2ecf7d5befa98d",
+          "musique-36eeee22dcdc8045b8de18532f801ff83bd34b058283f5b985721e926fe14cd6",
+          "musique-991a315d2029b1dc0068215b7f232483f1aedea899ab52e5b18c7dd8c18bc825",
+          "musique-34d8c341709f8ebfbd1991db48f37c10baf8450352e56bfd2f9f41ae390bfa68",
+          "musique-d7e33682f61a02f6b233d7d999049941d897a02bcd62755a9acf974f8a3bad47",
+          "musique-636b6f7d61f82cf5f1db3ef067d8b8c570e7df98c282ecec4db67ed6b6cddb8e",
+          "musique-d0ae0150ec904aa7e643279dad5e453bc54063d44af9e7182dbe8f043076d64c"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__547010_104557_161232",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.23463936301137822,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.23463936301137822,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-b4cd3ea2f5e835da3c11e80b4e74910c4699db3b38dcd15b10b08a81e63cbe32",
+          "musique-1a3b05d9064b09fcfcc20031b921d8f417811173a3fa6ba702c53f65213712df",
+          "musique-ea2d826ee4171ccc1d7af19d3b6fe71c675fd488eefb6596f295f320b239b56b",
+          "musique-51ad6af846a1b01d94946cc2fa45ac1c38e4dddf8876c33ffb060498cb33ed31",
+          "musique-1bc7dbe3fdb8936d2fd71c55f8745ebe21d28f1b749c7c32a6a82c2343556635",
+          "musique-828efc2ad50748bf36a9cf2c01a03114b5d0be24dab1494d0321b8878a9677b6",
+          "musique-759c1ec3fe407a55624122271575a222916689f72585d62aabab8fe105900c35",
+          "musique-73d3f475eadad88b16ecbdc2bff7d455ea140cea35c82aab0d154d2c07b7d1ef",
+          "musique-d98e2ba49c3483e45653da7c79581f4cb5d4821a08c2ca8cf8da86f1914d4309",
+          "musique-78bb879b2c0a00e7920f45111b6357bfc905241497aa9c8447691c77fe711842"
+        ],
+        "candidate": [
+          "musique-b4cd3ea2f5e835da3c11e80b4e74910c4699db3b38dcd15b10b08a81e63cbe32",
+          "musique-1a3b05d9064b09fcfcc20031b921d8f417811173a3fa6ba702c53f65213712df",
+          "musique-ea2d826ee4171ccc1d7af19d3b6fe71c675fd488eefb6596f295f320b239b56b",
+          "musique-51ad6af846a1b01d94946cc2fa45ac1c38e4dddf8876c33ffb060498cb33ed31",
+          "musique-1bc7dbe3fdb8936d2fd71c55f8745ebe21d28f1b749c7c32a6a82c2343556635",
+          "musique-828efc2ad50748bf36a9cf2c01a03114b5d0be24dab1494d0321b8878a9677b6",
+          "musique-73d3f475eadad88b16ecbdc2bff7d455ea140cea35c82aab0d154d2c07b7d1ef",
+          "musique-759c1ec3fe407a55624122271575a222916689f72585d62aabab8fe105900c35",
+          "musique-2d6233015348cc12125529480e50a00cb4eb6ed4a8f3fc8808ee75edf3191de9",
+          "musique-d98e2ba49c3483e45653da7c79581f4cb5d4821a08c2ca8cf8da86f1914d4309"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__581349_355553_476740",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.46927872602275644,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.46927872602275644,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-aeffbe8dda0b764a735dd21dce21c01b04dc138519f18991235aafe8f9b19136",
+          "musique-f4e8d54701719dd8429bf47065d7cabf4acc13873b00e209994475e74933ed30",
+          "musique-d94ce51f70053c4984c4ac7d46cdded3a3499cc0ec3a7232d5486a4040b810f4",
+          "musique-feb7a7a107ef360dfa1d3f60c47e06c22ecc94aa0c99e509015d719120b37c07",
+          "musique-890856ef1826ec6c7a79526b03b131f8df7008f3c1e06c8566cce83ead8ddf3f",
+          "musique-241f12e109c5f66fab2e88c789834048fc16f39e0c8ed60b2519b45e784396d2",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-2c85749f19a0797bd94606bad0cdc70ffc13b0ddc293d6092ff69cfa2526bb12",
+          "musique-a3b06faebfa7d1bb72b70b7ed89a48f61338f487c5bb5ba741d3735a374eb6a3",
+          "musique-18b5b6a4ce1843d1125331f62f92deebbde55cf0121cc7926d6c651f16a6cc10"
+        ],
+        "candidate": [
+          "musique-aeffbe8dda0b764a735dd21dce21c01b04dc138519f18991235aafe8f9b19136",
+          "musique-f4e8d54701719dd8429bf47065d7cabf4acc13873b00e209994475e74933ed30",
+          "musique-d94ce51f70053c4984c4ac7d46cdded3a3499cc0ec3a7232d5486a4040b810f4",
+          "musique-feb7a7a107ef360dfa1d3f60c47e06c22ecc94aa0c99e509015d719120b37c07",
+          "musique-890856ef1826ec6c7a79526b03b131f8df7008f3c1e06c8566cce83ead8ddf3f",
+          "musique-241f12e109c5f66fab2e88c789834048fc16f39e0c8ed60b2519b45e784396d2",
+          "musique-2c85749f19a0797bd94606bad0cdc70ffc13b0ddc293d6092ff69cfa2526bb12",
+          "musique-18b5b6a4ce1843d1125331f62f92deebbde55cf0121cc7926d6c651f16a6cc10",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-a3b06faebfa7d1bb72b70b7ed89a48f61338f487c5bb5ba741d3735a374eb6a3"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop1__756386_809839_451077",
+      "category": "3hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.46927872602275644,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.46927872602275644,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.3333333333333333,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.1,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-6251e6895c8aa7de415db97ef369c85800d1f96537fe32c43932ce4b8c4d6ef5",
+          "musique-43fefc02e4e3f7f6baca68493d17bdd67e8355960f8160dbfb9bd25c02d736f0",
+          "musique-21a6de04a71ecbad1d4ef93ea1578ba49edc757dd2e0a55a2a0e74871e6836c5",
+          "musique-dbf44f8737bddcfe62b8e04044106a3764e3665cce187bf1c1b247a875a50846",
+          "musique-8e958aa8a4b330f555a508cdc12055af32a6a0bf49132fb94940aa8f0b7f5982",
+          "musique-be0bde546ae90684dc61e534d0896e42d0c7b3a82a73a4b651ac6e726836adf4",
+          "musique-708d5f41c47385e0be0c07b040ebae4b3105a4def99781a1dc3b42622daec4ad",
+          "musique-e269c595c45984faea403f84ed94ac03067c1b4ead23a110a7103d1b87558a1d",
+          "musique-8a296e2569f2762d21648a48a904d69572a35ae494e02820e5900de7747f4702",
+          "musique-cda2d8c178cb5324866e7c22afbb4a6cd7cc0dec4b7714799bb5425faf0435dc"
+        ],
+        "candidate": [
+          "musique-6251e6895c8aa7de415db97ef369c85800d1f96537fe32c43932ce4b8c4d6ef5",
+          "musique-43fefc02e4e3f7f6baca68493d17bdd67e8355960f8160dbfb9bd25c02d736f0",
+          "musique-21a6de04a71ecbad1d4ef93ea1578ba49edc757dd2e0a55a2a0e74871e6836c5",
+          "musique-dbf44f8737bddcfe62b8e04044106a3764e3665cce187bf1c1b247a875a50846",
+          "musique-8e958aa8a4b330f555a508cdc12055af32a6a0bf49132fb94940aa8f0b7f5982",
+          "musique-be0bde546ae90684dc61e534d0896e42d0c7b3a82a73a4b651ac6e726836adf4",
+          "musique-708d5f41c47385e0be0c07b040ebae4b3105a4def99781a1dc3b42622daec4ad",
+          "musique-e269c595c45984faea403f84ed94ac03067c1b4ead23a110a7103d1b87558a1d",
+          "musique-8a296e2569f2762d21648a48a904d69572a35ae494e02820e5900de7747f4702",
+          "musique-cda2d8c178cb5324866e7c22afbb4a6cd7cc0dec4b7714799bb5425faf0435dc"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop2__10879_727243_161133",
+      "category": "3hop2",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.7653606369886217,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.7653606369886217,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.6666666666666666,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-40d9b8257b019f99f257efe27233bdfeb03cee23e2896a4f75368bdb2e1a5af2",
+          "musique-d15dbf3979489dfa70c0b0b603d8a58bea997be39aecbdf40fd19019b08c0064",
+          "musique-89ad5c5b5edcdba0c09a7aeb7f3bae5047c3b80f9e945b384dd3b57e3aa92474",
+          "musique-7b695a23e679e06eaddda0305e9afd1a31db9018a58d2bf7176e7c979625c5cc",
+          "musique-7097c80da3ff52bbe896fe4f64f25e056cc4c5f7a2b8d2dc68d968776f1c9c64",
+          "musique-cd018a898f8737536c0ea49d9aa97b41313bd0f18a1d80a94eb72aa39fc2fec9",
+          "musique-461dc87f291665bdce977b75c5f624cea30b7a26e7b936b711f13bb7d62c6e4d",
+          "musique-80bf0df505028a1946f6f034b937d15e9be234f41a6eae4bdd18c656b3da5f25",
+          "musique-fefe0415ae54bce0a52803cf87661e4b02c35ebef5aeb354ffc2d2a2e297d8db",
+          "musique-5996a03c6c7e9ba306d2ff87e1a78b93ba49361a2ec9679a299db1f80a9f78ad"
+        ],
+        "candidate": [
+          "musique-40d9b8257b019f99f257efe27233bdfeb03cee23e2896a4f75368bdb2e1a5af2",
+          "musique-d15dbf3979489dfa70c0b0b603d8a58bea997be39aecbdf40fd19019b08c0064",
+          "musique-89ad5c5b5edcdba0c09a7aeb7f3bae5047c3b80f9e945b384dd3b57e3aa92474",
+          "musique-7b695a23e679e06eaddda0305e9afd1a31db9018a58d2bf7176e7c979625c5cc",
+          "musique-7097c80da3ff52bbe896fe4f64f25e056cc4c5f7a2b8d2dc68d968776f1c9c64",
+          "musique-cd018a898f8737536c0ea49d9aa97b41313bd0f18a1d80a94eb72aa39fc2fec9",
+          "musique-461dc87f291665bdce977b75c5f624cea30b7a26e7b936b711f13bb7d62c6e4d",
+          "musique-5996a03c6c7e9ba306d2ff87e1a78b93ba49361a2ec9679a299db1f80a9f78ad",
+          "musique-80bf0df505028a1946f6f034b937d15e9be234f41a6eae4bdd18c656b3da5f25",
+          "musique-fefe0415ae54bce0a52803cf87661e4b02c35ebef5aeb354ffc2d2a2e297d8db"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "3hop2__89818_567672_4107",
+      "category": "3hop2",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.8710785440003369,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.8710785440003369,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-05fa2d5f8daff2daf4498fc3cf82f72275d20373a6697da1adb3f4b876eb2fb9",
+          "musique-7bd9015d04a26983bb2c896ffaa7378963e5ca8a944e32f5a18aeaebf87bf894",
+          "musique-4ea1b077da6e5bd4a3de82324b6a8e0f7b2365abcd64cbfdfbd2dd9808c5ccf6",
+          "musique-b5a1f8cb01637d99867ec9a99719c59ab4a5e08bced729b7fe2db481fe55de58",
+          "musique-7b52b14d33dc372040d7f1044fd5830d64e701426c6c2f195bd6cda5d7bccbf4",
+          "musique-6745d268a1c66fcb8e6e5ce6e485cb4cb0a3a6c4c14314dac3704ebec3ae52e2",
+          "musique-a8bb30af19ee2d6ff5151bd2156fbd42c20b6fb4248400550c9d01440910a067",
+          "musique-ab186e0fbbf1a257fca5d34b064f77f779344b785564d59e6f748d90108451d6",
+          "musique-0c7172c1a8cc330f80a172ca7ca7526713dcd6f754e0836eb9dbc1ca7cebffa2",
+          "musique-242a76617e74463e2430473cfeadb2342bd5b1c4af577e4eca0b6de559824a45"
+        ],
+        "candidate": [
+          "musique-05fa2d5f8daff2daf4498fc3cf82f72275d20373a6697da1adb3f4b876eb2fb9",
+          "musique-7bd9015d04a26983bb2c896ffaa7378963e5ca8a944e32f5a18aeaebf87bf894",
+          "musique-4ea1b077da6e5bd4a3de82324b6a8e0f7b2365abcd64cbfdfbd2dd9808c5ccf6",
+          "musique-b5a1f8cb01637d99867ec9a99719c59ab4a5e08bced729b7fe2db481fe55de58",
+          "musique-7b52b14d33dc372040d7f1044fd5830d64e701426c6c2f195bd6cda5d7bccbf4",
+          "musique-6745d268a1c66fcb8e6e5ce6e485cb4cb0a3a6c4c14314dac3704ebec3ae52e2",
+          "musique-a8bb30af19ee2d6ff5151bd2156fbd42c20b6fb4248400550c9d01440910a067",
+          "musique-ab186e0fbbf1a257fca5d34b064f77f779344b785564d59e6f748d90108451d6",
+          "musique-0c7172c1a8cc330f80a172ca7ca7526713dcd6f754e0836eb9dbc1ca7cebffa2",
+          "musique-242a76617e74463e2430473cfeadb2342bd5b1c4af577e4eca0b6de559824a45"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__122303_539917_832557_5583",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5319460297682747,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.553486104522623,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-2455eb7acfa0fa7cba0c98180f4448f77f64376aeeb74fc12c4866d60c1d9c9c",
+          "musique-046f07e569e29b79aef0f8659a1db35ffaaf80f5ab50a904c042fa178bbe36e0",
+          "musique-78a55ae6f8e205c3fa46fde1595610b863f0275068e2d088e28c83b7c814ba52",
+          "musique-312564f285bf69c339d56c5ebb3bec370e3a754785eaf06d87005ea3cb06937e",
+          "musique-446e5e2e5ae5cbb21995aa7ba311e3984208d9b631203380370138a4b5ca5fb1",
+          "musique-a618028ae98e13ac02d7ed5df56ea2cefb32a59bccf4ab047ae8fc98ba9fa842",
+          "musique-636199d4ec20132f93013bbcd3c5c34c7a38946777978c6ace5fc46d92bd0102",
+          "musique-0234191cb80d10856a9827719b9a2444643788acae9228a9ef47ff210c776501",
+          "musique-c0006e90352d33ff866d6455795cf479684e3001624e1a149f4b68ca3421083c",
+          "musique-c48426bfbe8bcfa9bcd2e3f763b2e8b8b73aa2496d1cb39f339d2286e57dbb90"
+        ],
+        "candidate": [
+          "musique-2455eb7acfa0fa7cba0c98180f4448f77f64376aeeb74fc12c4866d60c1d9c9c",
+          "musique-046f07e569e29b79aef0f8659a1db35ffaaf80f5ab50a904c042fa178bbe36e0",
+          "musique-78a55ae6f8e205c3fa46fde1595610b863f0275068e2d088e28c83b7c814ba52",
+          "musique-312564f285bf69c339d56c5ebb3bec370e3a754785eaf06d87005ea3cb06937e",
+          "musique-446e5e2e5ae5cbb21995aa7ba311e3984208d9b631203380370138a4b5ca5fb1",
+          "musique-c0006e90352d33ff866d6455795cf479684e3001624e1a149f4b68ca3421083c",
+          "musique-a618028ae98e13ac02d7ed5df56ea2cefb32a59bccf4ab047ae8fc98ba9fa842",
+          "musique-1a4c1b1eeffc51e9e44fec20cc49e52073490afb07578154f9f136b3d2e94b5a",
+          "musique-22db45ae70975757ceb3d40ebb64ca350e43e6dec3c7f4a1ac0446855ab79d7a",
+          "musique-4c4722c782fdf22e554dccb29458b12e4c4cb4a5901c311c2549420c553c34f6"
+        ]
+      },
+      "ndcg_delta": 0.02154007475434838,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__133590_631695_74047_576905",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5855700749881525,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.5855700749881525,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-ca73abeb9776ace7b0ebb2aee19abcb23b8e1fccf1f1248849d5e2be59b079e0",
+          "musique-30adc4df57e6d63ff2ec9fdf2797d8373934400f504af803552af6630166a58e",
+          "musique-d252577b5a0bacef3cb61a7e54a35da390d2f01121739da1399cef8fae02c422",
+          "musique-256df7b137bc98b2ab9a06509b43f2a7ebe1702520b5ab0ac8571aa7716ac5a5",
+          "musique-8a296e2569f2762d21648a48a904d69572a35ae494e02820e5900de7747f4702",
+          "musique-02162eeae3c937321436859a862b667a371229a7477097cb0336bd3190ad6bd0",
+          "musique-52a2c0af95270dda31c8743660f66830cd316c22941d956e14d0a9b93a68a356",
+          "musique-6dda59859dd80f50039309a5d369c410d94991e3a988d3aaae149fa8242b7d81",
+          "musique-32752c9a554306512561274c81049e0903d7fc79162f0f724d05a280af61b086",
+          "musique-bdb2764c61313fc449ffda693bb58fccaeff4c4cca1d96ee1e98a9f9bd91c39b"
+        ],
+        "candidate": [
+          "musique-ca73abeb9776ace7b0ebb2aee19abcb23b8e1fccf1f1248849d5e2be59b079e0",
+          "musique-30adc4df57e6d63ff2ec9fdf2797d8373934400f504af803552af6630166a58e",
+          "musique-d252577b5a0bacef3cb61a7e54a35da390d2f01121739da1399cef8fae02c422",
+          "musique-256df7b137bc98b2ab9a06509b43f2a7ebe1702520b5ab0ac8571aa7716ac5a5",
+          "musique-8a296e2569f2762d21648a48a904d69572a35ae494e02820e5900de7747f4702",
+          "musique-02162eeae3c937321436859a862b667a371229a7477097cb0336bd3190ad6bd0",
+          "musique-52a2c0af95270dda31c8743660f66830cd316c22941d956e14d0a9b93a68a356",
+          "musique-6dda59859dd80f50039309a5d369c410d94991e3a988d3aaae149fa8242b7d81",
+          "musique-32752c9a554306512561274c81049e0903d7fc79162f0f724d05a280af61b086",
+          "musique-bdb2764c61313fc449ffda693bb58fccaeff4c4cca1d96ee1e98a9f9bd91c39b"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__495205_206801_524406_52808",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5078961547485289,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.5078961547485289,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-0fcded2f6cd254f3bdff9baba37b8ce87779c3d980769ee7ade0eb820ca2874d",
+          "musique-1ef1e81589394f44d4898d77e39c6b113fb22c6e8143296065e20ac7ff8c51fc",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-e05508d51b889ddca368f548767c8c8704b79a863a6df3f8fd3ca88d4f11dcdb",
+          "musique-fefe0415ae54bce0a52803cf87661e4b02c35ebef5aeb354ffc2d2a2e297d8db",
+          "musique-f7c3fe04415bd03a8b5439085d909a5e382596a1218baffc18a4298f4b6b0687",
+          "musique-050a314ee56cfc1aff374a2531e0ad7bde51f80fbc89d3410728a9f525d254ce",
+          "musique-828efc2ad50748bf36a9cf2c01a03114b5d0be24dab1494d0321b8878a9677b6",
+          "musique-7c01c0d30949a08d3a698a1f429531e239154e5f04ad3a45449ff3f66f663e4f",
+          "musique-c15ab56a037c0d586fd8b136d5dea75a81e54c55bbcd4c9ca6bc8954ac6b6a3d"
+        ],
+        "candidate": [
+          "musique-0fcded2f6cd254f3bdff9baba37b8ce87779c3d980769ee7ade0eb820ca2874d",
+          "musique-1ef1e81589394f44d4898d77e39c6b113fb22c6e8143296065e20ac7ff8c51fc",
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-e05508d51b889ddca368f548767c8c8704b79a863a6df3f8fd3ca88d4f11dcdb",
+          "musique-fefe0415ae54bce0a52803cf87661e4b02c35ebef5aeb354ffc2d2a2e297d8db",
+          "musique-f7c3fe04415bd03a8b5439085d909a5e382596a1218baffc18a4298f4b6b0687",
+          "musique-050a314ee56cfc1aff374a2531e0ad7bde51f80fbc89d3410728a9f525d254ce",
+          "musique-828efc2ad50748bf36a9cf2c01a03114b5d0be24dab1494d0321b8878a9677b6",
+          "musique-7c01c0d30949a08d3a698a1f429531e239154e5f04ad3a45449ff3f66f663e4f",
+          "musique-4da3dfdd731b61c69a9272c7f5b3a82190f15f203c768b1344c256575f648f07"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__709382_146811_31223_24600",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.9108532513310018,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.4,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.8843252268199594,
+          "recall_at_10": null,
+          "judged_recall_at_10": 1.0,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.4,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-82096561865a6dfbb44b8ad877ec5f16813c1d5e70afe56b40df5ff2b2df6b3f",
+          "musique-d269e87e751ebd45fd1b224219c246c7ce7e2e83c9a455a26813f4bf44923ff8",
+          "musique-e2d1499228847ac546aa49f9363765ecd6e570618a2aaa3907a66d9ced1594e7",
+          "musique-d2991152aa9831b767b6b2695bfc73b30501544ab479c08d280bb1abc1df5220",
+          "musique-7afa1e962484d0f477fbb293f02a7686c6e021a52f960a8e0d19af659425a555",
+          "musique-4a834c7d5585ac15e6c138a06b958481d118f695f0fe05e780d9a4e09be2f5a5",
+          "musique-6f134f2f7cc001843a2753ee4ea8ae7740a1a1c0d0656513608fca85f816c088",
+          "musique-fed7f2af300df40ae66dbbe23cc2a60d96b1c3f5796872a2a182833bacb98ab0",
+          "musique-5f4c89e89b3341cd0bb27bfc4a18ecffc2da4c167dd8dc249087240a778de405",
+          "musique-ab312a27492af94de8f376c2ad4b93d6981861953e145fde9777d31e75479984"
+        ],
+        "candidate": [
+          "musique-82096561865a6dfbb44b8ad877ec5f16813c1d5e70afe56b40df5ff2b2df6b3f",
+          "musique-d269e87e751ebd45fd1b224219c246c7ce7e2e83c9a455a26813f4bf44923ff8",
+          "musique-e2d1499228847ac546aa49f9363765ecd6e570618a2aaa3907a66d9ced1594e7",
+          "musique-d2991152aa9831b767b6b2695bfc73b30501544ab479c08d280bb1abc1df5220",
+          "musique-4a834c7d5585ac15e6c138a06b958481d118f695f0fe05e780d9a4e09be2f5a5",
+          "musique-6f134f2f7cc001843a2753ee4ea8ae7740a1a1c0d0656513608fca85f816c088",
+          "musique-7afa1e962484d0f477fbb293f02a7686c6e021a52f960a8e0d19af659425a555",
+          "musique-ab312a27492af94de8f376c2ad4b93d6981861953e145fde9777d31e75479984",
+          "musique-fed7f2af300df40ae66dbbe23cc2a60d96b1c3f5796872a2a182833bacb98ab0",
+          "musique-2d18ca5c87b8b3863555b14eab8f8e3a252aa5f52b0ce4d3595844ddacaaad9a"
+        ]
+      },
+      "ndcg_delta": -0.026528024511042414,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__807033_715233_91861_124556",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.44149241373678083,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.44149241373678083,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-1942beefb5f48377a576bdaa4bf6530956409cf05104ea43601c90d55d4a5061",
+          "musique-5c51475a6be8991ecb30dc4236581bb9b02cb2ee1b39df0ab357f681af13fee5",
+          "musique-9e8778ccc0f4521f8fe57ac746507786d330cbfeac4ff94bc82be7fc5cc52b4e",
+          "musique-5c096b05b3e2af4b9561eaebffe2e24a1fbf372e9111c17380913b73f46aa4c2",
+          "musique-96915f93df7048e9779de7d85f0bedf47b738100d61e89e33c593cc1e0a600f5",
+          "musique-91b6f0c66e0820f25d79a26271207702c7567a39d813c806fc8e74bd547b674e",
+          "musique-54cf15f33fb79b872ebfd95cb93c6cfc2a8f683f2e560fa4a1bf02190decb1eb",
+          "musique-b89fe0eee6e29aa81f5d447d5168908ceb1caca31ac91211cb191dfc1e593ac6",
+          "musique-9af00f3f828ae0fec7b37c15d5e4896df5c783b8b6756489eddd45ff76c02d28",
+          "musique-c968f990bbdc7794d7405932ca7c67148c7238f08072104227b0ce1b0e03cd65"
+        ],
+        "candidate": [
+          "musique-1942beefb5f48377a576bdaa4bf6530956409cf05104ea43601c90d55d4a5061",
+          "musique-5c51475a6be8991ecb30dc4236581bb9b02cb2ee1b39df0ab357f681af13fee5",
+          "musique-9e8778ccc0f4521f8fe57ac746507786d330cbfeac4ff94bc82be7fc5cc52b4e",
+          "musique-5c096b05b3e2af4b9561eaebffe2e24a1fbf372e9111c17380913b73f46aa4c2",
+          "musique-96915f93df7048e9779de7d85f0bedf47b738100d61e89e33c593cc1e0a600f5",
+          "musique-91b6f0c66e0820f25d79a26271207702c7567a39d813c806fc8e74bd547b674e",
+          "musique-54cf15f33fb79b872ebfd95cb93c6cfc2a8f683f2e560fa4a1bf02190decb1eb",
+          "musique-9af00f3f828ae0fec7b37c15d5e4896df5c783b8b6756489eddd45ff76c02d28",
+          "musique-b89fe0eee6e29aa81f5d447d5168908ceb1caca31ac91211cb191dfc1e593ac6",
+          "musique-ef083b551db966c112054b9284a200f47c1accc2e4e51bf051f4c375ba3c4cb4"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop1__89464_85073_830682_68600",
+      "category": "4hop1",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.369453583111095,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.3764290720714305,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-daa4a378750aaa8dbaef82a8ac6372f378ba72842e8b5f36f65aa2e049b63669",
+          "musique-7a89f41d47f1cbe0754daf1d43ceada92894df6eddcad1384875324fb7c3b870",
+          "musique-e7d7e818268ea9ffa8079d687ad57e50521cc59f4fa35d663097bd363bee0ecf",
+          "musique-2c8721c4fbc7d1ef5ce0886c178fdbee1e6f6ab5d7cc93b941607a2757caae33",
+          "musique-4b5e1ca922232dc9ee4539f923c44c606a650100c0eca89cefdcac2e4b418885",
+          "musique-d3c5f453fc28f5acdf140db93e9793d6ca8774a0c467be8d2ee6ee3bedc6c904",
+          "musique-38d92f80ad42baa85c0370469f7f1a8bdca0ce8d7e2875da82a16cc8a3a7c75c",
+          "musique-c400d3452bc80b9d5aedf3a5f20fb939c1cb213d3a2757dbf5642ae3800b146a",
+          "musique-cc2508abf4fe56c81678f3593de571c705ed902b18ad347fd238f867140ab1a8",
+          "musique-74f2bcee47bff249b1b921b008c0faa636c75abd9e605eb379679b9284a30c0e"
+        ],
+        "candidate": [
+          "musique-daa4a378750aaa8dbaef82a8ac6372f378ba72842e8b5f36f65aa2e049b63669",
+          "musique-7a89f41d47f1cbe0754daf1d43ceada92894df6eddcad1384875324fb7c3b870",
+          "musique-e7d7e818268ea9ffa8079d687ad57e50521cc59f4fa35d663097bd363bee0ecf",
+          "musique-2c8721c4fbc7d1ef5ce0886c178fdbee1e6f6ab5d7cc93b941607a2757caae33",
+          "musique-4b5e1ca922232dc9ee4539f923c44c606a650100c0eca89cefdcac2e4b418885",
+          "musique-d3c5f453fc28f5acdf140db93e9793d6ca8774a0c467be8d2ee6ee3bedc6c904",
+          "musique-c400d3452bc80b9d5aedf3a5f20fb939c1cb213d3a2757dbf5642ae3800b146a",
+          "musique-38d92f80ad42baa85c0370469f7f1a8bdca0ce8d7e2875da82a16cc8a3a7c75c",
+          "musique-cc2508abf4fe56c81678f3593de571c705ed902b18ad347fd238f867140ab1a8",
+          "musique-74f2bcee47bff249b1b921b008c0faa636c75abd9e605eb379679b9284a30c0e"
+        ]
+      },
+      "ndcg_delta": 0.0069754889603355075,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop2__61674_57411_1952_78767",
+      "category": "4hop2",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.592512031964586,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.592512031964586,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-b8ceb6d52ac072e38ad099947860379d0a5c623946d6af5988e8ea801ce2d784",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511",
+          "musique-5f94b23e5b5c138bc2b3270cfa1d9b64da6ac3c1505f317e0e858ec271e9253d",
+          "musique-bf9c9091c49bdcba10e42517df2686cece7cf9f187abf2b52c0768c0baa8203f",
+          "musique-9f7402f1bd5325ff6a8c5b51cd0ce61175c4f8cdae6af421716384238070e74a",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-9519c0eb3e52304e38a664d2ed59c93e0203b31a1b7c48d8855e54c6a2b047cf",
+          "musique-35974936028065ac16d90e9a5a21494aa6733cb00d866a2c40f6025894c0442d",
+          "musique-b4b7298c6f7f393345fd7255d772e78656f2e4c8e99d8abb269204c7e36f1bdf",
+          "musique-263ebef65749b8bfc56f2e1129d65cf0f1b4b356c1ed8eaf3c736aca707c0620"
+        ],
+        "candidate": [
+          "musique-b8ceb6d52ac072e38ad099947860379d0a5c623946d6af5988e8ea801ce2d784",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511",
+          "musique-5f94b23e5b5c138bc2b3270cfa1d9b64da6ac3c1505f317e0e858ec271e9253d",
+          "musique-bf9c9091c49bdcba10e42517df2686cece7cf9f187abf2b52c0768c0baa8203f",
+          "musique-9f7402f1bd5325ff6a8c5b51cd0ce61175c4f8cdae6af421716384238070e74a",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-9519c0eb3e52304e38a664d2ed59c93e0203b31a1b7c48d8855e54c6a2b047cf",
+          "musique-35974936028065ac16d90e9a5a21494aa6733cb00d866a2c40f6025894c0442d",
+          "musique-b4b7298c6f7f393345fd7255d772e78656f2e4c8e99d8abb269204c7e36f1bdf",
+          "musique-263ebef65749b8bfc56f2e1129d65cf0f1b4b356c1ed8eaf3c736aca707c0620"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop3__146207_362455_28338_160498",
+      "category": "4hop3",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5205067333228022,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.5205067333228022,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-c20240cf232c4221a847618fd1bb4ab7a0e4504784bf61283d900ce96b51e95b",
+          "musique-7b10cd02252ba8cbaa295b9da8bb888cf7e644ba529eff1c7ce190d3abf01bcd",
+          "musique-b666619604fc05faf404019840c40152d9ebd506a86bdb03fbff7673d93c8035",
+          "musique-2d4b789722d3d0caf7d6091a2095408edf0b604f1f639c67e0cbf0f4fd33a49d",
+          "musique-17a00cd445161b09819d859927879297adaea788cf01dbff86922e3b179ee8df",
+          "musique-3152518b76aefc7a0980e0ed2c4406a0882c590ff802f313856a1510f8589fee",
+          "musique-dab438bc1b343dfbee4a4acb44d154216ee6379250aff47c9ae94fee6ea297d9",
+          "musique-1565767f6ca216a31e3e4c608f05aa9ebd66f6d975a5abf1c41f5639cc41b9b1",
+          "musique-8fc4c34183b7b76b16753675c5636cb2b282efaf8eb63a5b28279d964f586633",
+          "musique-7c9cff06193e1067484d9c22c5cafd9ea21c25b20e7eb9e2472b9f719c02dc47"
+        ],
+        "candidate": [
+          "musique-c20240cf232c4221a847618fd1bb4ab7a0e4504784bf61283d900ce96b51e95b",
+          "musique-7b10cd02252ba8cbaa295b9da8bb888cf7e644ba529eff1c7ce190d3abf01bcd",
+          "musique-b666619604fc05faf404019840c40152d9ebd506a86bdb03fbff7673d93c8035",
+          "musique-2d4b789722d3d0caf7d6091a2095408edf0b604f1f639c67e0cbf0f4fd33a49d",
+          "musique-17a00cd445161b09819d859927879297adaea788cf01dbff86922e3b179ee8df",
+          "musique-3152518b76aefc7a0980e0ed2c4406a0882c590ff802f313856a1510f8589fee",
+          "musique-dab438bc1b343dfbee4a4acb44d154216ee6379250aff47c9ae94fee6ea297d9",
+          "musique-1565767f6ca216a31e3e4c608f05aa9ebd66f6d975a5abf1c41f5639cc41b9b1",
+          "musique-8fc4c34183b7b76b16753675c5636cb2b282efaf8eb63a5b28279d964f586633",
+          "musique-7c9cff06193e1067484d9c22c5cafd9ea21c25b20e7eb9e2472b9f719c02dc47"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop3__381858_46089_61674_1952",
+      "category": "4hop3",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.5363781864793108,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.5363781864793108,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.75,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.3,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511",
+          "musique-63b0fa7934a162bf860d204f32c76f779835637a716cef1f2c2bfeb48ac685b5",
+          "musique-96915f93df7048e9779de7d85f0bedf47b738100d61e89e33c593cc1e0a600f5",
+          "musique-c15ab56a037c0d586fd8b136d5dea75a81e54c55bbcd4c9ca6bc8954ac6b6a3d",
+          "musique-9f7402f1bd5325ff6a8c5b51cd0ce61175c4f8cdae6af421716384238070e74a",
+          "musique-84db397d74b02ccd45e504bad376c0942de06b3731c9df6ffc15872ddacac2c6",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-4da3dfdd731b61c69a9272c7f5b3a82190f15f203c768b1344c256575f648f07",
+          "musique-e80e4e5dc96d1bad0cdab7e5a383782b2f6cadb75e14ea15f76c16046dd75335"
+        ],
+        "candidate": [
+          "musique-8a7132fea0a8103100bdddc4e81ee6ff4bd9eb983bc2d41c8eb7c25ffe327cd6",
+          "musique-78ae741f83bb37c4939c343ebe7de71bd3f16615b944f9052d2270621bcf1511",
+          "musique-63b0fa7934a162bf860d204f32c76f779835637a716cef1f2c2bfeb48ac685b5",
+          "musique-96915f93df7048e9779de7d85f0bedf47b738100d61e89e33c593cc1e0a600f5",
+          "musique-c15ab56a037c0d586fd8b136d5dea75a81e54c55bbcd4c9ca6bc8954ac6b6a3d",
+          "musique-9f7402f1bd5325ff6a8c5b51cd0ce61175c4f8cdae6af421716384238070e74a",
+          "musique-84db397d74b02ccd45e504bad376c0942de06b3731c9df6ffc15872ddacac2c6",
+          "musique-8e09c63260634e4d57c9deb061a1a5b6e2d75809ab6b5d1395e1402facc1ff6b",
+          "musique-4da3dfdd731b61c69a9272c7f5b3a82190f15f203c768b1344c256575f648f07",
+          "musique-a9ff1d0f9a5d29560e7c5bbe0d7885760077f53177523e442d185df4c67d469a"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    },
+    {
+      "query_id": "4hop3__838995_608613_5529_4107",
+      "category": "4hop3",
+      "metrics": {
+        "baseline": {
+          "ndcg_at_10": 0.298254219601818,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        },
+        "candidate": {
+          "ndcg_at_10": 0.298254219601818,
+          "recall_at_10": null,
+          "judged_recall_at_10": 0.5,
+          "judgments_complete": false,
+          "judged_result_fraction": 0.2,
+          "answerable": true,
+          "no_useful_result": false,
+          "empty_result": false,
+          "returned_on_unanswerable": null
+        }
+      },
+      "rankings": {
+        "baseline": [
+          "musique-30bcf4d67fc7e66da0c09650897acb7567cde497156d852f34227f8549a2fba2",
+          "musique-405d99b7ba3ca8d5b27779558b76730898ecd5dd102e22bd4c03b140e2253eb3",
+          "musique-67d8ab96181413b457c7f0ee573ace34bea34c298d7e1798d22a6f053a895c96",
+          "musique-4ea1b077da6e5bd4a3de82324b6a8e0f7b2365abcd64cbfdfbd2dd9808c5ccf6",
+          "musique-ab186e0fbbf1a257fca5d34b064f77f779344b785564d59e6f748d90108451d6",
+          "musique-a8bb30af19ee2d6ff5151bd2156fbd42c20b6fb4248400550c9d01440910a067",
+          "musique-9bb1da60cef27d6dfe64d21d2a9d88a73888bff91e67c21dd6bbf9184a762ad5",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-c0ac6f39bca9b6e8fbd8e46092abb82f1ce1b2164579424cc3721f0ab41cc8e2",
+          "musique-ffb4bbbabf084178e9989819596da408a6cdfaea7296aaff2446413d80843f44"
+        ],
+        "candidate": [
+          "musique-30bcf4d67fc7e66da0c09650897acb7567cde497156d852f34227f8549a2fba2",
+          "musique-405d99b7ba3ca8d5b27779558b76730898ecd5dd102e22bd4c03b140e2253eb3",
+          "musique-67d8ab96181413b457c7f0ee573ace34bea34c298d7e1798d22a6f053a895c96",
+          "musique-4ea1b077da6e5bd4a3de82324b6a8e0f7b2365abcd64cbfdfbd2dd9808c5ccf6",
+          "musique-ab186e0fbbf1a257fca5d34b064f77f779344b785564d59e6f748d90108451d6",
+          "musique-a8bb30af19ee2d6ff5151bd2156fbd42c20b6fb4248400550c9d01440910a067",
+          "musique-9bb1da60cef27d6dfe64d21d2a9d88a73888bff91e67c21dd6bbf9184a762ad5",
+          "musique-98d4d48ce5c9671e5d1dd8b0896481f118812ce12bec697f472e7a500221b244",
+          "musique-c0ac6f39bca9b6e8fbd8e46092abb82f1ce1b2164579424cc3721f0ab41cc8e2",
+          "musique-ffb4bbbabf084178e9989819596da408a6cdfaea7296aaff2446413d80843f44"
+        ]
+      },
+      "ndcg_delta": 0.0,
+      "recall_delta": 0.0
+    }
+  ],
+  "mean_ndcg_delta": -0.0014950938402282232,
+  "mean_recall_delta": 0.0,
+  "wins": 2,
+  "losses": 3,
+  "limits": [
+    "Observed development, not confirmation.",
+    "No new default, performance or agent-task claim.",
+    "Broader security and lifecycle acceptance remains required before publication."
+  ],
+  "server_base_revision": "d6503f21934e4042006f114ac79f4ed8a917cac7",
+  "experiment": "private_strength_zero_affinity_floor_v1",
+  "protocol_sha256": "0b974ae58b95b359b0eadc9a3b350c6655ae1ba6f0d7aac41f393c4a6019d5fe",
+  "data_identity": {
+    "musique-protocol-v2.json": "d7e0fb87c9cdf0ce065c61f42af1d741b1a494407c7f27354a7b421526f2cfdc",
+    "musique-e5-fixture.json": "3ae53f00df7e9ebb1e337f3a96a91a2c6ae8fab4de72570aec86982b1560abdb",
+    "musique-relations.json": "2bcc91a1851a286da5bc3abacd49e3c0774ccccd5d25965f39722836e2748dc1",
+    "musique-e5-generation.json": "0ba7dbe8268d9d726126d935cdcc922d6a2485a613a6047f369363fdba6ca6f0",
+    "protocol-v1.json": "0b974ae58b95b359b0eadc9a3b350c6655ae1ba6f0d7aac41f393c4a6019d5fe"
+  }
+}

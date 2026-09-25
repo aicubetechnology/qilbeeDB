@@ -180,6 +180,7 @@ nav:
     - Company Consumer Progress: api/company-consumer-directory.md
     - External Graph Consolidation: api/graph-consolidation.md
     - Graph Memory Evidence: research/graph-memory-evidence.md
+    - Zero-Floor Affinity Results: research/graph-zero-affinity-floor-development.md
     - Delivery Acceptance: research/delivery-acceptance.md
     - QMN Contract Mapping: research/qmn-contract-mapping.md
     - Consolidation: agent-memory/consolidation.md
