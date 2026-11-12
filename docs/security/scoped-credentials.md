@@ -38,7 +38,7 @@ Capabilities are independent; names do not imply other permissions:
 | `tool_develop` | Register artifacts, request development and request cancellation in a granted scope |
 | `tool_report` | Report development outcomes as the bound executor subject in a granted scope |
 | `tool_admin` | Register and inspect immutable tenant executor profiles |
-| `credential_admin` | Issue, inspect, rotate and revoke tenant credentials |
+| `credential_admin` | Manage tenant credentials and use company-wide memory, learning and administration inspection routes |
 
 A resource grant is an exact tuple of project, optional mission, agent and
 visibility. Omitting a mission means the missionless scope; it is not a wildcard.
@@ -48,10 +48,38 @@ JSON tuple encoding preserves component boundaries, including separator-like
 characters inside identifiers. Two tenants with identical project and agent IDs
 therefore address different storage namespaces.
 
-An administrator does not implicitly receive memory read access. A proposing
-credential does not implicitly receive evaluation, policy or credential powers.
-`authorize` must be called for each resource operation; its returned namespace is
-derived from the current credential rather than a caller-provided tenant or owner.
+## Scoped access and company administration
+
+Choose a credential according to the person's or application's task:
+
+| Task | Required authority | Data boundary |
+| --- | --- | --- |
+| Read through ordinary scoped memory APIs | `memory_read` and a matching grant or scope policy | Authenticated company, selected resource scope and private subject |
+| Discover and inspect retained company memory | `credential_admin` on the company administration routes | The authenticated company, including all private subjects; individual memory grants are unnecessary |
+| Inspect the company learning catalog and evidence | `credential_admin` on the company learning administration routes | The authenticated company, including retained scoped resources and company registries |
+
+A credential with `credential_admin` can inspect company data through these
+administrative routes even when it has no `memory_read` capability or memory
+grants. Exact grants do not narrow this company-wide inspection authority.
+Ordinary scoped reads still require their own operation capability and authorized
+scope; a company administrator without those grants receives a denial there.
+See [company memory administration](company-memory-administration.md) and the
+[company learning catalog](../api/company-learning-catalog.md) for discovery and
+selection workflows.
+
+Private visibility separates ordinary application subjects; it does not hide
+retained data from an authorized company administrator. Grant `credential_admin`
+only to trusted company administrators. For an application that should see only
+selected scopes, use the required operation capabilities and grants or an
+[integration scope policy](company-integrations.md), without `credential_admin`.
+A proposing credential does not implicitly receive evaluation, policy or
+credential administration powers.
+
+`authorize` must be called for each scoped resource operation; its returned
+namespace is derived from the current credential rather than a caller-provided
+tenant or owner. Company administration likewise derives its company from the
+current credential. A copied workspace or resource selection never grants access
+to another company.
 
 This follows the object-level checks described by
 [OWASP API Security](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/)
@@ -116,16 +144,20 @@ storage authority. The default HTTP router excludes the legacy routes. The [proc
 [learned-tool API](../api/learned-tools.md) explicitly check their respective
 capabilities; defining a capability does not implicitly enable an operation.
 
-## Validation
+## Authentication, retained data and in-flight work
 
-Tests cover reopen without persisting secrets, exact scope and capability checks,
-same-ID cross-tenant isolation, private versus shared subjects, expiry, malformed
-and non-ASCII tokens, unknown schema versions, administrator self-rotation,
-revocation, and strict issuance payloads. Concurrent bootstrap and rotation each
-produce exactly one winner. Storage tests verify all-or-nothing batches, stale
-conditions, deletion, reopen, duplicate guards and concurrent writers.
+Revocation, rotation, expiry and login invalidation prevent later authentication.
+An operation that has already been authorized may complete; revocation is not a
+cancellation protocol for in-flight work. Authentication uses the host wall clock
+for expiry, so operators must maintain appropriate system time.
 
-The tests use temporary local databases and require no external processes or
-model calls. The process-crash test for HTTP memory remains in the workspace suite;
-credential-specific hardware power-loss and operational recovery drills are not
-established by these tests.
+Revoking or expiring the credential that originally wrote a record does not erase
+that record or remove it from authorized company inspection. An administrator can
+inspect retained records that ordinary retrieval excludes, including expired
+records. Retained visibility does not certify source truth, current eligibility,
+retrieval quality or permission for an agent action. Use the explicit memory
+correction, invalidation and retention contracts when changing the data itself.
+
+The durable credential format and synchronous metadata writes support restart
+recovery under their configured storage assumptions. They do not establish
+credential-specific durability under every hardware power-loss or disk failure.

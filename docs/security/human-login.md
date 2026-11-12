@@ -15,8 +15,15 @@ All production authentication traffic must use HTTPS.
 | Account | Provisioning authority | Effective access |
 | --- | --- | --- |
 | Global operator | Installation master only | The bound global credential's capabilities |
-| Company administrator | `credential_admin` in the same company | The bound tenant credential's capabilities and exact resource grants |
+| Company administrator | `credential_admin` in the same company | Company administration and retained-data inspection; ordinary scoped calls still require their operation capabilities and grants |
 | Application user | Company administrator | Only the bound credential's explicit permissions |
+
+A login session does not narrow the bound credential's administrative authority.
+A company session with `credential_admin` can inspect retained company memory and
+learning resources, including other private subjects, without individual memory
+grants. See the [credential authority boundary](scoped-credentials.md#scoped-access-and-company-administration)
+when deciding which credential to bind. Use an application credential without
+`credential_admin` for access restricted to selected memory scopes.
 
 A master account bound to the installation's bootstrap master can register
 companies, appoint their administrators and administer global credentials. It
