@@ -366,6 +366,13 @@
       "order": 1034
     },
     {
+      "source": "docs/agent-memory/episode-lifecycle.md",
+      "file": "native-episode-lifecycle.md",
+      "title": "Native episode admission and lifecycle",
+      "description": "Configure native episode capacity and preserve scoped records with atomic admission and eviction.",
+      "order": 1042
+    },
+    {
       "source": "docs/agent-memory/relevance-accounting.md",
       "file": "native-relevance-accounting.md",
       "title": "Native relevance accounting",

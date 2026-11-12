@@ -1,26 +1,75 @@
-# Agent-scoped episode lifecycle
+# Native episode admission and lifecycle
 
-The synchronous `AgentMemory` and asynchronous `PersistentAgentMemory` managers
-now enforce the same ordinary-access rules:
+This guide is for applications embedding the Rust memory library. Atomic bounded
+admission is an unreleased source improvement; it is not a managed-platform quota
+or a new HTTP capability. Platform consumers use the [durable memory API](../api/versioned-memory.md)
+and its credential authorization contract.
 
-- A stored episode must belong to the configured, nonempty agent ID. This is
-  checked before capacity checks or eviction, including with a custom backend.
-- A zero `max_episodes` rejects writes rather than accepting an unbounded first
-  episode.
-- Updating an existing valid episode at capacity does not evict another record.
-- Capacity concerns valid episodes; invalidated records in the in-memory map do
-  not consume a live slot.
-- `get_episode` returns no result for an invalidated episode and does not
-  increment its access counter. Raw storage access remains available for
-  administrative inspection; temporal/history APIs require separate design.
+## Choose an application capacity
 
-Seven regression tests exercise both managers. Ownership rejection, invalidated
-reads and update-at-capacity behavior failed before the fix. The API changes
-are intentionally stricter: clients that previously read invalidated episodes
-through ordinary access must use explicit administrative storage access.
+Configure an agent and an explicit maximum number of valid episodes before
+creating its native `PersistentAgentMemory` manager:
 
-These checks are not user authentication or tenant authorization. The
-persistent manager still performs quota checks, eviction and storage through
-separate backend calls; concurrent managers or backend failures can break a
-global capacity invariant. Transactional capacity enforcement, atomic access
-counters and durable index maintenance remain separate work.
+```rust
+let config = MemoryConfig::new("agent-id").max_episodes(1_000);
+```
+
+`store_episode` accepts episodes belonging to that configured, nonempty agent.
+A zero capacity rejects writes. An update to an already valid episode does not
+evict another episode. Invalidated episodes remain available through raw storage
+inspection and do not occupy a valid slot; ordinary manager reads return no
+invalidated episode and do not count an access.
+
+The application chooses capacity and retention goals. Relevance is a policy
+signal, not proof of truth or task utility. Native agent IDs are storage scopes;
+they do not replace authenticated tenant or resource authorization.
+
+## Atomic bounded writes
+
+`MemoryStorage::store_episode_with_capacity(agent_id, &episode, max_episodes)`
+checks ownership, the UUID's existing owner and the current valid-record count
+under the backend mutation lock. If a new valid record fills an available slot,
+no record is evicted. At capacity, storage chooses the current lowest relevance
+score; ties select the oldest event time, then ascending UUID. The incoming
+record and its index, any timestamp move, and any victim record/index deletion
+commit in one write batch. A rejected scoped write or failed batch cannot leave
+an eviction committed by itself.
+
+An already valid record can be updated without consuming another slot, including
+when the application's newly selected limit is below the existing count. A new
+valid record is rejected while that count is already above the selected limit.
+The application must reconcile its policy explicitly; lowering a limit does not
+silently authorize bulk deletion. Reactivating an invalidated record consumes a
+valid slot. Storing an invalidated record does not evict a valid one.
+
+This operation serializes concurrent managers using the same backend. It checks
+the limit supplied by each call; applications using different limits do not gain
+a shared, persisted policy or a global quota. Direct low-level `store_episode`
+and `update_episode` remain unbounded whole-record replacement operations. Use
+the manager or bounded operation consistently when relying on capacity admission.
+Stale whole-record updates can still overwrite newer fields: this operation is
+not compare-and-swap or revision conflict detection.
+
+Capacity admission scans the agent's current records while holding the mutation
+lock. Large native stores can delay other mutations; no latency or scale target
+is established by this correctness guarantee. Applications should qualify their
+actual record sizes and workload before choosing a large capacity.
+
+## Errors, compatibility and recovery
+
+Ownership conflicts, zero capacity, malformed ranking scores, inconsistent
+record/index identities and backend failures return errors. The RocksDB backend
+and built-in in-memory backend implement bounded admission. The blocking HTTP
+storage adapter forwards the native operation internally. Custom backends must
+implement an equivalent atomic operation; the default returns an unsupported
+error instead of performing separate eviction and storage calls. This preserves
+Rust trait implementation compatibility while requiring explicit backend support
+for manager writes.
+
+New admission uses the existing episode format. WAL and synchronous-write
+configuration determine durability; the operation does not enable them
+implicitly. Retain a consistent backup before changing application policy.
+Acknowledged synchronous-write recovery after killing a process does not prove
+behavior under every host power-loss or disk failure. A pass involving multiple
+calls is not one transaction, and a configured capacity does not protect records
+from an explicit authorized deletion.

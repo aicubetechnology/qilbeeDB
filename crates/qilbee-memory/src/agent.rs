@@ -642,23 +642,9 @@ impl PersistentAgentMemory {
 
         let id = episode.id;
 
-        // Check max episodes limit
-        let count = self.storage.episode_count(&self.config.agent_id).await.map_err(|e| {
-            Error::Storage(format!("Failed to get episode count: {}", e))
-        })?;
-
-        let existing = self.storage.get_episode(&self.config.agent_id, id).await?;
-        let adds_valid_episode = episode.is_valid()
-            && !existing.as_ref().is_some_and(Episode::is_valid);
-        if adds_valid_episode && count >= self.config.max_episodes {
-            // Evict oldest low-relevance episode
-            self.evict_low_relevance_episode().await?;
-        }
-
         self.storage
-            .store_episode(&self.config.agent_id, &episode)
-            .await
-            .map_err(|e| Error::Storage(format!("Failed to store episode: {}", e)))?;
+            .store_episode_with_capacity(&self.config.agent_id, &episode, self.config.max_episodes)
+            .await?;
 
         debug!("Stored episode {} for agent {}", id, self.config.agent_id);
 
@@ -1256,41 +1242,7 @@ impl PersistentAgentMemory {
         Ok(results)
     }
 
-    // ========== Private Helpers ==========
 
-    async fn evict_low_relevance_episode(&self) -> Result<()> {
-        let all_episodes = self
-            .storage
-            .get_all_episodes(&self.config.agent_id)
-            .await
-            .map_err(|e| Error::Storage(format!("Failed to get episodes: {}", e)))?;
-
-        // Find the episode with lowest relevance
-        let lowest = all_episodes
-            .iter()
-            .filter(|e| e.is_valid())
-            .min_by(|a, b| {
-                a.relevance
-                    .score
-                    .partial_cmp(&b.relevance.score)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            })
-            .map(|e| e.id);
-
-        if let Some(id) = lowest {
-            self.storage
-                .delete_episode(&self.config.agent_id, id)
-                .await
-                .map_err(|e| Error::Storage(format!("Failed to delete episode: {}", e)))?;
-
-            debug!(
-                "Evicted low-relevance episode {} for agent {}",
-                id, self.config.agent_id
-            );
-        }
-
-        Ok(())
-    }
 }
 
 impl Clone for PersistentAgentMemory {
