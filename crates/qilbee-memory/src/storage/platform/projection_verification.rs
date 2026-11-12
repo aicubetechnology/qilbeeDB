@@ -20,7 +20,7 @@ pub struct MemoryProjectionVerification {
     pub chronological_scope_entries: u64,
     /// Company-ordered chronological rows implied and found identical.
     pub chronological_company_entries: u64,
-    /// Relation-head entries present; counted, not re-derived.
+    /// Relation heads checked against their physical entries and canonical identities.
     pub relation_head_entries: u64,
 }
 
@@ -184,7 +184,7 @@ impl RocksDbMemoryStorage {
         {
             return Err(inconsistent());
         }
-        report.relation_head_entries = self.count_prefix(meta, &[relations::adjacency::HEAD])?;
+        report.relation_head_entries = self.verify_relation_projections()?;
         Ok(report)
     }
 }

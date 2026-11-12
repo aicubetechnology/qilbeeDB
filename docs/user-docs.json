@@ -110,7 +110,7 @@
       "source": "docs/api/memory-review.md",
       "file": "memory-review.md",
       "title": "Memory review and correction",
-      "description": "Record authorized decisions, suppress rejected revisions and preserve review evidence.",
+      "description": "Record authorized decisions, suppress rejected revisions and preserve review evidence and graph consistency.",
       "order": 56
     },
     {
@@ -397,7 +397,7 @@
       "source": "docs/operations/store-verification.md",
       "file": "store-verification.md",
       "title": "Offline store verification",
-      "description": "Retain writer exclusion while checking native identities, complete physical journals, graph and knowledge integrity, and backup copies.",
+      "description": "Retain writer exclusion while checking native identities, physical journals, relation projections, graph and knowledge integrity, and backup copies.",
       "order": 1065
     },
     {

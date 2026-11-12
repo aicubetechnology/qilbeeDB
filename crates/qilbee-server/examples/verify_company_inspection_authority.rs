@@ -1,4 +1,4 @@
-//! Real HTTP/credential/persistence qualification of company inspection authority.
+//! Real HTTP/credential/persistence qualification of inspection and reviewed graphs.
 //! The child serves the actual platform router; no simulated services are used.
 use qilbee_graph::Database;
 use qilbee_server::{platform_http, security::identity::IdentityStore};
@@ -165,6 +165,26 @@ async fn inspect(
     )
     .await
 }
+fn graph_review(record: &str) -> Value {
+    json!({"scope":scope(),"command":{"contract_version":1,
+        "idempotency_key":"review-graph-preservation","record_id":record,"expected_revision":1,
+        "disposition":"approved","evidence_ref":"local:disposable-reviewed-graph"}})
+}
+async fn reviewed_graph(client: &Client, service: &Service, key: &str, record: &str) -> Value {
+    let result = request(
+        client,
+        service,
+        Method::POST,
+        "/api/v1/memory/graph/typed",
+        Some(key),
+        Some(json!({"contract_version":1,"scope":scope(),"query":{"root_record_ids":[record]}})),
+        StatusCode::OK,
+    )
+    .await;
+    assert_eq!(result["graph"]["coverage"]["complete"], true);
+    assert_eq!(result["graph"]["nodes"][0]["record"]["revision"], 2);
+    result
+}
 async fn revoke(client: &Client, service: &Service, admin: &str, key: &Key) {
     request(
         client,
@@ -309,7 +329,16 @@ async fn main() {
         &service,
         &admin_a.secret,
         "other-subject",
-        &["memory_read"],
+        &["memory_read", "memory_review"],
+        true,
+    )
+    .await;
+    let reviewer = issue(
+        &client,
+        &service,
+        &admin_a.secret,
+        "fixture-owner",
+        &["memory_read", "memory_review"],
         true,
     )
     .await;
@@ -318,6 +347,82 @@ async fn main() {
     let current = create(&client, &service, &writer_a.secret, "current-a", false).await;
     let expired = create(&client, &service, &writer_a.secret, "expired-a", true).await;
     let foreign = create(&client, &service, &writer_b.secret, "current-b", false).await;
+    let review_command = graph_review(&current);
+    request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&writer_a.secret),
+        Some(review_command.clone()),
+        StatusCode::FORBIDDEN,
+    )
+    .await;
+    request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&other_reader.secret),
+        Some(review_command.clone()),
+        StatusCode::NOT_FOUND,
+    )
+    .await;
+    let committed_review = request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&reviewer.secret),
+        Some(review_command.clone()),
+        StatusCode::OK,
+    )
+    .await;
+    assert_eq!(committed_review["receipt"]["revision"], 2);
+    assert_eq!(
+        committed_review["receipt"]["review"]["author"]["credential_id"],
+        reviewer.id
+    );
+    let replay = request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&reviewer.secret),
+        Some(review_command.clone()),
+        StatusCode::OK,
+    )
+    .await;
+    assert_eq!(replay["receipt"], committed_review["receipt"]);
+    let mut conflict = review_command.clone();
+    conflict["command"]["evidence_ref"] = json!("local:different-command");
+    request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&reviewer.secret),
+        Some(conflict),
+        StatusCode::CONFLICT,
+    )
+    .await;
+    let mut stale = review_command.clone();
+    stale["command"]["idempotency_key"] = json!("stale-review-attempt");
+    request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&reviewer.secret),
+        Some(stale),
+        StatusCode::CONFLICT,
+    )
+    .await;
+    let graph = reviewed_graph(&client, &service, &owner_reader.secret, &current).await;
+    assert_eq!(
+        graph["graph"]["nodes"][0]["record"]["author"]["credential_id"],
+        writer_a.id
+    );
     request(
         &client,
         &service,
@@ -513,6 +618,18 @@ async fn main() {
     .await;
     service.kill();
     service = Service::start(&path);
+    reviewed_graph(&client, &service, &owner_reader.secret, &current).await;
+    let recovered_review = request(
+        &client,
+        &service,
+        Method::POST,
+        "/api/v1/memory/reviews",
+        Some(&reviewer.secret),
+        Some(review_command),
+        StatusCode::OK,
+    )
+    .await;
+    assert_eq!(recovered_review["receipt"], committed_review["receipt"]);
     request(
         &client,
         &service,
@@ -573,7 +690,7 @@ async fn main() {
     )
     .await;
     workspaces(&client, &service, &session, StatusCode::UNAUTHORIZED).await;
-    for key in [&inspector_a, &owner_reader, &other_reader] {
+    for key in [&inspector_a, &owner_reader, &other_reader, &reviewer] {
         revoke(&client, &service, &admin_a.secret, key).await;
     }
     for key in [&inspector_b, &writer_b] {
@@ -618,6 +735,7 @@ async fn main() {
         &writer_b.secret,
         &owner_reader.secret,
         &other_reader.secret,
+        &reviewer.secret,
         &session,
     ] {
         assert!(
@@ -629,11 +747,28 @@ async fn main() {
         );
     }
     drop((authority, recovered));
+    if let Some(binary) = std::env::args_os().nth(1) {
+        let result = Command::new(binary)
+            .arg("verify-store")
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "Actual operator rejected acknowledged HTTP review: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert_eq!(
+            serde_json::from_slice::<Value>(&result.stdout).unwrap()["status"],
+            "verified"
+        );
+    }
     println!(
         "{}",
         json!({"version":env!("CARGO_PKG_VERSION"),"actual_http_authority":"passed",
         "two_company_private_subject_isolation":"passed","retained_expired_inspection":"passed",
         "writer_revocation_and_process_kill_recovery":"passed","administrator_login_session":"passed",
-        "temporary_credentials_revoked":"passed","temporary_login_disabled":"passed"})
+        "temporary_credentials_revoked":"passed","temporary_login_disabled":"passed",
+        "review_graph_permissions_idempotency_conflicts_and_recovery":"passed"})
     );
 }
