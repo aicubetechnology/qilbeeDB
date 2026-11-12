@@ -69,6 +69,42 @@ use `AccessNow` and `DecayNow`, observing wall-clock time after acquiring the
 backend lock. Explicitly timestamped changes retain their supplied time and reject
 out-of-order events. A real backwards wall-clock adjustment can still be rejected.
 
+## Forgetting against the current record
+
+Conditional forgetting is available in development source and is not a deployed
+managed-platform capability.
+
+Native `PersistentAgentMemory::forget` uses the application's `auto_forget` and
+`min_relevance` configuration. It scans valid candidates, then asks storage to
+recheck each current record under the same mutation lock used by accesses and
+decay. An access that commits a score at or above the threshold before the
+conditional deletion protects that episode. If deletion commits first, a later
+access finds no episode. The pass reports actual committed deletions.
+
+With an initialized native storage backend, explicit agent scope and episode ID:
+
+```rust
+let deleted = storage
+    .forget_episode_if_below("agent-id", episode_id, 0.1)
+    .await?;
+```
+
+`MemoryStorage::forget_episode_if_below` exposes this native operation. The
+threshold must be finite and between zero and one; equality is retained. Missing,
+foreign-scope and invalidated records return `false`. A malformed current score
+fails without deletion. Entity and lookup-index deletion use one write batch;
+WAL and synchronous-write settings determine durability. Custom backends must
+implement this atomic operation; the default returns an unsupported error. The
+HTTP storage adapter forwards it internally, without adding a public HTTP route.
+
+The application still chooses the retention policy. This operation neither
+settles additional elapsed time nor interprets a relevance score as utility or
+truth. Explicit deletion remains unconditional. Whole-record replacement can
+still overwrite a newer score if the caller submits stale data. A forgetting
+pass is not a transaction over all candidates: earlier deletions remain committed
+if a later operation fails. Concurrently added episodes are handled by a later
+pass. Native agent scoping does not replace platform credential authorization.
+
 ## Older records and recovery
 
 The reader accepts the original unversioned episode encoding and the QMEP v1
@@ -85,18 +121,11 @@ an older binary or restore an old backup over acknowledged newer writes without
 an explicit reconciliation procedure. Structured JSON content remains encoded
 separately from the binary episode layout.
 
-## Validation and remaining limits
+## Operational limits
 
-Controlled-clock tests cover partitioned time, repeated timestamps, access and
-rate changes, legacy adoption, invalid input and counter saturation. Original
-old-format fixtures verify field preservation. Concurrent tests cover sixteen
-accesses and races with invalidation in both built-in backends. A RocksDB reopen
-test verifies that repeating a previously settled timestamp does not charge twice.
-
-A child-process test kills the writer after a synchronous update is acknowledged,
-then verifies recovery and same-timestamp replay. A real RocksDB read-only handle
-rejects accounting and invalidation writes; neither change is persisted. These
-checks do not simulate host power loss, every storage failure mode or durability
-with WAL disabled. The workspace suite includes HTTP durability and schema
-regressions. No benchmark improvement or production deployment is claimed by
-this guide.
+Use an isolated real store to check an application's retention policy and its
+WAL/synchronous-write configuration before enabling forgetting on valuable data.
+Keep a consistent backup and account for the documented storage-format transition.
+Process restart recovery does not establish durability under every host or disk
+failure. No retrieval-quality improvement or downstream agent benefit is implied
+by temporal accounting or atomic forgetting.

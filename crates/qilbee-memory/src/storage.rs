@@ -45,6 +45,26 @@ fn capacity_victim<'a>(records: impl Iterator<Item = &'a Episode>, maximum: usiz
     Ok(if count == maximum { lowest.map(|episode| episode.id) } else { None })
 }
 
+pub(crate) fn validate_forgetting_threshold(threshold: f64) -> Result<()> {
+    if !threshold.is_finite() || !(0.0..=1.0).contains(&threshold) {
+        return Err(Error::ValidationError(
+            "Forgetting threshold must be finite and between zero and one".into(),
+        ));
+    }
+    Ok(())
+}
+
+fn eligible_for_forgetting(episode: &Episode, threshold: f64) -> Result<bool> {
+    if !episode.is_valid() {
+        return Ok(false);
+    }
+    let score = episode.relevance.score;
+    if !score.is_finite() || !(0.0..=1.0).contains(&score) {
+        return Err(Error::ValidationError("Invalid persisted relevance score".into()));
+    }
+    Ok(score < threshold)
+}
+
 /// Configuration for memory storage
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryStorageConfig {
@@ -129,6 +149,15 @@ pub trait MemoryStorage: Send + Sync {
 
     /// Delete an episode
     async fn delete_episode(&self, agent_id: &str, episode_id: EpisodeId) -> Result<bool>;
+
+    /// Delete a currently valid episode only if its current relevance is below
+    /// the finite [0, 1] threshold, atomically with respect to native mutations.
+    /// Missing, foreign-scope or invalidated records return false. Unsupported
+    /// backends must not fall back to an unguarded read/delete cycle.
+    async fn forget_episode_if_below(&self, _agent_id: &str, _episode_id: EpisodeId,
+        _threshold: f64) -> Result<bool> {
+        Err(Error::MemoryOperation("Backend does not support atomic episode forgetting".into()))
+    }
 
     /// Delete all episodes for an agent
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize>;
@@ -679,6 +708,36 @@ impl MemoryStorage for RocksDbMemoryStorage {
         Ok(true)
     }
 
+    async fn forget_episode_if_below(&self, agent_id: &str, episode_id: EpisodeId,
+        threshold: f64) -> Result<bool> {
+        Self::validate_agent(agent_id)?;
+        validate_forgetting_threshold(threshold)?;
+        let _guard = self.mutation_lock.lock()
+            .map_err(|_| Error::Internal("Memory mutation lock poisoned".into()))?;
+        let index_cf = self.cf(cf::EPISODE_INDEX)?;
+        let index_key = Self::episode_index_key(episode_id);
+        let Some(index) = self.db.get_cf(index_cf, &index_key)
+            .map_err(|e| Error::Storage(e.to_string()))? else { return Ok(false); };
+        let (owner, timestamp) = Self::index_location(&index)?;
+        if owner != agent_id { return Ok(false); }
+        let key = Self::episode_key(owner, timestamp, episode_id);
+        let records = self.cf(cf::EPISODES)?;
+        let Some(bytes) = self.db.get_cf(records, &key)
+            .map_err(|e| Error::Storage(e.to_string()))? else { return Ok(false); };
+        let episode = Self::decode_episode(&bytes)?;
+        if episode.id != episode_id || episode.agent_id != agent_id
+            || episode.event_time.as_millis() != timestamp {
+            return Err(Error::DataCorruption("Episode identity disagrees with its index".into()));
+        }
+        if !eligible_for_forgetting(&episode, threshold)? { return Ok(false); }
+        let mut batch = rocksdb::WriteBatch::default();
+        batch.delete_cf(records, key);
+        batch.delete_cf(index_cf, index_key);
+        self.db.write_opt(batch, &self.write_options())
+            .map_err(|e| Error::Storage(format!("Failed to forget episode: {e}")))?;
+        Ok(true)
+    }
+
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize> {
         Self::validate_agent(agent_id)?;
         let _guard = self
@@ -915,6 +974,21 @@ impl MemoryStorage for InMemoryStorage {
             .get_mut(agent_id)
             .map(|m| m.remove(&episode_id).is_some())
             .unwrap_or(false))
+    }
+
+    async fn forget_episode_if_below(&self, agent_id: &str, episode_id: EpisodeId,
+        threshold: f64) -> Result<bool> {
+        RocksDbMemoryStorage::validate_agent(agent_id)?;
+        validate_forgetting_threshold(threshold)?;
+        let mut episodes = self.episodes.write().await;
+        let Some(records) = episodes.get_mut(agent_id) else { return Ok(false); };
+        let Some(episode) = records.get(&episode_id) else { return Ok(false); };
+        if episode.agent_id != agent_id {
+            return Err(Error::DataCorruption("Episode owner disagrees with storage scope".into()));
+        }
+        if !eligible_for_forgetting(episode, threshold)? { return Ok(false); }
+        records.remove(&episode_id);
+        Ok(true)
     }
 
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize> {

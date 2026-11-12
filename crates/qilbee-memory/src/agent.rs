@@ -783,6 +783,7 @@ impl PersistentAgentMemory {
             return Ok(0);
         }
 
+        crate::storage::validate_forgetting_threshold(self.config.min_relevance)?;
         let all_episodes = self
             .storage
             .get_all_episodes(&self.config.agent_id)
@@ -795,13 +796,14 @@ impl PersistentAgentMemory {
             .filter(|e| e.relevance.should_forget(min_relevance))
             .collect();
 
-        let count = to_forget.len();
-
+        let mut count = 0;
         for episode in to_forget {
-            self.storage
-                .delete_episode(&self.config.agent_id, episode.id)
-                .await
-                .map_err(|e| Error::Storage(format!("Failed to delete episode: {}", e)))?;
+            if self.storage
+                .forget_episode_if_below(&self.config.agent_id, episode.id, min_relevance)
+                .await?
+            {
+                count += 1;
+            }
         }
 
         if count > 0 {
