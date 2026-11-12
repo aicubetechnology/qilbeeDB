@@ -37,8 +37,11 @@ umask 077
 ```
 
 The new tenant credential has `credential_admin` and `policy_admin`, with no
-implicit memory grants. It cannot register other companies or create global
-credentials. Bootstrap rejects an existing tenant instead of resetting its
+individual memory grants. Its `credential_admin` authority permits company-wide
+administrative inspection of retained memory and learning data, including private
+subjects. Ordinary scoped memory calls still require their operation capabilities
+and grants. Treat this as a company administrator credential, not a scope-limited
+application key. It cannot register other companies or create global credentials. Bootstrap rejects an existing tenant instead of resetting its
 authority. For a running SaaS installation, prefer the authenticated registration
 API and its durable provenance record.
 

@@ -33,7 +33,7 @@
       "source": "docs/security/scoped-credentials.md",
       "file": "authentication.md",
       "title": "Authentication and scopes",
-      "description": "Understand tenant isolation, exact resource grants, subjects and credential lifecycle.",
+      "description": "Distinguish scoped application access from company-wide administrative inspection and manage credential lifecycle.",
       "order": 40
     },
     {
