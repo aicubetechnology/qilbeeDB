@@ -74,13 +74,29 @@ and the persisted row counts must equal the implied counts, so an extra or
 stale row fails, including rows in namespaces with no canonical records.
 Relation heads are counted, not re-derived.
 
+**Complete physical journal coverage is available in development source.**
+Older binaries checked the recorded tip and anchored suffix more narrowly;
+use the qualified release's guide when selecting a verifier.
+
 The journal check visits every namespace that owns a journal state, a change
-record or an anchor. It validates the legacy change journal (last change digest
-and no dangling successor), the verified journal state (baseline digest, tip
-anchor and no dangling successor) and walks the anchor chain from baseline to
-tip with the same digest and link checks that the verified change feed applies.
-The report counts namespaces, legacy journals, verified journals and links
-checked. Orphaned anchors or changes without their state record fail.
+record or an anchor. It requires canonical keys and exactly the physical rows
+implied by each recorded range: legacy events from sequence one through the tip,
+and verified anchors strictly after the baseline through the tip. Missing rows,
+extra rows before or beyond those ranges, malformed keys and orphaned rows fail.
+A gap does not hide a later extra event or anchor.
+
+Every legacy event is checked against its journal identity, sequence and existing
+event digest, including events before a verified baseline or in a legacy-only
+journal. The verified state and anchor chain retain their baseline, tip, event
+digest and previous-link checks. Validating legacy events does not retroactively
+turn that prefix into a cryptographically linked history; the verified baseline
+remains an upgrade boundary. These are internal consistency checks, not an
+external authenticity or source-truth attestation.
+
+The report fields remain unchanged: namespaces, legacy journals, verified
+journals and `links_checked`. The last field counts verified anchor links, not
+legacy events or physical-key checks. Verification never deletes extra rows or
+repairs a copy; preserve a rejected copy for investigation.
 
 The knowledge index check re-derives every locator and active ranking entry
 from the authoritative procedure, receipt and combined-origin ledgers with the
@@ -199,6 +215,15 @@ this is not a hard process-memory or duration bound. It checks readable identity
 and lookup consistency, not every application-level field or an external
 cryptographic attestation of a native payload. A validly encoded alteration that
 preserves identity may need comparison with a trusted retained source to detect.
+
+Journal processing grows with the actual stored journal rows and bytes. The
+verifier retains coverage counters and identifiers per namespace, then checks
+physical cardinality before walking a recorded sequence range. A large recorded
+tip cannot by itself cause a walk beyond the observed physical row count.
+Retained metadata grows with distinct namespaces, and RocksDB materializes each
+returned row. This is not a hard process-memory or duration ceiling; plan an
+offline window appropriate to the stored history. Online feed page limits and
+wire contracts are unchanged.
 
 The command validates structure and integrity, not business meaning: it does
 not prove that retained memories are the ones an application expects, that a

@@ -390,7 +390,7 @@
       "source": "docs/operations/store-verification.md",
       "file": "store-verification.md",
       "title": "Offline store verification",
-      "description": "Retain writer exclusion while checking native episode identities, graph and memory indexes, knowledge integrity, and backup copies.",
+      "description": "Retain writer exclusion while checking native identities, complete physical journals, graph and knowledge integrity, and backup copies.",
       "order": 1065
     },
     {
