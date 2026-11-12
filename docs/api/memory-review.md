@@ -56,6 +56,13 @@ integrity index, historical receipt, retry receipt and `reviewed` change event
 commit in one synchronous WAL batch. Competing decisions for the same expected
 revision have only one winner.
 
+**Development-source correction:** the same commit also creates outgoing and
+incoming typed-graph completeness heads for the new memory revision. Graph reads
+can then observe the acknowledged decision without missing-head corruption.
+Relations still reference their original endpoint revisions; a review does not
+assign old assertions to the new revision. Use a qualified release containing
+this correction when combining reviews with typed-graph reads.
+
 Retry the identical command and idempotency key after a lost response. It returns
 the original receipt even after later changes, deletion or credential rotation
 within the same subject. Reusing the key for another command returns 409. A retry

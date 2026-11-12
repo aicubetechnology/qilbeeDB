@@ -5,6 +5,7 @@ mod types;
 pub use types::*;
 mod graph;
 pub use graph::*;
+mod verification;
 pub(super) mod adjacency;
 mod changes;
 mod publication;

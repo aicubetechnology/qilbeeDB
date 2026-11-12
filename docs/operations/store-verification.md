@@ -14,7 +14,7 @@ The command opens the three stores of a platform data directory read-only:
 | Store | Directory | Checks |
 | --- | --- | --- |
 | Graph and identity | `<data-directory>` | Exact column families, physical inventory, property-index reconstruction |
-| Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, native episode identity/index checks, journal chain verification, projection re-derivation |
+| Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, native episode identity/index checks, journal chains, candidate, chronological and relation projection checks |
 | Procedural learning | `<data-directory>/procedural-learning` | Schema marker, authoritative inventory, knowledge index consistency |
 
 For every column family it reports the number of records and a SHA-256 digest
@@ -24,8 +24,8 @@ source with its copy. Independently verified derived entries are counted as
 `derived_entries` and excluded from the digest: in the learning store the
 active knowledge index and its generation marker; in the agent-memory store the
 candidate and chronological projection rows and tips. Workspace membership and
-relation heads remain included in the digest because this command does not
-independently re-derive their contents.
+relation metadata remain included in the digest. Relation metadata keeps exact
+byte comparison even when its current projections pass the independent audit.
 
 The graph property-index check reconstructs the expected index from stored nodes
 using a verification-specific implementation of the canonical fingerprint. It
@@ -72,7 +72,34 @@ builders the server uses. Each implied row must exist with identical bytes,
 each namespace's projection tips must equal the digest of its journal state,
 and the persisted row counts must equal the implied counts, so an extra or
 stale row fails, including rows in namespaces with no canonical records.
-Relation heads are counted, not re-derived.
+
+**Relation projection auditing is available in development source.** Older
+verifier binaries counted relation heads without checking their contents. Use a
+qualified release containing this audit before relying on it to validate a
+typed-memory graph projection.
+
+Every current memory revision must have outgoing and incoming completeness
+heads, and every current memory namespace must have a relation projection tip
+matching its journal fingerprint. Current relation records are checked against
+their integrity records and latest history/receipt, and each indexed relation
+must have both expected adjacency rows with identical integrity bytes. Retired
+or rejected relations must have neither row. Expiry and endpoint staleness do
+not remove a retained relation's physical index obligation: eligibility remains
+a separate read-time decision.
+
+The audit recomputes each head's count and digest from its physical adjacency
+rows. Global counts reject extra or orphaned integrity, adjacency and tip rows,
+including rows outside namespaces reached from current records. Complete head
+keys, schema, namespace, endpoint identity, positive revision and direction are
+validated. Head revisions cannot exceed the corresponding retained memory's
+current revision. Current and relation-endpoint heads are required; valid empty
+historical heads may survive updates or disappear during a startup rebuild.
+This lifecycle does not require a head for every unreferenced historical revision.
+
+`relation_head_entries` now counts heads that passed these checks. Report fields,
+byte inventories and source/copy comparison rules are unchanged. The audit never
+rebuilds a projection or deletes an extra row. Keep a rejected copy unchanged for
+diagnosis before considering a separately qualified recovery operation.
 
 **Complete physical journal coverage is available in development source.**
 Older binaries checked the recorded tip and anchored suffix more narrowly;
@@ -162,7 +189,7 @@ never creates a missing directory.
 | `Property index is inconsistent or exceeds offline verification limits` | The graph index format, node identity, reconstructed keys/values, or verification budget did not pass. Keep the stopped data for diagnosis; the verifier does not repair or silently truncate. |
 | `Native episode or UUID index is inconsistent` | A native record cannot be decoded, its owner/UUID/event time disagrees with its primary key, or the bidirectional UUID lookup audit failed. Keep the stopped copy and original bytes for diagnosis; do not delete records to make verification pass. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
-| `Unsupported or inconsistent memory record, index or receipt` | A memory journal chain, anchor or change record does not verify. Keep the copy for inspection; do not adopt it. |
+| `Unsupported or inconsistent memory record, index or receipt` | A memory journal, record, index or relation projection failed integrity verification. Keep the copy for inspection; do not adopt it. |
 | `Knowledge index entry is missing` / `differs` / `ledgers imply` | The derived index does not match the ledgers. Keep the copy for inspection; a writable start would rebuild the index, but the underlying cause must be understood first. |
 | `digest mismatch`, `key mismatch`, `origin` errors | Authoritative records were altered or partially copied. Do not adopt the copy. |
 | `Corruption` mentioning a log or SST file | RocksDB found damaged bytes. A copy with a damaged write-ahead log is rejected outright rather than silently reported as a shorter store. After a power loss the tail of the log may be torn: keep the original, start the matching server once on a copy so it recovers, then verify that copy. |
@@ -225,11 +252,21 @@ returned row. This is not a hard process-memory or duration ceiling; plan an
 offline window appropriate to the stored history. Online feed page limits and
 wire contracts are unchanged.
 
+The relation audit scans stored records, current relations, heads and adjacency
+rows, with point reads for required identities and integrity data. It retains
+one head aggregate at a time and can read a referenced record more than once.
+RocksDB and decoding materialize values; there is no hard process-memory or
+duration ceiling. A forged count or revision does not cause a walk over an
+unstored numeric range. All historical relation revisions and command receipts
+are still inventoried; only the latest history/receipt needed by each current
+relation is independently checked by this projection audit. Internal consistency
+does not establish that an assertion or its cited evidence is externally true.
+
 The command validates structure and integrity, not business meaning: it does
 not prove that retained memories are the ones an application expects, that a
 backup is recent enough, or that retrieval quality is unchanged. Agent-memory
 journal chains are re-walked and candidate and chronological projections are
-re-derived; checkpoints, consolidation ledgers, relation heads and vector
+re-derived, and current relation projections are audited; checkpoints, consolidation ledgers and vector
 indexes are inventoried, not re-derived. Cloud snapshot consistency, freeze handling and access control for
 the copy remain operator procedures described in
 [backup and recovery](backup.md).

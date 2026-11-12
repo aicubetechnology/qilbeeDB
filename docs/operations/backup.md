@@ -21,7 +21,7 @@ procedure for the deployed version.
 5. Run [`qilbeedb verify-store <copy> --source <source>`](store-verification.md)
    with the same binary version while both are stopped, and keep the report
    with the manifest. It verifies each directory, checks the learning store's
-   knowledge index, native episode lookups and memory journals where supported
+   knowledge index, native episode lookups, memory journals and relation projections where supported
    by that qualified release, and confirms that every family digest
    matches; a named difference means the copy is not faithful.
 6. Restore a copy to an isolated directory or volume and open it with the exact
@@ -33,10 +33,11 @@ operator procedure. Snapshot completion alone does not verify restore semantics.
 This guide does not introduce a cloud backup service or an online snapshot API.
 
 Matching source/copy inventories establish equal retained bytes; both copies
-can still share an inconsistent journal. Require the journal checks supported by
-the qualified verifier, including complete physical coverage where available,
-before adopting a copy. A failed journal check is not permission to delete rows
-or repair the retained source in place.
+can still share an inconsistent journal or relation projection. Require the
+consistency checks supported by the qualified verifier, including complete
+physical journal coverage and relation projection auditing where available,
+before adopting a copy. A failed check is not permission to delete rows or
+repair the retained source in place.
 
 ## Restore or roll back
 
