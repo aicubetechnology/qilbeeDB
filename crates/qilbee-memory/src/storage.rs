@@ -14,6 +14,7 @@ use tracing::{debug, info, warn};
 
 mod legacy_episode;
 use legacy_episode::LegacyEpisode;
+mod native_verification;
 
 fn validate_admission_score(episode: &Episode) -> Result<()> {
     if !episode.relevance.score.is_finite() || !(0.0..=1.0).contains(&episode.relevance.score) {

@@ -21,7 +21,8 @@ procedure for the deployed version.
 5. Run [`qilbeedb verify-store <copy> --source <source>`](store-verification.md)
    with the same binary version while both are stopped, and keep the report
    with the manifest. It verifies each directory, checks the learning store's
-   knowledge index and memory journals, and confirms that every family digest
+   knowledge index, native episode lookups and memory journals where supported
+   by that qualified release, and confirms that every family digest
    matches; a named difference means the copy is not faithful.
 6. Restore a copy to an isolated directory or volume and open it with the exact
    compatible binary. Verify authorized inventories, revisions, receipts and

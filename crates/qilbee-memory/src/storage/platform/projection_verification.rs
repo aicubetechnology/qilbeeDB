@@ -92,8 +92,10 @@ impl RocksDbMemoryStorage {
         }
     }
 
-    /// Re-derive the candidate and chronological projections of every namespace.
+    /// Audit native episode lookups, then re-derive platform candidate and
+    /// chronological projections. The report counts only platform projections.
     pub fn verify_memory_projections(&self) -> Result<MemoryProjectionVerification> {
+        self.verify_native_episodes()?;
         let episodes = self.cf(super::super::cf::EPISODES)?;
         let index = self.cf(super::super::cf::EPISODE_INDEX)?;
         let meta = self.cf(super::super::cf::AGENT_META)?;
