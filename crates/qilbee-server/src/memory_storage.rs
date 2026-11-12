@@ -78,6 +78,14 @@ impl MemoryStorage for HttpMemoryStorage {
             .await
     }
 
+    async fn forget_episode_if_below(&self, agent_id: &str, id: EpisodeId,
+        threshold: f64) -> Result<bool> {
+        let agent = agent_id.to_owned();
+        self.run(move |storage| async move {
+            storage.forget_episode_if_below(&agent, id, threshold).await
+        }).await
+    }
+
     async fn delete_all_episodes(&self, agent_id: &str) -> Result<usize> {
         let agent = agent_id.to_owned();
         self.run(move |storage| async move { storage.delete_all_episodes(&agent).await })
