@@ -31,6 +31,12 @@ Cloud volume snapshot consistency and freeze/unfreeze handling belong to the
 operator procedure. Snapshot completion alone does not verify restore semantics.
 This guide does not introduce a cloud backup service or an online snapshot API.
 
+Matching source/copy inventories establish equal retained bytes; both copies
+can still share an inconsistent journal. Require the journal checks supported by
+the qualified verifier, including complete physical coverage where available,
+before adopting a copy. A failed journal check is not permission to delete rows
+or repair the retained source in place.
+
 ## Restore or roll back
 
 Restore into a separate location first. Verify the stopped copy with
