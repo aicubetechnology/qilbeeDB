@@ -14,6 +14,7 @@ use tracing::{debug, info, warn};
 
 mod legacy_episode;
 use legacy_episode::LegacyEpisode;
+mod native_verification;
 
 /// Configuration for memory storage
 #[derive(Debug, Clone, Serialize, Deserialize)]

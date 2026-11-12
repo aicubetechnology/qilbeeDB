@@ -14,7 +14,7 @@ The command opens the three stores of a platform data directory read-only:
 | Store | Directory | Checks |
 | --- | --- | --- |
 | Graph and identity | `<data-directory>` | Exact column families, physical inventory, property-index reconstruction |
-| Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, journal chain verification, projection re-derivation |
+| Agent memory | `<data-directory>/agent-memory` | Exact column families, authoritative inventory, native episode identity/index checks, journal chain verification, projection re-derivation |
 | Procedural learning | `<data-directory>/procedural-learning` | Schema marker, authoritative inventory, knowledge index consistency |
 
 For every column family it reports the number of records and a SHA-256 digest
@@ -46,6 +46,25 @@ limits are not a hard ceiling on process memory.
 
 It verifies the current format; it does not authorize a migration from an older
 index format. Keep the original data and qualify any format migration separately.
+
+**Native episode identity/index verification is available in development source.**
+Older verifier binaries inventoried these native rows without checking their
+relationship. Select a qualified release that includes this audit before relying
+on it to accept a native-memory backup.
+
+The native episode check requires every retained episode's owner, UUID and event
+time to match its complete primary key. Its UUID lookup must point to exactly
+that location, and every lookup must resolve to a retained episode. Missing,
+orphaned, duplicate-location, malformed or misdirected entries fail, including
+invalidated episodes that remain retained. The audit reads supported raw legacy,
+QMEP-v1 and QMEP-v2 records through the native decoder without upgrading them.
+Platform records sharing these column families keep their separate checks.
+
+The existing report fields are unchanged; `projections` counts platform
+projections, not native episodes. Native primary and lookup rows remain included
+in the authoritative family digests. The command never repairs a lookup or
+deletes an unindexed record. Preserve a rejected copy and diagnose its origin;
+matching inventories alone cannot establish that two copies are consistent.
 
 The projection check re-derives the candidate and chronological projections
 of every namespace from the canonical records with the same key and value
@@ -125,6 +144,7 @@ never creates a missing directory.
 | `Writer exclusion` | The command could not retain every store lock, the helper failed, or a lock file changed. Keep all source and candidate stores stopped, inspect the named path when provided, and retry only after resolving the cause. |
 | `column families … expects …` | The directory was written by a different version or is not this kind of store. Use the matching binary. |
 | `Property index is inconsistent or exceeds offline verification limits` | The graph index format, node identity, reconstructed keys/values, or verification budget did not pass. Keep the stopped data for diagnosis; the verifier does not repair or silently truncate. |
+| `Native episode or UUID index is inconsistent` | A native record cannot be decoded, its owner/UUID/event time disagrees with its primary key, or the bidirectional UUID lookup audit failed. Keep the stopped copy and original bytes for diagnosis; do not delete records to make verification pass. |
 | `Knowledge index generation is missing` | The learning store was never closed by a binary with this index. Start and stop the matching server once, then verify. |
 | `Unsupported or inconsistent memory record, index or receipt` | A memory journal chain, anchor or change record does not verify. Keep the copy for inspection; do not adopt it. |
 | `Knowledge index entry is missing` / `differs` / `ledgers imply` | The derived index does not match the ledgers. Keep the copy for inspection; a writable start would rebuild the index, but the underlying cause must be understood first. |
@@ -171,6 +191,14 @@ start maintains, so a named `graph/` difference after an upgrade needs review.
 Keep the comparison report with the backup manifest.
 
 ## Limits
+
+The native episode audit streams native primary and lookup rows with point
+lookups, retaining one decoded episode at a time. Its work grows with stored
+rows and payload sizes. RocksDB and the decoder materialize stored values, so
+this is not a hard process-memory or duration bound. It checks readable identity
+and lookup consistency, not every application-level field or an external
+cryptographic attestation of a native payload. A validly encoded alteration that
+preserves identity may need comparison with a trusted retained source to detect.
 
 The command validates structure and integrity, not business meaning: it does
 not prove that retained memories are the ones an application expects, that a
