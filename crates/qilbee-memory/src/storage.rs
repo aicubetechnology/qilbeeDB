@@ -15,6 +15,36 @@ use tracing::{debug, info, warn};
 mod legacy_episode;
 use legacy_episode::LegacyEpisode;
 
+fn validate_admission_score(episode: &Episode) -> Result<()> {
+    if !episode.relevance.score.is_finite() || !(0.0..=1.0).contains(&episode.relevance.score) {
+        return Err(Error::ValidationError("Invalid episode relevance score".into()));
+    }
+    Ok(())
+}
+
+/// Evaluate the application's capacity against current records, never a stale scan.
+fn capacity_victim<'a>(records: impl Iterator<Item = &'a Episode>, maximum: usize)
+    -> Result<Option<EpisodeId>> {
+    let mut count = 0;
+    let mut lowest: Option<&Episode> = None;
+    for episode in records.filter(|episode| episode.is_valid()) {
+        validate_admission_score(episode)?;
+        count += 1;
+        if lowest.is_none_or(|previous| {
+            episode.relevance.score.partial_cmp(&previous.relevance.score)
+                .expect("validated finite relevance")
+                .then(episode.event_time.as_millis().cmp(&previous.event_time.as_millis()))
+                .then(episode.id.as_uuid().cmp(&previous.id.as_uuid())).is_lt()
+        }) {
+            lowest = Some(episode);
+        }
+    }
+    if count > maximum {
+        return Err(Error::MemoryOperation("Agent already exceeds requested episode capacity".into()));
+    }
+    Ok(if count == maximum { lowest.map(|episode| episode.id) } else { None })
+}
+
 pub(crate) fn validate_forgetting_threshold(threshold: f64) -> Result<()> {
     if !threshold.is_finite() || !(0.0..=1.0).contains(&threshold) {
         return Err(Error::ValidationError(
@@ -94,6 +124,14 @@ impl MemoryStorageConfig {
 pub trait MemoryStorage: Send + Sync {
     /// Store an episode
     async fn store_episode(&self, agent_id: &str, episode: &Episode) -> Result<()>;
+
+    /// Atomically store with an application-selected valid-episode capacity.
+    /// Validate ownership and current capacity before committing any eviction.
+    /// Custom backends must implement this without a read/delete/store fallback.
+    async fn store_episode_with_capacity(&self, _agent_id: &str, _episode: &Episode,
+        _maximum: usize) -> Result<()> {
+        Err(Error::MemoryOperation("Backend does not support atomic episode admission".into()))
+    }
 
     /// Get an episode by ID
     async fn get_episode(&self, agent_id: &str, episode_id: EpisodeId) -> Result<Option<Episode>>;
@@ -415,16 +453,20 @@ impl RocksDbMemoryStorage {
             .cf_handle(name)
             .ok_or_else(|| Error::Internal(format!("Column family not found: {}", name)))
     }
-}
-
-#[async_trait]
-impl MemoryStorage for RocksDbMemoryStorage {
-    async fn store_episode(&self, agent_id: &str, episode: &Episode) -> Result<()> {
+    /// All native replacements share this lock; a bounded admission adds its
+    /// capacity check and optional eviction to the same entity/index write batch.
+    fn write_episode(&self, agent_id: &str, episode: &Episode, maximum: Option<usize>) -> Result<()> {
         Self::validate_agent(agent_id)?;
         if episode.agent_id != agent_id {
             return Err(Error::ValidationError(
                 "Episode agent does not match storage scope".into(),
             ));
+        }
+        if let Some(maximum) = maximum {
+            if maximum == 0 {
+                return Err(Error::MemoryOperation("Episode capacity is zero".into()));
+            }
+            validate_admission_score(episode)?;
         }
         let _guard = self
             .mutation_lock
@@ -447,6 +489,7 @@ impl MemoryStorage for RocksDbMemoryStorage {
         index_value.extend_from_slice(agent_bytes);
         index_value.extend_from_slice(&episode.event_time.as_millis().to_be_bytes());
 
+        let mut existing_valid = false;
         // Write batch for atomicity
         let mut batch = rocksdb::WriteBatch::default();
         if let Some(previous) = self
@@ -460,8 +503,48 @@ impl MemoryStorage for RocksDbMemoryStorage {
                     "Episode ID already belongs to another agent".into(),
                 ));
             }
+            if maximum.is_some() {
+                let key = Self::episode_key(owner, timestamp, episode.id);
+                let bytes = self.db.get_cf(episodes_cf, &key)
+                    .map_err(|e| Error::Storage(e.to_string()))?
+                    .ok_or_else(|| Error::DataCorruption("Episode index has no record".into()))?;
+                let existing = Self::decode_episode(&bytes)?;
+                if existing.id != episode.id || existing.agent_id != owner
+                    || existing.event_time.as_millis() != timestamp {
+                    return Err(Error::DataCorruption("Episode identity disagrees with its index".into()));
+                }
+                existing_valid = existing.is_valid();
+            }
             if timestamp != episode.event_time.as_millis() {
                 batch.delete_cf(episodes_cf, Self::episode_key(owner, timestamp, episode.id));
+            }
+        }
+        if let Some(maximum) = maximum.filter(|_| episode.is_valid() && !existing_valid) {
+            let prefix = Self::episode_prefix(agent_id);
+            let mut current = Vec::new();
+            for item in self.db.prefix_iterator_cf(episodes_cf, &prefix) {
+                let (key, bytes) = item.map_err(|e| Error::Storage(e.to_string()))?;
+                if !key.starts_with(&prefix) { break; }
+                let candidate = Self::decode_episode(&bytes)?;
+                if candidate.agent_id != agent_id || key.as_ref()
+                    != Self::episode_key(agent_id, candidate.event_time.as_millis(), candidate.id) {
+                    return Err(Error::DataCorruption("Episode identity disagrees with its storage key".into()));
+                }
+                current.push(candidate);
+            }
+            if let Some(victim_id) = capacity_victim(current.iter(), maximum)? {
+                let victim = current.iter().find(|record| record.id == victim_id)
+                    .ok_or_else(|| Error::DataCorruption("Capacity victim is missing".into()))?;
+                // Check the victim's UUID projection before deleting either entry.
+                let victim_index = Self::episode_index_key(victim_id);
+                let location = self.db.get_cf(index_cf, &victim_index)
+                    .map_err(|e| Error::Storage(e.to_string()))?
+                    .ok_or_else(|| Error::DataCorruption("Capacity victim has no index".into()))?;
+                if Self::index_location(&location)? != (agent_id, victim.event_time.as_millis()) {
+                    return Err(Error::DataCorruption("Capacity victim index is inconsistent".into()));
+                }
+                batch.delete_cf(episodes_cf, Self::episode_key(agent_id, victim.event_time.as_millis(), victim_id));
+                batch.delete_cf(index_cf, victim_index);
             }
         }
         batch.put_cf(episodes_cf, &episode_key, &value);
@@ -474,6 +557,20 @@ impl MemoryStorage for RocksDbMemoryStorage {
         debug!("Stored episode {} for agent {}", episode.id, agent_id);
 
         Ok(())
+    }
+
+
+}
+
+#[async_trait]
+impl MemoryStorage for RocksDbMemoryStorage {
+    async fn store_episode(&self, agent_id: &str, episode: &Episode) -> Result<()> {
+        self.write_episode(agent_id, episode, None)
+    }
+
+    async fn store_episode_with_capacity(&self, agent_id: &str, episode: &Episode,
+        maximum: usize) -> Result<()> {
+        self.write_episode(agent_id, episode, Some(maximum))
     }
 
     async fn get_episode(&self, agent_id: &str, episode_id: EpisodeId) -> Result<Option<Episode>> {
@@ -808,6 +905,28 @@ impl MemoryStorage for InMemoryStorage {
         let mut episodes = self.episodes.write().await;
         let agent_episodes = episodes.entry(agent_id.to_string()).or_default();
         agent_episodes.insert(episode.id, episode.clone());
+        Ok(())
+    }
+
+    async fn store_episode_with_capacity(&self, agent_id: &str, episode: &Episode,
+        maximum: usize) -> Result<()> {
+        RocksDbMemoryStorage::validate_agent(agent_id)?;
+        if episode.agent_id != agent_id {
+            return Err(Error::ValidationError("Episode agent does not match storage scope".into()));
+        }
+        if maximum == 0 { return Err(Error::MemoryOperation("Episode capacity is zero".into())); }
+        validate_admission_score(episode)?;
+        let mut agents = self.episodes.write().await;
+        if agents.iter().any(|(owner, records)| owner != agent_id && records.contains_key(&episode.id)) {
+            return Err(Error::ConstraintViolation("Episode ID already belongs to another agent".into()));
+        }
+        let records = agents.entry(agent_id.to_owned()).or_default();
+        let existing_valid = records.get(&episode.id).is_some_and(Episode::is_valid);
+        let victim = if episode.is_valid() && !existing_valid {
+            capacity_victim(records.values(), maximum)?
+        } else { None };
+        if let Some(id) = victim { records.remove(&id); }
+        records.insert(episode.id, episode.clone());
         Ok(())
     }
 

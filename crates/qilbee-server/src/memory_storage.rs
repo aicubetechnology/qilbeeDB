@@ -47,6 +47,14 @@ impl MemoryStorage for HttpMemoryStorage {
             .await
     }
 
+    async fn store_episode_with_capacity(&self, agent_id: &str, episode: &Episode,
+        maximum: usize) -> Result<()> {
+        let (agent, episode) = (agent_id.to_owned(), episode.clone());
+        self.run(move |storage| async move {
+            storage.store_episode_with_capacity(&agent, &episode, maximum).await
+        }).await
+    }
+
     async fn get_episode(&self, agent_id: &str, id: EpisodeId) -> Result<Option<Episode>> {
         let agent = agent_id.to_owned();
         self.run(move |storage| async move { storage.get_episode(&agent, id).await })
